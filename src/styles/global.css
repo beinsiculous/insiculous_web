@@ -1,0 +1,149 @@
+/* ------------------------------------------------------------------ */
+/* Be Insiculous — design tokens                                       */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* near-black with a faint green cast */
+  --bg: #0a0f0c;
+  --surface: #10170f;
+  --surface-raised: #16211a;
+  --border: #223026;
+  --border-bright: #2f4434;
+
+  /* phosphor green accent */
+  --accent: #3dfa7e;
+  --accent-dim: #27b158;
+  --accent-glow: rgba(61, 250, 126, 0.12);
+
+  /* text */
+  --text: #c6d2cb;
+  --text-bright: #eef4f0;
+  --text-dim: #7d8c83;
+
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', monospace;
+  --font-body: 'Space Grotesk Variable', system-ui, sans-serif;
+
+  --max-width: 68rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* reset + base                                                        */
+/* ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+canvas,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-mono);
+  color: var(--text-bright);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+}
+
+h2 {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  margin-top: 2.2em;
+}
+
+h2::before {
+  content: '// ';
+  color: var(--accent-dim);
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ------------------------------------------------------------------ */
+/* layout helpers                                                      */
+/* ------------------------------------------------------------------ */
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}

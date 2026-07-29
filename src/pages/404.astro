@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 — Be Insiculous">
+  <div class="wrap">
+    <p class="code">404</p>
+    <h1>screen not found</h1>
+    <p>This level doesn't exist (yet).</p>
+    <p><a href="/">← back to the title screen</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .wrap {
+    text-align: center;
+    padding: 4rem 0;
+  }
+
+  .code {
+    font-family: var(--font-mono);
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0;
+    line-height: 1;
+    text-shadow: 0 0 40px var(--accent-glow);
+  }
+</style>

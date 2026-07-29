@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# astro generated types/cache
+.astro/
+
+# wrangler local state
+.wrangler/
+
+# adversarial-review transient artifacts
+review/
+
+# local-only claude settings
+.claude/settings.local.json
+
+# misc
+npm-debug.log*
+.DS_Store

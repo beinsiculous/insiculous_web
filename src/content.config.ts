@@ -1,0 +1,33 @@
+import { defineCollection, reference, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+// Slugs come from the entry `id`, which the glob loader derives from the
+// filename (base + extension stripped): src/content/games/my-game.md -> "my-game".
+
+const games = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/games' }),
+  schema: z.object({
+    title: z.string(),
+    blurb: z.string(),
+    status: z.enum(['playable', 'in-development', 'prototype']),
+    // Path to the wasm-bindgen JS glue under public/, e.g. "/games/my-game/v1/game.js".
+    // Bump the version folder (v1 -> v2) on every update instead of overwriting in place.
+    wasm: z.string().optional(),
+    screenshots: z.array(z.string()).default([]),
+    order: z.number().default(0),
+  }),
+});
+
+const devlog = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/devlog' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    tags: z.array(z.string()).default([]),
+    // Validated reference: the build fails if this doesn't match a games entry id.
+    game: reference('games').optional(),
+  }),
+});
+
+export const collections = { games, devlog };

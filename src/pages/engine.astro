@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Insiculous 2D — the engine — Be Insiculous"
+  description="Insiculous 2D: a 2D game engine written in Rust, also used for agentic-coding benchmarking."
+>
+  <p class="section-label">the engine</p>
+  <h1>Insiculous 2D</h1>
+  <p class="lede">
+    A 2D game engine written in Rust — built over years of independent
+    development, shaped by shipping actual games with it.
+  </p>
+
+  <!-- PLACEHOLDER: everything below is stub structure. Fill each section in. -->
+
+  <section>
+    <h2>Architecture</h2>
+    <p class="placeholder">
+      [placeholder] — crate layout, core loops, ECS or not, how game code
+      talks to the engine.
+    </p>
+  </section>
+
+  <section>
+    <h2>Rendering</h2>
+    <p class="placeholder">
+      [placeholder] — rendering approach, batching, target platforms
+      (native + WASM/WebGPU/WebGL), why it's built this way.
+    </p>
+  </section>
+
+  <section>
+    <h2>Tech stack</h2>
+    <p class="placeholder">
+      [placeholder] — Rust toolchain, key dependencies (or the lack of them),
+      wasm-bindgen pipeline for browser builds.
+    </p>
+  </section>
+
+  <section>
+    <h2>Agentic-coding benchmarking</h2>
+    <p class="placeholder">
+      [placeholder] — how the engine doubles as a benchmark target for AI
+      coding agents: what gets measured, why a real codebase beats synthetic
+      tasks.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.2rem;
+    color: var(--text-bright);
+    max-width: 38em;
+  }
+
+  .placeholder {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    border-left: 2px solid var(--border-bright);
+    padding-left: 1rem;
+    max-width: 46em;
+  }
+</style>

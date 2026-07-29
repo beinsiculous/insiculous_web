@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('devlog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<BaseLayout
+  title="Devlog — Be Insiculous"
+  description="Development notes on games and the Insiculous 2D engine."
+>
+  <p class="section-label">devlog</p>
+  <h1>Devlog</h1>
+  <p class="intro">
+    Notes from the trenches — engine internals, game progress, and the
+    occasional benchmark war story.
+  </p>
+
+  <ul class="posts">
+    {
+      posts.map((post) => (
+        <li>
+          <span class="date">{post.data.pubDate.toISOString().slice(0, 10)}</span>
+          <div>
+            <a class="title" href={`/devlog/${post.id}/`}>
+              {post.data.title}
+            </a>
+            <p>{post.data.description}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 42em;
+    margin-bottom: 2.5rem;
+  }
+
+  .posts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  .posts li {
+    display: flex;
+    gap: 1.5rem;
+    align-items: baseline;
+  }
+
+  .date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-dim);
+    white-space: nowrap;
+  }
+
+  .title {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    color: var(--text-bright);
+  }
+
+  .title:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .posts p {
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  @media (max-width: 40rem) {
+    .posts li {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+</style>

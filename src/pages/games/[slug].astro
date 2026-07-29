@@ -1,0 +1,123 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import GameEmbed from '../../components/GameEmbed.astro';
+
+export async function getStaticPaths() {
+  const games = await getCollection('games');
+  return games.map((game) => ({
+    params: { slug: game.id },
+    props: { game },
+  }));
+}
+
+const { game } = Astro.props;
+const { Content } = await render(game);
+
+const relatedPosts = (await getCollection('devlog'))
+  .filter((post) => post.data.game?.id === game.id)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title={`${game.data.title} — Be Insiculous`} description={game.data.blurb}>
+  <header class="game-header">
+    <h1>{game.data.title}</h1>
+    <StatusBadge status={game.data.status} />
+  </header>
+  <p class="blurb">{game.data.blurb}</p>
+
+  <GameEmbed src={game.data.wasm} title={game.data.title} />
+
+  <article>
+    <Content />
+  </article>
+
+  <section>
+    <h2>Screenshots</h2>
+    {
+      game.data.screenshots.length > 0 ? (
+        <div class="screenshots">
+          {game.data.screenshots.map((shot) => (
+            <img src={shot} alt={`${game.data.title} screenshot`} loading="lazy" />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">No screenshots yet.</p>
+      )
+    }
+  </section>
+
+  <section>
+    <h2>Devlog</h2>
+    {
+      relatedPosts.length > 0 ? (
+        <ul class="post-links">
+          {relatedPosts.map((post) => (
+            <li>
+              <a href={`/devlog/${post.id}/`}>{post.data.title}</a>
+              <span class="date">
+                {post.data.pubDate.toISOString().slice(0, 10)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No devlog posts about this game yet.</p>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .game-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .game-header h1 {
+    margin: 0;
+  }
+
+  .blurb {
+    font-size: 1.15rem;
+    color: var(--text-bright);
+    max-width: 40em;
+    margin-top: 0.75rem;
+  }
+
+  .screenshots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+
+  .screenshots img {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .empty {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+  }
+
+  .post-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .post-links .date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-left: 0.75rem;
+  }
+</style>

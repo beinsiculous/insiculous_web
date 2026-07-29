@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GameCard from '../../components/GameCard.astro';
+
+const games = (await getCollection('games')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<BaseLayout
+  title="Games — Be Insiculous"
+  description="Games built with the Insiculous 2D engine."
+>
+  <p class="section-label">games</p>
+  <h1>Games</h1>
+  <p class="intro">
+    Everything below runs on <a href="/engine/">Insiculous 2D</a>. Playable
+    builds run right in the browser via WebAssembly.
+  </p>
+
+  <div class="grid">
+    {games.map((game) => <GameCard game={game} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 42em;
+    margin-bottom: 2rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1.25rem;
+  }
+</style>

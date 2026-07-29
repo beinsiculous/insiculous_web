@@ -1,0 +1,9 @@
+# Cloudflare Pages custom headers.
+#
+# Uncomment the block below if a game needs cross-origin isolation
+# (SharedArrayBuffer / wasm threads). Note this affects everything under
+# /games/*, including embedding third-party content on those pages.
+#
+# /games/*
+#   Cross-Origin-Opener-Policy: same-origin
+#   Cross-Origin-Embedder-Policy: require-corp

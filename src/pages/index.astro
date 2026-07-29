@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Be Insiculous — independent game studio">
+  <section class="hero">
+    <p class="section-label">independent game studio</p>
+    <h1>Be Insiculous</h1>
+    <p class="lede">
+      One developer, a Rust engine, and a long-running habit of building 2D
+      games from the metal up.
+    </p>
+  </section>
+
+  <section>
+    <p>
+      Be Insiculous is a solo studio. After years of independent game and
+      engine development, everything here runs on <strong>Insiculous 2D</strong>
+      — a 2D engine written in Rust, built for the games I actually want to
+      make rather than the ones a general-purpose engine expects.
+    </p>
+    <p>
+      These days the engine pulls double duty: it powers the games on this
+      site and serves as a real-world target for
+      <a href="/engine/">agentic-coding benchmarking</a> — letting AI coding
+      agents loose on a live, opinionated Rust codebase and seeing what
+      survives.
+    </p>
+    <!-- PLACEHOLDER: add a third paragraph here if you want to mention current focus / what's next. -->
+  </section>
+
+  <section class="cta">
+    <a class="button" href="/games/">browse the games →</a>
+    <a class="button secondary" href="/devlog/">read the devlog →</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: 2rem 0 1rem;
+  }
+
+  .lede {
+    font-size: 1.25rem;
+    color: var(--text-bright);
+    max-width: 34em;
+  }
+
+  section p {
+    max-width: 42em;
+  }
+
+  .cta {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .button {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .button:hover {
+    text-decoration: none;
+    filter: brightness(1.1);
+  }
+
+  .button.secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    font-weight: 500;
+  }
+</style>

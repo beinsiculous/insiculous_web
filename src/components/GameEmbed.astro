@@ -1,0 +1,103 @@
+---
+/**
+ * Placeholder embed area for a WASM game build.
+ *
+ * `src` is the path to the wasm-bindgen JS glue under public/, following the
+ * drop-in convention: public/games/<slug>/v<N>/game.js
+ * (see README "WASM builds" for the full convention).
+ *
+ * No client JS ships from this component yet — the wiring example below is
+ * an HTML comment on purpose. Turn it into a real <script> when a build exists.
+ */
+interface Props {
+  src?: string;
+  title: string;
+}
+
+const { src, title } = Astro.props;
+---
+
+<div class="game-embed" data-wasm-src={src}>
+  <div class="placeholder">
+    <span class="glyph" aria-hidden="true">▚▞</span>
+    <p class="status">wasm build not wired up yet</p>
+    <p class="hint">
+      {
+        src
+          ? `expected glue module: ${src}`
+          : 'no wasm path set in this game’s frontmatter'
+      }
+    </p>
+  </div>
+  <span class="visually-hidden">Playable embed area for {title}</span>
+</div>
+
+<!--
+  TODO(wasm wiring): when a build exists at `src`, replace the placeholder
+  above with a <canvas> and activate a script like this (kept as an HTML
+  comment so Astro ships zero client JS until then — do NOT use define:vars
+  on a commented-out script):
+
+  <canvas id="game-canvas" width="960" height="540"></canvas>
+  <script>
+    const embed = document.querySelector('.game-embed');
+    const src = embed?.getAttribute('data-wasm-src');
+    if (src) {
+      const init = (await import(src)).default;
+      await init(); // wasm-bindgen with target web entry point
+    }
+  </script>
+
+  If Vite warns about the dynamic import, prefix the specifier with its
+  vite-ignore block-comment pragma.
+-->
+
+<style>
+  .game-embed {
+    aspect-ratio: 16 / 9;
+    background: var(--surface);
+    border: 1px dashed var(--border-bright);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .placeholder {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .glyph {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 2.2rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    color: var(--text-bright);
+    margin: 0 0 0.3rem;
+  }
+
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>
