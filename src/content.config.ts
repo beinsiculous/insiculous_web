@@ -6,16 +6,22 @@ import { glob } from 'astro/loaders';
 
 const games = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/games' }),
-  schema: z.object({
-    title: z.string(),
-    blurb: z.string(),
-    status: z.enum(['playable', 'in-development', 'prototype']),
-    // Path to the wasm-bindgen JS glue under public/, e.g. "/games/my-game/v1/game.js".
-    // Bump the version folder (v1 -> v2) on every update instead of overwriting in place.
-    wasm: z.string().optional(),
-    screenshots: z.array(z.string()).default([]),
-    order: z.number().default(0),
-  }),
+  schema: z
+    .object({
+      title: z.string(),
+      blurb: z.string(),
+      status: z.enum(['playable', 'in-development', 'prototype']),
+      // Path to the wasm-bindgen JS glue under public/, e.g. "/games/my-game/v1/game.js".
+      // Must be absolute (leading slash). Bump the version folder (v1 -> v2)
+      // on every update instead of overwriting in place.
+      wasm: z.string().startsWith('/').optional(),
+      screenshots: z.array(z.string().startsWith('/')).default([]),
+      order: z.number().default(0),
+    })
+    .refine((game) => game.status !== 'playable' || game.wasm !== undefined, {
+      message: "status 'playable' requires a wasm path — a playable game must have a build to play",
+      path: ['wasm'],
+    }),
 });
 
 const devlog = defineCollection({

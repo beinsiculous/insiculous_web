@@ -49,7 +49,9 @@ const { src, title } = Astro.props;
   </script>
 
   If Vite warns about the dynamic import, prefix the specifier with its
-  vite-ignore block-comment pragma.
+  vite-ignore block-comment pragma. The `src` path must be absolute
+  (e.g. /games/<slug>/v1/game.js) — a relative path would resolve against
+  the current page URL and 404.
 -->
 
 <style>

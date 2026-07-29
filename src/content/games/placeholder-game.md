@@ -2,9 +2,10 @@
 # PLACEHOLDER ENTRY — replace with a real game (or rename this file; the
 # filename becomes the URL slug: /games/placeholder-game/).
 title: 'Placeholder Game'
-blurb: 'A stand-in entry showing what a playable game looks like on this site.'
-status: 'playable'
-# Uncomment once a build is dropped into public/games/placeholder-game/v1/:
+blurb: 'A stand-in entry showing what a game page looks like on this site.'
+status: 'prototype'
+# Set status to 'playable' only together with a wasm path (enforced at build
+# time). Uncomment once a build is dropped into public/games/placeholder-game/v1/:
 # wasm: '/games/placeholder-game/v1/game.js'
 screenshots: []
 order: 1
