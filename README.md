@@ -1,6 +1,6 @@
 # Be Insiculous — studio site
 
-Static site for [Be Insiculous](https://be-insiculous.pages.dev), an
+Static site for [Be Insiculous](https://insiculous-web.jessemsmcintosh.workers.dev), an
 independent game studio / solo-dev label. Built with [Astro](https://astro.build),
 deployed to Cloudflare Pages. The site is wired to embed WebAssembly game
 builds from the Insiculous 2D engine (Rust) as they land — the games are

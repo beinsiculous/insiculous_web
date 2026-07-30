@@ -1,4 +1,5 @@
-name = "be-insiculous"
+name = "insiculous-web"
+workers_dev = true
 compatibility_date = "2026-07-29"
 
 # Static-assets Worker: `npx wrangler deploy` uploads dist/ as the site.
