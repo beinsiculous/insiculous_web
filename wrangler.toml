@@ -1,3 +1,8 @@
 name = "be-insiculous"
 compatibility_date = "2026-07-29"
-pages_build_output_dir = "dist"
+
+# Static-assets Worker: `npx wrangler deploy` uploads dist/ as the site.
+# not_found_handling serves our 404.astro page for unknown routes.
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"

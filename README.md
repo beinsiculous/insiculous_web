@@ -72,15 +72,20 @@ Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
 If a game ever needs threads/SharedArrayBuffer, uncomment the COOP/COEP block
 in `public/_headers`.
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare (Workers static assets)
 
-1. Push this repo to GitHub/GitLab.
-2. Cloudflare dashboard → Workers & Pages → Create → Pages → connect the repo.
-3. Build settings (also declared in `wrangler.toml`):
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-4. Set the `NODE_VERSION` environment variable to `24` (matches `.nvmrc`).
-5. Every push to the production branch deploys; other branches get preview
-   deployments.
+The repo is connected via the Cloudflare dashboard's Git integration
+(Workers Builds). `wrangler.toml` declares a static-assets Worker serving
+`dist/`, so the default pipeline works as-is:
 
-After connecting, set the real domain in `astro.config.mjs` (`site`).
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+
+Every push to `main` builds and deploys; the `404-page` handling serves the
+Astro 404 page, and `public/_headers` rules apply to the served assets.
+
+Manual deploy from a machine with wrangler auth: `npm run build && npx
+wrangler deploy`.
+
+After the first deploy, set the real URL (workers.dev or custom domain) in
+`astro.config.mjs` (`site`).
