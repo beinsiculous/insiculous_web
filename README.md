@@ -2,8 +2,9 @@
 
 Static site for [Be Insiculous](https://be-insiculous.pages.dev), an
 independent game studio / solo-dev label. Built with [Astro](https://astro.build),
-deployed to Cloudflare Pages. Games run in the browser as WebAssembly builds
-from the Insiculous 2D engine (Rust).
+deployed to Cloudflare Pages. The site is wired to embed WebAssembly game
+builds from the Insiculous 2D engine (Rust) as they land — the games are
+desktop-only until the engine's web export ships.
 
 ## Setup
 
@@ -26,14 +27,20 @@ npm run dev   # dev server at http://localhost:4321
 ## Content
 
 - **Games** live in `src/content/games/*.md`. The filename (minus `.md`) is the
-  URL slug. Frontmatter: `title`, `blurb`, `status`
-  (`playable` / `in-development` / `prototype`), optional `wasm` path,
+  URL slug. Frontmatter: `title`, `blurb`, `status`, optional `wasm` path,
   `screenshots` (paths under `public/`), `order`.
+- **Status values**:
+  - `playable` — runs in the browser on this site. Requires a `wasm` path
+    (enforced at build time).
+  - `alpha` — full gameplay loop in a desktop build, polish ongoing. Switch
+    to `playable` when the game's browser build lands.
+  - `in-development` / `prototype` — earlier stages.
 - **Devlog posts** live in `src/content/devlog/*.md`. Frontmatter: `title`,
   `description`, `pubDate`, `tags`, optional `game` (a game slug — validated
   at build time, so typos fail the build instead of shipping 404 links).
 
-Current entries are clearly-marked placeholders — replace them.
+The six game entries are real; the devlog still contains one clearly-marked
+placeholder post to delete once real posts exist.
 
 ## WASM builds
 
@@ -44,7 +51,8 @@ Convention for shipping a playable game:
    glue module + `.wasm` binary.
 2. Drop the output into a **versioned folder**:
    `public/games/<slug>/v1/` → `game.js`, `game_bg.wasm`, assets.
-3. Set the game's frontmatter: `wasm: '/games/<slug>/v1/game.js'`.
+3. Set the game's frontmatter: `wasm: '/games/<slug>/v1/game.js'` and flip
+   its `status` to `playable`.
 4. Wire up `src/components/GameEmbed.astro` — it currently renders a
    placeholder; the intended loader script is included as a marked HTML
    comment inside the component.

@@ -10,7 +10,9 @@ const games = defineCollection({
     .object({
       title: z.string(),
       blurb: z.string(),
-      status: z.enum(['playable', 'in-development', 'prototype']),
+      // 'playable' = runs in the browser on this site (requires wasm).
+      // 'alpha' = full gameplay loop on desktop, still getting polish.
+      status: z.enum(['playable', 'alpha', 'in-development', 'prototype']),
       // Path to the wasm-bindgen JS glue under public/, e.g. "/games/my-game/v1/game.js".
       // Must be absolute (leading slash). Bump the version folder (v1 -> v2)
       // on every update instead of overwriting in place.

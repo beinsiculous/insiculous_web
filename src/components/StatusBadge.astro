@@ -1,12 +1,13 @@
 ---
 interface Props {
-  status: 'playable' | 'in-development' | 'prototype';
+  status: 'playable' | 'alpha' | 'in-development' | 'prototype';
 }
 
 const { status } = Astro.props;
 
 const labels: Record<Props['status'], string> = {
   playable: 'playable',
+  alpha: 'alpha · desktop',
   'in-development': 'in development',
   prototype: 'prototype',
 };
@@ -29,6 +30,11 @@ const labels: Record<Props['status'], string> = {
     background: var(--accent);
     color: var(--bg);
     font-weight: 700;
+  }
+
+  .alpha {
+    border: 1px solid var(--accent);
+    color: var(--accent);
   }
 
   .in-development {

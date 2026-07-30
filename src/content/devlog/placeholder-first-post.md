@@ -6,8 +6,8 @@ description: 'A stand-in post demonstrating the devlog layout. Delete freely.'
 pubDate: 2026-07-29
 tags: ['meta', 'placeholder']
 # Optional link to a game entry (validated at build time — must match a
-# filename in src/content/games/ without the extension):
-game: 'placeholder-game'
+# filename in src/content/games/ without the extension), e.g.:
+# game: 'pong'
 ---
 
 This is a placeholder devlog post. It exists so the devlog listing and post

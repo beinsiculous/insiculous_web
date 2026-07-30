@@ -20,16 +20,24 @@ const { src, title } = Astro.props;
 <div class="game-embed" data-wasm-src={src}>
   <div class="placeholder">
     <span class="glyph" aria-hidden="true">▚▞</span>
-    <p class="status">wasm build not wired up yet</p>
+    <p class="status">
+      {src ? 'wasm build not wired up yet' : 'browser build coming'}
+    </p>
     <p class="hint">
       {
         src
           ? `expected glue module: ${src}`
-          : 'no wasm path set in this game’s frontmatter'
+          : 'desktop-only for now — playable here once the engine’s web export lands'
       }
     </p>
   </div>
-  <span class="visually-hidden">Playable embed area for {title}</span>
+  <span class="visually-hidden">
+    {
+      src
+        ? `Game embed area for ${title} — build not wired up yet`
+        : `Placeholder game embed for ${title} — browser build coming`
+    }
+  </span>
 </div>
 
 <!--
