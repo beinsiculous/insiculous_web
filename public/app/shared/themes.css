@@ -143,6 +143,14 @@
   background-repeat: no-repeat;
   filter: brightness(1.1);
 }
+@media (max-width: 900px) {
+  /* A portrait phone crops the landscape frame hard: centred on the paper it would show only the
+     cleaver's edge and lose the carving fork off the right. The panels cover the paper here anyway,
+     so anchor the crop on the silverware instead — the cleaver and fork both in view. */
+  [data-theme="fork-knife"] body::before {
+    background-position: center, 68% 40%;
+  }
+}
 [data-theme="fork-knife"] h1, [data-theme="fork-knife"] h2 {
   font-weight: 700;
   letter-spacing: -0.02em;
