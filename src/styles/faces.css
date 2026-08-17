@@ -279,10 +279,21 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
   --cursor-forbidden: not-allowed;
 }
 [data-theme="fork-knife"] main { max-width: 62rem; }
-/* Wide screens: the column sits left of centre so the silverware (themes.css body::before, pinned
-   bottom-right) has a real gutter to float in beside the copy instead of hiding behind it. */
+/* Wide screens: the column sits on the kraft paper in the photograph (themes.css body::before,
+   covering the viewport) — between the whole garlic bulb on the left (~18% across the frame) and the
+   cleaver on the right (~58%) — so the content is where the photographer left the blank space.
+   Those are frame percentages, so the column is placed by viewport width, capped so it never
+   grows past the paper. */
 @media (min-width: 1200px) {
-  [data-theme="fork-knife"] main { margin-left: max(2rem, calc((100vw - 62rem) / 2 - 8rem)); }
+  [data-theme="fork-knife"] main {
+    max-width: min(62rem, 41vw);
+    margin-left: 19vw;
+    margin-right: auto;
+  }
+  /* The paper is too narrow for seven day-columns (7 × 120px minimum would burst the panel and run
+     over the cleaver), so the fortnight reads four days to a row here — the same collapse the grid
+     already makes on small screens, one step earlier. */
+  [data-theme="fork-knife"] .fortnight-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 /* Settings: the profile bar (which saved answer set is being edited) */
