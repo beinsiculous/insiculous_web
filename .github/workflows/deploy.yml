@@ -1,0 +1,64 @@
+# The one path to production. Every push to main is type-checked and built before anything is
+# uploaded, so a broken build can never reach beinsiculous.com — the deploy step only runs if
+# `check` and `build` (which includes scripts/postbuild-check.mjs) both pass. `npm run verify`
+# runs the same two steps locally, so the two cannot drift.
+#
+# Secrets this needs (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   — an "Edit Cloudflare Workers" token, scoped to the account and to
+#                            the beinsiculous.com zone (it owns the custom-domain route).
+#   CLOUDFLARE_ACCOUNT_ID  — the account the insiculous-web Worker lives in.
+#
+# The Cloudflare dashboard's own Workers Builds Git integration must stay disconnected, or the
+# same commit would deploy twice from two places.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # deploy the current main by hand from the Actions tab
+
+# One deploy at a time; never cancel one mid-upload.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Verify and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type-check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # A deploy that reports success but does not serve is the failure mode this whole file
+      # exists to catch, so ask the live domain before calling it done.
+      - name: Check the site is serving
+        run: |
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://beinsiculous.com/ || true)
+            echo "attempt $attempt: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 10
+          done
+          echo "beinsiculous.com did not return 200 after the deploy"
+          exit 1

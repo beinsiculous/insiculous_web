@@ -8,6 +8,8 @@
     "build": "astro build && node scripts/postbuild-check.mjs",
     "preview": "astro preview",
     "check": "astro check",
+    "verify": "npm run check && npm run build",
+    "deploy": "npm run verify && wrangler deploy",
     "sync:fortknight": "node scripts/sync-fortknight.mjs"
   },
   "dependencies": {
@@ -18,6 +20,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "playwright": "^1.55.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "wrangler": "4.123.0"
   }
 }
