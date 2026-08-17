@@ -5,11 +5,11 @@ import bundle from "../../data/bundle.json";
 import { withBase } from "../../lib/paths.js";
 import { PROFILE_PATH, facePath } from "../../lib/faces.js";
 
-// ForkKnife's questionnaire = its settings (docs/meal-plan.md): the "forkknife" sections of data/questionnaire.json
-// (the meals — names, when they are eaten, prepping and cooking — and the meal preferences the assistant prompt
-// embeds), then the fortnight menu itself: for each meal the dishes and the day(s) they are eaten (the second day is
-// leftovers), by hand here or applied from a meal-plan document on the Assistant page. Save writes these keys over the
-// active profile's answers as stored at that moment; FortKnight's own answers are carried through untouched.
+// ForkKnife's questionnaire = its settings (docs/meal-plan.md): the "forkknife" sections of data/questionnaire.json —
+// the meals (names, when they are eaten, prepping and cooking) and the meal preferences the assistant prompt embeds.
+// The menu those meals are keyed by is built on the Spoon Feed page; this page still carries it, because renaming a
+// meal has to retag its dishes and dropping a meal has to drop them. Save writes these keys over the active profile's
+// answers as stored at that moment; FortKnight's own answers are carried through untouched.
 const questionnaire = bundle.questionnaire;
 const sections = (questionnaire?.sections ?? []).filter((section) => section.face === "forkknife");
 const options = questionnaire?.options ?? {};
@@ -17,7 +17,7 @@ const options = questionnaire?.options ?? {};
 <FaceLayout title="Questionnaire" face="forkknife">
   <section class="panel">
     <h1>Questionnaire</h1>
-    <p class="muted">Your meals and your menu are ForkKnife's settings; they live in the same profile as your FortKnight answers, on this device. Save keeps them here; the <a href={withBase(PROFILE_PATH)}>Profile page</a> turns the whole profile into files for your own AI workspace, and the <a href={facePath("forkknife", "assistant/")}>Assistant page</a> asks your assistant to draft the menu from what you answer here.</p>
+    <p class="muted">Your meals and how you eat are ForkKnife's settings; they live in the same profile as your FortKnight answers, on this device. Save keeps them here; the <a href={withBase(PROFILE_PATH)}>Profile page</a> turns the whole profile into files for your own AI workspace, and the <a href={facePath("forkknife", "assistant/")}>Assistant page</a> asks your assistant to draft the menu from what you answer here.</p>
     <p class="profile-bar" id="profileBar"><strong id="profileName"></strong> <span class="muted" id="profileStatus"></span></p>
     {questionnaire ? (
     <form id="forkknifeForm" class="settings-form questionnaire">
@@ -31,12 +31,8 @@ const options = questionnaire?.options ?? {};
         </fieldset>
       ))}
 
-      <fieldset data-section="menu">
-        <legend>Your fortnight menu</legend>
-        <p class="muted">For each meal, add the dishes and the days you eat them. The first day is the fresh serving, the second is leftovers. Leftovers are never eaten the next day, and at most three days later — the fortnight wraps, so Monday B follows Saturday B. Leftovers of an afternoon or evening meal can also become an earlier meal: dinner on Sunday A can be breakfast on Tuesday A. About eight dishes cover a meal's fourteen days, and a meal takes one dish a day. Renaming a meal above keeps its dishes; dropping a meal drops them. Or let your assistant draft the menu on the <a href={facePath("forkknife", "assistant/")}>Assistant page</a>.</p>
-        <p class="muted" id="planStatus"></p>
-        <div id="mealSections"></div>
-      </fieldset>
+      <p class="muted">The dishes themselves are <a href={facePath("forkknife", "spoon-feed/")}>Spoon Feed</a> — for each meal, what you eat on which day. Renaming a meal here keeps its dishes; dropping a meal drops them, and Save says how many. Or let your assistant draft the whole menu on the <a href={facePath("forkknife", "assistant/")}>Assistant page</a>.</p>
+      <p class="muted" id="planStatus"></p>
 
       <div class="button-row">
         <button type="submit">Save</button>
@@ -53,7 +49,7 @@ const options = questionnaire?.options ?? {};
 <script>
   import { loadSettings, profileIds, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
   import { FORKKNIFE_ANSWER_KEYS, activeWeights, answersProblem, defaultAnswers, mealsWithDefaults, pickAnswers, userWeightsFromAnswers } from "../../lib/shared/weights-rules.js";
-  import { allowedSecondDays, canTakeLeftovers, coverage, dayLabel, itemServings, mealSlug, normalizeMealPlan, retagMealPlan } from "../../lib/shared/meal-plan.js";
+  import { mealSlug, normalizeMealPlan, retagMealPlan } from "../../lib/shared/meal-plan.js";
   import { localTodayIsoDate } from "../../lib/shared/clock.js";
   import { populateMeals, populateSimpleAnswer, readMeals, readSimpleAnswer, wireMealsEditor } from "../../lib/question-fields.js";
   import { promptProfileName } from "../../lib/profile-naming.js";
@@ -61,25 +57,16 @@ const options = questionnaire?.options ?? {};
 
   const form = document.getElementById("forkknifeForm");
   const status = document.getElementById("questionnaireStatus");
-  const elements = { planStatus: document.getElementById("planStatus"), mealSections: document.getElementById("mealSections") };
+  const planStatus = document.getElementById("planStatus");
   let bundle = null;
   let settings = loadSettings();
-  let meals = [];          // the meals as edited above (defaults filled) — the menu editor is keyed by their slugs
-  let items = [];          // the menu being edited (normalised items)
+  let meals = [];          // the meals as edited here (defaults filled) — the menu on Spoon Feed is keyed by their slugs
+  let renames = {};        // old meal slug -> new one, composed over every edit in this sitting; applied at save time
   let dirty = false;
   let resyncMealsEditor = () => {};
-  const editing = {};      // meal slug -> whether its list shows the remove buttons
 
   /** The ForkKnife questions (data/questionnaire.json sections with face "forkknife"), simple kinds only. */
   const simpleQuestions = () => bundle.questionnaire.sections.filter((section) => section.face === "forkknife").flatMap((section) => section.questions).filter((question) => question.kind !== "meals");
-  const dayOptions = () => bundle.days.order.map((dayKey) => ({ dayKey, label: bundle.days.days[dayKey].label }));
-
-  function element(tagName, className, text) {
-    const node = document.createElement(tagName);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
 
   /** The profile line: the active profile's name and whether it is saved (switching lives in the nav dropdown). */
   function renderProfileBar() {
@@ -88,16 +75,14 @@ const options = questionnaire?.options ?? {};
     document.getElementById("profileStatus").textContent = saved ? `— saved (${profileIds(settings).length} on this device)` : "— not saved yet";
   }
 
-  /** This page's answers into the form: the meals editor, the preference questions, the menu. */
+  /** This page's answers into the form: the meals editor and the preference questions (the menu is Spoon Feed's). */
   function populate(answers) {
     populateMeals(form, answers.meals, bundle.questionnaire);
     for (const question of simpleQuestions()) populateSimpleAnswer(form, question, answers[question.id]);
     meals = mealsWithDefaults(readMeals(form), bundle.questionnaire).meals;
-    const { normalized, problems } = normalizeMealPlan(answers.mealPlan || { items: [] }, meals);
-    items = normalized.items;
-    elements.planStatus.textContent = problems.length ? `${problems.length === 1 ? "1 stored dish no longer matches your meals and was dropped" : `${problems.length} stored dishes no longer match your meals and were dropped`}: ${problems.join("; ")}.` : "";
+    renames = {};
+    planStatus.textContent = "";
     resyncMealsEditor();
-    renderSections();
   }
 
   function populateFromSettings() {
@@ -108,148 +93,52 @@ const options = questionnaire?.options ?? {};
     status.textContent = savedAnswers ? `Loaded the saved answers of profile ${settings.activeWeightsId}.` : `Profile ${settings.activeWeightsId} is new — answer and Save to keep it.`;
   }
 
-  /** The keys this page owns, as edited. */
-  function readOwnAnswers() {
-    const own = { meals: readMeals(form), mealPlan: { items: JSON.parse(JSON.stringify(items)) } };
+  /** The menu (Spoon Feed's, not this page's) brought along with the meals it is keyed by: the plan **as stored right
+   *  now** — never a load-time snapshot, so a Save here cannot undo a dish added on Spoon Feed meanwhile — retagged
+   *  with the renames of this sitting, and with the dishes of any dropped meal dropped. Reports what it dropped. */
+  function mealPlanForSave(storedAnswers) {
+    const retagged = retagMealPlan(storedAnswers?.mealPlan || { items: [] }, renames);
+    const keptSlugs = new Set(meals.map((meal) => mealSlug(meal.name)));
+    const dropped = retagged.items.filter((item) => !keptSlugs.has(item.meal) || (item.leftoversMeal && !keptSlugs.has(item.leftoversMeal)));
+    if (dropped.length) {
+      const droppedNames = [...new Set(dropped.map((item) => item.meal))].join(", ");
+      planStatus.textContent = `Dropped ${dropped.length} dish${dropped.length === 1 ? "" : "es"} of ${droppedNames}, no longer among your meals.`;
+    }
+    const kept = retagged.items.filter((item) => !dropped.includes(item));
+    return { items: normalizeMealPlan({ items: kept }, meals).normalized.items };
+  }
+
+  /** The keys this page owns, as edited, plus the menu carried across the meal changes above. */
+  function readOwnAnswers(storedAnswers) {
+    const own = { meals: readMeals(form), mealPlan: mealPlanForSave(storedAnswers) };
     for (const question of simpleQuestions()) own[question.id] = readSimpleAnswer(form, question);
     return own;
   }
 
-  /** The whole answers object at save time: the profile as stored *right now* (another tab or FortKnight's
-   *  questionnaire may have saved meanwhile) with this page's keys written over it. */
+  /** The whole answers object at save time: the profile as stored *right now* (another tab, Spoon Feed or
+   *  FortKnight's questionnaire may have saved meanwhile) with this page's keys written over it. */
   function mergedAnswersForSave() {
     const stored = loadSettings();
     stored.activeWeightsId = settings.activeWeightsId; // the profile shown on this page, not whichever another tab switched to
     const base = activeWeights(stored)?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories);
-    return { stored, answers: { ...base, ...pickAnswers(readOwnAnswers(), FORKKNIFE_ANSWER_KEYS) } };
+    return { stored, answers: { ...base, ...pickAnswers(readOwnAnswers(base), FORKKNIFE_ANSWER_KEYS) } };
   }
 
-  /** The meals changed above: renamed meals keep their dishes (retag by position), dropped meals drop theirs. */
+  /** The meals changed: renamed meals keep their dishes (retag by position, composed over this sitting's edits),
+   *  dropped meals drop theirs — both applied to the stored menu at save time. */
   function onMealsChange(previous, current) {
-    const renames = {};
     current.meals.forEach((meal, index) => {
       const before = previous.meals[index];
-      if (before && mealSlug(before.name) !== mealSlug(meal.name)) renames[mealSlug(before.name)] = mealSlug(meal.name);
+      if (!before) return;
+      const from = mealSlug(before.name);
+      const to = mealSlug(meal.name);
+      if (from === to) return;
+      // Compose: a meal renamed twice must still map from the slug the stored menu actually uses.
+      const original = Object.keys(renames).find((key) => renames[key] === from) ?? from;
+      if (original === to) delete renames[original];
+      else renames[original] = to;
     });
-    let plan = retagMealPlan({ items }, renames);
-    const keptSlugs = new Set(current.meals.map((meal) => mealSlug(meal.name)));
-    const dropped = plan.items.filter((item) => !keptSlugs.has(item.meal) || (item.leftoversMeal && !keptSlugs.has(item.leftoversMeal)));
-    if (dropped.length) {
-      const droppedNames = [...new Set(dropped.map((item) => item.meal))].join(", ");
-      elements.planStatus.textContent = `Dropped ${dropped.length} dish${dropped.length === 1 ? "" : "es"} of ${droppedNames}, no longer among your meals. Save keeps that; Reset or reload undoes it.`;
-      plan = { items: plan.items.filter((item) => !dropped.includes(item)) };
-    }
     meals = mealsWithDefaults(current, bundle.questionnaire).meals;
-    items = normalizeMealPlan(plan, meals).normalized.items;
-    renderSections();
-  }
-
-  /** One section per meal: coverage line, the committed list (Edit → remove), one entry row (dish, first day, second day, Add). */
-  function renderSections() {
-    elements.mealSections.replaceChildren();
-    for (const meal of meals) {
-      const slug = mealSlug(meal.name);
-      const section = element("div", "meal-plan-section");
-      const heading = element("h3", "editor-heading");
-      const covered = coverage(items, slug);
-      heading.textContent = `${meal.name}`;
-      heading.appendChild(element("span", "muted", ` · ${covered.dishes} dish${covered.dishes === 1 ? "" : "es"} · ${covered.covered}/14 days${covered.missing.length && covered.missing.length < 14 ? ` — missing: ${covered.missing.map(dayLabel).join(", ")}` : ""}`));
-      section.appendChild(heading);
-      section.appendChild(committedList(meal, slug));
-      section.appendChild(entryRow(meal, slug));
-      elements.mealSections.appendChild(section);
-    }
-  }
-
-  function committedList(meal, slug) {
-    const container = element("div", "committed-list");
-    const mine = items.filter((item) => item.meal === slug);
-    if (!mine.length) {
-      container.appendChild(element("p", "muted committed-empty", `No ${meal.name.toLowerCase()} dishes yet.`));
-      return container;
-    }
-    const header = element("div", "committed-header");
-    header.appendChild(element("span", "muted", `${mine.length} dish${mine.length === 1 ? "" : "es"}`));
-    const toggle = element("button", "link-button", editing[slug] ? "Done" : "Edit");
-    toggle.type = "button";
-    toggle.addEventListener("click", () => { editing[slug] = !editing[slug]; renderSections(); });
-    header.appendChild(toggle);
-    container.appendChild(header);
-    const list = element("ul", `committed-items${editing[slug] ? " editing" : ""}`);
-    for (const item of mine) {
-      const line = element("li");
-      line.appendChild(element("strong", null, item.dish));
-      const leftoversAs = item.leftoversMeal ? ` as ${meals.find((other) => mealSlug(other.name) === item.leftoversMeal)?.name ?? item.leftoversMeal}` : "";
-      line.append(` · ${item.days.map(dayLabel).join(" + ")}${item.days.length === 2 ? ` (leftovers${leftoversAs})` : ""}${item.notes ? ` — ${item.notes}` : ""}`);
-      if (editing[slug]) {
-        const remove = element("button", "remove-committed", "×");
-        remove.type = "button";
-        remove.title = `Remove ${item.dish}`;
-        remove.addEventListener("click", () => { items = items.filter((other) => other.id !== item.id); markDirty(); renderSections(); });
-        line.appendChild(remove);
-      }
-      list.appendChild(line);
-    }
-    container.appendChild(list);
-    return container;
-  }
-
-  function entryRow(meal, slug) {
-    const row = element("div", "meal-entry-row");
-    // A meal is eaten once a day: (meal, day) servings already in the plan leave the dropdowns.
-    const takenServings = new Set(items.flatMap((item) => itemServings(item).map(([servingMeal, day]) => `${servingMeal}|${day}`)));
-    const isTaken = (servingMeal, dayKey) => takenServings.has(`${servingMeal}|${dayKey}`);
-    const freeDays = dayOptions().filter(({ dayKey }) => !isTaken(slug, dayKey));
-    if (!freeDays.length) {
-      row.appendChild(element("span", "muted", `Every day has its ${meal.name.toLowerCase()} — remove a dish to change one.`));
-      return row;
-    }
-    const dish = document.createElement("input");
-    dish.type = "text";
-    dish.placeholder = `${meal.name} dish`;
-    dish.setAttribute("aria-label", `${meal.name} dish`);
-    const firstDay = document.createElement("select");
-    firstDay.setAttribute("aria-label", `${meal.name}: first day`);
-    for (const { dayKey, label } of freeDays) firstDay.appendChild(new Option(label, dayKey));
-    const secondDay = document.createElement("select");
-    secondDay.setAttribute("aria-label", `${meal.name}: leftovers day`);
-    // Leftovers: the same meal on an allowed later day, or — from an afternoon/evening/late-evening meal — another
-    // early-morning/mid-morning/afternoon meal on such a day (value "day|meal").
-    const fillSecondDays = () => {
-      secondDay.replaceChildren(new Option("No leftovers", ""));
-      for (const dayKey of allowedSecondDays(firstDay.value)) {
-        if (!isTaken(slug, dayKey)) secondDay.appendChild(new Option(`leftovers ${dayLabel(dayKey)}`, `${dayKey}|${slug}`));
-        for (const other of meals) {
-          const otherSlug = mealSlug(other.name);
-          if (otherSlug === slug || !canTakeLeftovers(meal, other) || isTaken(otherSlug, dayKey)) continue;
-          secondDay.appendChild(new Option(`leftovers ${dayLabel(dayKey)} as ${other.name}`, `${dayKey}|${otherSlug}`));
-        }
-      }
-    };
-    fillSecondDays();
-    firstDay.addEventListener("change", fillSecondDays);
-    const add = element("button", null, "Add");
-    add.type = "button";
-    const rowStatus = element("span", "muted");
-    const commit = () => {
-      const [secondDayKey, leftoversSlug] = secondDay.value ? secondDay.value.split("|") : [null, null];
-      const days = [firstDay.value, ...(secondDayKey ? [secondDayKey] : [])];
-      const candidate = { items: [...items, { meal: meal.name, dish: dish.value, days, leftoversMeal: leftoversSlug && leftoversSlug !== slug ? leftoversSlug : null }] };
-      const { normalized, problems } = normalizeMealPlan(candidate, meals);
-      if (!dish.value.trim()) { rowStatus.textContent = "Give the dish a name first."; return; }
-      if (problems.length) { const problem = problems[problems.length - 1]; rowStatus.textContent = `${problem[0].toUpperCase()}${problem.slice(1)}.`; return; }
-      items = normalized.items;
-      rowStatus.textContent = "";
-      dish.value = "";
-      markDirty();
-      renderSections();
-      elements.mealSections.querySelector(`[data-focus-meal="${slug}"] input`)?.focus();
-    };
-    add.addEventListener("click", commit);
-    dish.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); commit(); } });
-    row.dataset.focusMeal = slug;
-    row.append(dish, firstDay, secondDay, add, rowStatus);
-    return row;
   }
 
   function markDirty() {
@@ -275,7 +164,7 @@ const options = questionnaire?.options ?? {};
     settings = loadSettings();
     document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
     renderProfileBar();
-    status.textContent = `Saved the meals, preferences and menu of profile ${settings.activeWeightsId} on this device.${note}`;
+    status.textContent = `Saved the meals and preferences of profile ${settings.activeWeightsId} on this device.${note}`;
   }
 
   // Switching profiles from the nav dropdown reloads the page: with unsaved edits, ask first (cancel vetoes the switch).
@@ -294,7 +183,7 @@ const options = questionnaire?.options ?? {};
       if (!bundle) return;
       populate(defaultAnswers(bundle.questionnaire, bundle.categories)); // this page's keys only; FortKnight's answers stay
       dirty = true;
-      status.textContent = "Reset to defaults (not saved) — meals, preferences and an empty menu.";
+      status.textContent = "Reset to defaults (not saved) — the meals and preferences. Your menu is kept, minus the dishes of any meal these defaults do not have.";
     });
     try {
       const response = await fetch(withBase("bundle.json"));

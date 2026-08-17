@@ -18,10 +18,12 @@ const pages = {
   // FortKnight
   "fortknight-overview": "fortknight/",
   "fortknight-day": "fortknight/days/wed-b/",
+  "fortknight-build": "fortknight/build/",
   "fortknight-questionnaire": "fortknight/questionnaire/",
   "fortknight-assistant": "fortknight/assistant/",
   // ForkKnife
   "forkknife-overview": "forkknife/",
+  "forkknife-spoon-feed": "forkknife/spoon-feed/",
   "forkknife-questionnaire": "forkknife/questionnaire/",
   "forkknife-assistant": "forkknife/assistant/",
   // shared

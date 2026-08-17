@@ -1,0 +1,15 @@
+---
+// The fortnight menu editor's markup (docs/meal-plan.md), on both ForkKnife's Spoon Feed page and FortKnight's Build
+// page: the rules in prose, a status line, and the container the per-meal sections are drawn into by
+// lib/meal-plan-editor.js. Which face the page belongs to only changes where the "or let your assistant draft it"
+// link points — either Assistant page applies a meal-plan document, because the profile is shared.
+import { facePath } from "../lib/faces.js";
+
+const { face } = Astro.props;
+---
+<fieldset data-section="menu">
+  <legend>Your fortnight menu</legend>
+  <p class="muted">For each meal, add the dishes and the days you eat them. The first day is the fresh serving, the second is leftovers. Leftovers are never eaten the next day, and at most three days later — the fortnight wraps, so Monday B follows Saturday B. Leftovers of an afternoon or evening meal can also become an earlier meal: dinner on Sunday A can be breakfast on Tuesday A. About eight dishes cover a meal's fourteen days, and a meal takes one dish a day. The meals themselves — their names, when you eat them, whether they need prepping or cooking — are ForkKnife's <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a>. Or let your assistant draft the whole menu on the <a href={facePath(face, "assistant/")}>Assistant page</a>.</p>
+  <p class="muted" id="planStatus"></p>
+  <div id="mealSections"></div>
+</fieldset>

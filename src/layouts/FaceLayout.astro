@@ -2,16 +2,17 @@
 import "../styles/faces.css";
 import bundle from "../data/bundle.json";
 import { withBase } from "../lib/paths.js";
-import { DEFAULT_FAVICON, DEFAULT_THEME, FACES, FACE_IDS, FACE_NAV, PROFILE_PATH, SITE_NAME, STUDIO, facePath, studioPath } from "../lib/faces.js";
+import { DEFAULT_FAVICON, DEFAULT_THEME, FACES, FACE_IDS, PROFILE_PATH, SITE_NAME, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
 
 // `face` is which of the site's two faces the page belongs to (docs/app.md): "fortknight" or "forkknife" — its menu is
-// Overview, Questionnaire, Assistant — or null on the Profile page. Each face brings its own skin (FACES[face].theme),
-// so the two read as different sites. The switcher sits left of the brand: the Be Insiculous logo back out to the studio
-// site first, then the other face's logo. The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
+// Overview, the face's own building page (Spoon Feed / Build), Questionnaire, Assistant — or null on the Profile page.
+// Each face brings its own skin (FACES[face].theme), so the two read as different sites. The switcher sits left of the
+// brand: the Be Insiculous logo back out to the studio site first, then the other face's logo. The profile dropdown and
+// ⚙ Profile only show once a profile is saved on this device.
 const { title, face = null } = Astro.props;
 const currentFace = face ? FACES[face] : null;
 const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
-const navItems = currentFace ? FACE_NAV.map((item) => ({ ...item, href: facePath(face, item.path) })) : [];
+const navItems = currentFace ? faceNav(face).map((item) => ({ ...item, href: facePath(face, item.path) })) : [];
 const profileHref = withBase(PROFILE_PATH);
 const pathname = Astro.url.pathname;
 function isActive(item) {
@@ -50,7 +51,9 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     </a>
     <nav class="nav-links">
       {navItems.map((item) => (
-        <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href}>{item.label}</a>
+        <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
+          <span class="nav-full">{item.label}</span><span class="nav-short">{item.shortLabel}</span>
+        </a>
       ))}
     </nav>
     <div class="nav-profile" id="navProfile" hidden data-questionnaire-href={facePath(face || "fortknight", "questionnaire/")}>

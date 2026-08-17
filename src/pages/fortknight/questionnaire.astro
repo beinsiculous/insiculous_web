@@ -45,68 +45,14 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
             <QuestionField question={question} index={questionIndex} options={options} questionnaire={questionnaire}>
               {question.kind === "commitments" && (
                 <div class="commitments">
-                  <p class="import-pointer">Have your assistant read your calendar or planner? <a href={facePath("fortknight", "assistant/")}>Upload its import file on the Assistant page →</a></p>
+                  <p class="import-pointer">Add them one at a time on <a href={facePath("fortknight", "build/")}>the Build page →</a></p>
+                  <p class="import-pointer">Or had your assistant read your calendar or planner? <a href={facePath("fortknight", "assistant/")}>Upload its import file on the Assistant page →</a></p>
+                  <p class="muted" id="buildCounts"></p>
                   <details class="applied-import" id="appliedImport">
                     <summary class="muted" id="importStatus"></summary>
                     <div class="import-review" id="importReview"></div>
                     <button type="button" class="link-button" id="forgetImportButton" hidden>Forget the applied import</button>
                   </details>
-                  <h3 class="editor-heading">Commitments <span class="muted">— timed; they anchor your blocks</span></h3>
-                  <div class="appointments-editor">
-                  <table class="appointments-table">
-                    <thead><tr><th scope="col">What</th><th scope="col">Weekdays</th><th scope="col">How often</th><th scope="col">Starts</th><th scope="col">Minutes</th><th scope="col">Category</th><th scope="col"></th></tr></thead>
-                    <tbody id="appointmentEntry"></tbody>
-                    <tbody id="appointmentPrototype" hidden>
-                      <tr class="appointment-row">
-                      <td><input type="text" data-field="title" placeholder="e.g. Piano lesson" /></td>
-                      <td class="weekday-strip">{options.weekdays.map((weekday) => (
-                        <label title={weekday.label}><input type="checkbox" data-field="weekday" value={weekday.id} /> {weekday.label.slice(0, 2)}</label>
-                      ))}</td>
-                      <td>
-                        <select data-field="cadenceKind">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
-                        <input type="date" data-field="firstDate" data-needs="firstDate" aria-label="first date it happens" hidden />
-                        <select data-field="nth" data-needs="nth" aria-label="which weekday of the month" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
-                        <input type="number" data-field="dayOfMonth" data-needs="dayOfMonth" min="1" max="31" value="1" aria-label="day of month" hidden />
-                        <input type="date" data-field="date" data-needs="date" aria-label="date" hidden />
-                      </td>
-                      <td><input type="time" data-field="start" value="16:00" step="900" /></td>
-                      <td><input type="number" data-field="durationMinutes" min="0" step="15" value="60" /></td>
-                      <td><select data-field="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
-                      <td><button type="button" class="remove-appointment" aria-label="remove commitment">×</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="button-row commit-row"><button type="button" id="addAppointmentButton">Add commitment</button><span class="muted" id="appointmentEntryStatus"></span></div>
-                  <div class="committed-list" id="appointmentList" data-kind="commitments"></div>
-                </div>
-                  <div class="tasks-editor">
-                  <h3 class="editor-heading">Tasks <span class="muted">— a day, no clock time</span></h3>
-                  <table class="appointments-table tasks-table">
-                    <thead><tr><th scope="col">What</th><th scope="col">Weekdays</th><th scope="col">How often</th><th scope="col">When</th><th scope="col">Minutes</th><th scope="col">Category</th><th scope="col"></th></tr></thead>
-                    <tbody id="taskEntry"></tbody>
-                    <tbody id="taskPrototype" hidden>
-                      <tr class="task-row">
-                      <td><input type="text" data-field="title" placeholder="e.g. Take out the bins" /></td>
-                      <td class="weekday-strip">{options.weekdays.map((weekday) => (
-                        <label title={weekday.label}><input type="checkbox" data-field="weekday" value={weekday.id} /> {weekday.label.slice(0, 2)}</label>
-                      ))}</td>
-                      <td>
-                        <select data-field="cadenceKind">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
-                        <input type="date" data-field="firstDate" data-needs="firstDate" aria-label="first date it happens" hidden />
-                        <select data-field="nth" data-needs="nth" aria-label="which weekday of the month" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
-                        <input type="number" data-field="dayOfMonth" data-needs="dayOfMonth" min="1" max="31" value="1" aria-label="day of month" hidden />
-                        <input type="date" data-field="date" data-needs="date" aria-label="date" hidden />
-                      </td>
-                      <td><select data-field="timeOfDay">{options.timesOfDay.map((time) => <option value={time.id}>{time.label}</option>)}</select></td>
-                      <td><input type="number" data-field="durationMinutes" min="0" step="5" value="15" /></td>
-                      <td><select data-field="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
-                      <td><button type="button" class="remove-task" aria-label="remove task">×</button></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="button-row commit-row"><button type="button" id="addTaskButton">Add task</button><span class="muted" id="taskEntryStatus"></span></div>
-                  <div class="committed-list" id="taskList" data-kind="tasks"></div>
-                </div>
                 </div>
               )}
 
@@ -299,13 +245,13 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 </FaceLayout>
 
 <script>
-  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, FORKKNIFE_ANSWER_KEYS, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, standingAppointmentProblem, taskProblem, formatClockRange, personDayKeyResolver, slugifyId, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
+  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, formatClockRange, personDayKeyResolver, slugifyId, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
+  import { NOT_FORTKNIGHT_QUESTIONNAIRE_KEYS } from "../../lib/answer-keys.js";
   import { loadSettings, profileIds, renameProfile, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
   import { renderImportReview } from "../../lib/shared/import-review.js";
   import { dayLabel } from "../../lib/shared/meal-plan.js";
   import { checkedValues as checkedValuesIn, setChecked as setCheckedIn } from "../../lib/question-fields.js";
-  import { describeCadence } from "../../lib/shared/import-document.js";
-  import { MINUTES_PER_DAY, describeDuration, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
+  import { MINUTES_PER_DAY, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
   import { downloadText } from "../../lib/shared/download.js";
   import { WEEKDAY_NAMES, formatIsoDate, startDateForRule } from "../../lib/shared/fortknight-rules.js";
   import { withBase } from "../../lib/paths.js";
@@ -720,141 +666,14 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     };
   }
 
-  function element(tagName, className, text) {
-    const node = document.createElement(tagName);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
-
-  function categoryLabel(categoryKey) {
-    return bundle.categories.categories[categoryKey]?.label ?? categoryKey;
-  }
-
-  // Startup 2: one entry row per kind; "Add" commits it into a compact read-only list (Edit only reveals remove).
-  let commitments = [];
-  let tasks = [];
-  const editing = { commitments: false, tasks: false };
-
-  function updateAppointmentRow(row) {
-    const kindSelect = row.querySelector('[data-field="cadenceKind"]');
-    const needs = kindSelect.selectedOptions[0]?.dataset.needs || "none";
-    for (const field of row.querySelectorAll("[data-needs]")) field.hidden = field.dataset.needs !== needs;
-  }
-
-  /** Mount the single entry row of a kind (cloned from its hidden prototype); the row's own remove button is dropped. */
-  function mountEntryRow(prototypeId, entryId, defaultCategory) {
-    const row = document.querySelector(`#${prototypeId} tr`).cloneNode(true);
-    row.querySelector('[data-field="category"]').value = defaultCategory;
-    row.querySelector(".remove-appointment, .remove-task")?.closest("td").replaceChildren();
-    row.querySelector('[data-field="cadenceKind"]').addEventListener("change", () => updateAppointmentRow(row));
-    updateAppointmentRow(row);
-    document.getElementById(entryId).replaceChildren(row);
-    return row;
-  }
-
-  function entryRow(entryId) {
-    return document.querySelector(`#${entryId} tr`);
-  }
-
-  function readCadence(row) {
-    const kind = row.querySelector('[data-field="cadenceKind"]').value;
-    const cadence = { kind };
-    if (kind === "every-other-week") cadence.firstDate = row.querySelector('[data-field="firstDate"]').value || localTodayIsoDate();
-    if (kind === "monthly-nth-weekday") cadence.nth = Number(row.querySelector('[data-field="nth"]').value);
-    if (kind === "monthly-date") cadence.dayOfMonth = Number(row.querySelector('[data-field="dayOfMonth"]').value) || 1;
-    if (kind === "one-off") cadence.date = row.querySelector('[data-field="date"]').value || localTodayIsoDate();
-    return cadence;
-  }
-
-  function readEntryCommon(row) {
-    return {
-      title: row.querySelector('[data-field="title"]').value.trim(),
-      weekdays: [...row.querySelectorAll('[data-field="weekday"]:checked')].map((box) => box.value),
-      cadence: readCadence(row),
-      durationMinutes: Number(row.querySelector('[data-field="durationMinutes"]').value) || 0,
-      category: row.querySelector('[data-field="category"]').value,
-    };
-  }
-
-  function readAppointmentEntry() {
-    const row = entryRow("appointmentEntry");
-    const { title, weekdays, cadence, durationMinutes, category } = readEntryCommon(row);
-    return { title, weekdays, start: row.querySelector('[data-field="start"]').value || "16:00", durationMinutes, category, cadence };
-  }
-
-  function readTaskEntry() {
-    const row = entryRow("taskEntry");
-    return { ...readEntryCommon(row), timeOfDay: row.querySelector('[data-field="timeOfDay"]').value };
-  }
-
-  /** After a commit: clear what identifies the item, keep the rest (people add several alike in a row). */
-  function resetEntry(row) {
-    row.querySelector('[data-field="title"]').value = "";
-    for (const box of row.querySelectorAll('[data-field="weekday"]')) box.checked = false;
-    row.querySelector('[data-field="title"]').focus();
-  }
-
-  function commitEntry(kind) {
-    const isCommitment = kind === "commitments";
-    const record = isCommitment ? readAppointmentEntry() : readTaskEntry();
-    const status = document.getElementById(isCommitment ? "appointmentEntryStatus" : "taskEntryStatus");
-    if (!record.title) { status.textContent = "Give it a name first."; return; }
-    const problem = isCommitment ? standingAppointmentProblem(record, bundle.categories.order, weekdayIds()) : taskProblem(record, bundle.categories.order, weekdayIds());
-    if (problem) { status.textContent = `${problem[0].toUpperCase()}${problem.slice(1)}.`; return; }
-    status.textContent = "";
-    (isCommitment ? commitments : tasks).push(record);
-    renderCommittedList(kind);
-    resetEntry(entryRow(isCommitment ? "appointmentEntry" : "taskEntry"));
-    form.dispatchEvent(new Event("input"));
-  }
-
-  /** One line per committed item; Edit shows a remove button on each (never inline editing — remove and re-add). */
-  function renderCommittedList(kind) {
-    const isCommitment = kind === "commitments";
-    const container = document.getElementById(isCommitment ? "appointmentList" : "taskList");
-    const items = isCommitment ? commitments : tasks;
-    container.replaceChildren();
-    if (!items.length) {
-      container.appendChild(element("p", "muted committed-empty", isCommitment ? "No commitments yet." : "No tasks yet."));
-      return;
-    }
-    const header = element("div", "committed-header");
-    header.appendChild(element("span", "muted", `${items.length} ${isCommitment ? "commitment" : "task"}${items.length === 1 ? "" : "s"}`));
-    const toggle = element("button", "link-button", editing[kind] ? "Done" : "Edit");
-    toggle.type = "button";
-    toggle.addEventListener("click", () => { editing[kind] = !editing[kind]; renderCommittedList(kind); });
-    header.appendChild(toggle);
-    container.appendChild(header);
-    const list = element("ul", `committed-items${editing[kind] ? " editing" : ""}`);
-    items.forEach((item, index) => {
-      const line = element("li");
-      const when = isCommitment ? formatClockTime(item.start) : item.timeOfDay;
-      const parts = [describeCadence(item.cadence, item.weekdays), when, item.durationMinutes ? describeDuration(item.durationMinutes) : "", categoryLabel(item.category)].filter(Boolean);
-      line.appendChild(element("strong", null, item.title));
-      line.appendChild(document.createTextNode(` · ${parts.join(" · ")}`));
-      if (editing[kind]) {
-        const remove = element("button", "remove-committed", "×");
-        remove.type = "button";
-        remove.setAttribute("aria-label", `remove ${item.title}`);
-        remove.addEventListener("click", () => { items.splice(index, 1); renderCommittedList(kind); form.dispatchEvent(new Event("input")); });
-        line.appendChild(remove);
-      }
-      list.appendChild(line);
-    });
-    container.appendChild(list);
-  }
-
-  function readAppointments() {
-    return commitments.map((item) => ({ ...item, weekdays: [...item.weekdays], cadence: { ...item.cadence } }));
-  }
-
-  function readTasks() {
-    return tasks.map((item) => ({ ...item, weekdays: [...item.weekdays], cadence: { ...item.cadence } }));
-  }
-
-  function weekdayIds() {
-    return bundle.questionnaire.options.weekdays.map((weekday) => weekday.id);
+  /** Startup Q2: the commitments and tasks this profile has. They are added on the Build page and by an import
+   *  applied on the Assistant page; this page only counts them and carries them through every save. */
+  function showBuildCounts(answers) {
+    const commitments = answers.standingAppointments?.length ?? 0;
+    const tasks = answers.tasks?.length ?? 0;
+    document.getElementById("buildCounts").textContent = commitments || tasks
+      ? `This profile has ${commitments} commitment${commitments === 1 ? "" : "s"} and ${tasks} task${tasks === 1 ? "" : "s"}.`
+      : "This profile has no commitments or tasks yet.";
   }
 
   /** Startup Q2: what the Assistant page applied (the import document is uploaded there, not here). */
@@ -865,30 +684,31 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     details.open = false; // collapsed by default; the person opens it to read the assistant's review
     details.classList.toggle("empty", !appliedImport);
     if (appliedImport) {
-      status.textContent = `Applied from your assistant${appliedImport.source?.kind ? ` (${appliedImport.source.kind})` : ""}. Its commitments and tasks are in the lists below; any focus grid and fixed activities come with your answers.`;
+      status.textContent = `Applied from your assistant${appliedImport.source?.kind ? ` (${appliedImport.source.kind})` : ""}. Its commitments and tasks are in this profile — they are listed on the Build page; any focus grid and fixed activities come with your answers.`;
       forget.hidden = false;
     } else {
       status.textContent = "Nothing applied from your assistant yet.";
       forget.hidden = true;
     }
-    // Only what the lists below cannot show: what the assistant skipped, its review notes, parse problems.
+    // Only what the Build page's lists cannot show: what the assistant skipped, its review notes, parse problems.
     renderImportReview(document.getElementById("importReview"), appliedImport, bundle.categories, [], { listApplied: false });
   }
 
-  /** ForkKnife's keys (meals, menu, preferences) as stored for this profile *right now* — read at save time, never
-   *  from a load-time snapshot, so a Save here never overwrites a newer ForkKnife save (docs/app.md). */
-  function storedForkknifeAnswers() {
+  /** The keys other pages own — ForkKnife's (meals, menu, preferences) and the Build page's (the menu, the
+   *  commitments and the tasks) — as stored for this profile *right now*: read at save time, never from a
+   *  load-time snapshot, so a Save here never overwrites a newer save made elsewhere (docs/app.md). */
+  function storedAnswersOwnedElsewhere() {
     const stored = loadSettings();
     stored.activeWeightsId = settings.activeWeightsId;
-    return pickAnswers(activeWeights(stored)?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories), FORKKNIFE_ANSWER_KEYS);
+    return pickAnswers(activeWeights(stored)?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories), NOT_FORTKNIGHT_QUESTIONNAIRE_KEYS);
   }
 
-  /** The whole answers object: this page's questions over ForkKnife's stored keys. */
+  /** The whole answers object: this page's questions over the keys the other pages own. */
   function readAnswers() {
-    return { ...storedForkknifeAnswers(), ...readOwnAnswers() };
+    return { ...storedAnswersOwnedElsewhere(), ...readOwnAnswers() };
   }
 
-  /** The keys this page owns (everything but ForkKnife's). */
+  /** The keys this page owns (everything but ForkKnife's and the Build page's). */
   function readOwnAnswers() {
     const subjectTime = {};
     for (const row of subjectRows()) {
@@ -914,8 +734,6 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       wakingWindow: { start: wakingClock(Number(form.wakingStart.value)), end: wakingClock(Number(form.wakingEnd.value)) },
       yearSplit: { scheme: form.querySelector('input[name="yearScheme"]:checked')?.value || "custom", sectionLabel: form.sectionLabel.value.trim() || "season", sections: readSections() },
       weekStart: currentWeekStart(),
-      standingAppointments: readAppointments(),
-      tasks: readTasks(),
       appointmentWeekdays: checkedValues("appointmentWeekdays"),
       practices: checkedValues("practices"),
       agendaScope: form.querySelector('input[name="agendaScope"]:checked')?.value || DEFAULT_AGENDA_SCOPE,
@@ -931,9 +749,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     ownBlockFocusGrid = answers.blockFocusGrid && Object.keys(answers.blockFocusGrid).length ? answers.blockFocusGrid : null;
     importJsonText = answers.startup?.importJson || "";
     showAppliedImport();
-    tasks = (answers.tasks || []).map((task) => JSON.parse(JSON.stringify(task)));
-    editing.tasks = false;
-    renderCommittedList("tasks");
+    showBuildCounts(answers);
     setChecked("agendaScope", [answers.agendaScope || DEFAULT_AGENDA_SCOPE]);
     setChecked("restDays", answers.restDays || []);
     setChecked("energyPeak", [answers.energyPeak || DEFAULT_ENERGY_PEAK]);
@@ -958,9 +774,6 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     setChecked("sentiment-enjoy", Object.keys(sentiment).filter((key) => sentiment[key] === "enjoy"));
     setChecked("weekStart", [answers.weekStart || DEFAULT_WEEK_START]);
     showYearSplit(hydratePresetSections(answers.yearSplit || yearSplitForScheme("quarters")));
-    commitments = (answers.standingAppointments || []).map((appointment) => JSON.parse(JSON.stringify(appointment)));
-    editing.commitments = false;
-    renderCommittedList("commitments");
     setChecked("appointmentWeekdays", answers.appointmentWeekdays || []);
     setChecked("practices", answers.practices || []);
     showWakingWindow(answers.wakingWindow ?? bundle.questionnaire.wakingWindow.default);
@@ -1077,12 +890,9 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     });
     document.getElementById("addSectionButton").addEventListener("click", () => { addSectionRow(); form.dispatchEvent(new Event("input")); });
     form.sectionLabel.addEventListener("input", updateSectionCount);
-    mountEntryRow("appointmentPrototype", "appointmentEntry", "health");
-    mountEntryRow("taskPrototype", "taskEntry", "operations");
-    document.getElementById("addAppointmentButton").addEventListener("click", () => commitEntry("commitments"));
-    document.getElementById("addTaskButton").addEventListener("click", () => commitEntry("tasks"));
     document.getElementById("forgetImportButton").addEventListener("click", () => {
-      // Drops the document (its tasks, focus grid and anchors); commitments it added stay as rows until removed by hand.
+      // Drops the document (its tasks, focus grid and anchors); the commitments and tasks it added stay in the
+      // profile until removed on the Build page.
       appliedImport = null;
       importJsonText = "";
       showAppliedImport();

@@ -1,4 +1,4 @@
-// ForkKnife page helpers shared by its Overview, Questionnaire and Assistant pages (docs/meal-plan.md): the active
+// ForkKnife page helpers shared by its Overview, Spoon Feed and Assistant pages (docs/meal-plan.md): the active
 // profile's meals + menu, the next date of every day key (for Create tasks), and the meal-plan template.
 import { loadSettings } from "./shared/user-settings.js";
 import { activeWeights, defaultAnswers, mealsWithDefaults, personDayKeyResolver } from "./shared/weights-rules.js";

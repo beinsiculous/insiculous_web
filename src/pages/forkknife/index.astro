@@ -8,12 +8,12 @@ import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
 
 // ForkKnife's Overview (docs/meal-plan.md): the fortnight menu as a 14-day grid — one line per meal per day, from the
 // active profile's meal plan — with the coverage per meal, and the meal-prep and cooking tasks the menu implies
-// (an import document to paste into the Assistant page, step 2). The menu itself is edited on the Questionnaire.
+// (an import document to paste into the Assistant page, step 2). The menu itself is built on the Spoon Feed page.
 ---
 <FaceLayout title="Overview" face="forkknife">
   <section class="panel">
     <h1>Overview</h1>
-    <p class="muted">Your fortnight menu: which dish is which meal on each day (leftovers marked). Edit the meals and dishes on the <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a>, or have your assistant draft the menu on the <a href={facePath("forkknife", "assistant/")}>Assistant page</a>. Each day links to its FortKnight day page.</p>
+    <p class="muted">Your fortnight menu: which dish is which meal on each day (leftovers marked). Add dishes on <a href={facePath("forkknife", "spoon-feed/")}>Spoon Feed</a>, or have your assistant draft the whole menu on the <a href={facePath("forkknife", "assistant/")}>Assistant page</a>. Each day links to its FortKnight day page.</p>
     <p class="muted" id="menuStatus"></p>
     <ul class="proposal-reasons" id="coverageLines"></ul>
     <noscript><p class="muted">This page needs JavaScript to show your menu.</p></noscript>
@@ -111,7 +111,7 @@ import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
     elements.copyTasksButton.disabled = elements.downloadTasksButton.disabled = !items.length;
     elements.tasksSummary.textContent = document_.tasks.length
       ? `${document_.tasks.length} task${document_.tasks.length === 1 ? "" : "s"} from ${items.length} menu item${items.length === 1 ? "" : "s"}, every other week from the next date of each day. Copy or download the import file, then paste it into step 2 of the Assistant page and Apply. They land in your profile's tasks and show on your day pages.`
-      : `No tasks yet: ${items.length ? "none of your meals need prepping or cooking — set that on the Questionnaire" : "add dishes to the menu on the Questionnaire first"}.`;
+      : `No tasks yet: ${items.length ? "none of your meals need prepping or cooking — set that on the Questionnaire" : "add dishes to the menu on Spoon Feed first"}.`;
     elements.tasksReview.replaceChildren(...document_.review.map((line) => element("li", null, line)));
   }
 
