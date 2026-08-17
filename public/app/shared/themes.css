@@ -1,7 +1,7 @@
 /* One skin per face, so the two read as different websites (the third, the Be Insiculous studio
    site they live inside, has its own layout and never loads this file):
      fort-knight — the treehouse and the knight's watch; Trebuchet MS, planks, ember amber.
-     fork-knife  — silverware in daylight; a light, near-monochrome product page, sans-serif.
+     fork-knife  — the butcher's block; a dark flat-lay, the content on the kraft paper, sans-serif.
    Canonical here; the site mirrors it to public/app/shared/. Loaded after the app chrome CSS
    (faces.css), which owns the base :root palette. data-theme comes from the page's face
    (FACES[face].theme in src/lib/faces.js), set by the layout's boot script before first paint. */
@@ -98,29 +98,30 @@
 }
 [data-theme="fort-knight"] .allocation-bar, [data-theme="fort-knight"] .block-bar { border: 1px solid var(--line); }
 
-/* ==== fork knife: silverware in daylight — a light, near-monochrome product page ==== */
-/* The photograph (app/images/fork-knife.jpg: a knife and fork on a white surface, absolutvision on
-   Unsplash) is high-key, so the skin follows it: white ground, ink-black type, hairline rules, and the
-   silverware sitting large to one side as the page's only atmosphere — the way a hero object floats
-   beside the copy on a product page. Nothing on the page is a warm or brand colour; the accent is the
-   ink itself. */
-:root[data-theme="fork-knife"] { color-scheme: light; }
+/* ==== fork knife: the butcher's block — a dark flat-lay, the content sitting on the paper ==== */
+/* The photograph (app/images/fork-knife.jpg: cleaver, carving fork, garlic and herbs around a board,
+   Sergey Kotenev on Unsplash) is dark and warm, with a crumpled sheet of kraft paper dead centre — the
+   photographer's own blank space. The skin follows it: near-black ground, warm off-white type,
+   frosted DARK glass for the panels, and the content column placed on the paper, between the whole
+   garlic bulb on the left and the cleaver on the right. Serious, sans-serif, no ornament; the accent
+   is the ink itself, as on a product page. */
+:root[data-theme="fork-knife"] { color-scheme: dark; }
 
 :root[data-theme="fork-knife"] {
-  --background: #f4f4f5;
-  --panel: rgba(255, 255, 255, 0.55);
-  --panel-soft: rgba(255, 255, 255, 0.5);
-  --ink: #111113;
-  --muted: #6b6b70;
-  --line: #e2e2e6;
-  --accent: #111113;
-  --on-accent: #ffffff;
-  --flexible: #ececef;
-  --shadow: 0 1px 2px rgba(17, 17, 19, 0.06), 0 8px 24px rgba(17, 17, 19, 0.08);
-  /* The seven category colours keep their hues (a person switching faces still reads them) but are
-     pulled toward steel so they sit quietly on white under white chip text. */
-  --meals: #6f747c; --cleaning: #5a7080; --working: #667459; --spirituality-development: #6f667e;
-  --friends-family: #83666a; --health: #5b7770; --operations: #717174;
+  --background: #16130f;
+  --panel: rgba(22, 19, 15, 0.62);
+  --panel-soft: rgba(255, 255, 255, 0.06);
+  --ink: #f3ede4;
+  --muted: #b9b0a3;
+  --line: rgba(243, 237, 228, 0.14);
+  --accent: #f3ede4;
+  --on-accent: #16130f;
+  --flexible: rgba(255, 255, 255, 0.08);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
+  /* The seven category colours keep their hues (a person switching faces still reads them), lifted so
+     they hold up on the dark glass under white chip text. */
+  --meals: #c08b4a; --cleaning: #6f97b3; --working: #86a25f; --spirituality-development: #a48bc2;
+  --friends-family: #c47a7a; --health: #62a892; --operations: #a29a8c;
 }
 
 [data-theme="fork-knife"] body {
@@ -128,40 +129,20 @@
   color: var(--ink);
   background-color: var(--background);
 }
-/* The photograph as a hero object, the way keycaps float beside the copy on a product page: fixed
-   behind everything, NOT covering — sized to the viewport's height and pinned bottom-right so the whole
-   knife and fork sit in the right gutter, beside the content column rather than under it. The
-   photo's own ground is white, so its left edge dissolves into --background with a short gradient
-   and nothing else is needed. Missing file → the flat --background. */
+/* The photograph covers the viewport (it is a whole scene, not a hero object in a gutter), lightly
+   softened and lifted so the frosted panels stay legible; a faint vignette keeps the edges quiet.
+   Missing file → the flat --background. */
 [data-theme="fork-knife"] body::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background-color: var(--background);
   background-image:
-    linear-gradient(90deg, rgba(244, 244, 245, 0.55) 0%, rgba(244, 244, 245, 0.25) 40%, rgba(244, 244, 245, 0) 65%),
+    radial-gradient(120% 90% at 50% 45%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.45) 100%),
     url("../images/fork-knife.jpg");
-  /* Sized to the viewport's WIDTH so the whole frame — knife and fork — is in view, not just the
-     fork on the right; anchored right and a little below centre so the silverware sits across the
-     middle of the page rather than up behind the header. The gradient is gentle: the knife should
-     read through the frosted panels on the left, not be erased. */
-  background-size: 100% 100%, 92% auto;
-  background-position: left top, right 55%;
+  background-size: cover, cover;
+  background-position: center, center 42%;
   background-repeat: no-repeat;
-  /* Lifted a little and only lightly softened: the frosted panels do the real blurring wherever
-     content sits, so the silverware stays crisp in the open gutter beside the copy. The pseudo-element
-     is scaled up slightly so the blur's transparent fringe never shows at the viewport edge. */
   filter: blur(1.5px) brightness(1.1);
   transform: scale(1.02);
-}
-@media (max-width: 900px) {
-  /* A phone is too narrow for a hero to one side: the silverware peeks in behind the top and a
-     bottom-weighted gradient keeps the stacked panels legible. */
-  [data-theme="fork-knife"] body::before {
-    background-image:
-      linear-gradient(180deg, rgba(244, 244, 245, 0) 0%, rgba(244, 244, 245, 0.7) 28%, var(--background) 50%),
-      url("../images/fork-knife.jpg");
-    background-size: 100% 100%, cover;
-    background-position: left top, center 20%;
-  }
 }
 [data-theme="fork-knife"] h1, [data-theme="fork-knife"] h2 {
   font-weight: 700;
@@ -174,17 +155,19 @@
 }
 [data-theme="fork-knife"] .site-nav, [data-theme="fork-knife"] .top-bar {
   border-bottom: 1px solid var(--line);
-  background-color: rgba(255, 255, 255, 0.86);
+  background-color: rgba(22, 19, 15, 0.7);
   background-image: none;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 [data-theme="fork-knife"] .site-nav .nav-link { color: var(--muted); border-radius: 6px; }
-[data-theme="fork-knife"] .site-nav .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
+[data-theme="fork-knife"] .site-nav .nav-link:hover { color: var(--ink); background: rgba(255, 255, 255, 0.08); }
 [data-theme="fork-knife"] .site-nav .nav-link.active { color: var(--on-accent); background: var(--ink); }
-[data-theme="fork-knife"] .face-link:hover { background: var(--panel-soft); }
+[data-theme="fork-knife"] .face-link:hover { background: rgba(255, 255, 255, 0.08); }
+/* Frosted dark glass: a translucent charcoal over the blurred photograph, so the board and paper read
+   through the panels; a hair of light at the edge so the glass reads as a shape. */
 [data-theme="fork-knife"] .panel {
-  /* frosted glass: a translucent white over the blurred photograph, so the silverware reads through */
-  border: 1px solid rgba(17, 17, 19, 0.08);
+  border: 1px solid rgba(243, 237, 228, 0.12);
   border-radius: 10px;
   background-color: var(--panel);
   background-image: none;
@@ -193,11 +176,11 @@
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 [data-theme="fork-knife"] .day-card {
-  border: 1px solid rgba(17, 17, 19, 0.1);
+  border: 1px solid rgba(243, 237, 228, 0.12);
   border-radius: 8px;
   background: var(--panel-soft);
 }
-[data-theme="fork-knife"] .day-card:hover { background: rgba(255, 255, 255, 0.85); outline-color: var(--ink); }
+[data-theme="fork-knife"] .day-card:hover { background: rgba(255, 255, 255, 0.11); outline-color: var(--ink); }
 [data-theme="fork-knife"] .day-card.today { outline-color: var(--ink); }
 [data-theme="fork-knife"] .appointment-tag { background: var(--ink); color: var(--on-accent); }
 [data-theme="fork-knife"] button, [data-theme="fork-knife"] .file-button, [data-theme="fork-knife"] .button {
@@ -206,7 +189,7 @@
   font-weight: 500;
 }
 [data-theme="fork-knife"] button[type=button], [data-theme="fork-knife"] .file-button {
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--ink);
   border-color: var(--line);
 }
@@ -218,8 +201,8 @@
   border: 1px solid var(--line);
   border-radius: 6px;
 }
-/* Inputs and secondary buttons sit on the frosted panels; they keep a nearly opaque white so what
-   you type never fights the photograph behind. */
+/* Inputs and text areas sit on the frosted panels; a slightly firmer dark ground so what you type
+   never fights the photograph behind. */
 [data-theme="fork-knife"] input:not([type=checkbox]):not([type=radio]):not([type=range]),
 [data-theme="fork-knife"] select,
 [data-theme="fork-knife"] textarea,
@@ -227,5 +210,4 @@
 [data-theme="fork-knife"] .committed-items,
 [data-theme="fork-knife"] .prompt-text,
 [data-theme="fork-knife"] .paste-box textarea,
-[data-theme="fork-knife"] .retry-box .retry-text { background-color: rgba(255, 255, 255, 0.85); }
-[data-theme="fork-knife"] button[type=button], [data-theme="fork-knife"] .file-button { background: rgba(255, 255, 255, 0.85); }
+[data-theme="fork-knife"] .retry-box .retry-text { background-color: rgba(0, 0, 0, 0.35); }
