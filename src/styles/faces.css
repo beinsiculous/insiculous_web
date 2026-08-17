@@ -55,6 +55,9 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 }
 .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
 .nav-link.active { color: var(--on-accent); background: var(--accent); }
+/* Each pill carries its full label and a short one; the short one only comes out where four pills share a narrow
+   no-wrap row (ForkKnife's phone bar, below). The link's aria-label is always the full one. */
+.nav-short { display: none; }
 main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 0 auto; width: 100%; flex: 1; align-content: start; }
 .site-footer { padding: 1rem 1.25rem 2rem; text-align: center; }
 
@@ -294,7 +297,7 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 }
 /* ForkKnife's menu bar lives at the BOTTOM of the screen at every width — thumb-reach on a phone, and
    on a desktop it keeps the top of the page for the photograph. It is the same header markup as
-   FortKnight's, reordered by CSS order: the ForkKnife brand leftmost, the three pages, then the two
+   FortKnight's, reordered by CSS order: the ForkKnife brand leftmost, the four pages, then the two
    buttons out to the other sites (💧 the studio, 🏰🛡️ FortKnight) in the far-right corner. */
 [data-theme="fork-knife"] .site-nav {
   position: fixed; top: auto; bottom: 0; left: 0; right: 0;
@@ -310,14 +313,17 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 [data-theme="fork-knife"] .site-nav .nav-profile { order: 3; margin-left: auto; width: auto; }
 /* Room at the bottom so the last panel clears the fixed bar. */
 [data-theme="fork-knife"] main { padding-bottom: 5.5rem; }
-/* Phones: five items and a wordmark do not fit 390px, so the brand shows only its 🍴 (the name stays
-   for screen readers), the pills tighten, and the profile dropdown hides — it stays reachable on the
+/* Phones: six items and a wordmark do not fit 390px, so the brand shows only its 🍴 (the name stays
+   for screen readers), the four pills tighten and wear their short labels (Menu · Spoon · Quiz · AI —
+   each link keeps its full aria-label), and the profile dropdown hides — it stays reachable on the
    Profile page. The first panel drops down so the cleaver and fork stand clear at the top. */
 @media (max-width: 900px) {
   [data-theme="fork-knife"] .site-nav .brand { margin-right: 0; font-size: 0; }
   [data-theme="fork-knife"] .site-nav .brand .logo { font-size: 1.25rem; }
   [data-theme="fork-knife"] .site-nav .nav-links { gap: 0.1rem; }
   [data-theme="fork-knife"] .site-nav .nav-link { font-size: 0.78rem; padding: 0.3rem 0.5rem; }
+  [data-theme="fork-knife"] .site-nav .nav-full { display: none; }
+  [data-theme="fork-knife"] .site-nav .nav-short { display: inline; }
   [data-theme="fork-knife"] .site-nav .face-switch { margin-left: auto; gap: 0; }
   [data-theme="fork-knife"] .site-nav .face-link { padding: 0.15rem 0.25rem; }
   [data-theme="fork-knife"] .site-nav .nav-profile { display: none; }
@@ -483,7 +489,8 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 .meal-slot-strip label { display: inline-flex; align-items: center; gap: 0.25rem; }
 .meal-entry-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-top: 0.4rem; }
 .meal-entry-row input[type=text] { flex: 1 1 12rem; min-width: 8rem; padding: 0.35rem 0.5rem; font: inherit; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
-.meal-entry-row select { padding: 0.35rem; font: inherit; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
+/* The day dropdowns size to their content: the entry row is one row (the form-wide `width: 100%` would stack it). */
+.meal-entry-row select { width: auto; max-width: 100%; padding: 0.35rem; font: inherit; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
 /* Startup 2: the committed lists under each entry row */
 .commit-row { align-items: center; margin: 0.35rem 0; }
 .committed-list { margin: 0.35rem 0 0.25rem; }
