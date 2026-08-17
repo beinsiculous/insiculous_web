@@ -12,7 +12,7 @@
   --radius: 10px;
   --shadow: 0 1px 2px rgba(35, 35, 31, 0.06), 0 4px 14px rgba(35, 35, 31, 0.06);
   /* The mouse, Fort Knight's: a large wooden arrow; a sword where a pointer would show; a shield where the
-     "no" symbol would. Fork Knife swaps in its own three at the bottom of this file. */
+     "no" symbol would. Fork Knife resets these three to the browser's own at the bottom of this file. */
   --cursor-default: url("./cursors/wooden-arrow.svg") 3 3, auto;
   --cursor-pointer: url("./cursors/sword.svg") 2 2, pointer;
   --cursor-forbidden: url("./cursors/shield.svg") 24 24, not-allowed;
@@ -269,15 +269,21 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 /* ==== fort knight: content centered between the treehouse and the campfire ==== */
 [data-theme="fort-knight"] main { max-width: 60rem; }
 
-/* ==== fork knife: a wider board, and the chalk-and-brass cursors in place of the knight's ====
-   The cursor url()s must live here rather than in themes.css: they resolve relative to this
-   file, and Vite inlines the SVGs from src/styles/cursors/. */
+/* ==== fork knife: a wider column, and the browser's own cursors ====
+   ForkKnife opts out of the custom mouse — a serious, near-monochrome page wants the native arrow,
+   hand and not-allowed. Only the three variables change; everything below that reads them
+   (html/body, the clickable list, :disabled) follows. FortKnight keeps its set above. */
 :root[data-theme="fork-knife"] {
-  --cursor-default: url("./cursors/chalk-arrow.svg") 3 3, auto;
-  --cursor-pointer: url("./cursors/fork.svg") 2 2, pointer;
-  --cursor-forbidden: url("./cursors/cloche.svg") 24 24, not-allowed;
+  --cursor-default: auto;
+  --cursor-pointer: pointer;
+  --cursor-forbidden: not-allowed;
 }
-[data-theme="fork-knife"] main { max-width: 66rem; }
+[data-theme="fork-knife"] main { max-width: 62rem; }
+/* Wide screens: the column sits left of centre so the silverware (themes.css body::before, pinned
+   bottom-right) has a real gutter to float in beside the copy instead of hiding behind it. */
+@media (min-width: 1200px) {
+  [data-theme="fork-knife"] main { margin-left: max(2rem, calc((100vw - 62rem) / 2 - 8rem)); }
+}
 
 /* Settings: the profile bar (which saved answer set is being edited) */
 .profile-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.5rem 0; }
