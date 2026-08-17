@@ -137,10 +137,14 @@
   content: ""; position: fixed; inset: 0; z-index: -1;
   background-color: var(--background);
   background-image:
-    linear-gradient(90deg, var(--background) 0%, var(--background) 42%, rgba(244, 244, 245, 0) 62%),
+    linear-gradient(90deg, rgba(244, 244, 245, 0.55) 0%, rgba(244, 244, 245, 0.25) 40%, rgba(244, 244, 245, 0) 65%),
     url("../images/fork-knife.jpg");
-  background-size: 100% 100%, auto 100%;
-  background-position: left top, right bottom;
+  /* Sized to the viewport's WIDTH so the whole frame — knife and fork — is in view, not just the
+     fork on the right; anchored right and a little below centre so the silverware sits across the
+     middle of the page rather than up behind the header. The gradient is gentle: the knife should
+     read through the frosted panels on the left, not be erased. */
+  background-size: 100% 100%, 92% auto;
+  background-position: left top, right 55%;
   background-repeat: no-repeat;
   /* Lifted a little and only lightly softened: the frosted panels do the real blurring wherever
      content sits, so the silverware stays crisp in the open gutter beside the copy. The pseudo-element
