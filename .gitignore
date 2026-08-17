@@ -19,3 +19,6 @@ review/
 # misc
 npm-debug.log*
 .DS_Store
+
+# screenshot output (scripts/screenshot-pages.mjs)
+shots/

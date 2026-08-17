@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/postbuild-check.mjs",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "sync:fortknight": "node scripts/sync-fortknight.mjs"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.5",
@@ -16,6 +17,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "playwright": "^1.55.0",
     "typescript": "^5.8.0"
   }
 }

@@ -1,0 +1,80 @@
+---
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import ApplyFromAssistant from "../../components/ApplyFromAssistant.astro";
+import { withBase } from "../../lib/paths.js";
+import { PROFILE_PATH, facePath } from "../../lib/faces.js";
+
+// ForkKnife's assistant page (docs/meal-plan.md, docs/assistant-workspace.md): step 1 hands the person a prompt built
+// from their meals and preferences (the Questionnaire) plus the meal-plan contract and template; step 2 applies what
+// the assistant returns (a meal-plan document — or any other document; the profile is shared).
+---
+<FaceLayout title="Apply from assistant" face="forkknife">
+  <section class="panel">
+    <h1>Apply from assistant</h1>
+    <p class="muted">ForkKnife has no AI of its own. Your assistant drafts the fortnight menu in <em>your</em> AI workspace, built from the files on the <a href={withBase(PROFILE_PATH)}>Profile page</a> (once a profile is saved). Two steps: get the menu from your assistant, then paste it here. Everything is applied on this device only.</p>
+
+    <div class="apply-step">
+      <h3><span class="step-number">1</span> Get the JSON from your assistant</h3>
+      <p class="muted">Send your assistant this prompt — it carries your meals and the preferences you answered on the <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a>: <button type="button" class="link-button" id="copyPromptButton">Copy the prompt</button></p>
+      <p class="prompt-text" id="mealPlanPrompt"></p>
+      <p class="muted">Upload <code>meal-plan.md</code> with it — the file below, also in the Profile page's file set. It tells the assistant the document shape and the leftovers rules. Would you rather write the menu yourself? The <button type="button" class="link-button" id="downloadTemplateButton">template</button> is the same shape with your meals filled in.</p>
+      <div class="file-list" id="mealPlanGuideRow"></div>
+    </div>
+
+    <ApplyFromAssistant face="forkknife" />
+  </section>
+</FaceLayout>
+
+<script>
+  import { buildWorkspaceDocuments, MEAL_PLAN_GUIDE_FILE_NAME, mealPlanPrompt } from "../../lib/shared/workspace-docs.js";
+  import { copyText, downloadText } from "../../lib/shared/download.js";
+  import { localTodayIsoDate } from "../../lib/shared/clock.js";
+  import { renderFileRow } from "../../lib/shared/workspace-files.js";
+  import { missingStaticTexts, staticTexts } from "../../lib/workspace-static-texts.js";
+  import { loadMealPlan, mealPlanTemplate } from "../../lib/forkknife.js";
+  import { withBase } from "../../lib/paths.js";
+
+  const guideRow = document.getElementById("mealPlanGuideRow");
+  const promptText = document.getElementById("mealPlanPrompt");
+  const copyPromptButton = document.getElementById("copyPromptButton");
+  const downloadTemplateButton = document.getElementById("downloadTemplateButton");
+  let prompt = "";
+  let template = null;
+
+  copyPromptButton.addEventListener("click", async () => {
+    if (!prompt) return;
+    try {
+      await copyText(prompt);
+      copyPromptButton.textContent = "Copied";
+      setTimeout(() => { copyPromptButton.textContent = "Copy the prompt"; }, 1500);
+    } catch (error) {
+      alert(`Copy failed: ${error.message}`);
+    }
+  });
+  downloadTemplateButton.addEventListener("click", () => {
+    if (template) downloadText("meal-plan.template.json", JSON.stringify(template, null, 2) + "\n", "application/json");
+  });
+
+  /** The prompt follows the active profile: rebuilt after an Apply or a profile switch announced by the nav. */
+  function renderPrompt(bundle) {
+    const { settings, answers, meals } = loadMealPlan(bundle);
+    prompt = mealPlanPrompt({ meals, answers, questionnaire: bundle.questionnaire });
+    promptText.textContent = prompt;
+    template = mealPlanTemplate(meals, bundle);
+    const documents = buildWorkspaceDocuments({ bundle, settings, staticTexts, todayIsoDate: localTodayIsoDate() });
+    const guide = documents.find((entry) => entry.fileName === MEAL_PLAN_GUIDE_FILE_NAME);
+    guideRow.replaceChildren(...(guide ? [renderFileRow(guide)] : []));
+    if (missingStaticTexts.includes(MEAL_PLAN_GUIDE_FILE_NAME)) guideRow.appendChild(Object.assign(document.createElement("p"), { className: "muted", textContent: `Warning: ${MEAL_PLAN_GUIDE_FILE_NAME} did not sync — run npm run dev again.` }));
+  }
+
+  try {
+    const response = await fetch(withBase("bundle.json"));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const bundle = await response.json();
+    renderPrompt(bundle);
+    document.addEventListener("fortknight:settings-saved", () => renderPrompt(bundle));
+  } catch (error) {
+    promptText.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    console.error(error);
+  }
+</script>

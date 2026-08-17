@@ -13,11 +13,15 @@ const {
   description = 'Be Insiculous — independent game studio building games and a Rust 2D engine.',
 } = Astro.props;
 
+// FortKnight and ForkKnife are the two planner faces that live on this domain under their own
+// layout and their own skin (src/layouts/FaceLayout.astro); their pages link back here.
 const nav = [
   { href: '/', label: 'Home' },
   { href: '/games/', label: 'Games' },
   { href: '/devlog/', label: 'Devlog' },
   { href: '/engine/', label: 'Engine' },
+  { href: '/fortknight/', label: 'FortKnight' },
+  { href: '/forkknife/', label: 'ForkKnife' },
 ];
 
 const currentPath = Astro.url.pathname;

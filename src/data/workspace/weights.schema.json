@@ -1,0 +1,1228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/weights.schema.json",
+  "title": "FortKnight weights",
+  "description": "The questionnaire contract: how much of the fortnight each category should receive. Produced by the questionnaire (app or scripts/questionnaire_to_weights.py) or by analyze_allocations.py from the baseline.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "baseline",
+        "questionnaire",
+        "manual"
+      ]
+    },
+    "cycleLengthDays": {
+      "type": "integer",
+      "const": 14
+    },
+    "wakingWindow": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+          "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+          "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+        },
+        "minutesPerDay": {
+          "type": "integer"
+        },
+        "minutesPerCycle": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": false,
+      "description": "The agenda's scope. Baseline: the fixed 08:00-18:00 focus window. Questionnaire profiles: the answered waking window (may wrap midnight: end < start)."
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "share": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Fraction of the focus-carrying time in one fortnight."
+          },
+          "minutesPerCycle": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "preferredBlocks": {
+            "type": "array",
+            "description": "Focus block keys ordered by preference. Baseline: early/midday/late; questionnaire profiles: keys from this file's `blocks` (validate.py checks).",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          },
+          "wantMore": {
+            "type": "boolean",
+            "description": "Derived: at least one of the category's subjects is marked as a goal (the category gets wantMoreMultiplier)."
+          },
+          "sentiment": {
+            "type": "string",
+            "enum": [
+              "struggle",
+              "neutral",
+              "enjoy"
+            ]
+          },
+          "delegable": {
+            "type": "boolean",
+            "description": "Can be handed off (delegated, deferred, paused, paid for) during an emergency or vacation."
+          },
+          "essential": {
+            "type": "boolean",
+            "description": "Must be done personally even under duress."
+          }
+        },
+        "required": [
+          "share"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "subjects": {
+      "type": "object",
+      "description": "Per-subject answers, keyed by subject id (categories.json).",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "minutesPerDay": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "additionalProperties": false
+          },
+          "peripheral": {
+            "type": "boolean",
+            "description": "Marked 'not often': excluded from shares, may still appear as a peripheral task."
+          },
+          "goal": {
+            "type": "boolean",
+            "description": "Wanted in the schedule but not (yet) done at this level; currentMinutesPerDay says where the person is today."
+          },
+          "currentMinutesPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1440,
+            "description": "Current actual minutes per day when goal is true; null otherwise."
+          }
+        },
+        "required": [
+          "minutesPerDay",
+          "peripheral"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "flexibleShare": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction not covered by category shares. Baseline (workbook) profiles: the flexible focus blocks. Questionnaire profiles: never an input — only the rounding remainder (1 when every subject is peripheral)."
+    },
+    "unscheduledBlock": {
+      "type": "object",
+      "description": "Wind-down + sleep + wake-up ritual: the complement of the answered wakingWindow (either may wrap midnight: end < start).",
+      "properties": {
+        "start": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+          "description": "24h clock, HH:MM"
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+          "description": "24h clock, HH:MM"
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1440
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "minutes"
+      ],
+      "additionalProperties": false
+    },
+    "blocks": {
+      "type": "array",
+      "description": "Proposed day split for this profile (questionnaire output): the unscheduled block plus 1-4 focus blocks, same cuts every day. Times may wrap midnight.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+            "description": "24h clock, HH:MM"
+          },
+          "end": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+            "description": "24h clock, HH:MM"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "carriesFocus": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "start",
+          "end",
+          "durationMinutes",
+          "carriesFocus"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "blockSplit": {
+      "type": "object",
+      "description": "How the blocks were chosen.",
+      "properties": {
+        "standoutCategories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "focusBlockCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "anchors": {
+          "type": "array",
+          "description": "Fixed activities (priority 1 or flexibility 'no', timed) the cuts were snapped around.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "activityId": {
+                "type": "string"
+              },
+              "dayKey": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "start": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM"
+              },
+              "end": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "block": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "activity",
+                  "import",
+                  "standing-appointment"
+                ]
+              }
+            },
+            "required": [
+              "activityId",
+              "dayKey",
+              "start",
+              "end",
+              "categories"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "agendaScope": {
+          "type": "string",
+          "enum": [
+            "subjects",
+            "categories"
+          ]
+        }
+      },
+      "required": [
+        "standoutCategories",
+        "focusBlockCount"
+      ],
+      "additionalProperties": false
+    },
+    "meals": {
+      "type": "object",
+      "description": "The person's meals: name, time-of-day slot(s), whether a menu item needs prepping / cooking and how long that takes.",
+      "properties": {
+        "perDay": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "meals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "The meal's name (Breakfast, Lunch, Dinner, Snack…); its slug keys the meal plan's items. Files derived before meals had names lack it — readers fall back to \"Meal n\"."
+              },
+              "slots": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                },
+                "minItems": 1
+              },
+              "needsPrepped": {
+                "type": "boolean",
+                "description": "A menu item of this meal needs prepping ahead (the generator proposes a prep task the day before its first serving)."
+              },
+              "needsCooked": {
+                "type": "boolean",
+                "description": "A menu item of this meal needs cooking (a cook task on its first serving)."
+              },
+              "prepMinutes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cookMinutes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "slots"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "perDay",
+        "meals"
+      ],
+      "additionalProperties": false
+    },
+    "mealPlan": {
+      "type": "object",
+      "description": "The fortnight menu built on the ForkKnife page or applied from a meal-plan document (docs/meal-plan.md): per meal, dishes with the day(s) they are eaten (the second day is leftovers).",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*--(sun|mon|tue|wed|thu|fri|sat)-[ab](--([a-z0-9]+(-[a-z0-9]+)*--)?(sun|mon|tue|wed|thu|fri|sat)-[ab])?$"
+              },
+              "meal": {
+                "type": "string",
+                "description": "Slug of the meal's name (weights.meals.meals[].name)."
+              },
+              "dish": {
+                "type": "string",
+                "minLength": 1
+              },
+              "days": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "type": "string",
+                  "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+                }
+              },
+              "leftoversMeal": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Slug of the meal that eats the leftovers when it is not the same meal (dinner -> breakfast): allowed from an afternoon/evening/late-evening meal to an early-morning/mid-morning/afternoon meal."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "meal",
+              "dish",
+              "days"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "yearSplit": {
+      "type": "object",
+      "description": "How the person splits their year: a scheme (options.yearSplitSchemes) and the sections themselves, editable — the seed for this profile's own seasons.",
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "sectionLabel": {
+          "type": "string",
+          "description": "What a section is called: season, era, term, quarter…"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "gregorianEquivalent": {
+                "type": "string"
+              },
+              "durationWeeks": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "min": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "max": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ],
+                "additionalProperties": false,
+                "description": "How long the section runs, in weeks (min = max when fixed)."
+              },
+              "start": {
+                "type": "object",
+                "properties": {
+                  "marker": {
+                    "type": "string",
+                    "enum": [
+                      "date",
+                      "rule",
+                      "holiday",
+                      "weather",
+                      "manual"
+                    ]
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "rule": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "A computable start (docs/questionnaire.md 'Section start rules'; evaluated by fk_core/dates.py start_date_for_rule and its JavaScript twin): the kind's base date for the year, + offsetDays, then snapped to a weekday or not. Kind-specific fields: fixed-date month+day; nth-weekday month+weekday+occurrence (1-4, -1 = last); solar term; new-moon index (1-13, the nth new moon of the year); easter and manual need nothing (manual reads knownStarts[year]).",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "fixed-date",
+                          "nth-weekday",
+                          "easter",
+                          "solar",
+                          "new-moon",
+                          "manual"
+                        ]
+                      },
+                      "month": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 12
+                      },
+                      "day": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 31
+                      },
+                      "weekday": {
+                        "type": "string",
+                        "enum": [
+                          "sunday",
+                          "monday",
+                          "tuesday",
+                          "wednesday",
+                          "thursday",
+                          "friday",
+                          "saturday"
+                        ]
+                      },
+                      "occurrence": {
+                        "type": "integer",
+                        "enum": [
+                          1,
+                          2,
+                          3,
+                          4,
+                          -1
+                        ]
+                      },
+                      "term": {
+                        "type": "string",
+                        "enum": [
+                          "spring-equinox",
+                          "summer-solstice",
+                          "autumn-equinox",
+                          "winter-solstice"
+                        ]
+                      },
+                      "index": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 13
+                      },
+                      "offsetDays": {
+                        "type": "integer",
+                        "minimum": -366,
+                        "maximum": 366
+                      },
+                      "snap": {
+                        "type": [
+                          "object",
+                          "null"
+                        ],
+                        "properties": {
+                          "weekday": {
+                            "type": "string",
+                            "enum": [
+                              "sunday",
+                              "monday",
+                              "tuesday",
+                              "wednesday",
+                              "thursday",
+                              "friday",
+                              "saturday"
+                            ]
+                          },
+                          "direction": {
+                            "type": "string",
+                            "enum": [
+                              "on-or-after",
+                              "on-or-before"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "weekday",
+                          "direction"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "offsetDays",
+                      "snap"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "marker"
+                ],
+                "additionalProperties": false
+              },
+              "startVariant": {
+                "type": "string",
+                "enum": [
+                  "a",
+                  "b"
+                ],
+                "description": "Which half of the fortnight the section opens on (with weekStart -> the season's startDayKey)."
+              },
+              "knownStarts": {
+                "type": "object",
+                "description": "Year -> ISO date. Read by manual rules (the typed start of that year); for computed rules a documented check value (validate.py verifies it equals the computed date).",
+                "additionalProperties": {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "start"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "scheme",
+        "sections"
+      ],
+      "additionalProperties": false
+    },
+    "weekStart": {
+      "type": "string",
+      "enum": [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ],
+      "description": "The weekday the person's week (and fortnight) starts on (Rhythm Q3); default sunday."
+    },
+    "standingAppointments": {
+      "type": "array",
+      "description": "Recurring appointments (docs/questionnaire.md); each also acts as an anchor for the block split.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "sunday",
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday"
+              ]
+            }
+          },
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "cadence": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "weekly",
+                  "every-other-week",
+                  "monthly-nth-weekday",
+                  "monthly-date",
+                  "one-off"
+                ]
+              },
+              "firstDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "nth": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4
+              },
+              "dayOfMonth": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 31
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "title",
+          "weekdays",
+          "start",
+          "durationMinutes",
+          "category",
+          "cadence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "description": "Questionnaire Startup 2: recurring things to do with a day but no fixed clock time (chores, errands), typed by hand or merged from an applied import document. Shown on the day pages by their time-of-day word; never anchors.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "sunday",
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday"
+              ]
+            }
+          },
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "cadence": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "weekly",
+                  "every-other-week",
+                  "monthly-nth-weekday",
+                  "monthly-date",
+                  "one-off"
+                ]
+              },
+              "firstDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "nth": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4
+              },
+              "dayOfMonth": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 31
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "timeOfDay": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "morning",
+              "midday",
+              "afternoon",
+              "evening",
+              "night",
+              "anytime",
+              null
+            ],
+            "description": "Where in the day it goes when it has no start (docs/importers.md TIME_OF_DAY_MINUTES); null when `start` is set."
+          },
+          "from": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "weekdays",
+          "durationMinutes",
+          "category",
+          "cadence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "appointmentWeekdays": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday"
+        ]
+      }
+    },
+    "restDays": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "sunday",
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday"
+        ]
+      },
+      "description": "Questionnaire Your week 2: the person's days off (weekday ids); empty = every day alike. Recorded for an assistant/generator, no share effect."
+    },
+    "practices": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      }
+    },
+    "blockFocusGrid": {
+      "type": "object",
+      "description": "Fully-resolved focus per day and focus block. Baseline: the workbook's 14 x early/midday/late cells. Questionnaire profiles: the person's own grid (answers.blockFocusGrid, an adopted proposal) or else the applied import document's grid, restricted to this profile's focus blocks ({} when neither exists).",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "enum": [
+            "meals",
+            "cleaning",
+            "working",
+            "spirituality-development",
+            "friends-family",
+            "health",
+            "operations",
+            "flexible"
+          ]
+        }
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "description": "The generator's proposed grid for this profile (docs/generator.md): generated from the weights above (shares, anchors, rest days, preferred blocks, energy peak) and the season it was made for; `diff` compares it with `blockFocusGrid`.",
+      "properties": {
+        "blockFocusGrid": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "meals",
+                "cleaning",
+                "working",
+                "spirituality-development",
+                "friends-family",
+                "health",
+                "operations",
+                "flexible"
+              ]
+            }
+          }
+        },
+        "seasonId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The season/section whose focus list nudged the proposal (null: none)."
+        },
+        "reasons": {
+          "type": "object",
+          "description": "Per cell, why that focus: rest day | anchor: <id> covers NN% | behind share (delivered/target min) | over share, plus tags (preferred block, energy peak, season focus #n, alternates with <dayKey>).",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "diff": {
+          "type": "object",
+          "properties": {
+            "changes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "dayKey": {
+                    "type": "string"
+                  },
+                  "block": {
+                    "type": "string"
+                  },
+                  "imported": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "proposed": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "dayKey",
+                  "block",
+                  "imported",
+                  "proposed"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "counts": {
+              "type": "object",
+              "properties": {
+                "same": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "changed": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "added": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "removed": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "same",
+                "changed",
+                "added",
+                "removed"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "changes",
+            "counts"
+          ],
+          "additionalProperties": false
+        },
+        "activities": {
+          "type": "array",
+          "description": "Activities the generator proposes inside the proposed grid's cells (docs/generator.md): subject sessions sized from the Focus-1 hours, one daily activity per practice, one per meal at its slot (titled with the ForkKnife menu's dish; the menu's prep and cook tasks arrive as tasks, not proposals). Absent on files derived before the activities half shipped; the app regenerates them live.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^proposed--[a-z0-9-]+$"
+              },
+              "title": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "session",
+                  "practice",
+                  "meal"
+                ]
+              },
+              "dayKey": {
+                "type": "string",
+                "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+              },
+              "block": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "categories": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "meals",
+                    "cleaning",
+                    "working",
+                    "spirituality-development",
+                    "friends-family",
+                    "health",
+                    "operations"
+                  ]
+                }
+              },
+              "subjectId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "timing": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "estimatedStart": {
+                    "type": "string",
+                    "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                  },
+                  "estimatedEnd": {
+                    "type": "string",
+                    "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+                  },
+                  "durationMinutes": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "estimatedStart",
+                  "estimatedEnd",
+                  "durationMinutes"
+                ],
+                "additionalProperties": false
+              },
+              "minutes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "reason": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "proposed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "kind",
+              "dayKey",
+              "block",
+              "priority",
+              "categories",
+              "subjectId",
+              "timing",
+              "minutes",
+              "reason",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "placedMinutes": {
+          "type": "object",
+          "description": "Per subject: the minutes the sessions aimed for and the minutes placed.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "target": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "placed": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "target",
+              "placed"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "blockFocusGrid",
+        "seasonId",
+        "reasons",
+        "warnings",
+        "diff"
+      ],
+      "additionalProperties": false
+    },
+    "questionnaire": {
+      "type": "object",
+      "description": "The raw answers this file was derived from (kept beside the structured fields, like `raw` elsewhere).",
+      "properties": {
+        "version": {
+          "type": "integer"
+        },
+        "answeredAt": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "answers": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "answers"
+      ],
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "agendaScope": {
+      "type": "string",
+      "enum": [
+        "subjects",
+        "categories"
+      ],
+      "description": "Questionnaire Focus 6: 'categories' adds one wide-scope focus block to the day."
+    },
+    "energyPeak": {
+      "type": "string",
+      "enum": [
+        "morning",
+        "midday",
+        "evening",
+        "varies"
+      ],
+      "description": "Questionnaire About you 1: when in the day the person is sharpest (ids in options.energyPeaks). Recorded for an assistant/generator, no share effect."
+    },
+    "context": {
+      "type": "string",
+      "description": "Questionnaire About you 2: free-text context for an assistant building the agenda. No share effect."
+    },
+    "appointmentBlocks": {
+      "type": "object",
+      "description": "From the applied import document: the block each day key opens for appointments (workbook: week 1 midday, week 2 early).",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "source",
+    "cycleLengthDays",
+    "categories"
+  ],
+  "additionalProperties": false
+}

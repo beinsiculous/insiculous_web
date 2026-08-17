@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- ForkKnife's "not allowed", where FortKnight shows a shield: the cloche is down, the dish is closed. -->
+  <defs>
+    <linearGradient id="dome" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0dc9a"/>
+      <stop offset="0.55" stop-color="#c9a227"/>
+      <stop offset="1" stop-color="#7d6210"/>
+    </linearGradient>
+  </defs>
+  <path d="M7 34 C7 20 14 12 24 12 C34 12 41 20 41 34 Z" fill="url(#dome)" stroke="#2b2a1c" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M13 30 C13.5 21 18 16.5 23 16" fill="none" stroke="#fdf3cf" stroke-width="1.6" opacity="0.65" stroke-linecap="round"/>
+  <rect x="4" y="33.5" width="40" height="5" rx="2.5" fill="url(#dome)" stroke="#2b2a1c" stroke-width="1.6"/>
+  <rect x="21.5" y="6" width="5" height="6" rx="1.5" fill="url(#dome)" stroke="#2b2a1c" stroke-width="1.4"/>
+  <circle cx="24" cy="5" r="3.4" fill="url(#dome)" stroke="#2b2a1c" stroke-width="1.4"/>
+</svg>

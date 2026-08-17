@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/user-settings.schema.json",
+  "title": "FortKnight user settings",
+  "description": "On-device only. The questionnaire answers are the settings (inside each profile under `weightsProfiles`; `activeWeightsId` names the one in use); device extras layer on top of the built bundle. Never sent anywhere — the person may hand the file to their own AI workspace (docs/assistant-workspace.md).",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 3
+    },
+    "theme": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Vestigial: each page's skin comes from its face (FACES[face].theme), not from stored settings. Kept so older stored/exported settings still import cleanly; the value is ignored."
+    },
+    "epochOverride": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "dayKey": {
+          "type": "string",
+          "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+        }
+      },
+      "required": [
+        "date",
+        "dayKey"
+      ],
+      "additionalProperties": false
+    },
+    "timezone": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "activeSeasonId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "weightsProfiles": {
+      "type": "object",
+      "description": "Named weights profiles this device keeps, keyed by weights id (weights.schema.json; each profile's id equals its key and the questionnaire answers ride inside at questionnaire.answers). Derived on device from the answers whenever Settings are saved. A profile that was created but never saved has no entry yet.",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "activeWeightsId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "The profile in use (default username); FortKnight's Overview, the assistant workspace and Apply from assistant all read and write this one."
+    },
+    "hidden": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "overrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "added": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dayKey": {
+            "type": "string",
+            "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+          },
+          "block": {
+            "type": "string",
+            "enum": [
+              "too-early",
+              "early",
+              "midday",
+              "late",
+              "too-late"
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "1 = fixed/most important, 5 = optional outing"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "meals",
+                "cleaning",
+                "working",
+                "spirituality-development",
+                "friends-family",
+                "health",
+                "operations"
+              ]
+            },
+            "minItems": 1
+          },
+          "flexibility": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "no",
+              "some",
+              "yes",
+              null
+            ]
+          },
+          "timing": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "estimatedStart": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "travelPrepComplete": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "timeStart": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "timeFinished": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "estimatedEnd": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "estimatedEndSource": {
+                "type": "string",
+                "enum": [
+                  "formula",
+                  "literal"
+                ]
+              },
+              "durationMinutes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "prepMinutes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "estimatedStart",
+              "travelPrepComplete",
+              "timeStart",
+              "timeFinished",
+              "estimatedEnd",
+              "durationMinutes",
+              "prepMinutes"
+            ],
+            "additionalProperties": false
+          },
+          "detail": {
+            "type": "object",
+            "properties": {
+              "raw": {
+                "type": "string"
+              },
+              "kind": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "meal-prep",
+                  "url",
+                  "text",
+                  null
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "mealRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slot": {
+                      "type": "string",
+                      "enum": [
+                        "brunch",
+                        "snack",
+                        "dinner"
+                      ]
+                    },
+                    "mealKey": {
+                      "type": "string"
+                    },
+                    "days": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "slot",
+                    "mealKey",
+                    "days"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "raw",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "raw": {
+            "type": "object",
+            "description": "Original spreadsheet cell text, keyed by column header. Never edited."
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "dayKey",
+          "block",
+          "priority",
+          "categories",
+          "flexibility",
+          "timing",
+          "detail"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "dayNotes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion"
+  ],
+  "additionalProperties": false
+}

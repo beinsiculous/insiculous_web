@@ -1,0 +1,463 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/import.schema.json",
+  "title": "FortKnight import document",
+  "description": "What an importer — the person's own assistant reading a calendar, planner photo or export; the future Import page; scripts/build.py for a data set — hands the questionnaire (docs/importers.md). Version 2 is written for the person to read: `commitments` (repeats/start/lasts in words), untimed `tasks`, what was `skipped` and why, and a `review` summary; the app normalizes it on read. Version 1's machine sections (standingAppointments, fixedActivities, blockFocusGrid, appointmentBlocks, blocks, meals) stay valid in either version: the Assistant page merges standing appointments (and version-2 commitments) into the person's commitments (Startup 2), fixedActivities anchor the block split, blockFocusGrid (restricted to the profile's focus blocks) is what FortKnight's Overview shows, tasks land on the day pages; meals is reserved; mealPlan is the ForkKnife menu (docs/meal-plan.md).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ],
+      "description": "1 = machine sections only; 2 = readable commitments/tasks/skipped/review (+ the machine sections)."
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "text",
+            "photo",
+            "xlsx",
+            "ics",
+            "google-calendar",
+            "forkknife",
+            "other"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "importedAt": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "commitments": {
+      "type": "array",
+      "description": "Version 2: the person's timed commitments — appointments, lessons, work or school hours, meetings — one readable record each; merged into the person's commitments (Startup 2) on Apply.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repeats": {
+            "type": "string",
+            "description": "\"every week\" · \"every other week from YYYY-MM-DD\" · \"monthly on the 2nd tuesday\" (1st-4th or last) · \"monthly on day 15\" · \"once on YYYY-MM-DD\""
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "A weekday name (\"monday\"), a 3-letter form (\"Mon\") or a plural (\"Mondays\") — case-insensitive."
+            },
+            "description": "Required for \"every week\" and \"every other week\" (name the weekday even though the every-other-week date implies it); not needed for \"monthly on the Nth <weekday>\" (the phrase names it), \"monthly on day N\" or \"once on <date>\"."
+          },
+          "start": {
+            "type": "string",
+            "description": "Optional for a task: a clock time when it has one (\"7:00 PM\"); otherwise use `when`."
+          },
+          "lasts": {
+            "type": [
+              "string",
+              "integer"
+            ],
+            "description": "Optional for a task: \"10 min\", \"1 h\" or integer minutes (default 0)."
+          },
+          "category": {
+            "type": "string",
+            "description": "A categories.json key (\"friends-family\") or label (\"Friends & Family\")."
+          },
+          "from": {
+            "type": "string",
+            "description": "Where it came from, for the reader: the source event's name, how many occurrences were seen, what was guessed."
+          }
+        },
+        "required": [
+          "title",
+          "repeats",
+          "start",
+          "lasts",
+          "category"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "description": "Version 2: recurring things to do that have a day but no fixed clock time (chores, errands); shown on the day pages, never anchors.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repeats": {
+            "type": "string",
+            "description": "\"every week\" · \"every other week from YYYY-MM-DD\" · \"monthly on the 2nd tuesday\" (1st-4th or last) · \"monthly on day 15\" · \"once on YYYY-MM-DD\""
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "A weekday name (\"monday\"), a 3-letter form (\"Mon\") or a plural (\"Mondays\") — case-insensitive."
+            },
+            "description": "Required for \"every week\" and \"every other week\" (name the weekday even though the every-other-week date implies it); not needed for \"monthly on the Nth <weekday>\" (the phrase names it), \"monthly on day N\" or \"once on <date>\"."
+          },
+          "start": {
+            "type": "string",
+            "description": "Optional for a task: a clock time when it has one (\"7:00 PM\"); otherwise use `when`."
+          },
+          "lasts": {
+            "type": [
+              "string",
+              "integer"
+            ],
+            "description": "Optional for a task: \"10 min\", \"1 h\" or integer minutes (default 0)."
+          },
+          "category": {
+            "type": "string",
+            "description": "A categories.json key (\"friends-family\") or label (\"Friends & Family\")."
+          },
+          "from": {
+            "type": "string",
+            "description": "Where it came from, for the reader: the source event's name, how many occurrences were seen, what was guessed."
+          },
+          "when": {
+            "type": "string",
+            "enum": [
+              "morning",
+              "midday",
+              "afternoon",
+              "evening",
+              "night",
+              "anytime"
+            ],
+            "description": "Time of day for a task without a clock time; the day page places it in the block that word falls in (anytime = listed without a block)."
+          }
+        },
+        "required": [
+          "title",
+          "repeats",
+          "category"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "skipped": {
+      "type": "array",
+      "description": "Version 2: what the importer saw and did NOT bring in, each with the reason — so the person can judge completeness.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "why"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "review": {
+      "type": "array",
+      "description": "Version 2: the importer's summary for the reader — what was scanned (source, date range), counts found/imported/skipped, every guess made.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standingAppointments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "sunday",
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday"
+              ]
+            }
+          },
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "cadence": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "weekly",
+                  "every-other-week",
+                  "monthly-nth-weekday",
+                  "monthly-date",
+                  "one-off"
+                ]
+              },
+              "firstDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "nth": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 4
+              },
+              "dayOfMonth": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 31
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "title",
+          "weekdays",
+          "start",
+          "durationMinutes",
+          "category",
+          "cadence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "fixedActivities": {
+      "type": "array",
+      "description": "Fixed activities in the shape of data/activities.json (id, title, dayKey, block, priority, categories, flexibility, timing). Timed ones with priority 1 or flexibility 'no' anchor the block split.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dayKey": {
+            "type": "string"
+          },
+          "block": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "priority": {
+            "type": [
+              "integer",
+              "number",
+              "null"
+            ]
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "flexibility": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timing": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "dayKey",
+          "categories"
+        ]
+      }
+    },
+    "meals": {
+      "type": "array",
+      "description": "Reserved: menu meals in the shape of data/menus/*.json.",
+      "items": {
+        "type": "object"
+      }
+    },
+    "mealPlan": {
+      "type": "object",
+      "description": "The fortnight menu (docs/meal-plan.md), as the ForkKnife page writes it into the tasks document it creates: per meal, dishes with the day(s) they are eaten (the second day is leftovers). Applied into the profile's meal plan (merged by id) alongside the tasks.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "meal": {
+                "type": "string"
+              },
+              "dish": {
+                "type": "string",
+                "minLength": 1
+              },
+              "days": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "leftoversMeal": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "The meal that eats the leftovers when not the same meal (name or slug)."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "meal",
+              "dish",
+              "days"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "description": "The source system's day layout (informational; the same item shape as a weights file's blocks).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+            "description": "24h clock, HH:MM"
+          },
+          "end": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+            "description": "24h clock, HH:MM"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "carriesFocus": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "start",
+          "end",
+          "durationMinutes",
+          "carriesFocus"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "blockFocusGrid": {
+      "type": "object",
+      "description": "The source system's focus per day and block. Keys are day keys (sun-a … sat-b); values map a focus block key to its focus.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "enum": [
+            "meals",
+            "cleaning",
+            "working",
+            "spirituality-development",
+            "friends-family",
+            "health",
+            "operations",
+            "flexible"
+          ]
+        }
+      }
+    },
+    "appointmentBlocks": {
+      "type": "object",
+      "description": "The block each day key opens for appointments in the source system.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "source"
+  ],
+  "additionalProperties": false
+}

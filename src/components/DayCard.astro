@@ -1,0 +1,27 @@
+---
+// Server side this card carries the bundle's days (day keys; a focus only when the data set has one, e.g. the
+// workbook example build) as no-JS / pre-hydration fallback content;
+// on the client index.astro's renderCards() replaces the focus line and chips with the person's
+// settings (their blocks, the block focus they imported), so the fallback is never what a person
+// with a working script sees.
+import { categoryLabel } from "../lib/labels.js";
+import { facePath } from "../lib/faces.js";
+
+const { dayKey, day } = Astro.props;
+const FALLBACK_FOCUS_BLOCK_KEYS = ["early", "midday", "late"];
+---
+<a class="day-card" href={facePath("fortknight", `days/${dayKey}/`)} data-day-key={dayKey} data-weekday={day.weekday}>
+  <div class="day-label"><span>{day.label}<span class="day-tags"></span></span></div>
+  <div class="day-focus">{day.mainFocusLabel || (day.mainFocus ? categoryLabel(day.mainFocus) : "—")}</div>
+  <div class="block-chips">
+    {FALLBACK_FOCUS_BLOCK_KEYS.map((blockKey) => {
+      const focus = day.blockFocus?.[blockKey] ?? null;
+      const appointmentMarker = day.appointmentBlock === blockKey ? " •" : "";
+      return (
+        <span class={`block-chip ${focus ?? "unset"}`} style={focus ? `background: var(--${focus})` : undefined}>
+          {blockKey}: {focus ? categoryLabel(focus) : "—"}{appointmentMarker}
+        </span>
+      );
+    })}
+  </div>
+</a>

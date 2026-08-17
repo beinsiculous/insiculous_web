@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "meal-plan.schema.json",
+  "title": "FortKnight meal-plan document",
+  "description": "The fortnight menu a person (or their assistant) hands to FortKnight: for each meal, the dishes and the day(s) they are eaten — a second day means the first day's leftovers. Applied on the ForkKnife page (or the Assistant page) into the profile's answers (docs/meal-plan.md). Meals are named as in the questionnaire (Breakfast, Lunch, Dinner…); days are FortKnight day keys (sun-a … sat-b) or their names (Sunday A). Rules: a second serving is never the next day and at most three days later, cyclic (Saturday B → Monday B); one dish per meal per day; leftovers may move to another meal (leftoversMeal) from an afternoon/evening/late-evening meal to an early-morning/mid-morning/afternoon meal.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "meal-plan"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "meal": {
+            "type": "string",
+            "description": "The meal's name (as in the questionnaire) — matched by slug."
+          },
+          "dish": {
+            "type": "string",
+            "minLength": 1
+          },
+          "days": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 2,
+            "items": {
+              "type": "string"
+            },
+            "description": "First serving, then optionally the leftovers day: day keys (sun-a) or names (Sunday A)."
+          },
+          "leftoversMeal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional: the meal that eats the leftovers when it is not the same meal — allowed from an afternoon/evening/late-evening meal to an early-morning/mid-morning/afternoon meal (dinner Sunday A -> breakfast Tuesday A)."
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "meal",
+          "dish",
+          "days"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "items"
+  ],
+  "additionalProperties": false
+}
