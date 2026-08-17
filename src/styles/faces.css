@@ -292,6 +292,33 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
      already makes on small screens, one step earlier. */
   [data-theme="fork-knife"] .fortnight-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+/* Phones: the menu bar moves to the bottom of the screen, thumb-reach, and the first panel drops down
+   so the silverware in the photograph gets a clear strip at the top instead of sitting under glass.
+   In the bar the ForkKnife brand stays leftmost; the two buttons out to the other sites (💧 the studio,
+   🏰🛡️ FortKnight) go to the far right. Pure CSS reordering — the markup is the same header, so the
+   desktop layout above is untouched. */
+@media (max-width: 900px) {
+  [data-theme="fork-knife"] .site-nav {
+    position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+    border-bottom: 0;
+    border-top: 1px solid var(--line);
+    flex-wrap: nowrap;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  /* The brand shows only its 🍴 in the bar — five items and a wordmark do not fit 390px, and you are
+     already inside ForkKnife. The name is still there for a screen reader (font-size 0 keeps the text). */
+  [data-theme="fork-knife"] .site-nav .brand { order: 1; margin-right: 0; font-size: 0; white-space: nowrap; }
+  [data-theme="fork-knife"] .site-nav .brand .logo { font-size: 1.25rem; }
+  /* Three links must share one row with the brand and the two buttons: smaller type, tighter pills. */
+  [data-theme="fork-knife"] .site-nav .nav-links { order: 2; flex: 1; justify-content: center; flex-wrap: nowrap; gap: 0.1rem; min-width: 0; }
+  [data-theme="fork-knife"] .site-nav .nav-link { font-size: 0.78rem; padding: 0.3rem 0.5rem; white-space: nowrap; }
+  [data-theme="fork-knife"] .site-nav .face-switch { order: 3; margin-left: auto; gap: 0; }
+  [data-theme="fork-knife"] .site-nav .face-link { padding: 0.15rem 0.25rem; }
+  /* The profile dropdown does not fit a phone's bottom bar; it stays reachable on the Profile page. */
+  [data-theme="fork-knife"] .site-nav .nav-profile { display: none; }
+  /* The strip for the silverware, and room at the bottom so the last panel clears the fixed bar. */
+  [data-theme="fork-knife"] main { padding-top: 38vh; padding-bottom: 5.5rem; }
+}
 
 /* Settings: the profile bar (which saved answer set is being edited) */
 .profile-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.5rem 0; }
