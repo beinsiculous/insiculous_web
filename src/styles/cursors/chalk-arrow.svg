@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- ForkKnife's default pointer: the same arrow shape as the wooden one, drawn in chalk on slate. -->
+  <defs>
+    <clipPath id="chalkArrowClip"><path d="M3 3 L3 39 L13.5 30 L21 45 L27 42 L19.5 27 L33 27 Z"/></clipPath>
+  </defs>
+  <path d="M3 3 L3 39 L13.5 30 L21 45 L27 42 L19.5 27 L33 27 Z" fill="#20261f" stroke="#f2efe6" stroke-width="2.4" stroke-linejoin="round"/>
+  <g clip-path="url(#chalkArrowClip)" fill="none" stroke="#f2efe6" stroke-width="1" opacity="0.35" stroke-linecap="round">
+    <path d="M5 8 L5 34"/>
+    <path d="M8 12 L8 30"/>
+    <path d="M16 31 L23 42"/>
+  </g>
+  <path d="M3 3 L3 39 L13.5 30 L21 45 L27 42 L19.5 27 L33 27 Z" fill="none" stroke="#c9a227" stroke-width="0.9" stroke-linejoin="round" opacity="0.8"/>
+</svg>

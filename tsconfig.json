@@ -1,5 +1,25 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "review"]
+  "exclude": [
+    "dist",
+    "review",
+    "shots",
+    // FortKnight's and ForkKnife's pages are plain untyped JavaScript, canonical in the FortKnight
+    // repository (src/lib/shared/ is synced verbatim from it — see scripts/sync-fortknight.mjs).
+    // `astro check` stays pointed at the studio's own TypeScript rather than reporting thousands of
+    // strict-mode errors on code this repository does not own. `astro build` type-checks nothing,
+    // so this does not weaken the build.
+    "src/pages/fortknight",
+    "src/pages/forkknife",
+    "src/pages/profile.astro",
+    "src/layouts/FaceLayout.astro",
+    "src/components/AllocationBars.astro",
+    "src/components/ApplyFromAssistant.astro",
+    "src/components/DayCard.astro",
+    "src/components/MenuDayCard.astro",
+    "src/components/QuestionField.astro",
+    "src/lib",
+    "scripts"
+  ]
 }

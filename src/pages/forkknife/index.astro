@@ -1,0 +1,140 @@
+---
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import MenuDayCard from "../../components/MenuDayCard.astro";
+import bundle from "../../data/bundle.json";
+import { withBase } from "../../lib/paths.js";
+import { facePath } from "../../lib/faces.js";
+import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
+
+// ForkKnife's Overview (docs/meal-plan.md): the fortnight menu as a 14-day grid — one line per meal per day, from the
+// active profile's meal plan — with the coverage per meal, and the meal-prep and cooking tasks the menu implies
+// (an import document to paste into the Assistant page, step 2). The menu itself is edited on the Questionnaire.
+---
+<FaceLayout title="Overview" face="forkknife">
+  <section class="panel">
+    <h1>Overview</h1>
+    <p class="muted">Your fortnight menu: which dish is which meal on each day (leftovers marked). Edit the meals and dishes on the <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a>, or have your assistant draft the menu on the <a href={facePath("forkknife", "assistant/")}>Assistant page</a>. Each day links to its FortKnight day page.</p>
+    <p class="muted" id="menuStatus"></p>
+    <ul class="proposal-reasons" id="coverageLines"></ul>
+    <noscript><p class="muted">This page needs JavaScript to show your menu.</p></noscript>
+  </section>
+  <section class="panel">
+    <div class="fortnight-grid" id="menuGrid">
+      {DAY_KEY_ORDER.map((dayKey, index) => (
+        <>
+          {(index === 0 || index === 7) && <div class="week-divider">Week {index === 0 ? 1 : 2}</div>}
+          <MenuDayCard dayKey={dayKey} day={bundle.days.days[dayKey]} />
+        </>
+      ))}
+    </div>
+  </section>
+
+  <section class="panel" id="tasksPanel">
+    <h2>Your meal-prep and cooking tasks</h2>
+    <p class="muted" id="tasksSummary">The menu becomes prep and cooking tasks, every other week from the next date of each day. Copy or download the import file, then paste it into step 2 of the Assistant page and Apply. The tasks land in your profile and show on your day pages.</p>
+    <div class="paste-box">
+      <textarea id="tasksJson" rows="8" readonly></textarea>
+    </div>
+    <div class="button-row">
+      <button type="button" id="copyTasksButton" disabled>Copy</button>
+      <button type="button" id="downloadTasksButton" disabled>Download</button>
+      <a class="button" href={facePath("forkknife", "assistant/")}>Open the Assistant page → paste into step 2</a>
+    </div>
+    <ul class="proposal-reasons" id="tasksReview"></ul>
+  </section>
+</FaceLayout>
+
+<script>
+  import { coverage, dayLabel, forkknifeImportDocument, mealSlug, menuForDay } from "../../lib/shared/meal-plan.js";
+  import { personCalendarFromSettings } from "../../lib/shared/weights-rules.js";
+  import { dayKeyOrderStartingOn } from "../../lib/shared/fortknight-rules.js";
+  import { copyText, downloadText } from "../../lib/shared/download.js";
+  import { datesByDayKey, loadMealPlan } from "../../lib/forkknife.js";
+  import { withBase } from "../../lib/paths.js";
+
+  const elements = {
+    menuStatus: document.getElementById("menuStatus"),
+    coverageLines: document.getElementById("coverageLines"),
+    grid: document.getElementById("menuGrid"),
+    tasksSummary: document.getElementById("tasksSummary"),
+    tasksJson: document.getElementById("tasksJson"),
+    copyTasksButton: document.getElementById("copyTasksButton"),
+    downloadTasksButton: document.getElementById("downloadTasksButton"),
+    tasksReview: document.getElementById("tasksReview"),
+  };
+
+  function element(tagName, className, text) {
+    const node = document.createElement(tagName);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  /** Display only: rotate the 14 cards so the grid starts on the person's week-start weekday (canonical order stays). */
+  function rotateGrid(weekStart) {
+    const cards = Object.fromEntries([...elements.grid.querySelectorAll(".day-card")].map((card) => [card.dataset.dayKey, card]));
+    const dividers = [...elements.grid.querySelectorAll(".week-divider")];
+    const order = dayKeyOrderStartingOn(weekStart);
+    elements.grid.replaceChildren();
+    order.forEach((dayKey, index) => {
+      if (index === 0 || index === 7) elements.grid.appendChild(dividers[index === 0 ? 0 : 1]);
+      elements.grid.appendChild(cards[dayKey]);
+    });
+  }
+
+  function renderMenu(bundle, plan) {
+    const { settings, saved, meals, items, problems } = plan;
+    elements.menuStatus.textContent = `Profile ${settings.activeWeightsId}${saved ? "" : " (not saved yet)"}: ${items.length} menu item${items.length === 1 ? "" : "s"} across ${meals.length} meal${meals.length === 1 ? "" : "s"}.`
+      + (problems.length ? ` ${problems.length === 1 ? "1 stored dish no longer matches" : `${problems.length} stored dishes no longer match`} your meals: ${problems.join("; ")}.` : "");
+    elements.coverageLines.replaceChildren(...meals.map((meal) => {
+      const covered = coverage(items, mealSlug(meal.name));
+      return element("li", null, `${meal.name}: ${covered.dishes} dish${covered.dishes === 1 ? "" : "es"} · ${covered.covered}/14 days${covered.missing.length && covered.missing.length < 14 ? ` — missing: ${covered.missing.map(dayLabel).join(", ")}` : ""}`);
+    }));
+    for (const card of elements.grid.querySelectorAll(".day-card")) {
+      const lines = card.querySelector(".menu-lines");
+      lines.replaceChildren(...menuForDay({ items }, meals, card.dataset.dayKey).map((entry) => {
+        const line = element("li");
+        line.appendChild(element("span", "menu-meal", `${entry.meal}: `));
+        line.appendChild(element("span", entry.dish ? null : "muted", entry.dish ? `${entry.dish}${entry.leftovers ? " (leftovers)" : ""}` : "—"));
+        return line;
+      }));
+    }
+    const weekStart = personCalendarFromSettings(settings, bundle).weekStart;
+    if (weekStart !== "sunday") rotateGrid(weekStart);
+  }
+
+  /** The tasks: the menu as an import document (version 2) with the prep and cook tasks + the menu. */
+  function renderTasks(bundle, plan) {
+    const { settings, answers, meals, items } = plan;
+    const document_ = forkknifeImportDocument({ items }, meals, datesByDayKey(answers, bundle, settings));
+    elements.tasksJson.value = JSON.stringify(document_, null, 2);
+    elements.copyTasksButton.disabled = elements.downloadTasksButton.disabled = !items.length;
+    elements.tasksSummary.textContent = document_.tasks.length
+      ? `${document_.tasks.length} task${document_.tasks.length === 1 ? "" : "s"} from ${items.length} menu item${items.length === 1 ? "" : "s"}, every other week from the next date of each day. Copy or download the import file, then paste it into step 2 of the Assistant page and Apply. They land in your profile's tasks and show on your day pages.`
+      : `No tasks yet: ${items.length ? "none of your meals need prepping or cooking — set that on the Questionnaire" : "add dishes to the menu on the Questionnaire first"}.`;
+    elements.tasksReview.replaceChildren(...document_.review.map((line) => element("li", null, line)));
+  }
+
+  elements.copyTasksButton.addEventListener("click", async () => {
+    try {
+      await copyText(elements.tasksJson.value);
+      elements.copyTasksButton.textContent = "Copied";
+      setTimeout(() => { elements.copyTasksButton.textContent = "Copy"; }, 1500);
+    } catch (error) {
+      alert(`Copy failed: ${error.message}`);
+    }
+  });
+  elements.downloadTasksButton.addEventListener("click", () => downloadText("meal-tasks.import.json", elements.tasksJson.value + "\n", "application/json"));
+
+  try {
+    const response = await fetch(withBase("bundle.json"));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const bundle = await response.json();
+    const plan = loadMealPlan(bundle);
+    renderMenu(bundle, plan);
+    renderTasks(bundle, plan);
+  } catch (error) {
+    elements.menuStatus.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    console.error(error);
+  }
+</script>

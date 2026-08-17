@@ -1,0 +1,175 @@
+---
+// Step 2 of both assistant pages (docs/assistant-workspace.md): paste (or upload) what the person's assistant handed
+// back — an import document, a meal-plan document, a weights file or a settings file — and Apply it to the active
+// profile on this device. Which face the page belongs to only changes the links (data-face reaches the script).
+import { facePath } from "../lib/faces.js";
+
+const { face } = Astro.props;
+---
+<div class="apply-step" id="applyStep" data-face={face}>
+  <h3><span class="step-number">2</span> Paste it here and Apply</h3>
+  <p class="muted">Paste (or upload) the JSON your assistant handed back. It can be an import file (your commitments and tasks, readable — check the list it shows below), a meal-plan document (your fortnight menu, shown on <a href={facePath("forkknife")}>ForkKnife</a>), a weights file (the app derives the weights from the answers in it), or a settings file. Any of them can be applied on either app's Assistant page, because the profile is shared.</p>
+  <div class="paste-box">
+    <textarea id="assistantJson" rows="6" placeholder={face === "forkknife"
+      ? '{"schemaVersion": 1, "kind": "meal-plan", "source": {"kind": "assistant", "description": "Autumn menu"}, "items": [{"meal": "Dinner", "dish": "Lentil soup", "days": ["Sunday A", "Wednesday B"]}]}'
+      : '{"schemaVersion": 2, "source": {"kind": "xlsx"}, "commitments": [{"title": "Piano lesson", "repeats": "every week", "weekdays": ["friday"], "start": "2:00 PM", "lasts": "1 h", "category": "spirituality-development"}], "tasks": [], "skipped": [], "review": []}'}></textarea>
+  </div>
+  <div class="button-row">
+    <button type="button" id="applyButton" disabled>Apply</button>
+    <label class="file-button">Upload .json <input type="file" id="assistantFileInput" accept="application/json" hidden /></label>
+    <a href={facePath(face, "questionnaire/")}>Open the Questionnaire →</a>
+    {face === "forkknife" && <a href={facePath("forkknife")}>Open the Overview →</a>}
+  </div>
+  <p class="muted" id="applyStatus"></p>
+  <div class="apply-outcome" id="applyOutcome" role="status" aria-live="polite" hidden>
+    <div class="apply-outcome-badge apply-outcome-check" id="applyOutcomeCheck" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="88" height="88" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </div>
+    <div class="apply-outcome-badge apply-outcome-shield" id="applyOutcomeShield" aria-hidden="true">⚠️</div>
+    <p id="applyOutcomeText"></p>
+  </div>
+  <div class="import-review" id="importReview"></div>
+  {face === "fortknight"
+    ? <p class="muted">Then check the review that appears: what landed, what your assistant skipped and why. Wrong line? Open the Commitments section of the <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a>, press <em>Edit</em> and remove it.</p>
+    : <p class="muted">Then check the message: how many dishes landed and which were not applied (a meal the profile does not have, a day rule broken). The dishes show on the <a href={facePath("forkknife")}>Overview</a> and the day pages; wrong dish? Open the <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a>, press <em>Edit</em> under that meal and remove it.</p>}
+</div>
+
+<script>
+  import { classifyAssistantDocument } from "../lib/shared/workspace-docs.js";
+  import { importSettings, loadSettings, mergeImportedSettings, profileIdFrom, saveSettings, setActiveWeights } from "../lib/shared/user-settings.js";
+  import { activeWeights, defaultAnswers, applyImportDocument, mealsWithDefaults, userWeightsFromAnswers } from "../lib/shared/weights-rules.js";
+  import { mergeMealPlan, normalizeMealPlan } from "../lib/shared/meal-plan.js";
+  import { promptProfileName } from "../lib/profile-naming.js";
+  import { localTodayIsoDate } from "../lib/shared/clock.js";
+  import { importSummary, renderImportReview } from "../lib/shared/import-review.js";
+  import { withBase } from "../lib/paths.js";
+
+  const elements = {
+    step: document.getElementById("applyStep"),
+    assistantJson: document.getElementById("assistantJson"),
+    applyButton: document.getElementById("applyButton"),
+    assistantFileInput: document.getElementById("assistantFileInput"),
+    applyStatus: document.getElementById("applyStatus"),
+    applyOutcome: document.getElementById("applyOutcome"),
+    applyOutcomeCheck: document.getElementById("applyOutcomeCheck"),
+    applyOutcomeShield: document.getElementById("applyOutcomeShield"),
+    applyOutcomeText: document.getElementById("applyOutcomeText"),
+    importReview: document.getElementById("importReview"),
+  };
+  const face = elements.step.dataset.face;
+  const menuPageName = face === "forkknife" ? "the Overview" : "the ForkKnife Overview";
+  let bundle = null;
+
+  function weekdayIds() {
+    return bundle.questionnaire.options.weekdays.map((weekday) => weekday.id);
+  }
+
+  /** Weights are always re-derived on this device from answers — assistant-computed shares are never trusted.
+   *  Stores the result as profile `weightsId` and makes it active. */
+  function deriveAndSave(answers, settings, weightsId) {
+    setActiveWeights(settings, userWeightsFromAnswers(answers, bundle, { weightsId, epochOverride: settings.epochOverride, answeredAt: localTodayIsoDate() }));
+    saveSettings(settings);
+  }
+
+  /** Apply what the assistant produced; returns { message, clean } — `clean` is true when nothing was rejected. */
+  function applyAssistantDocument(text) {
+    const parsed = JSON.parse(text);
+    const kind = classifyAssistantDocument(parsed);
+    const settings = loadSettings();
+    if (kind === "weights") {
+      const answers = parsed.questionnaire?.answers;
+      if (!answers) throw new Error("this weights file has no questionnaire.answers — the app derives weights from answers, so it cannot apply shares alone");
+      // The file's id names the profile: an existing one is updated, an unknown one created; either way it becomes active.
+      const weightsId = profileIdFrom(typeof parsed.id === "string" && parsed.id ? parsed.id : settings.activeWeightsId);
+      const existed = Boolean(settings.weightsProfiles?.[weightsId]);
+      deriveAndSave(answers, settings, weightsId);
+      return { message: `Applied the weights file to profile ${weightsId} (${existed ? "updated" : "new"}, now active): its answers were taken and the weights re-derived on this device.`, clean: true, createdProfileId: existed ? null : weightsId };
+    }
+    if (kind === "import-document") {
+      const existed = Boolean(activeWeights(settings));
+      const answers = activeWeights(settings)?.questionnaire?.answers || defaultAnswers(bundle.questionnaire, bundle.categories);
+      const merged = applyImportDocument(answers, parsed, bundle.categories.order, weekdayIds(), text.trim(), bundle.categories, bundle.questionnaire);
+      deriveAndSave(answers, settings, settings.activeWeightsId);
+      renderImportReview(elements.importReview, parsed, bundle.categories, [...merged.rejected, ...merged.mealPlanProblems.map((problem) => `meal plan: ${problem}`)]);
+      const ownGridNote = parsed.blockFocusGrid && answers.blockFocusGrid && Object.keys(answers.blockFocusGrid).length
+        ? " Note: the grid you adopted on the FortKnight Overview still wins over this import's focus grid — drop your grid there to see the import's."
+        : "";
+      const menuNote = merged.mealPlanApplied || merged.mealPlanProblems.length
+        ? ` Menu: ${merged.mealPlanApplied} item${merged.mealPlanApplied === 1 ? "" : "s"} added to the meal plan${merged.mealPlanProblems.length ? ` (${merged.mealPlanProblems.length} not applied: ${merged.mealPlanProblems.join("; ")})` : ""}.`
+        : "";
+      return { message: `${importSummary(merged, parsed).replace(/\.$/, "")} — applied to profile ${settings.activeWeightsId}; the list is below.${ownGridNote}${menuNote}`, clean: merged.rejected.length === 0 && merged.mealPlanProblems.length === 0, createdProfileId: existed ? null : settings.activeWeightsId };
+    }
+    if (kind === "meal-plan") {
+      const existed = Boolean(activeWeights(settings));
+      const answers = activeWeights(settings)?.questionnaire?.answers || defaultAnswers(bundle.questionnaire, bundle.categories);
+      const meals = mealsWithDefaults(answers.meals ?? defaultAnswers(bundle.questionnaire, bundle.categories).meals, bundle.questionnaire).meals;
+      const { normalized, problems } = normalizeMealPlan(parsed, meals);
+      answers.mealPlan = { items: mergeMealPlan(answers.mealPlan?.items || [], normalized.items) };
+      deriveAndSave(answers, settings, settings.activeWeightsId);
+      const problemWords = problems.length ? ` ${problems.length} item${problems.length === 1 ? "" : "s"} not applied: ${problems.join("; ")}.` : "";
+      return { message: `Applied ${normalized.items.length} menu item${normalized.items.length === 1 ? "" : "s"} to profile ${settings.activeWeightsId}'s meal plan (${menuPageName} shows it).${problemWords}`, clean: problems.length === 0, createdProfileId: existed ? null : settings.activeWeightsId };
+    }
+    if (kind === "user-settings") {
+      const imported = importSettings(text);
+      // Profiles in the file are re-derived on this device from their answers (ones without answers are never
+      // trusted) and merged into the device's: added or updated, the others kept — a narrower file drops nothing.
+      const derived = {};
+      for (const [weightsId, weights] of Object.entries(imported.weightsProfiles)) {
+        const answers = weights?.questionnaire?.answers;
+        if (answers) derived[weightsId] = userWeightsFromAnswers(answers, bundle, { weightsId, epochOverride: imported.epochOverride, answeredAt: localTodayIsoDate() });
+      }
+      const derivedIds = Object.keys(derived);
+      imported.weightsProfiles = derived;
+      const merged = mergeImportedSettings(settings, imported);
+      saveSettings(merged);
+      if (!derivedIds.length) return { message: "Applied the settings file (device extras only — it carried no answers, so your profiles are unchanged).", clean: true };
+      return { message: `Applied the settings file: profile${derivedIds.length === 1 ? "" : "s"} ${derivedIds.join(", ")} ${derivedIds.length === 1 ? "was" : "were"} added or updated (weights re-derived from the answers on this device), your other profiles were kept; ${merged.activeWeightsId} is active.`, clean: true };
+    }
+    throw new Error("not a FortKnight / ForkKnife document (expected a weights file, an import document, a meal-plan document, or a user-settings file)");
+  }
+
+  let outcomeTimer = null;
+  /** The big pop-up after Apply: a green check when nothing was rejected, a shield when the apply errored or
+   *  some entries were not applied (the details stay in the status line and the review below). */
+  function showApplyOutcome(clean, text) {
+    elements.applyOutcomeCheck.hidden = !clean;
+    elements.applyOutcomeShield.hidden = clean;
+    elements.applyOutcomeText.textContent = text;
+    elements.applyOutcome.hidden = false;
+    elements.applyOutcome.classList.remove("apply-outcome-visible");
+    void elements.applyOutcome.offsetWidth; // restart the animation on repeated applies
+    elements.applyOutcome.classList.add("apply-outcome-visible");
+    clearTimeout(outcomeTimer);
+    outcomeTimer = setTimeout(() => { elements.applyOutcome.hidden = true; }, 2200);
+  }
+  elements.applyButton.addEventListener("click", () => {
+    elements.applyOutcome.hidden = true;
+    try {
+      const applied = applyAssistantDocument(elements.assistantJson.value);
+      elements.applyStatus.textContent = applied.message;
+      if (applied.createdProfileId) elements.applyStatus.textContent += promptProfileName(applied.createdProfileId);
+      document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
+      showApplyOutcome(applied.clean, applied.clean ? "Applied — nothing was rejected." : "Applied, but some entries were skipped — see the review below.");
+    } catch (error) {
+      elements.applyStatus.textContent = `Not applied: ${error.message}`;
+      elements.importReview.replaceChildren();
+      showApplyOutcome(false, "Not applied — see the message below.");
+    }
+  });
+  elements.assistantFileInput.addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    elements.assistantJson.value = await file.text();
+  });
+
+  // The component owns its data: Apply enables once the bundle is here, whatever step 1 does.
+  try {
+    const response = await fetch(withBase("bundle.json"));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    bundle = await response.json();
+    elements.applyButton.disabled = false;
+  } catch (error) {
+    elements.applyStatus.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    console.error(error);
+  }
+</script>

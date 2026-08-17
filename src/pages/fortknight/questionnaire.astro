@@ -1,0 +1,1168 @@
+---
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import bundle from "../../data/bundle.json";
+import { withBase } from "../../lib/paths.js";
+import { PROFILE_PATH, facePath } from "../../lib/faces.js";
+import QuestionField from "../../components/QuestionField.astro";
+import { formatClockTime, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
+
+// The questionnaire IS FortKnight's settings. The form is rendered from data/questionnaire.json (via the bundle) —
+// the sections without a `face` (ForkKnife's questionnaire renders the "forkknife" ones); the client script turns
+// the answers into the active profile's weights file with the shared rule in app/shared/weights-rules.js. Device
+// extras (cycle anchor, settings import) live elsewhere: the stored settings file is honoured as-is, and the
+// Assistant page applies a settings file.
+const questionnaire = bundle.questionnaire;
+const sections = (questionnaire?.sections ?? []).filter((section) => (section.face ?? "fortknight") === "fortknight");
+const categories = bundle.categories;
+const categoryRows = categories.order.map((categoryKey) => ({ key: categoryKey, label: categories.categories[categoryKey].label }));
+const options = questionnaire?.options ?? {};
+// Your day and year Q1: the waking window on one track of `track.minutes` (42 h) from `track.start`; values are
+// minutes from the track's start, so a window can end past midnight. Ticks every 12 h.
+// (Guarded: a bundle built before this question existed renders no waking-window question and must not crash the page.)
+const wakingTrack = questionnaire?.wakingWindow?.track ?? { start: "00:00", minutes: 2520 };
+const wakingDefault = questionnaire?.wakingWindow ? {
+  start: timeStringToMinutes(questionnaire.wakingWindow.default.start) - timeStringToMinutes(wakingTrack.start),
+  end: timeStringToMinutes(questionnaire.wakingWindow.default.end) - timeStringToMinutes(wakingTrack.start),
+} : { start: 0, end: 0 };
+const wakingTickPositions = Array.from({ length: Math.floor(wakingTrack.minutes / 720) + 1 }, (_, index) => index * 720);
+if (wakingTickPositions[wakingTickPositions.length - 1] !== wakingTrack.minutes) wakingTickPositions.push(wakingTrack.minutes);
+const wakingTicks = wakingTickPositions.map((position) => ({ percent: (position / wakingTrack.minutes) * 100, label: formatClockTime(minutesToTimeString((timeStringToMinutes(wakingTrack.start) + position) % 1440)).replace(":00 ", " ") }));
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+---
+<FaceLayout title="Questionnaire" face="fortknight">
+  <section class="panel">
+    <h1>Questionnaire</h1>
+    <p class="muted">Your answers are your settings. They become your <em>weights</em> — how much of the fortnight each category should get. Everything stays on this device. Save keeps it here, Download gives you the weights JSON, and <a href={withBase(PROFILE_PATH)}>Profile</a> turns it all into files for your own AI workspace.</p>
+    <p class="profile-bar" id="profileBar"><strong id="profileName"></strong> <span class="muted" id="profileStatus"></span></p>
+    <p class="muted">A profile is one saved set of answers — a person on a shared device, or your own alternative. The Overview and the assistant workspace follow the active one. Once a profile is saved, the dropdown at the top right switches profiles and starts new ones; <a href={withBase(PROFILE_PATH)}>Profile</a> duplicates or deletes the active one. Names become ids like <code>family</code> and do not change once created.</p>
+    {questionnaire ? (
+    <form id="questionnaireForm" class="settings-form questionnaire" data-essential-min={questionnaire.essentialCategories?.min ?? 1} data-essential-max={questionnaire.essentialCategories?.max ?? 3}>
+      {sections.map((section) => (
+        <fieldset data-section={section.id}>
+          <legend>{section.title}</legend>
+          {section.intro && <p class="muted">{section.intro}</p>}
+          {section.questions.map((question, questionIndex) => (
+            <QuestionField question={question} index={questionIndex} options={options} questionnaire={questionnaire}>
+              {question.kind === "commitments" && (
+                <div class="commitments">
+                  <p class="import-pointer">Have your assistant read your calendar or planner? <a href={facePath("fortknight", "assistant/")}>Upload its import file on the Assistant page →</a></p>
+                  <details class="applied-import" id="appliedImport">
+                    <summary class="muted" id="importStatus"></summary>
+                    <div class="import-review" id="importReview"></div>
+                    <button type="button" class="link-button" id="forgetImportButton" hidden>Forget the applied import</button>
+                  </details>
+                  <h3 class="editor-heading">Commitments <span class="muted">— timed; they anchor your blocks</span></h3>
+                  <div class="appointments-editor">
+                  <table class="appointments-table">
+                    <thead><tr><th scope="col">What</th><th scope="col">Weekdays</th><th scope="col">How often</th><th scope="col">Starts</th><th scope="col">Minutes</th><th scope="col">Category</th><th scope="col"></th></tr></thead>
+                    <tbody id="appointmentEntry"></tbody>
+                    <tbody id="appointmentPrototype" hidden>
+                      <tr class="appointment-row">
+                      <td><input type="text" data-field="title" placeholder="e.g. Piano lesson" /></td>
+                      <td class="weekday-strip">{options.weekdays.map((weekday) => (
+                        <label title={weekday.label}><input type="checkbox" data-field="weekday" value={weekday.id} /> {weekday.label.slice(0, 2)}</label>
+                      ))}</td>
+                      <td>
+                        <select data-field="cadenceKind">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
+                        <input type="date" data-field="firstDate" data-needs="firstDate" aria-label="first date it happens" hidden />
+                        <select data-field="nth" data-needs="nth" aria-label="which weekday of the month" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
+                        <input type="number" data-field="dayOfMonth" data-needs="dayOfMonth" min="1" max="31" value="1" aria-label="day of month" hidden />
+                        <input type="date" data-field="date" data-needs="date" aria-label="date" hidden />
+                      </td>
+                      <td><input type="time" data-field="start" value="16:00" step="900" /></td>
+                      <td><input type="number" data-field="durationMinutes" min="0" step="15" value="60" /></td>
+                      <td><select data-field="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
+                      <td><button type="button" class="remove-appointment" aria-label="remove commitment">×</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="button-row commit-row"><button type="button" id="addAppointmentButton">Add commitment</button><span class="muted" id="appointmentEntryStatus"></span></div>
+                  <div class="committed-list" id="appointmentList" data-kind="commitments"></div>
+                </div>
+                  <div class="tasks-editor">
+                  <h3 class="editor-heading">Tasks <span class="muted">— a day, no clock time</span></h3>
+                  <table class="appointments-table tasks-table">
+                    <thead><tr><th scope="col">What</th><th scope="col">Weekdays</th><th scope="col">How often</th><th scope="col">When</th><th scope="col">Minutes</th><th scope="col">Category</th><th scope="col"></th></tr></thead>
+                    <tbody id="taskEntry"></tbody>
+                    <tbody id="taskPrototype" hidden>
+                      <tr class="task-row">
+                      <td><input type="text" data-field="title" placeholder="e.g. Take out the bins" /></td>
+                      <td class="weekday-strip">{options.weekdays.map((weekday) => (
+                        <label title={weekday.label}><input type="checkbox" data-field="weekday" value={weekday.id} /> {weekday.label.slice(0, 2)}</label>
+                      ))}</td>
+                      <td>
+                        <select data-field="cadenceKind">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
+                        <input type="date" data-field="firstDate" data-needs="firstDate" aria-label="first date it happens" hidden />
+                        <select data-field="nth" data-needs="nth" aria-label="which weekday of the month" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
+                        <input type="number" data-field="dayOfMonth" data-needs="dayOfMonth" min="1" max="31" value="1" aria-label="day of month" hidden />
+                        <input type="date" data-field="date" data-needs="date" aria-label="date" hidden />
+                      </td>
+                      <td><select data-field="timeOfDay">{options.timesOfDay.map((time) => <option value={time.id}>{time.label}</option>)}</select></td>
+                      <td><input type="number" data-field="durationMinutes" min="0" step="5" value="15" /></td>
+                      <td><select data-field="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
+                      <td><button type="button" class="remove-task" aria-label="remove task">×</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="button-row commit-row"><button type="button" id="addTaskButton">Add task</button><span class="muted" id="taskEntryStatus"></span></div>
+                  <div class="committed-list" id="taskList" data-kind="tasks"></div>
+                </div>
+                </div>
+              )}
+
+              {question.kind === "subject-sliders" && (
+                <div class="category-list">
+                  <div class="category-row category-header muted" aria-hidden="true">
+                    <span>Category</span><span>Not often</span><span>Time per day (least–most)</span><span>More</span><span></span>
+                  </div>
+                  {categoryRows.map((category) => (
+                    <div class="category-block" data-category={category.key}>
+                      <div class="category-row">
+                        <span class="category-name subject-tip" title={categories.categories[category.key].subjects.map((subjectId) => categories.subjects[subjectId].label).join(" · ")}>{category.label}</span>
+                        <span class="check-cell"><input type="checkbox" data-role="category-peripheral" aria-label={`${category.label}: not often (all subjects)`} /></span>
+                        <span class="range-cell">
+                          <span class="dual-range">
+                            <input type="range" data-role="category-min" step="15" aria-label={`${category.label}: minimum minutes per day (all subjects)`} />
+                            <input type="range" data-role="category-max" step="15" aria-label={`${category.label}: maximum minutes per day (all subjects)`} />
+                            <span class="range-label" data-role="category-range-label"></span>
+                          </span>
+                        </span>
+                        <span class="check-cell"><input type="checkbox" data-role="category-more" aria-label={`${category.label}: allow more (all subjects)`} /></span>
+                        <span class="category-toggle"></span>
+                      </div>
+                      <details class="category-subjects">
+                        <summary class="muted">{categories.categories[category.key].subjects.length} subjects</summary>
+                        <table class="subject-table" data-category={category.key}>
+                          <thead>
+                            <tr><th scope="col">Subject</th><th scope="col">Not often</th><th scope="col">Time per day (least–most)</th><th scope="col">More</th><th scope="col">Goal</th></tr>
+                          </thead>
+                          <tbody>
+                            {categories.categories[category.key].subjects.map((subjectId) => {
+                              const slider = questionnaire.subjectSliders[subjectId];
+                              const subject = categories.subjects[subjectId];
+                              return (
+                                <tr data-subject={subjectId} data-normal-max={slider.minutesPerDay.max} data-more-max={slider.moreMax}>
+                                  <th scope="row"><span class="subject-tip" title={subject.description}>{subject.label}</span></th>
+                                  <td><input type="checkbox" data-role="peripheral" aria-label={`${subject.label}: not often`} /></td>
+                                  <td class="range-cell">
+                                    <span class="dual-range">
+                                      <input type="range" data-role="min" min={slider.minutesPerDay.min} max={slider.minutesPerDay.max} step={slider.step ?? 15} value={slider.default.min} aria-label={`${subject.label}: minimum minutes per day`} />
+                                      <input type="range" data-role="max" min={slider.minutesPerDay.min} max={slider.minutesPerDay.max} step={slider.step ?? 15} value={slider.default.max} aria-label={`${subject.label}: maximum minutes per day`} />
+                                      <span class="range-label" data-role="range-label"></span>
+                                    </span>
+                                  </td>
+                                  <td><input type="checkbox" data-role="more" aria-label={`${subject.label}: allow more`} /></td>
+                                  <td><input type="checkbox" data-role="goal" aria-label={`${subject.label}: this is a goal, not what I do today`} /></td>
+                                </tr>
+                                <tr class="goal-row" data-goal-for={subjectId} hidden>
+                                  <td></td>
+                                  <td></td>
+                                  <td colspan="3" class="range-cell">
+                                    <span class="muted">Currently</span>
+                                    <input type="range" data-role="current" min="0" max={slider.minutesPerDay.max} step={slider.step ?? 15} value="0" aria-label={`${subject.label}: current minutes per day`} />
+                                    <span class="range-label" data-role="current-label"></span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </details>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {question.kind === "category-checklist" && (
+                <table class="category-table">
+                  <thead><tr><th scope="col">Focus</th><th scope="col">✓</th></tr></thead>
+                  <tbody>
+                    {categoryRows.map((category) => (
+                      <tr><th scope="row">{category.label}</th><td><input type="checkbox" name={question.id} value={category.key} /></td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {question.kind === "category-sentiment" && (
+                <table class="category-table">
+                  <thead><tr><th scope="col">Struggle with</th><th scope="col">Focus</th><th scope="col">Enjoy</th></tr></thead>
+                  <tbody>
+                    {categoryRows.map((category) => (
+                      <tr>
+                        <td><input type="checkbox" name="sentiment-struggle" value={category.key} aria-label={`${category.label}: struggle with`} /></td>
+                        <th scope="row">{category.label}</th>
+                        <td><input type="checkbox" name="sentiment-enjoy" value={category.key} aria-label={`${category.label}: enjoy`} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {question.kind === "weekday-picks" && (
+                <ul class="pick-list pick-list-inline">
+                  {options.weekdays.map((option) => (
+                    <li><label><input type="checkbox" name={question.id} value={option.id} /> {option.label}</label></li>
+                  ))}
+                </ul>
+              )}
+
+              {question.kind === "year-split" && (
+                <div class="year-split">
+                  <ul class="pick-list">
+                    {options.yearSplitSchemes.map((scheme) => (
+                      <li><label><input type="radio" name="yearScheme" value={scheme.id} /> {scheme.label}{scheme.sections ? ` (${scheme.sections})` : ""}</label><p class="muted scheme-blurb">{scheme.blurb}</p></li>
+                    ))}
+                  </ul>
+                  <div id="sectionEditor" hidden>
+                  <label class="inline-field">Section name (season, term, era…) <input type="text" name="sectionLabel" /></label>
+                  <table class="sections-table">
+                    <thead><tr><th scope="col">Title</th><th scope="col">Type</th><th scope="col">Gregorian equivalent</th><th scope="col">Weeks (min – max)</th><th scope="col">Starts with (words + rule)</th><th scope="col"></th></tr></thead>
+                    <tbody id="sectionRows"></tbody>
+                    <tbody id="sectionPrototype" hidden>
+                      <tr class="section-row">
+                      <td><input type="text" data-field="title" placeholder="e.g. Summer" /></td>
+                      <td><input type="text" data-field="kind" placeholder="e.g. summer, furlough" /></td>
+                      <td><input type="text" data-field="gregorianEquivalent" placeholder="e.g. Jun – Aug (optional)" /></td>
+                      <td class="weeks-cell"><input type="number" data-field="durationWeeksMin" min="1" max="52" placeholder="min" aria-label="minimum weeks" /><input type="number" data-field="durationWeeksMax" min="1" max="52" placeholder="max" aria-label="maximum weeks" /></td>
+                      <td class="marker-cell">
+                        <select data-field="startMarker">{options.sectionMarkers.map((marker) => <option value={marker.id}>{marker.label}</option>)}</select>
+                        <input type="text" data-field="startDescription" placeholder="e.g. first frost, Labor Day" />
+                        <div class="rule-editor">
+                          <select data-field="ruleKind" aria-label="how the start is computed">{options.startRuleKinds.map((kind) => <option value={kind.id}>{kind.label}</option>)}</select>
+                          <span class="rule-fields">
+                            <select data-field="ruleMonth" data-rule-kinds="fixed-date nth-weekday" aria-label="month" hidden>{MONTH_NAMES.map((name, index) => <option value={index + 1}>{name}</option>)}</select>
+                            <input type="number" data-field="ruleDay" data-rule-kinds="fixed-date" min="1" max="31" value="1" aria-label="day of month" hidden />
+                            <select data-field="ruleOccurrence" data-rule-kinds="nth-weekday" aria-label="which one" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
+                            <select data-field="ruleWeekday" data-rule-kinds="nth-weekday" aria-label="weekday" hidden>{options.weekdays.map((weekday) => <option value={weekday.id}>{weekday.label}</option>)}</select>
+                            <select data-field="ruleTerm" data-rule-kinds="solar" aria-label="equinox or solstice" hidden>{options.solarTerms.map((term) => <option value={term.id}>{term.label}</option>)}</select>
+                            <label data-rule-kinds="new-moon" hidden>new moon № <input type="number" data-field="ruleIndex" min="1" max="13" value="1" aria-label="which new moon of the year" /></label>
+                            <span class="known-starts" data-rule-kinds="manual" hidden>
+                              <span class="known-start-rows"></span>
+                              <button type="button" class="add-known-start" aria-label="add a year's start date">Add date</button>
+                            </span>
+                          </span>
+                          <span class="rule-tail" data-rule-kinds="fixed-date nth-weekday easter solar new-moon manual" hidden>
+                            <label>± days <input type="number" data-field="ruleOffsetDays" min="-366" max="366" value="0" aria-label="offset in days" /></label>
+                            <select data-field="ruleSnap" aria-label="snap to your week-start day">{options.snapDirections.map((direction) => <option value={direction.id}>{direction.label}</option>)}</select>
+                          </span>
+                          <label>opens on <select data-field="startVariant" aria-label="week A or B of the fortnight">{options.startVariants.map((variant) => <option value={variant.id}>{variant.label}</option>)}</select></label>
+                          <span class="muted rule-preview" data-role="rule-preview"></span>
+                        </div>
+                      </td>
+                      <td class="row-actions"><button type="button" class="move-section-up" aria-label="move up">↑</button><button type="button" class="move-section-down" aria-label="move down">↓</button><button type="button" class="remove-section" aria-label="remove section">×</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button type="button" id="addSectionButton">Add section</button>
+                  <p class="muted" id="sectionCount"></p>
+                  </div>
+                </div>
+              )}
+
+              {question.kind === "waking-window" && (
+                <div class="waking-window">
+                  <span class="dual-range">
+                    <input type="range" name="wakingStart" min="0" max={wakingTrack.minutes} step={questionnaire.wakingWindow.minutes.step ?? 15} value={wakingDefault.start} aria-label="waking window starts" />
+                    <input type="range" name="wakingEnd" min="0" max={wakingTrack.minutes} step={questionnaire.wakingWindow.minutes.step ?? 15} value={wakingDefault.end} aria-label="waking window ends" />
+                    <span class="range-label" data-role="waking-label"></span>
+                  </span>
+                  <div class="waking-ticks muted" aria-hidden="true">{wakingTicks.map((tick) => <span style={`left: ${tick.percent}%`}>{tick.label}</span>)}</div>
+                </div>
+              )}
+            </QuestionField>
+          ))}
+        </fieldset>
+      ))}
+
+      <div class="button-row">
+        <button type="submit">Save</button>
+        <button type="button" id="downloadWeightsButton">Download weights JSON</button>
+        <button type="button" id="resetAnswersButton">Reset to defaults</button>
+      </div>
+      <p class="muted" id="questionnaireStatus"></p>
+      <p class="muted" id="epochOverrideNotice" hidden>A date override is stored on this device (<span id="epochOverrideText"></span>): the date resolver pins that date to that day instead of following the seasons. <button type="button" class="link-button" id="clearEpochOverrideButton">Clear override</button></p>
+    </form>
+    ) : (
+      <p class="muted">The app's data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
+    )}
+  </section>
+
+  <section class="panel">
+    <h2>Preview — share of the fortnight</h2>
+    <p class="muted">Recomputed as you answer.</p>
+    <div id="sharePreview"></div>
+    <h2>Preview — your day's blocks</h2>
+    <p class="muted">Your waking window sets the day's scope; the rest is unscheduled. Each standout category earns a focus block — if none do, you get one flexible block. Blocks are cut around your fixed activities and appointments.</p>
+    <div id="blockPreview"></div>
+  </section>
+</FaceLayout>
+
+<script>
+  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, FORKKNIFE_ANSWER_KEYS, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, standingAppointmentProblem, taskProblem, formatClockRange, personDayKeyResolver, slugifyId, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
+  import { loadSettings, profileIds, renameProfile, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
+  import { renderImportReview } from "../../lib/shared/import-review.js";
+  import { dayLabel } from "../../lib/shared/meal-plan.js";
+  import { checkedValues as checkedValuesIn, setChecked as setCheckedIn } from "../../lib/question-fields.js";
+  import { describeCadence } from "../../lib/shared/import-document.js";
+  import { MINUTES_PER_DAY, describeDuration, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
+  import { downloadText } from "../../lib/shared/download.js";
+  import { WEEKDAY_NAMES, formatIsoDate, startDateForRule } from "../../lib/shared/fortknight-rules.js";
+  import { withBase } from "../../lib/paths.js";
+
+  const form = document.getElementById("questionnaireForm");
+  const status = document.getElementById("questionnaireStatus");
+  const preview = document.getElementById("sharePreview");
+  const blockPreview = document.getElementById("blockPreview");
+  let bundle = null;
+  let settings = loadSettings();
+  // Startup 2: the import document last applied on the Assistant page (structured), shown read-only here.
+  let appliedImport = null;
+  // The person's own block focus grid (a proposal adopted on the Overview): not a form field, but it rides
+  // with the answers, so a Save here must carry it along instead of dropping it.
+  let ownBlockFocusGrid = null;
+  let importJsonText = ""; // the raw text of that document (uploaded on the Assistant page), kept with the answers
+  // Unsaved edits since the last populate/save — switching profiles asks before discarding them.
+  let dirty = false;
+
+  function formatMinutes(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    if (!hours) return `${rest} min`;
+    return rest ? `${hours} h ${rest} min` : `${hours} h`;
+  }
+
+  function subjectRows() {
+    return [...form.querySelectorAll("tr[data-subject]")];
+  }
+
+  const checkedValues = (name) => checkedValuesIn(form, name);
+  const setChecked = (name, values) => setCheckedIn(form, name, values);
+
+  /** One double slider = two overlaid range inputs; the thumb that moved pushes the other one along. */
+  function orderThumbs(minInput, maxInput, movedInput = null) {
+    if (Number(minInput.value) <= Number(maxInput.value)) return;
+    if (movedInput === maxInput) minInput.value = maxInput.value;
+    else maxInput.value = minInput.value;
+  }
+
+  /** Paint the band between the thumbs and place the floating label (CSS reads --low / --high on .dual-range);
+   *  when the thumbs stack at an edge, mark which one must stay on top so both remain reachable. */
+  function paintDualRange(minInput, maxInput, movedInput = null) {
+    const wrapper = minInput.closest(".dual-range");
+    const low = Number(minInput.min);
+    const high = Number(minInput.max);
+    const span = Math.max(1, high - low);
+    wrapper.style.setProperty("--low", `${((Number(minInput.value) - low) / span) * 100}%`);
+    wrapper.style.setProperty("--high", `${((Number(maxInput.value) - low) / span) * 100}%`);
+    const stacked = Number(minInput.value) === Number(maxInput.value);
+    wrapper.classList.toggle("at-right-edge", stacked && Number(maxInput.value) === high);
+    wrapper.classList.toggle("at-left-edge", stacked && Number(minInput.value) === low);
+    if (movedInput) {
+      minInput.classList.toggle("last-moved", movedInput === minInput);
+      maxInput.classList.toggle("last-moved", movedInput === maxInput);
+    }
+  }
+
+  function updateSubjectRow(row, movedInput = null) {
+    const minInput = row.querySelector('[data-role="min"]');
+    const maxInput = row.querySelector('[data-role="max"]');
+    const ceiling = row.querySelector('[data-role="more"]').checked ? row.dataset.moreMax : row.dataset.normalMax;
+    minInput.max = ceiling;
+    maxInput.max = ceiling;
+    orderThumbs(minInput, maxInput, movedInput);
+    paintDualRange(minInput, maxInput, movedInput);
+    row.classList.toggle("peripheral", row.querySelector('[data-role="peripheral"]').checked);
+    row.querySelector('[data-role="range-label"]').textContent = `${formatMinutes(Number(minInput.value))} – ${formatMinutes(Number(maxInput.value))}`;
+    const goalRow = goalRowFor(row);
+    const currentInput = goalRow.querySelector('[data-role="current"]');
+    goalRow.hidden = !row.querySelector('[data-role="goal"]').checked;
+    currentInput.max = ceiling;
+    goalRow.querySelector('[data-role="current-label"]').textContent = `${formatMinutes(Number(currentInput.value))} today`;
+  }
+
+  function goalRowFor(row) {
+    return form.querySelector(`tr[data-goal-for="${row.dataset.subject}"]`);
+  }
+
+  // ----- category row <-> subject rows (UI only; subjects stay the source of truth) -----
+  function categoryBlocks() {
+    return [...form.querySelectorAll(".category-block")];
+  }
+
+  function blockRows(block) {
+    return [...block.querySelectorAll("tr[data-subject]")];
+  }
+
+  function activeRows(block) {
+    return blockRows(block).filter((row) => !row.querySelector('[data-role="peripheral"]').checked);
+  }
+
+  function setTriState(checkbox, rows, role) {
+    const checkedCount = rows.filter((row) => row.querySelector(`[data-role="${role}"]`).checked).length;
+    checkbox.checked = rows.length > 0 && checkedCount === rows.length;
+    checkbox.indeterminate = checkedCount > 0 && checkedCount < rows.length;
+  }
+
+  /** Category thumbs = sums over non-peripheral subjects; bounds = sums of subject bounds. */
+  function syncCategoryFromSubjects(block) {
+    const rows = blockRows(block);
+    const active = activeRows(block);
+    const minInput = block.querySelector('[data-role="category-min"]');
+    const maxInput = block.querySelector('[data-role="category-max"]');
+    const sum = (selector, attribute) => active.reduce((total, row) => total + Number(row.querySelector(selector)[attribute]), 0);
+    minInput.min = maxInput.min = sum('[data-role="min"]', "min");
+    minInput.max = maxInput.max = sum('[data-role="max"]', "max");
+    minInput.value = sum('[data-role="min"]', "value");
+    maxInput.value = sum('[data-role="max"]', "value");
+    minInput.disabled = maxInput.disabled = active.length === 0;
+    paintDualRange(minInput, maxInput, block.lastMovedCategoryThumb ?? null);
+    block.querySelector('[data-role="category-range-label"]').textContent = active.length
+      ? `${formatMinutes(Number(minInput.value))} – ${formatMinutes(Number(maxInput.value))}`
+      : "not often";
+    setTriState(block.querySelector('[data-role="category-peripheral"]'), rows, "peripheral");
+    setTriState(block.querySelector('[data-role="category-more"]'), rows, "more");
+    block.classList.toggle("peripheral", active.length === 0);
+    const goals = rows.filter((row) => row.querySelector('[data-role="goal"]').checked).length;
+    block.querySelector(".category-toggle").textContent = goals ? `${goals} goal${goals > 1 ? "s" : ""}` : "";
+  }
+
+  /** Distribute the category thumb over its subjects proportionally, snapped and clamped, remainder to the roomiest. */
+  function applyCategoryRange(block, which) {
+    const minInput = block.querySelector('[data-role="category-min"]');
+    const maxInput = block.querySelector('[data-role="category-max"]');
+    block.lastMovedCategoryThumb = which === "min" ? minInput : maxInput;
+    const target = Number((which === "min" ? minInput : maxInput).value);
+    if (Number(minInput.value) > Number(maxInput.value)) {
+      // The moved thumb crossed the other one: push that one to the same value first so the target is reachable.
+      distributeCategoryThumb(block, which === "min" ? "max" : "min", target);
+    }
+    distributeCategoryThumb(block, which, target);
+  }
+
+  function distributeCategoryThumb(block, which, target) {
+    const active = activeRows(block);
+    if (!active.length) return;
+    const entries = active.map((row) => {
+      const minInput = row.querySelector('[data-role="min"]');
+      const maxInput = row.querySelector('[data-role="max"]');
+      const input = which === "min" ? minInput : maxInput;
+      const step = Number(input.step) || 15;
+      const low = which === "min" ? Number(minInput.min) : Number(minInput.value);
+      const high = which === "min" ? Number(maxInput.value) : Number(maxInput.max);
+      return { input, step, low, high, current: Number(input.value) };
+    });
+    const currentTotal = entries.reduce((total, entry) => total + entry.current, 0);
+    for (const entry of entries) {
+      const share = currentTotal > 0 ? entry.current / currentTotal : 1 / entries.length;
+      const snapped = Math.round((target * share) / entry.step) * entry.step;
+      entry.next = Math.min(entry.high, Math.max(entry.low, snapped));
+    }
+    let remainder = target - entries.reduce((total, entry) => total + entry.next, 0);
+    for (let guard = 0; guard < 200 && Math.abs(remainder) >= 15; guard += 1) {
+      const direction = remainder > 0 ? 1 : -1;
+      const candidates = entries.filter((entry) => (direction > 0 ? entry.next + entry.step <= entry.high : entry.next - entry.step >= entry.low));
+      if (!candidates.length) break;
+      const roomiest = candidates.reduce((best, entry) => {
+        const room = direction > 0 ? entry.high - entry.next : entry.next - entry.low;
+        const bestRoom = direction > 0 ? best.high - best.next : best.next - best.low;
+        return room > bestRoom ? entry : best;
+      });
+      roomiest.next += direction * roomiest.step;
+      remainder -= direction * roomiest.step;
+    }
+    for (const entry of entries) entry.input.value = entry.next;
+    for (const row of active) updateSubjectRow(row);
+    syncCategoryFromSubjects(block);
+  }
+
+  function setAllRows(block, role, checked) {
+    for (const row of blockRows(block)) row.querySelector(`[data-role="${role}"]`).checked = checked;
+    for (const row of blockRows(block)) updateSubjectRow(row);
+    syncCategoryFromSubjects(block);
+  }
+
+  // ----- the waking window (Your day and year Q1): two thumbs on a 42 h track, 10–18 h between them -----
+  const wakingTrackStart = timeStringToMinutes(bundle?.questionnaire?.wakingWindow?.track?.start ?? "00:00");
+  const wakingBounds = bundle?.questionnaire?.wakingWindow?.minutes ?? { min: 600, max: 1080 };
+  /** A track position (minutes from the track's start) as the clock time it lands on. */
+  function wakingClock(position) {
+    return minutesToTimeString((wakingTrackStart + position) % MINUTES_PER_DAY);
+  }
+  /** Keep the window between min and max hours by pushing the thumb that did not move; then paint + label. */
+  function updateWakingWindow(movedInput = null) {
+    const startInput = form.wakingStart;
+    const endInput = form.wakingEnd;
+    if (!startInput || !endInput) return;
+    const trackEnd = Number(startInput.max);
+    let start = Number(startInput.value);
+    let end = Number(endInput.value);
+    if (movedInput === endInput) {
+      start = Math.min(Math.max(start, end - wakingBounds.max), end - wakingBounds.min);
+      if (start < 0) { start = 0; end = Math.max(end, wakingBounds.min); }
+    } else {
+      end = Math.min(Math.max(end, start + wakingBounds.min), start + wakingBounds.max);
+      if (end > trackEnd) { end = trackEnd; start = Math.min(start, trackEnd - wakingBounds.min); }
+    }
+    startInput.value = start;
+    endInput.value = end;
+    paintDualRange(startInput, endInput, movedInput);
+    const nextDay = wakingTrackStart + end >= MINUTES_PER_DAY && Math.floor((wakingTrackStart + end) / MINUTES_PER_DAY) > Math.floor((wakingTrackStart + start) / MINUTES_PER_DAY);
+    form.querySelector('[data-role="waking-label"]').textContent = `${formatClockTime(wakingClock(start))} – ${formatClockTime(wakingClock(end))}${nextDay ? " next day" : ""} · ${formatMinutes(end - start)} awake`;
+  }
+  /** Track positions for a saved answer: the start on day 0 of the track, the end after it (always fits a 42 h track). */
+  function showWakingWindow(wakingWindow) {
+    const startClock = timeStringToMinutes(wakingWindow.start);
+    const endClock = timeStringToMinutes(wakingWindow.end);
+    const start = (startClock - wakingTrackStart + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+    const length = (endClock - startClock + MINUTES_PER_DAY) % MINUTES_PER_DAY || MINUTES_PER_DAY;
+    form.wakingStart.value = start;
+    form.wakingEnd.value = start + length;
+    updateWakingWindow();
+  }
+
+  // ----- year split: scheme prefills an editable section table -----
+  function schemes() {
+    return bundle?.questionnaire.options.yearSplitSchemes ?? [];
+  }
+
+  function currentWeekStart() {
+    return form.querySelector('input[name="weekStart"]:checked')?.value || DEFAULT_WEEK_START;
+  }
+
+  function sectionRows() {
+    return [...form.querySelectorAll("#sectionRows .section-row")];
+  }
+
+  function updateSectionCount() {
+    const count = sectionRows().length;
+    const bounds = bundle?.questionnaire.yearSections;
+    const label = form.sectionLabel.value.trim() || "section";
+    document.getElementById("sectionCount").textContent = `${count} ${label}${count === 1 ? "" : "s"}${bounds ? ` (${bounds.min}–${bounds.max})` : ""}`;
+  }
+
+  // ----- section start rules (docs/questionnaire.md "Section start rules") -----
+  function addKnownStartRow(row, isoDate = "") {
+    const holder = row.querySelector(".known-start-rows");
+    const entry = document.createElement("span");
+    entry.className = "known-start";
+    const input = document.createElement("input");
+    input.type = "date";
+    input.dataset.field = "knownStart";
+    input.value = isoDate;
+    input.setAttribute("aria-label", "the start date of that year");
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "remove-known-start";
+    remove.setAttribute("aria-label", "remove this date");
+    remove.textContent = "×";
+    remove.addEventListener("click", () => { entry.remove(); updateSectionRow(row); form.dispatchEvent(new Event("input")); });
+    entry.append(input, remove);
+    holder.appendChild(entry);
+    return input;
+  }
+
+  function readKnownStarts(row) {
+    const knownStarts = {};
+    for (const input of row.querySelectorAll('[data-field="knownStart"]')) {
+      if (input.value) knownStarts[input.value.slice(0, 4)] = input.value;
+    }
+    return knownStarts;
+  }
+
+  /** The row's rule as stored: null for "no rule"; the snap weekday is always the person's week start. */
+  function readRule(row) {
+    const kind = row.querySelector('[data-field="ruleKind"]').value;
+    if (kind === "none") return null;
+    const rule = { kind, offsetDays: Number(row.querySelector('[data-field="ruleOffsetDays"]').value) || 0, snap: null };
+    const snapDirection = row.querySelector('[data-field="ruleSnap"]').value;
+    if (snapDirection !== "none") rule.snap = { weekday: currentWeekStart(), direction: snapDirection };
+    if (kind === "fixed-date") Object.assign(rule, { month: Number(row.querySelector('[data-field="ruleMonth"]').value), day: Number(row.querySelector('[data-field="ruleDay"]').value) });
+    if (kind === "nth-weekday") Object.assign(rule, { month: Number(row.querySelector('[data-field="ruleMonth"]').value), weekday: row.querySelector('[data-field="ruleWeekday"]').value, occurrence: Number(row.querySelector('[data-field="ruleOccurrence"]').value) });
+    if (kind === "solar") rule.term = row.querySelector('[data-field="ruleTerm"]').value;
+    if (kind === "new-moon") rule.index = Number(row.querySelector('[data-field="ruleIndex"]').value) || 1;
+    return rule;
+  }
+
+  function populateRule(row, section) {
+    const rule = section?.start?.rule ?? null;
+    row.querySelector('[data-field="ruleKind"]').value = rule?.kind ?? "none";
+    row.querySelector('[data-field="ruleMonth"]').value = String(rule?.month ?? 1);
+    row.querySelector('[data-field="ruleDay"]').value = rule?.day ?? 1;
+    row.querySelector('[data-field="ruleWeekday"]').value = rule?.weekday ?? currentWeekStart();
+    row.querySelector('[data-field="ruleOccurrence"]').value = String(rule?.occurrence ?? 1);
+    row.querySelector('[data-field="ruleTerm"]').value = rule?.term ?? "spring-equinox";
+    row.querySelector('[data-field="ruleIndex"]').value = rule?.index ?? 1;
+    row.querySelector('[data-field="ruleOffsetDays"]').value = rule?.offsetDays ?? 0;
+    // A new custom section snaps to the week start on or after its marker; a stored rule keeps its own choice.
+    row.querySelector('[data-field="ruleSnap"]').value = rule ? (rule.snap?.direction ?? "none") : "on-or-after";
+    row.querySelector('[data-field="startVariant"]').value = section?.startVariant ?? DEFAULT_START_VARIANT;
+    row.querySelector(".known-start-rows").replaceChildren();
+    for (const isoDate of Object.values(section?.knownStarts ?? {}).sort()) addKnownStartRow(row, isoDate);
+  }
+
+  /** Show the fields the chosen kind needs and preview this year's computed start. */
+  function updateSectionRow(row) {
+    const kind = row.querySelector('[data-field="ruleKind"]').value;
+    for (const field of row.querySelectorAll("[data-rule-kinds]")) field.hidden = !field.dataset.ruleKinds.split(" ").includes(kind);
+    const preview = row.querySelector('[data-role="rule-preview"]');
+    if (kind === "none") { preview.textContent = "No rule: this section never restarts the fortnight."; return; }
+    const year = new Date().getFullYear();
+    const rule = readRule(row);
+    const start = startDateForRule(rule, year, readKnownStarts(row));
+    preview.textContent = start
+      ? `${year}: ${WEEKDAY_NAMES[start.getUTCDay()].slice(0, 3)} ${formatIsoDate(start)}`
+      : `no start in ${year}${kind === "manual" ? " — add that year's date" : ""}`;
+  }
+
+  function addSectionRow(section = null) {
+    const row = document.querySelector("#sectionPrototype .section-row").cloneNode(true);
+    if (section) {
+      row.querySelector('[data-field="title"]').value = section.title ?? "";
+      row.querySelector('[data-field="kind"]').value = section.kind ?? "";
+      row.querySelector('[data-field="gregorianEquivalent"]').value = section.gregorianEquivalent ?? "";
+      row.querySelector('[data-field="durationWeeksMin"]').value = section.durationWeeks?.min ?? "";
+      row.querySelector('[data-field="durationWeeksMax"]').value = section.durationWeeks?.max ?? "";
+      row.querySelector('[data-field="startMarker"]').value = section.start?.marker ?? "date";
+      row.querySelector('[data-field="startDescription"]').value = section.start?.description ?? "";
+    }
+    populateRule(row, section);
+    row.querySelector(".remove-section").addEventListener("click", () => { row.remove(); updateSectionCount(); form.dispatchEvent(new Event("input")); });
+    row.querySelector(".move-section-up").addEventListener("click", () => { row.previousElementSibling?.before(row); form.dispatchEvent(new Event("input")); });
+    row.querySelector(".move-section-down").addEventListener("click", () => { row.nextElementSibling?.after(row); form.dispatchEvent(new Event("input")); });
+    row.querySelector(".add-known-start").addEventListener("click", () => { addKnownStartRow(row).focus(); });
+    row.addEventListener("input", () => updateSectionRow(row));
+    row.addEventListener("change", () => updateSectionRow(row));
+    document.getElementById("sectionRows").appendChild(row);
+    updateSectionRow(row);
+    updateSectionCount();
+    return row;
+  }
+
+  function readSections() {
+    return sectionRows().map((row) => {
+      const section = { title: row.querySelector('[data-field="title"]').value.trim() || "Untitled" };
+      const kind = row.querySelector('[data-field="kind"]').value.trim();
+      const gregorian = row.querySelector('[data-field="gregorianEquivalent"]').value.trim();
+      const weeksMin = Number(row.querySelector('[data-field="durationWeeksMin"]').value);
+      const weeksMax = Number(row.querySelector('[data-field="durationWeeksMax"]').value);
+      if (kind) section.kind = kind;
+      if (gregorian) section.gregorianEquivalent = gregorian;
+      if (weeksMin > 0 || weeksMax > 0) {
+        const low = weeksMin > 0 ? weeksMin : weeksMax;
+        const high = weeksMax > 0 ? weeksMax : weeksMin;
+        section.durationWeeks = { min: Math.min(low, high), max: Math.max(low, high) };
+      }
+      section.start = { marker: row.querySelector('[data-field="startMarker"]').value, description: row.querySelector('[data-field="startDescription"]').value.trim(), rule: readRule(row) };
+      section.startVariant = row.querySelector('[data-field="startVariant"]').value;
+      const knownStarts = readKnownStarts(row);
+      if (Object.keys(knownStarts).length) section.knownStarts = knownStarts;
+      return section;
+    });
+  }
+
+  /** Only editable schemes (custom) expose the section editor; a preset is described by its blurb under the option
+   *  (its sections still live in the answers, just not on screen). */
+  function setSectionsEditable(editable) {
+    document.getElementById("sectionEditor").hidden = !editable;
+    form.sectionLabel.disabled = !editable;
+    document.getElementById("addSectionButton").hidden = !editable;
+    for (const control of form.querySelectorAll("#sectionRows input, #sectionRows select, #sectionRows button")) {
+      control.disabled = !editable;
+      if (control.placeholder !== undefined) {
+        if (!control.dataset.placeholder) control.dataset.placeholder = control.placeholder;
+        control.placeholder = editable ? control.dataset.placeholder : "";
+      }
+    }
+    form.querySelector(".sections-table").classList.toggle("read-only", !editable);
+  }
+
+  function schemeIsEditable(schemeId) {
+    return Boolean(schemes().find((scheme) => scheme.id === schemeId)?.editable);
+  }
+
+  /** A scheme's starting year split: presets from their template, Custom from FortKnight's own five seasons. */
+  function yearSplitForScheme(schemeId) {
+    const scheme = schemes().find((candidate) => candidate.id === schemeId);
+    if (!scheme) return null;
+    return scheme.templateFrom === "seasons" ? yearSplitFromSeasons(bundle.seasons, schemeId) : yearSplitFromScheme(bundle.questionnaire, schemeId);
+  }
+
+  function showYearSplit(yearSplit) {
+    for (const input of form.querySelectorAll('input[name="yearScheme"]')) input.checked = input.value === yearSplit.scheme;
+    form.sectionLabel.value = yearSplit.sectionLabel ?? "";
+    document.getElementById("sectionRows").replaceChildren();
+    for (const section of yearSplit.sections || []) addSectionRow(section);
+    setSectionsEditable(schemeIsEditable(yearSplit.scheme));
+    updateSectionCount();
+  }
+
+  function applyYearScheme(schemeId) {
+    const yearSplit = yearSplitForScheme(schemeId);
+    if (yearSplit) showYearSplit(yearSplit);
+  }
+
+  /** Saved answers of a read-only preset are hydrated additively: a section missing its rule / start half
+   *  takes the template's (by position); the saved list itself is never replaced. */
+  function hydratePresetSections(yearSplit) {
+    if (!yearSplit || schemeIsEditable(yearSplit.scheme)) return yearSplit;
+    const template = yearSplitForScheme(yearSplit.scheme);
+    if (!template) return yearSplit;
+    return {
+      ...yearSplit,
+      sections: (yearSplit.sections || []).map((section, index) => {
+        const templateSection = template.sections[index];
+        if (!templateSection) return section;
+        const start = { ...(section.start || {}) };
+        if (start.rule === undefined) start.rule = templateSection.start?.rule ?? null;
+        return { ...section, start, startVariant: section.startVariant ?? templateSection.startVariant ?? DEFAULT_START_VARIANT };
+      }),
+    };
+  }
+
+  function element(tagName, className, text) {
+    const node = document.createElement(tagName);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function categoryLabel(categoryKey) {
+    return bundle.categories.categories[categoryKey]?.label ?? categoryKey;
+  }
+
+  // Startup 2: one entry row per kind; "Add" commits it into a compact read-only list (Edit only reveals remove).
+  let commitments = [];
+  let tasks = [];
+  const editing = { commitments: false, tasks: false };
+
+  function updateAppointmentRow(row) {
+    const kindSelect = row.querySelector('[data-field="cadenceKind"]');
+    const needs = kindSelect.selectedOptions[0]?.dataset.needs || "none";
+    for (const field of row.querySelectorAll("[data-needs]")) field.hidden = field.dataset.needs !== needs;
+  }
+
+  /** Mount the single entry row of a kind (cloned from its hidden prototype); the row's own remove button is dropped. */
+  function mountEntryRow(prototypeId, entryId, defaultCategory) {
+    const row = document.querySelector(`#${prototypeId} tr`).cloneNode(true);
+    row.querySelector('[data-field="category"]').value = defaultCategory;
+    row.querySelector(".remove-appointment, .remove-task")?.closest("td").replaceChildren();
+    row.querySelector('[data-field="cadenceKind"]').addEventListener("change", () => updateAppointmentRow(row));
+    updateAppointmentRow(row);
+    document.getElementById(entryId).replaceChildren(row);
+    return row;
+  }
+
+  function entryRow(entryId) {
+    return document.querySelector(`#${entryId} tr`);
+  }
+
+  function readCadence(row) {
+    const kind = row.querySelector('[data-field="cadenceKind"]').value;
+    const cadence = { kind };
+    if (kind === "every-other-week") cadence.firstDate = row.querySelector('[data-field="firstDate"]').value || localTodayIsoDate();
+    if (kind === "monthly-nth-weekday") cadence.nth = Number(row.querySelector('[data-field="nth"]').value);
+    if (kind === "monthly-date") cadence.dayOfMonth = Number(row.querySelector('[data-field="dayOfMonth"]').value) || 1;
+    if (kind === "one-off") cadence.date = row.querySelector('[data-field="date"]').value || localTodayIsoDate();
+    return cadence;
+  }
+
+  function readEntryCommon(row) {
+    return {
+      title: row.querySelector('[data-field="title"]').value.trim(),
+      weekdays: [...row.querySelectorAll('[data-field="weekday"]:checked')].map((box) => box.value),
+      cadence: readCadence(row),
+      durationMinutes: Number(row.querySelector('[data-field="durationMinutes"]').value) || 0,
+      category: row.querySelector('[data-field="category"]').value,
+    };
+  }
+
+  function readAppointmentEntry() {
+    const row = entryRow("appointmentEntry");
+    const { title, weekdays, cadence, durationMinutes, category } = readEntryCommon(row);
+    return { title, weekdays, start: row.querySelector('[data-field="start"]').value || "16:00", durationMinutes, category, cadence };
+  }
+
+  function readTaskEntry() {
+    const row = entryRow("taskEntry");
+    return { ...readEntryCommon(row), timeOfDay: row.querySelector('[data-field="timeOfDay"]').value };
+  }
+
+  /** After a commit: clear what identifies the item, keep the rest (people add several alike in a row). */
+  function resetEntry(row) {
+    row.querySelector('[data-field="title"]').value = "";
+    for (const box of row.querySelectorAll('[data-field="weekday"]')) box.checked = false;
+    row.querySelector('[data-field="title"]').focus();
+  }
+
+  function commitEntry(kind) {
+    const isCommitment = kind === "commitments";
+    const record = isCommitment ? readAppointmentEntry() : readTaskEntry();
+    const status = document.getElementById(isCommitment ? "appointmentEntryStatus" : "taskEntryStatus");
+    if (!record.title) { status.textContent = "Give it a name first."; return; }
+    const problem = isCommitment ? standingAppointmentProblem(record, bundle.categories.order, weekdayIds()) : taskProblem(record, bundle.categories.order, weekdayIds());
+    if (problem) { status.textContent = `${problem[0].toUpperCase()}${problem.slice(1)}.`; return; }
+    status.textContent = "";
+    (isCommitment ? commitments : tasks).push(record);
+    renderCommittedList(kind);
+    resetEntry(entryRow(isCommitment ? "appointmentEntry" : "taskEntry"));
+    form.dispatchEvent(new Event("input"));
+  }
+
+  /** One line per committed item; Edit shows a remove button on each (never inline editing — remove and re-add). */
+  function renderCommittedList(kind) {
+    const isCommitment = kind === "commitments";
+    const container = document.getElementById(isCommitment ? "appointmentList" : "taskList");
+    const items = isCommitment ? commitments : tasks;
+    container.replaceChildren();
+    if (!items.length) {
+      container.appendChild(element("p", "muted committed-empty", isCommitment ? "No commitments yet." : "No tasks yet."));
+      return;
+    }
+    const header = element("div", "committed-header");
+    header.appendChild(element("span", "muted", `${items.length} ${isCommitment ? "commitment" : "task"}${items.length === 1 ? "" : "s"}`));
+    const toggle = element("button", "link-button", editing[kind] ? "Done" : "Edit");
+    toggle.type = "button";
+    toggle.addEventListener("click", () => { editing[kind] = !editing[kind]; renderCommittedList(kind); });
+    header.appendChild(toggle);
+    container.appendChild(header);
+    const list = element("ul", `committed-items${editing[kind] ? " editing" : ""}`);
+    items.forEach((item, index) => {
+      const line = element("li");
+      const when = isCommitment ? formatClockTime(item.start) : item.timeOfDay;
+      const parts = [describeCadence(item.cadence, item.weekdays), when, item.durationMinutes ? describeDuration(item.durationMinutes) : "", categoryLabel(item.category)].filter(Boolean);
+      line.appendChild(element("strong", null, item.title));
+      line.appendChild(document.createTextNode(` · ${parts.join(" · ")}`));
+      if (editing[kind]) {
+        const remove = element("button", "remove-committed", "×");
+        remove.type = "button";
+        remove.setAttribute("aria-label", `remove ${item.title}`);
+        remove.addEventListener("click", () => { items.splice(index, 1); renderCommittedList(kind); form.dispatchEvent(new Event("input")); });
+        line.appendChild(remove);
+      }
+      list.appendChild(line);
+    });
+    container.appendChild(list);
+  }
+
+  function readAppointments() {
+    return commitments.map((item) => ({ ...item, weekdays: [...item.weekdays], cadence: { ...item.cadence } }));
+  }
+
+  function readTasks() {
+    return tasks.map((item) => ({ ...item, weekdays: [...item.weekdays], cadence: { ...item.cadence } }));
+  }
+
+  function weekdayIds() {
+    return bundle.questionnaire.options.weekdays.map((weekday) => weekday.id);
+  }
+
+  /** Startup Q2: what the Assistant page applied (the import document is uploaded there, not here). */
+  function showAppliedImport() {
+    const status = document.getElementById("importStatus");
+    const forget = document.getElementById("forgetImportButton");
+    const details = document.getElementById("appliedImport");
+    details.open = false; // collapsed by default; the person opens it to read the assistant's review
+    details.classList.toggle("empty", !appliedImport);
+    if (appliedImport) {
+      status.textContent = `Applied from your assistant${appliedImport.source?.kind ? ` (${appliedImport.source.kind})` : ""}. Its commitments and tasks are in the lists below; any focus grid and fixed activities come with your answers.`;
+      forget.hidden = false;
+    } else {
+      status.textContent = "Nothing applied from your assistant yet.";
+      forget.hidden = true;
+    }
+    // Only what the lists below cannot show: what the assistant skipped, its review notes, parse problems.
+    renderImportReview(document.getElementById("importReview"), appliedImport, bundle.categories, [], { listApplied: false });
+  }
+
+  /** ForkKnife's keys (meals, menu, preferences) as stored for this profile *right now* — read at save time, never
+   *  from a load-time snapshot, so a Save here never overwrites a newer ForkKnife save (docs/app.md). */
+  function storedForkknifeAnswers() {
+    const stored = loadSettings();
+    stored.activeWeightsId = settings.activeWeightsId;
+    return pickAnswers(activeWeights(stored)?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories), FORKKNIFE_ANSWER_KEYS);
+  }
+
+  /** The whole answers object: this page's questions over ForkKnife's stored keys. */
+  function readAnswers() {
+    return { ...storedForkknifeAnswers(), ...readOwnAnswers() };
+  }
+
+  /** The keys this page owns (everything but ForkKnife's). */
+  function readOwnAnswers() {
+    const subjectTime = {};
+    for (const row of subjectRows()) {
+      const goal = row.querySelector('[data-role="goal"]').checked;
+      subjectTime[row.dataset.subject] = {
+        minutesPerDay: { min: Number(row.querySelector('[data-role="min"]').value), max: Number(row.querySelector('[data-role="max"]').value) },
+        peripheral: row.querySelector('[data-role="peripheral"]').checked,
+        more: row.querySelector('[data-role="more"]').checked,
+        goal,
+        ...(goal ? { currentMinutesPerDay: Number(goalRowFor(row).querySelector('[data-role="current"]').value) } : {}),
+      };
+    }
+    const sentiment = {};
+    for (const categoryKey of checkedValues("sentiment-struggle")) sentiment[categoryKey] = "struggle";
+    for (const categoryKey of checkedValues("sentiment-enjoy")) sentiment[categoryKey] = "enjoy";
+    return {
+      startup: { groupSize: Number(form.groupSize.value) || 1, importJson: importJsonText, import: appliedImport },
+      ...(ownBlockFocusGrid ? { blockFocusGrid: ownBlockFocusGrid } : {}),
+      subjectTime,
+      sentiment,
+      delegable: checkedValues("delegable"),
+      essential: checkedValues("essential"),
+      wakingWindow: { start: wakingClock(Number(form.wakingStart.value)), end: wakingClock(Number(form.wakingEnd.value)) },
+      yearSplit: { scheme: form.querySelector('input[name="yearScheme"]:checked')?.value || "custom", sectionLabel: form.sectionLabel.value.trim() || "season", sections: readSections() },
+      weekStart: currentWeekStart(),
+      standingAppointments: readAppointments(),
+      tasks: readTasks(),
+      appointmentWeekdays: checkedValues("appointmentWeekdays"),
+      practices: checkedValues("practices"),
+      agendaScope: form.querySelector('input[name="agendaScope"]:checked')?.value || DEFAULT_AGENDA_SCOPE,
+      restDays: checkedValues("restDays"),
+      energyPeak: form.querySelector('input[name="energyPeak"]:checked')?.value || DEFAULT_ENERGY_PEAK,
+      context: form.context.value.trim(),
+    };
+  }
+
+  function populate(answers) {
+    form.groupSize.value = answers.startup?.groupSize ?? 1;
+    appliedImport = answers.startup?.import ?? null;
+    ownBlockFocusGrid = answers.blockFocusGrid && Object.keys(answers.blockFocusGrid).length ? answers.blockFocusGrid : null;
+    importJsonText = answers.startup?.importJson || "";
+    showAppliedImport();
+    tasks = (answers.tasks || []).map((task) => JSON.parse(JSON.stringify(task)));
+    editing.tasks = false;
+    renderCommittedList("tasks");
+    setChecked("agendaScope", [answers.agendaScope || DEFAULT_AGENDA_SCOPE]);
+    setChecked("restDays", answers.restDays || []);
+    setChecked("energyPeak", [answers.energyPeak || DEFAULT_ENERGY_PEAK]);
+    form.context.value = answers.context || "";
+    for (const row of subjectRows()) {
+      const subjectAnswer = answers.subjectTime?.[row.dataset.subject];
+      if (!subjectAnswer) continue;
+      row.querySelector('[data-role="more"]').checked = Boolean(subjectAnswer.more);
+      row.querySelector('[data-role="peripheral"]').checked = Boolean(subjectAnswer.peripheral);
+      row.querySelector('[data-role="goal"]').checked = Boolean(subjectAnswer.goal);
+      goalRowFor(row).querySelector('[data-role="current"]').value = subjectAnswer.currentMinutesPerDay ?? 0;
+      updateSubjectRow(row); // apply the ceiling before setting values
+      row.querySelector('[data-role="min"]').value = subjectAnswer.minutesPerDay.min;
+      row.querySelector('[data-role="max"]').value = subjectAnswer.minutesPerDay.max;
+      updateSubjectRow(row);
+    }
+    for (const block of categoryBlocks()) syncCategoryFromSubjects(block);
+    setChecked("delegable", answers.delegable || []);
+    setChecked("essential", answers.essential || []);
+    const sentiment = answers.sentiment || {};
+    setChecked("sentiment-struggle", Object.keys(sentiment).filter((key) => sentiment[key] === "struggle"));
+    setChecked("sentiment-enjoy", Object.keys(sentiment).filter((key) => sentiment[key] === "enjoy"));
+    setChecked("weekStart", [answers.weekStart || DEFAULT_WEEK_START]);
+    showYearSplit(hydratePresetSections(answers.yearSplit || yearSplitForScheme("quarters")));
+    commitments = (answers.standingAppointments || []).map((appointment) => JSON.parse(JSON.stringify(appointment)));
+    editing.commitments = false;
+    renderCommittedList("commitments");
+    setChecked("appointmentWeekdays", answers.appointmentWeekdays || []);
+    setChecked("practices", answers.practices || []);
+    showWakingWindow(answers.wakingWindow ?? bundle.questionnaire.wakingWindow.default);
+  }
+
+  function currentWeights(answeredAt = null) {
+    // The person's weights follow their own seasons; a stored cycle-anchor override (a device extra) is
+    // shown and clearable below but does not bend the questionnaire's derivation.
+    const answers = readAnswers();
+    const season = currentSeasonForAnswers(answers, bundle, answeredAt);
+    return weightsFromAnswers(answers, bundle.categories, bundle.questionnaire, {
+      weightsId: settings.activeWeightsId,
+      answeredAt,
+      days: bundle.days,
+      resolveDayKey: personDayKeyResolver(answers, bundle),
+      seasonFocus: season?.focus ?? null,
+      seasonId: season?.id ?? null,
+    });
+  }
+
+  function renderBlockPreview(weights) {
+    const totalMinutes = weights.blocks.reduce((sum, block) => sum + block.durationMinutes, 0);
+    const bars = weights.blocks.map((block) => `
+      <span class="block-segment${block.carriesFocus ? "" : " unscheduled"}" style="flex: ${block.durationMinutes} 0 0" title="${block.key} ${formatClockRange(block.start, block.end)}">
+        ${block.key === FLEXIBLE_BLOCK_KEY ? "" : `<strong>${block.key}</strong> `}${formatClockRange(block.start, block.end)}
+      </span>`).join("");
+    const standouts = weights.blockSplit.standoutCategories.map((key) => bundle.categories.categories[key].label);
+    const warnings = weights.blockSplit.warnings.map((warning) => `<li>${warning}</li>`).join("");
+    const anchorCount = weights.blockSplit.anchors.length;
+    const standingCount = weights.blockSplit.anchors.filter((anchor) => anchor.source === "standing-appointment").length;
+    const anchorNote = `${anchorCount} anchor${anchorCount === 1 ? "" : "s"} (${anchorCount - standingCount} imported fixed activit${anchorCount - standingCount === 1 ? "y" : "ies"}, ${standingCount} standing appointment${standingCount === 1 ? "" : "s"}).`;
+    const gridDays = Object.keys(weights.blockFocusGrid || {}).length;
+    const gridNote = gridDays ? ` Block focus imported for ${gridDays} day${gridDays === 1 ? "" : "s"}.` : " No focus grid yet — apply an import in the Commitments section below to see one on the Overview.";
+    blockPreview.innerHTML = `
+      <div class="block-bar" aria-label="day split, ${totalMinutes} minutes">${bars}</div>
+      <p class="muted">Waking window ${formatClockRange(weights.wakingWindow.start, weights.wakingWindow.end)} (${formatMinutes(weights.wakingWindow.minutesPerDay)}).
+        ${standouts.length ? `Standing out: ${standouts.join(", ")}.` : "No category stands out."} ${weights.blockSplit.agendaScope === "categories" ? "Categories scope adds one block." : ""} ${anchorNote}${gridNote}</p>
+      ${warnings ? `<ul class="muted block-warnings">${warnings}</ul>` : ""}`;
+  }
+
+  function renderPreview() {
+    const weights = currentWeights();
+    renderBlockPreview(weights);
+    const rows = bundle.categories.order.map((categoryKey) => [categoryKey, bundle.categories.categories[categoryKey].label, weights.categories[categoryKey].share]);
+    // Same markup as components/AllocationBars.astro (global.css .allocation-*).
+    preview.innerHTML = rows.map(([categoryKey, label, share]) => `
+      <div class="allocation-row${share === 0 ? " zero" : ""}">
+        <span>${label}</span>
+        <div class="allocation-bar">
+          <span class="fill" style="width: ${Math.round(share * 100)}%; background: var(--${categoryKey})"></span>
+          <span class="allocation-value">${(share * 100).toFixed(1)}%</span>
+        </div>
+      </div>`).join("");
+  }
+
+  /** Only visible while a cycle-anchor override is stored on this device (there is no editor for it any more). */
+  function showEpochOverrideNotice() {
+    const override = settings.epochOverride;
+    document.getElementById("epochOverrideNotice").hidden = !override?.date;
+    if (override?.date) document.getElementById("epochOverrideText").textContent = `${override.date} = ${dayLabel(override.dayKey)}`;
+  }
+
+  /** The profile line: the active profile's name and whether it is saved (switching lives in the nav dropdown). */
+  function renderProfileBar() {
+    const saved = Boolean(settings.weightsProfiles[settings.activeWeightsId]);
+    document.getElementById("profileName").textContent = `Profile ${settings.activeWeightsId}`;
+    document.getElementById("profileStatus").textContent = saved ? `— saved (${profileIds(settings).length} on this device)` : "— not saved yet";
+  }
+
+  /** Answers of the active profile (else typical-person defaults) plus the device extras. */
+  function populateFromSettings() {
+    showEpochOverrideNotice();
+    renderProfileBar();
+    const savedAnswers = activeWeights(settings)?.questionnaire?.answers;
+    populate(savedAnswers || defaultAnswers(bundle.questionnaire, bundle.categories));
+    renderPreview();
+    dirty = false;
+    status.textContent = savedAnswers ? `Loaded the saved answers of profile ${settings.activeWeightsId}.` : `Profile ${settings.activeWeightsId} is new — answer and Save to keep it.`;
+  }
+
+  // Switching profiles from the nav dropdown reloads the page: with unsaved edits, ask first (cancel vetoes the
+  // switch); leaving any other way gets the browser's own leave-page prompt.
+  document.addEventListener("fortknight:profile-switch", (event) => {
+    if (!dirty) return;
+    if (confirm("You have unsaved changes in this profile — switch anyway and drop them?")) dirty = false;
+    else event.preventDefault();
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (dirty) event.preventDefault();
+  });
+
+  function wireForm() {
+    for (const block of categoryBlocks()) {
+      for (const row of blockRows(block)) {
+        row.addEventListener("input", (event) => { updateSubjectRow(row, event.target); syncCategoryFromSubjects(block); });
+        goalRowFor(row).addEventListener("input", () => updateSubjectRow(row));
+      }
+      block.querySelector('[data-role="category-min"]').addEventListener("input", () => applyCategoryRange(block, "min"));
+      block.querySelector('[data-role="category-max"]').addEventListener("input", () => applyCategoryRange(block, "max"));
+      block.querySelector('[data-role="category-peripheral"]').addEventListener("change", (event) => setAllRows(block, "peripheral", event.target.checked));
+      block.querySelector('[data-role="category-more"]').addEventListener("change", (event) => setAllRows(block, "more", event.target.checked));
+    }
+    // struggle/enjoy are mutually exclusive per category
+    form.addEventListener("change", (event) => {
+      const input = event.target;
+      if (input.name === "sentiment-struggle" || input.name === "sentiment-enjoy") {
+        const other = input.name === "sentiment-struggle" ? "sentiment-enjoy" : "sentiment-struggle";
+        if (input.checked) form.querySelector(`input[name="${other}"][value="${input.value}"]`).checked = false;
+      }
+    });
+    form.addEventListener("change", (event) => {
+      if (event.target.name === "yearScheme") applyYearScheme(event.target.value);
+      if (event.target.name === "weekStart") for (const row of sectionRows()) updateSectionRow(row);
+    });
+    document.getElementById("addSectionButton").addEventListener("click", () => { addSectionRow(); form.dispatchEvent(new Event("input")); });
+    form.sectionLabel.addEventListener("input", updateSectionCount);
+    mountEntryRow("appointmentPrototype", "appointmentEntry", "health");
+    mountEntryRow("taskPrototype", "taskEntry", "operations");
+    document.getElementById("addAppointmentButton").addEventListener("click", () => commitEntry("commitments"));
+    document.getElementById("addTaskButton").addEventListener("click", () => commitEntry("tasks"));
+    document.getElementById("forgetImportButton").addEventListener("click", () => {
+      // Drops the document (its tasks, focus grid and anchors); commitments it added stay as rows until removed by hand.
+      appliedImport = null;
+      importJsonText = "";
+      showAppliedImport();
+      form.dispatchEvent(new Event("input"));
+    });
+    form.addEventListener("change", () => { dirty = true; }); // radios/checkboxes/selects; row add/remove/move dispatch "input"
+    for (const thumb of [form.wakingStart, form.wakingEnd]) thumb?.addEventListener("input", () => updateWakingWindow(thumb));
+    form.addEventListener("input", () => {
+      dirty = true;
+      if (bundle) renderPreview();
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!bundle) return;
+      const answers = readAnswers();
+      const problem = answersProblem(answers, bundle.questionnaire, bundle.categories);
+      if (problem) { status.textContent = problem; return; }
+      const weights = currentWeights(localTodayIsoDate());
+      const activeId = settings.activeWeightsId;
+      settings = loadSettings(); // re-read: another tab may have saved meanwhile
+      settings.activeWeightsId = activeId;
+      const firstSave = !settings.weightsProfiles[activeId];
+      setActiveWeights(settings, weights);
+      saveSettings(settings);
+      dirty = false;
+      let savedId = weights.id;
+      if (firstSave) {
+        // The profile now exists: let the person name it (the name is the id; Cancel or the same name keeps it).
+        const name = prompt("Saved. Name this profile:", savedId);
+        if (name && slugifyId(name) !== savedId) {
+          try {
+            renameProfile(settings, savedId, name);
+            saveSettings(settings);
+            savedId = settings.activeWeightsId;
+          } catch (error) {
+            status.textContent = `Saved profile ${savedId}, but not renamed: ${error.message}. Rename it on the Profile page.`;
+            renderProfileBar();
+            document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
+            return;
+          }
+        }
+      }
+      renderProfileBar();
+      document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
+      status.textContent = `Saved profile ${savedId} on this device.`;
+    });
+    document.getElementById("downloadWeightsButton").addEventListener("click", () => {
+      if (!bundle) return;
+      const weights = currentWeights(localTodayIsoDate());
+      downloadText(`weights.${weights.id}.json`, JSON.stringify(weights, null, 2) + "\n");
+    });
+    document.getElementById("resetAnswersButton").addEventListener("click", () => {
+      if (!bundle) return;
+      populate(defaultAnswers(bundle.questionnaire, bundle.categories)); // this page's questions only; ForkKnife's answers stay
+      renderPreview();
+      dirty = true;
+      status.textContent = "Reset to defaults (not saved) — your meals and menu are ForkKnife's and stay as they are.";
+    });
+    document.getElementById("clearEpochOverrideButton").addEventListener("click", () => {
+      settings = loadSettings();
+      settings.epochOverride = null;
+      saveSettings(settings);
+      showEpochOverrideNotice();
+      status.textContent = "Date override cleared.";
+    });
+  }
+
+  if (form) {
+    wireForm();
+    for (const row of subjectRows()) updateSubjectRow(row);
+    for (const block of categoryBlocks()) syncCategoryFromSubjects(block);
+    updateWakingWindow();
+    try {
+      const response = await fetch(withBase("bundle.json"));
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      bundle = await response.json();
+      populateFromSettings();
+    } catch (error) {
+      status.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+      console.error(error);
+    }
+  }
+</script>

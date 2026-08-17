@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="planks" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b8763a"/>
+      <stop offset="0.5" stop-color="#9a5a27"/>
+      <stop offset="1" stop-color="#7a4419"/>
+    </linearGradient>
+    <linearGradient id="iron" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c9ced4"/>
+      <stop offset="1" stop-color="#5f6870"/>
+    </linearGradient>
+    <clipPath id="shieldClip"><path d="M8 5 H40 V24 C40 35 31 42.5 24 46 C17 42.5 8 35 8 24 Z"/></clipPath>
+  </defs>
+  <path d="M8 5 H40 V24 C40 35 31 42.5 24 46 C17 42.5 8 35 8 24 Z" fill="url(#planks)"/>
+  <g clip-path="url(#shieldClip)" stroke="#5c3212" stroke-width="1" opacity="0.8">
+    <path d="M18 3 V48 M30 3 V48"/>
+    <path d="M10 14 C 14 12, 16 18, 18 15 M20 24 C 24 22, 26 28, 30 25 M32 33 C 34 30, 36 36, 40 34" fill="none" opacity="0.6"/>
+  </g>
+  <path d="M8 5 H40 V24 C40 35 31 42.5 24 46 C17 42.5 8 35 8 24 Z" fill="none" stroke="url(#iron)" stroke-width="3.2" stroke-linejoin="round"/>
+  <path d="M8 5 H40 V24 C40 35 31 42.5 24 46 C17 42.5 8 35 8 24 Z" fill="none" stroke="#2c3138" stroke-width="1" stroke-linejoin="round"/>
+  <circle cx="24" cy="24" r="5.5" fill="url(#iron)" stroke="#2c3138" stroke-width="1.2"/>
+  <circle cx="22.5" cy="22.5" r="1.6" fill="#eef1f4" opacity="0.9"/>
+</svg>

@@ -1,0 +1,129 @@
+---
+import "../styles/faces.css";
+import bundle from "../data/bundle.json";
+import { withBase } from "../lib/paths.js";
+import { DEFAULT_FAVICON, DEFAULT_THEME, FACES, FACE_IDS, FACE_NAV, PROFILE_PATH, SITE_NAME, STUDIO, facePath, studioPath } from "../lib/faces.js";
+
+// `face` is which of the site's two faces the page belongs to (docs/app.md): "fortknight" or "forkknife" — its menu is
+// Overview, Questionnaire, Assistant — or null on the Profile page. Each face brings its own skin (FACES[face].theme),
+// so the two read as different sites. The switcher sits left of the brand: the Be Insiculous logo back out to the studio
+// site first, then the other face's logo. The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
+const { title, face = null } = Astro.props;
+const currentFace = face ? FACES[face] : null;
+const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
+const navItems = currentFace ? FACE_NAV.map((item) => ({ ...item, href: facePath(face, item.path) })) : [];
+const profileHref = withBase(PROFILE_PATH);
+const pathname = Astro.url.pathname;
+function isActive(item) {
+  if (item.exact) return pathname === item.href || pathname.startsWith(`${item.href}days/`); // the day pages belong to the Overview's grid
+  return pathname.startsWith(item.href);
+}
+const profileActive = pathname.startsWith(profileHref);
+const brandLabel = currentFace ? `${currentFace.logo} ${currentFace.label}` : SITE_NAME;
+const theme = currentFace ? currentFace.theme : DEFAULT_THEME;
+// Each face gets its own tab icon too — an emoji drawn into an inline SVG, so there is no file to ship.
+const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${currentFace ? currentFace.favicon : DEFAULT_FAVICON}</text></svg>`;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} · {brandLabel}</title>
+  <link rel="icon" href={favicon} />
+  <link rel="stylesheet" href={withBase("app/shared/themes.css")} />
+  <script is:inline define:vars={{ theme }}>
+    // The page's face decides its skin; set before first paint so the base palette never shows.
+    document.documentElement.dataset.theme = theme;
+  </script>
+</head>
+<body>
+  <header class="site-nav">
+    <nav class="face-switch" aria-label="Switch app">
+      <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>
+        <img src={withBase(STUDIO.logo)} alt="" width="24" height="24" />
+      </a>
+      {otherFaces.map((other) => (
+        <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
+      ))}
+    </nav>
+    <a class="brand" href={currentFace ? facePath(face) : withBase("")}>
+      {currentFace ? <><span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}</> : SITE_NAME}
+    </a>
+    <nav class="nav-links">
+      {navItems.map((item) => (
+        <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href}>{item.label}</a>
+      ))}
+    </nav>
+    <div class="nav-profile" id="navProfile" hidden data-questionnaire-href={facePath(face || "fortknight", "questionnaire/")}>
+      <label class="nav-profile-label">Profile <select id="navProfileSelect" aria-label="Profile"></select></label>
+      <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
+    </div>
+  </header>
+  <main>
+    <slot />
+  </main>
+  <footer class="site-footer muted">
+    Times shown in {bundle.meta.timezone}
+  </footer>
+  <script define:vars={{ buildHash: bundle.buildInfo.buildHash, timezone: bundle.meta.timezone }}>
+    console.log(`beinsiculous bundle ${buildHash} · ${timezone}`);
+  </script>
+  <script>
+    // The profile dropdown (top right): shows once a profile is saved on this device; switching makes that profile
+    // active and reloads the page so every page re-renders from it; "New profile…" creates an unsaved profile and opens
+    // the current face's questionnaire to answer and save it. Rename/Duplicate/Delete live on the Profile page.
+    import { createProfile, loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
+
+    const NEW_PROFILE_VALUE = "__new__";
+    const container = document.getElementById("navProfile");
+    const select = document.getElementById("navProfileSelect");
+
+    /** (Re)draw the dropdown from the device's settings; hidden until a profile is saved. */
+    function renderNavProfile() {
+      const settings = loadSettings();
+      const savedIds = profileIds(settings);
+      container.hidden = savedIds.length === 0;
+      select.replaceChildren();
+      if (!savedIds.length) return;
+      const activeId = settings.activeWeightsId;
+      const options = savedIds.map((id) => ({ value: id, label: id }));
+      if (activeId && !savedIds.includes(activeId)) options.push({ value: activeId, label: `${activeId} (not saved yet)` });
+      options.push({ value: NEW_PROFILE_VALUE, label: "New profile…" });
+      for (const { value, label } of options) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+      }
+      select.value = activeId && options.some((option) => option.value === activeId) ? activeId : savedIds[0];
+    }
+
+    select.addEventListener("change", () => {
+      const current = loadSettings(); // another tab may have saved meanwhile
+      // A page with unsaved edits (the questionnaire) may veto the switch: it listens for this cancelable event.
+      const allowed = document.dispatchEvent(new CustomEvent("fortknight:profile-switch", { cancelable: true, detail: { to: select.value } }));
+      if (!allowed) { select.value = current.activeWeightsId; return; }
+      try {
+        if (select.value === NEW_PROFILE_VALUE) {
+          const name = prompt("Name for the new profile:");
+          if (!name) { select.value = current.activeWeightsId; return; }
+          createProfile(current, name);
+          saveSettings(current);
+          location.href = container.dataset.questionnaireHref;
+          return;
+        }
+        switchProfile(current, select.value);
+        saveSettings(current);
+        location.reload();
+      } catch (error) {
+        alert(error.message);
+        select.value = current.activeWeightsId;
+      }
+    });
+    // Pages that save or apply settings without reloading (Questionnaire Save, Assistant Apply) announce it.
+    document.addEventListener("fortknight:settings-saved", renderNavProfile);
+    renderNavProfile();
+  </script>
+</body>
+</html>

@@ -2,6 +2,13 @@ name = "insiculous-web"
 workers_dev = true
 compatibility_date = "2026-07-29"
 
+# The custom domain. `wrangler deploy` creates the DNS record and the route itself, but only once
+# the beinsiculous.com zone exists in this Cloudflare account and the registrar points at
+# Cloudflare's nameservers. Until then the deploy still succeeds on the workers.dev URL.
+routes = [
+  { pattern = "beinsiculous.com", custom_domain = true },
+]
+
 # Static-assets Worker: `npx wrangler deploy` uploads dist/ as the site.
 # not_found_handling serves our 404.astro page for unknown routes.
 [assets]

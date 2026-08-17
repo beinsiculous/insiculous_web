@@ -1,0 +1,142 @@
+---
+import FaceLayout from "../layouts/FaceLayout.astro";
+import { withBase } from "../lib/paths.js";
+import { facePath } from "../lib/faces.js";
+
+// Profile (shared by FortKnight and ForkKnife): the active profile (name, Duplicate, Delete) and the assistant-workspace
+// downloads. The answers themselves are edited on each face's Questionnaire page (docs/app.md).
+---
+<FaceLayout title="Profile">
+  <section class="panel">
+    <h1>Profile</h1>
+    <h2 id="profileHeading"></h2>
+    <form class="button-row profile-name-form" id="profileNameForm">
+      <label class="inline-field">Name <input type="text" id="profileNameInput" autocomplete="off" required /></label>
+      <button type="submit" id="renameProfileButton">Rename</button>
+      <span class="muted" id="renameStatus"></span>
+    </form>
+    <p class="muted" id="profileStatus"></p>
+    <div class="button-row" id="profileActions">
+      <button type="button" id="duplicateProfileButton">Duplicate as…</button>
+      <button type="button" id="deleteProfileButton">Delete</button>
+    </div>
+    <p class="muted">The name becomes the profile's id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched, and new ones started, from the dropdown at the top right. Both apps share this profile: FortKnight's answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife's <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Assistant workspace</h2>
+    <p class="muted">Neither app has an AI of its own. Download these files and upload them into <em>your</em> AI workspace — a Claude Project, or a ChatGPT, Kimi or NotebookLM workspace. The assistant there gets everything it needs to help with your schedule and your menu. This app sends nothing anywhere; you choose what to upload. What the assistant hands back goes in on either Assistant page (<a href={facePath("fortknight", "assistant/")}>FortKnight</a>, <a href={facePath("forkknife", "assistant/")}>ForkKnife</a>).</p>
+    <p class="muted" id="workspaceStatus"></p>
+    <div class="button-row">
+      <button type="button" id="downloadAllButton" disabled>Download all</button>
+    </div>
+    <div class="file-list" id="fileList"></div>
+  </section>
+</FaceLayout>
+
+<script>
+  import { buildWorkspaceDocuments } from "../lib/shared/workspace-docs.js";
+  import { deleteProfile, duplicateProfile, loadSettings, profileIds, renameProfile, saveSettings } from "../lib/shared/user-settings.js";
+  import { activeWeights } from "../lib/shared/weights-rules.js";
+  import { downloadAll, renderFileRow } from "../lib/shared/workspace-files.js";
+  import { localTodayIsoDate } from "../lib/shared/clock.js";
+  import { missingStaticTexts, staticTexts } from "../lib/workspace-static-texts.js";
+  import { withBase } from "../lib/paths.js";
+  import { facePath } from "../lib/faces.js";
+
+  const elements = {
+    profileHeading: document.getElementById("profileHeading"),
+    profileNameForm: document.getElementById("profileNameForm"),
+    profileNameInput: document.getElementById("profileNameInput"),
+    renameStatus: document.getElementById("renameStatus"),
+    profileStatus: document.getElementById("profileStatus"),
+    profileActions: document.getElementById("profileActions"),
+    duplicateProfileButton: document.getElementById("duplicateProfileButton"),
+    deleteProfileButton: document.getElementById("deleteProfileButton"),
+    workspaceStatus: document.getElementById("workspaceStatus"),
+    downloadAllButton: document.getElementById("downloadAllButton"),
+    fileList: document.getElementById("fileList"),
+  };
+  let bundle = null;
+  let documents = [];
+
+  function renderProfile() {
+    const settings = loadSettings();
+    const active = activeWeights(settings);
+    const savedCount = profileIds(settings).length;
+    elements.profileHeading.textContent = settings.activeWeightsId;
+    elements.profileNameInput.value = settings.activeWeightsId;
+    // Duplicate/Delete need a saved profile.
+    elements.duplicateProfileButton.hidden = !active;
+    elements.deleteProfileButton.hidden = !active;
+    if (active) {
+      elements.profileStatus.textContent = `Saved on this device${active.questionnaire?.answeredAt ? ` (answers from ${active.questionnaire.answeredAt})` : ""}${savedCount > 1 ? `; ${savedCount} profiles saved` : ""}.`;
+    } else if (savedCount) {
+      elements.profileStatus.textContent = `Not saved yet — answer the Questionnaire and Save. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown at the top right.`;
+    } else {
+      elements.profileStatus.textContent = "No profile saved yet — answer the Questionnaire and Save; the Overview shows default answers until then.";
+    }
+  }
+
+  function renderFiles() {
+    const settings = loadSettings();
+    documents = buildWorkspaceDocuments({ bundle, settings, staticTexts, todayIsoDate: localTodayIsoDate() });
+    const active = activeWeights(settings);
+    elements.workspaceStatus.textContent = `${documents.length} files generated today${active ? ` for profile ${active.id}` : ""}.${active ? "" : ` Profile ${settings.activeWeightsId} is not saved yet, so there is no weights file.`}`
+      + (missingStaticTexts.length ? ` Warning: ${missingStaticTexts.join(", ")} did not sync — run npm run dev again.` : "");
+    elements.fileList.replaceChildren(...documents.map(renderFileRow));
+    elements.downloadAllButton.disabled = false;
+  }
+
+  /** Re-read the device's settings (another tab may have saved), run the operation, save; errors go to the status line. */
+  function withProfiles(operation, statusElement = elements.profileStatus) {
+    const settings = loadSettings();
+    try {
+      operation(settings);
+      saveSettings(settings);
+      return true;
+    } catch (error) {
+      statusElement.textContent = error.message;
+      return false;
+    }
+  }
+
+  elements.profileNameForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const current = loadSettings();
+    const name = elements.profileNameInput.value;
+    elements.renameStatus.textContent = "";
+    if (!name.trim() || name.trim() === current.activeWeightsId) return;
+    // The name is the id (weights.<id>.json): everything saved under the old id moves; the nav dropdown follows on reload.
+    if (withProfiles((settings) => renameProfile(settings, settings.activeWeightsId, name), elements.renameStatus)) location.reload();
+  });
+  elements.duplicateProfileButton.addEventListener("click", () => {
+    const current = loadSettings();
+    const name = prompt(`Name for the copy of ${current.activeWeightsId}:`);
+    if (!name) return;
+    if (withProfiles((settings) => duplicateProfile(settings, settings.activeWeightsId, name))) location.reload();
+  });
+  elements.deleteProfileButton.addEventListener("click", () => {
+    const current = loadSettings();
+    if (!confirm(`Delete profile ${current.activeWeightsId} from this device? Its saved answers are removed.`)) return;
+    if (withProfiles((settings) => deleteProfile(settings, settings.activeWeightsId))) {
+      const remaining = loadSettings();
+      if (activeWeights(remaining)) location.reload(); else location.href = facePath("fortknight", "questionnaire/");
+    }
+  });
+  elements.downloadAllButton.addEventListener("click", () => {
+    downloadAll(documents);
+    elements.workspaceStatus.textContent = `Downloading ${documents.length} files. Your browser may ask once to allow multiple downloads. Safari may take only the first — use the per-file buttons or Copy.`;
+  });
+
+  renderProfile();
+  try {
+    const response = await fetch(withBase("bundle.json"));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    bundle = await response.json();
+    renderFiles();
+  } catch (error) {
+    elements.workspaceStatus.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    console.error(error);
+  }
+</script>
