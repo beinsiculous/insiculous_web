@@ -1,8 +1,8 @@
 # Be Insiculous — studio site
 
-Static site for [Be Insiculous](https://insiculous-web.jessemsmcintosh.workers.dev), an
+Static site for [Be Insiculous](https://beinsiculous.com), an
 independent game studio / solo-dev label. Built with [Astro](https://astro.build),
-deployed to Cloudflare Pages. The site is wired to embed WebAssembly game
+deployed to Cloudflare as a static-assets Worker. The site is wired to embed WebAssembly game
 builds from the Insiculous 2D engine (Rust) as they land — the games are
 desktop-only until the engine's web export ships.
 
@@ -23,6 +23,8 @@ npm run dev   # dev server at http://localhost:4321
 | `npm run build`   | Build to `dist/` + postbuild checks (see below)               |
 | `npm run preview` | Serve the production build locally                            |
 | `npm run check`   | Type-check `.astro` files and content schemas                 |
+| `npm run verify`  | `check` + `build` — run this before pushing; CI runs the same |
+| `npm run deploy`  | `verify`, then `wrangler deploy` (manual release; see below)  |
 
 ## Content
 
@@ -74,18 +76,33 @@ in `public/_headers`.
 
 ## Deploying to Cloudflare (Workers static assets)
 
-The repo is connected via the Cloudflare dashboard's Git integration
-(Workers Builds). `wrangler.toml` declares a static-assets Worker serving
-`dist/`, so the default pipeline works as-is:
+`wrangler.toml` declares a static-assets Worker serving `dist/` at
+`beinsiculous.com`; `404-page` handling serves the Astro 404 page, and
+`public/_headers` rules apply to the served assets.
 
-- Build command: `npm run build`
-- Deploy command: `npx wrangler deploy`
+**Production deploys happen in GitHub Actions, on every push to `main`**
+(`.github/workflows/deploy.yml`): install → `npm run check` → `npm run build`
+→ `npx wrangler deploy` → a request to the live domain to confirm it serves.
+The deploy step only runs if the check and the build pass, so a broken build
+cannot reach the site. The workflow can also be run by hand from the Actions
+tab (`workflow_dispatch`) to redeploy the current `main`.
 
-Every push to `main` builds and deploys; the `404-page` handling serves the
-Astro 404 page, and `public/_headers` rules apply to the served assets.
+It needs two repository secrets (Settings → Secrets and variables → Actions):
 
-Manual deploy from a machine with wrangler auth: `npm run build && npx
-wrangler deploy`.
+| secret | what |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | an "Edit Cloudflare Workers" token, scoped to the account **and** to the `beinsiculous.com` zone (it owns the custom-domain route) |
+| `CLOUDFLARE_ACCOUNT_ID` | the account the `insiculous-web` Worker lives in |
 
-After the first deploy, set the real URL (workers.dev or custom domain) in
-`astro.config.mjs` (`site`).
+The Cloudflare dashboard's own Workers Builds Git integration must stay
+disconnected — with both wired up, one commit would deploy twice from two
+places. (It was connected once and stopped firing; Actions replaced it.)
+
+Deploying by hand, from a machine with wrangler auth (`npx wrangler login`):
+
+```sh
+npm run deploy   # check + build + postbuild + wrangler deploy
+```
+
+Never `wrangler deploy` on its own — that ships whatever happens to be in
+`dist/`, checked or not.
