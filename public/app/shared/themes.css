@@ -108,8 +108,8 @@
 
 :root[data-theme="fork-knife"] {
   --background: #f4f4f5;
-  --panel: #ffffff;
-  --panel-soft: #f7f7f8;
+  --panel: rgba(255, 255, 255, 0.55);
+  --panel-soft: rgba(255, 255, 255, 0.5);
   --ink: #111113;
   --muted: #6b6b70;
   --line: #e2e2e6;
@@ -132,8 +132,7 @@
    behind everything, NOT covering — sized to the viewport's height and pinned bottom-right so the whole
    knife and fork sit in the right gutter, beside the content column rather than under it. The
    photo's own ground is white, so its left edge dissolves into --background with a short gradient
-   and nothing else is needed. No filter — the skin follows the photo's own exposure. Missing
-   file → the flat --background. */
+   and nothing else is needed. Missing file → the flat --background. */
 [data-theme="fork-knife"] body::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background-color: var(--background);
@@ -143,6 +142,11 @@
   background-size: 100% 100%, auto 100%;
   background-position: left top, right bottom;
   background-repeat: no-repeat;
+  /* Lifted a little and only lightly softened: the frosted panels do the real blurring wherever
+     content sits, so the silverware stays crisp in the open gutter beside the copy. The pseudo-element
+     is scaled up slightly so the blur's transparent fringe never shows at the viewport edge. */
+  filter: blur(1.5px) brightness(1.1);
+  transform: scale(1.02);
 }
 @media (max-width: 900px) {
   /* A phone is too narrow for a hero to one side: the silverware peeks in behind the top and a
@@ -175,18 +179,21 @@
 [data-theme="fork-knife"] .site-nav .nav-link.active { color: var(--on-accent); background: var(--ink); }
 [data-theme="fork-knife"] .face-link:hover { background: var(--panel-soft); }
 [data-theme="fork-knife"] .panel {
-  border: 1px solid var(--line);
+  /* frosted glass: a translucent white over the blurred photograph, so the silverware reads through */
+  border: 1px solid rgba(17, 17, 19, 0.08);
   border-radius: 10px;
   background-color: var(--panel);
   background-image: none;
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 [data-theme="fork-knife"] .day-card {
-  border: 1px solid var(--line);
+  border: 1px solid rgba(17, 17, 19, 0.1);
   border-radius: 8px;
   background: var(--panel-soft);
 }
-[data-theme="fork-knife"] .day-card:hover { background: var(--panel); outline-color: var(--ink); }
+[data-theme="fork-knife"] .day-card:hover { background: rgba(255, 255, 255, 0.85); outline-color: var(--ink); }
 [data-theme="fork-knife"] .day-card.today { outline-color: var(--ink); }
 [data-theme="fork-knife"] .appointment-tag { background: var(--ink); color: var(--on-accent); }
 [data-theme="fork-knife"] button, [data-theme="fork-knife"] .file-button, [data-theme="fork-knife"] .button {
@@ -207,3 +214,14 @@
   border: 1px solid var(--line);
   border-radius: 6px;
 }
+/* Inputs and secondary buttons sit on the frosted panels; they keep a nearly opaque white so what
+   you type never fights the photograph behind. */
+[data-theme="fork-knife"] input:not([type=checkbox]):not([type=radio]):not([type=range]),
+[data-theme="fork-knife"] select,
+[data-theme="fork-knife"] textarea,
+[data-theme="fork-knife"] .file-row,
+[data-theme="fork-knife"] .committed-items,
+[data-theme="fork-knife"] .prompt-text,
+[data-theme="fork-knife"] .paste-box textarea,
+[data-theme="fork-knife"] .retry-box .retry-text { background-color: rgba(255, 255, 255, 0.85); }
+[data-theme="fork-knife"] button[type=button], [data-theme="fork-knife"] .file-button { background: rgba(255, 255, 255, 0.85); }
