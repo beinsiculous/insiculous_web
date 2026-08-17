@@ -129,9 +129,9 @@
   color: var(--ink);
   background-color: var(--background);
 }
-/* The photograph covers the viewport (it is a whole scene, not a hero object in a gutter), lightly
-   softened and lifted so the frosted panels stay legible; a faint vignette keeps the edges quiet.
-   Missing file → the flat --background. */
+/* The photograph covers the viewport (it is a whole scene, not a hero object in a gutter), sharp,
+   lifted a touch; the frosted panels do the softening where content sits and a faint vignette keeps
+   the edges quiet. Missing file → the flat --background. */
 [data-theme="fork-knife"] body::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background-color: var(--background);
@@ -141,8 +141,7 @@
   background-size: cover, cover;
   background-position: center, center 42%;
   background-repeat: no-repeat;
-  filter: blur(1.5px) brightness(1.1);
-  transform: scale(1.02);
+  filter: brightness(1.1);
 }
 [data-theme="fork-knife"] h1, [data-theme="fork-knife"] h2 {
   font-weight: 700;
@@ -164,7 +163,7 @@
 [data-theme="fork-knife"] .site-nav .nav-link:hover { color: var(--ink); background: rgba(255, 255, 255, 0.08); }
 [data-theme="fork-knife"] .site-nav .nav-link.active { color: var(--on-accent); background: var(--ink); }
 [data-theme="fork-knife"] .face-link:hover { background: rgba(255, 255, 255, 0.08); }
-/* Frosted dark glass: a translucent charcoal over the blurred photograph, so the board and paper read
+/* Frosted dark glass: a translucent charcoal that blurs the photograph behind it, so the board and paper read
    through the panels; a hair of light at the edge so the glass reads as a shape. */
 [data-theme="fork-knife"] .panel {
   border: 1px solid rgba(243, 237, 228, 0.12);

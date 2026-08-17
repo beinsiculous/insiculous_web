@@ -40,9 +40,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <header class="site-nav">
     <nav class="face-switch" aria-label="Switch app">
-      <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>
-        <img src={withBase(STUDIO.logo)} alt="" width="24" height="24" />
-      </a>
+      <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
       {otherFaces.map((other) => (
         <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
       ))}

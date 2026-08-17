@@ -46,9 +46,6 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 .face-switch { display: flex; gap: 0.25rem; }
 .face-link { text-decoration: none; font-size: 1.15rem; padding: 0.15rem 0.4rem; border-radius: 999px; opacity: 0.75; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
 .face-link:hover { opacity: 1; background: var(--panel-soft); }
-/* The Be Insiculous logo, leftmost in the switcher: the way back out to the studio site. */
-.face-home { display: inline-flex; align-items: center; padding: 0.1rem 0.3rem; }
-.face-home img { display: block; width: 1.4rem; height: 1.4rem; object-fit: contain; image-rendering: pixelated; }
 .brand { font-weight: 700; font-size: 1.15rem; color: var(--ink); text-decoration: none; margin-right: 0.5rem; }
 .brand .logo { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; letter-spacing: 0; text-shadow: none; }
 .nav-links { display: flex; gap: 0.25rem; flex-wrap: wrap; }

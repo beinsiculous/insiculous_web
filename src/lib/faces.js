@@ -25,8 +25,8 @@ export const PROFILE_PATH = "profile/";
 /** The skin and tab icon for pages with no face (the shared Profile page). */
 export const DEFAULT_THEME = FACES.fortknight.theme;
 export const DEFAULT_FAVICON = FACES.fortknight.favicon;
-/** The studio site (beinsiculous.com itself) that the two faces sit inside: its home and its logo. */
-export const STUDIO = { label: "Be Insiculous", logo: "app/images/beinsiculous.png" };
+/** The studio site (beinsiculous.com itself) that the two faces sit inside: its label and its logo (an emoji, like the faces'). */
+export const STUDIO = { label: "Be Insiculous", logo: "💧" };
 /** URL of the studio home. */
 export function studioPath() {
   return withBase("");
