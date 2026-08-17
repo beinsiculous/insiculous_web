@@ -1,7 +1,7 @@
 /* One skin per face, so the two read as different websites (the third, the Be Insiculous studio
    site they live inside, has its own layout and never loads this file):
      fort-knight — the treehouse and the knight's watch; Trebuchet MS, planks, ember amber.
-     fork-knife  — the bistro chalkboard; a slate wall in chalk and brass, serif hand.
+     fork-knife  — silverware in daylight; a light, near-monochrome product page, sans-serif.
    Canonical here; the site mirrors it to public/app/shared/. Loaded after the app chrome CSS
    (faces.css), which owns the base :root palette. data-theme comes from the page's face
    (FACES[face].theme in src/lib/faces.js), set by the layout's boot script before first paint. */
@@ -98,97 +98,112 @@
 }
 [data-theme="fort-knight"] .allocation-bar, [data-theme="fort-knight"] .block-bar { border: 1px solid var(--line); }
 
-
-/* ==== fork knife: a bistro's chalkboard menu — slate, chalk and brass ==== */
-:root[data-theme="fork-knife"] { color-scheme: dark; }
+/* ==== fork knife: silverware in daylight — a light, near-monochrome product page ==== */
+/* The photograph (app/images/fork-knife.jpg: a knife and fork on a white surface, absolutvision on
+   Unsplash) is high-key, so the skin follows it: white ground, ink-black type, hairline rules, and the
+   silverware sitting large to one side as the page's only atmosphere — the way a hero object floats
+   beside the copy on a product page. Nothing on the page is a warm or brand colour; the accent is the
+   ink itself. */
+:root[data-theme="fork-knife"] { color-scheme: light; }
 
 :root[data-theme="fork-knife"] {
-  --background: #1c211e;
-  --panel: rgba(38, 44, 40, 0.94);
-  --panel-soft: rgba(50, 58, 52, 0.95);
-  --ink: #f2efe6;
-  --muted: #c3c9bd;
-  --line: #3a423c;
-  --accent: #c9a227;
-  --on-accent: #1c211e;
-  --flexible: rgba(255, 255, 255, 0.07);
-  --slate: rgba(30, 36, 32, 0.95);
-  --chalk: rgba(242, 239, 230, 0.16);
-  --shadow: 0 1px 0 rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.45);
-  --meals: #c9a227; --cleaning: #6f93a4; --working: #86a05f; --spirituality-development: #9b83b4;
-  --friends-family: #bd6f6f; --health: #62a08f; --operations: #9d9887;
+  --background: #f4f4f5;
+  --panel: #ffffff;
+  --panel-soft: #f7f7f8;
+  --ink: #111113;
+  --muted: #6b6b70;
+  --line: #e2e2e6;
+  --accent: #111113;
+  --on-accent: #ffffff;
+  --flexible: #ececef;
+  --shadow: 0 1px 2px rgba(17, 17, 19, 0.06), 0 8px 24px rgba(17, 17, 19, 0.08);
+  /* The seven category colours keep their hues (a person switching faces still reads them) but are
+     pulled toward steel so they sit quietly on white under white chip text. */
+  --meals: #6f747c; --cleaning: #5a7080; --working: #667459; --spirituality-development: #6f667e;
+  --friends-family: #83666a; --health: #5b7770; --operations: #717174;
 }
 
 [data-theme="fork-knife"] body {
-  /* A different hand from FortKnight's Trebuchet: the menu board is written in serif. */
-  font-family: Georgia, "Palatino Linotype", Palatino, "Times New Roman", serif;
+  font-family: Inter, "SF Pro Text", -apple-system, "Segoe UI", system-ui, sans-serif;
   color: var(--ink);
   background-color: var(--background);
 }
-/* The photograph sits on a fixed pseudo-element so it can be darkened with a filter. Until
-   app/images/fork-knife.jpg exists the url() simply fails and the slate gradients below it carry
-   the theme on their own — the board is legible either way. */
+/* The photograph as a hero object, the way keycaps float beside the copy on a product page: fixed
+   behind everything, NOT covering — sized to the viewport's height and pinned bottom-right so the whole
+   knife and fork sit in the right gutter, beside the content column rather than under it. The
+   photo's own ground is white, so its left edge dissolves into --background with a short gradient
+   and nothing else is needed. No filter — the skin follows the photo's own exposure. Missing
+   file → the flat --background. */
 [data-theme="fork-knife"] body::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
+  background-color: var(--background);
   background-image:
-    radial-gradient(120% 80% at 50% 0%, rgba(28, 33, 30, 0.55), rgba(14, 18, 16, 0.88) 70%),
-    linear-gradient(180deg, #232a25, #161a17 70%, #101312),
+    linear-gradient(90deg, var(--background) 0%, var(--background) 42%, rgba(244, 244, 245, 0) 62%),
     url("../images/fork-knife.jpg");
-  background-size: cover, cover, cover;
-  background-position: center, center, center;
+  background-size: 100% 100%, auto 100%;
+  background-position: left top, right bottom;
   background-repeat: no-repeat;
-  filter: brightness(0.72) saturate(0.85);
+}
+@media (max-width: 900px) {
+  /* A phone is too narrow for a hero to one side: the silverware peeks in behind the top and a
+     bottom-weighted gradient keeps the stacked panels legible. */
+  [data-theme="fork-knife"] body::before {
+    background-image:
+      linear-gradient(180deg, rgba(244, 244, 245, 0) 0%, rgba(244, 244, 245, 0.7) 28%, var(--background) 50%),
+      url("../images/fork-knife.jpg");
+    background-size: 100% 100%, cover;
+    background-position: left top, center 20%;
+  }
 }
 [data-theme="fork-knife"] h1, [data-theme="fork-knife"] h2 {
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  /* chalk on slate: soft edges rather than a hard shadow */
-  text-shadow: 0 0 1px rgba(242, 239, 230, 0.5);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
-[data-theme="fork-knife"] h1 { font-style: italic; }
 [data-theme="fork-knife"] .brand {
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: 0.05em;
-  color: var(--accent);
-  text-shadow: 0 0 2px rgba(201, 162, 39, 0.35);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 [data-theme="fork-knife"] .site-nav, [data-theme="fork-knife"] .top-bar {
-  /* the board's brass rail across the top */
-  border-bottom: 2px solid var(--accent);
-  background-color: var(--slate);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 60%);
-  backdrop-filter: blur(4px);
+  border-bottom: 1px solid var(--line);
+  background-color: rgba(255, 255, 255, 0.86);
+  background-image: none;
+  backdrop-filter: blur(10px);
 }
-[data-theme="fork-knife"] .site-nav .nav-link { color: var(--muted); }
-[data-theme="fork-knife"] .site-nav .nav-link:hover { color: var(--ink); background: rgba(255, 255, 255, 0.09); }
-[data-theme="fork-knife"] .site-nav .nav-link.active { color: var(--on-accent); background: var(--accent); }
-/* Panels are chalked-out rectangles on the slate: square corners, a thin chalk rule, no bevel. */
+[data-theme="fork-knife"] .site-nav .nav-link { color: var(--muted); border-radius: 6px; }
+[data-theme="fork-knife"] .site-nav .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
+[data-theme="fork-knife"] .site-nav .nav-link.active { color: var(--on-accent); background: var(--ink); }
+[data-theme="fork-knife"] .face-link:hover { background: var(--panel-soft); }
 [data-theme="fork-knife"] .panel {
-  border: 1px solid var(--chalk);
-  border-radius: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
   background-color: var(--panel);
   background-image: none;
   box-shadow: var(--shadow);
 }
 [data-theme="fork-knife"] .day-card {
-  border: 1px solid var(--chalk);
-  border-radius: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   background: var(--panel-soft);
 }
-[data-theme="fork-knife"] .day-card:hover { outline-color: var(--accent); }
-[data-theme="fork-knife"] .appointment-tag { background: var(--accent); color: var(--on-accent); }
+[data-theme="fork-knife"] .day-card:hover { background: var(--panel); outline-color: var(--ink); }
+[data-theme="fork-knife"] .day-card.today { outline-color: var(--ink); }
+[data-theme="fork-knife"] .appointment-tag { background: var(--ink); color: var(--on-accent); }
 [data-theme="fork-knife"] button, [data-theme="fork-knife"] .file-button, [data-theme="fork-knife"] .button {
-  border-radius: 2px;
-  border-color: var(--accent);
-  letter-spacing: 0.03em;
+  border-radius: 6px;
+  border-color: var(--ink);
+  font-weight: 500;
+}
+[data-theme="fork-knife"] button[type=button], [data-theme="fork-knife"] .file-button {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--line);
 }
 [data-theme="fork-knife"] .site-footer {
   color: var(--muted);
-  width: fit-content; margin: 0 auto; padding: 0.35rem 1rem 0.45rem;
-  border-top: 1px solid var(--chalk);
+  border-top: 1px solid var(--line);
 }
 [data-theme="fork-knife"] .allocation-bar, [data-theme="fork-knife"] .block-bar {
-  border: 1px solid var(--chalk);
-  border-radius: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
 }
