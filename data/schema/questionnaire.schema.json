@@ -1,0 +1,1330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/questionnaire.schema.json",
+  "title": "FortKnight questionnaire definition",
+  "description": "The questions, per-subject slider bounds and derivation constants the questionnaire UI renders from and the answers→weights rule reads (docs/questionnaire.md).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "title": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "wantMoreMultiplier": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Applied to a category's raw minutes when the user wants more of it."
+    },
+    "wakingWindow": {
+      "type": "object",
+      "description": "Your day and year Q1: the waking window (start/end HH:MM; end before start = next day) — its complement is the unscheduled block. `minutes` bounds the window's length; `track` is the slider's span (from track.start, in minutes; 42 h so any window fits).",
+      "properties": {
+        "default": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        "minutes": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max": {
+              "type": "integer",
+              "maximum": 1440
+            },
+            "step": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "min",
+            "max"
+          ],
+          "additionalProperties": false
+        },
+        "track": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "minutes": {
+              "type": "integer",
+              "minimum": 1440
+            }
+          },
+          "required": [
+            "start",
+            "minutes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "default",
+        "minutes",
+        "track"
+      ],
+      "additionalProperties": false
+    },
+    "blockSplit": {
+      "type": "object",
+      "description": "Constants for turning shares + fixed activities into a block split (docs/questionnaire.md).",
+      "properties": {
+        "standoutMultiplier": {
+          "type": "number",
+          "minimum": 1
+        },
+        "maxFocusBlocks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "cutGridMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cutSearchMinutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "straddlePenalty": {
+          "type": "number",
+          "minimum": 0
+        },
+        "edgeBonus": {
+          "type": "number",
+          "minimum": 0
+        },
+        "focusBlockKeys": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "standoutMultiplier",
+        "maxFocusBlocks",
+        "cutGridMinutes",
+        "cutSearchMinutes",
+        "focusBlockKeys"
+      ],
+      "additionalProperties": false
+    },
+    "generator": {
+      "type": "object",
+      "description": "Constants for the generator that proposes a blockFocusGrid from weights (docs/generator.md).",
+      "properties": {
+        "anchorPinCoverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of a block that one category's anchors must cover to pin the cell."
+        },
+        "overshootSlackCells": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How far past its target (in cells) a category may still take a cell."
+        },
+        "preferredBlockWeight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "energyPeakWeight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "seasonFocusWeight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "alternationWeight": {
+          "type": "number",
+          "minimum": 0
+        },
+        "energyPeakBlock": {
+          "type": "object",
+          "description": "energyPeak answer id -> which focus block carries the demanding focus (first | middle | last | null).",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "first",
+              "middle",
+              "last",
+              null
+            ]
+          }
+        },
+        "sessionGridMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Session lengths are multiples of this."
+        },
+        "maxSessionMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Longest spillover session in a flexible cell."
+        },
+        "practiceMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mealMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "mealSlotTimes": {
+          "type": "object",
+          "description": "meal slot id -> HH:MM the meal is placed at (null: not placeable, e.g. anytime).",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          }
+        }
+      },
+      "required": [
+        "anchorPinCoverage",
+        "overshootSlackCells",
+        "preferredBlockWeight",
+        "energyPeakWeight",
+        "seasonFocusWeight",
+        "alternationWeight",
+        "energyPeakBlock",
+        "sessionGridMinutes",
+        "maxSessionMinutes",
+        "practiceMinutes",
+        "mealMinutes",
+        "mealSlotTimes"
+      ],
+      "additionalProperties": false
+    },
+    "essentialCategories": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "additionalProperties": false
+    },
+    "mealsPerDay": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer"
+        },
+        "default": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max",
+        "default"
+      ],
+      "additionalProperties": false
+    },
+    "slotsPerMeal": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "additionalProperties": false
+    },
+    "mealPrep": {
+      "type": "object",
+      "description": "Bounds of the per-meal prep/cook minute sliders and their defaults (docs/questionnaire.md).",
+      "properties": {
+        "minutes": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "step": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "min",
+            "max",
+            "step"
+          ],
+          "additionalProperties": false
+        },
+        "defaultPrepMinutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "defaultCookMinutes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "minutes",
+        "defaultPrepMinutes",
+        "defaultCookMinutes"
+      ],
+      "additionalProperties": false
+    },
+    "yearSections": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "description": "Option lists the form renders from. The six meal-preference lists (dietaryRules … shoppingCadences) belong to ForkKnife's questionnaire section.",
+      "properties": {
+        "mealSlots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "yearSplitSchemes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              },
+              "blurb": {
+                "type": "string",
+                "description": "One sentence shown under the option in the questionnaire; the section editor itself is shown only for editable schemes."
+              },
+              "sections": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "sectionLabel": {
+                "type": "string"
+              },
+              "template": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string"
+                    },
+                    "gregorianEquivalent": {
+                      "type": "string"
+                    },
+                    "durationWeeks": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "properties": {
+                        "min": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "max": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": [
+                        "min",
+                        "max"
+                      ],
+                      "additionalProperties": false,
+                      "description": "How long the section runs, in weeks (min = max when fixed)."
+                    },
+                    "start": {
+                      "type": "object",
+                      "properties": {
+                        "marker": {
+                          "type": "string",
+                          "enum": [
+                            "date",
+                            "rule",
+                            "holiday",
+                            "weather",
+                            "manual"
+                          ]
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "rule": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "description": "A computable start (docs/questionnaire.md 'Section start rules'; evaluated by fk_core/dates.py start_date_for_rule and its JavaScript twin): the kind's base date for the year, + offsetDays, then snapped to a weekday or not. Kind-specific fields: fixed-date month+day; nth-weekday month+weekday+occurrence (1-4, -1 = last); solar term; new-moon index (1-13, the nth new moon of the year); easter and manual need nothing (manual reads knownStarts[year]).",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": [
+                                "fixed-date",
+                                "nth-weekday",
+                                "easter",
+                                "solar",
+                                "new-moon",
+                                "manual"
+                              ]
+                            },
+                            "month": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 12
+                            },
+                            "day": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 31
+                            },
+                            "weekday": {
+                              "type": "string",
+                              "enum": [
+                                "sunday",
+                                "monday",
+                                "tuesday",
+                                "wednesday",
+                                "thursday",
+                                "friday",
+                                "saturday"
+                              ]
+                            },
+                            "occurrence": {
+                              "type": "integer",
+                              "enum": [
+                                1,
+                                2,
+                                3,
+                                4,
+                                -1
+                              ]
+                            },
+                            "term": {
+                              "type": "string",
+                              "enum": [
+                                "spring-equinox",
+                                "summer-solstice",
+                                "autumn-equinox",
+                                "winter-solstice"
+                              ]
+                            },
+                            "index": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 13
+                            },
+                            "offsetDays": {
+                              "type": "integer",
+                              "minimum": -366,
+                              "maximum": 366
+                            },
+                            "snap": {
+                              "type": [
+                                "object",
+                                "null"
+                              ],
+                              "properties": {
+                                "weekday": {
+                                  "type": "string",
+                                  "enum": [
+                                    "sunday",
+                                    "monday",
+                                    "tuesday",
+                                    "wednesday",
+                                    "thursday",
+                                    "friday",
+                                    "saturday"
+                                  ]
+                                },
+                                "direction": {
+                                  "type": "string",
+                                  "enum": [
+                                    "on-or-after",
+                                    "on-or-before"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "weekday",
+                                "direction"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "offsetDays",
+                            "snap"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "marker"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "startVariant": {
+                      "type": "string",
+                      "enum": [
+                        "a",
+                        "b"
+                      ],
+                      "description": "Which half of the fortnight the section opens on (with weekStart -> the season's startDayKey)."
+                    },
+                    "knownStarts": {
+                      "type": "object",
+                      "description": "Year -> ISO date. Read by manual rules (the typed start of that year); for computed rules a documented check value (validate.py verifies it equals the computed date).",
+                      "additionalProperties": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "start"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "templateFrom": {
+                "type": "string",
+                "enum": [
+                  "seasons"
+                ],
+                "description": "Prefill from data/seasons.json instead of `template` (mapping in fk_core/weights.py year_split_from_seasons / weights-rules.js yearSplitFromSeasons)."
+              },
+              "editable": {
+                "type": "boolean",
+                "description": "Only editable schemes show the section editor; presets are read-only."
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "blurb",
+              "sectionLabel",
+              "template",
+              "editable"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "weekdays": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "appointmentCadences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              },
+              "needs": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "firstDate",
+                  "nth",
+                  "dayOfMonth",
+                  "date"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "needs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "practices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "nthChoices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sectionMarkers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "startRuleKinds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "solarTerms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "snapDirections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "startVariants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "subjectCadences": {
+          "type": "array",
+          "description": "How often a subject happens when it is not everyday (Focus 1). `section` is the person's own year-split unit, so the UI labels it with their sectionLabel.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "enum": [
+                  "fortnight",
+                  "section"
+                ]
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "agendaScopes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "energyPeaks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "timesOfDay": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "dietaryRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "cuisines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "cookingSkills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "foodBudgets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "kitchenKit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "shoppingCadences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "mealSlots",
+        "yearSplitSchemes",
+        "weekdays",
+        "appointmentCadences",
+        "practices",
+        "nthChoices",
+        "sectionMarkers",
+        "startRuleKinds",
+        "solarTerms",
+        "snapDirections",
+        "startVariants",
+        "agendaScopes",
+        "subjectCadences",
+        "energyPeaks",
+        "timesOfDay"
+      ],
+      "additionalProperties": false
+    },
+    "defaultAnswers": {
+      "type": "object",
+      "description": "Category boxes pre-ticked for a typical person.",
+      "properties": {
+        "sentiment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "struggle",
+              "enjoy"
+            ]
+          }
+        },
+        "delegable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "essential": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "meals": {
+          "type": "object"
+        },
+        "yearSplitScheme": {
+          "type": "string",
+          "description": "id in options.yearSplitSchemes; the typical person's year split is that scheme's template."
+        },
+        "weekStart": {
+          "type": "string"
+        },
+        "standingAppointments": {
+          "type": "array"
+        },
+        "appointmentWeekdays": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "practices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "agendaScope": {
+          "type": "string"
+        },
+        "restDays": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "energyPeak": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "eaters": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dietaryRules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allergiesAndDislikes": {
+          "type": "string"
+        },
+        "favouriteCuisines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "favouriteDishes": {
+          "type": "string"
+        },
+        "cookingSkill": {
+          "type": "string"
+        },
+        "foodBudget": {
+          "type": "string"
+        },
+        "kitchenKit": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "shoppingCadence": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "subjectSliders": {
+      "type": "object",
+      "description": "Keyed by subject id (categories.json). Bounds in integer minutes per day.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "minutesPerDay": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "additionalProperties": false
+          },
+          "default": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "additionalProperties": false,
+            "description": "A typical person's range; the slider opens here. Must sit inside minutesPerDay."
+          },
+          "peripheralByDefault": {
+            "type": "boolean",
+            "description": "'not often' pre-ticked for a typical person."
+          },
+          "cadenceByDefault": {
+            "type": "object",
+            "description": "The typical person does not do this every day: the cadence their form opens on (questionnaire.md -> Cadence). Omit for an everyday subject.",
+            "properties": {
+              "cadence": {
+                "type": "string",
+                "enum": [
+                  "fortnight",
+                  "section"
+                ]
+              },
+              "daysPerPeriod": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "cadence",
+              "daysPerPeriod"
+            ],
+            "additionalProperties": false
+          },
+          "moreMax": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1440
+          },
+          "step": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "minutesPerDay",
+          "default",
+          "peripheralByDefault",
+          "moreMax"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "face": {
+            "type": "string",
+            "enum": [
+              "fortknight",
+              "forkknife"
+            ],
+            "description": "Which questionnaire page renders the section: FortKnight's (default) or ForkKnife's."
+          },
+          "intro": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "number",
+                    "subject-sliders",
+                    "category-checklist",
+                    "category-sentiment",
+                    "waking-window",
+                    "meals",
+                    "year-split",
+                    "weekday-picks",
+                    "multi-select",
+                    "single-select",
+                    "text",
+                    "commitments"
+                  ]
+                },
+                "prompt": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string"
+                },
+                "intro": {
+                  "type": "string"
+                },
+                "min": {
+                  "type": "integer"
+                },
+                "default": {},
+                "minChecked": {
+                  "type": "integer"
+                },
+                "maxChecked": {
+                  "type": "integer"
+                },
+                "options": {
+                  "type": "string",
+                  "description": "Name of an entry in `options` (multi-select questions)."
+                },
+                "placeholder": {
+                  "type": "string",
+                  "description": "Placeholder text of a `text` question's textarea."
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "prompt"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "questions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "wantMoreMultiplier",
+    "wakingWindow",
+    "blockSplit",
+    "subjectSliders",
+    "sections",
+    "options",
+    "mealPrep"
+  ],
+  "additionalProperties": false
+}

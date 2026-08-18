@@ -27,7 +27,7 @@ import { PROFILE_PATH } from "../../lib/faces.js";
   import { copyText } from "../../lib/shared/download.js";
   import { localTodayIsoDate } from "../../lib/shared/clock.js";
   import { renderFileRow } from "../../lib/shared/workspace-files.js";
-  import { missingStaticTexts, staticTexts } from "../../lib/workspace-static-texts.js";
+  import { staticTexts } from "../../lib/workspace-static-texts.js";
   import { withBase } from "../../lib/paths.js";
 
   const guideRow = document.getElementById("spreadsheetGuideRow");
@@ -53,7 +53,6 @@ import { PROFILE_PATH } from "../../lib/faces.js";
     const documents = buildWorkspaceDocuments({ bundle, settings: loadSettings(), staticTexts, todayIsoDate: localTodayIsoDate() });
     const guide = documents.find((entry) => entry.fileName === SPREADSHEET_GUIDE_FILE_NAME);
     guideRow.replaceChildren(...(guide ? [renderFileRow(guide)] : []));
-    if (missingStaticTexts.includes(SPREADSHEET_GUIDE_FILE_NAME)) guideRow.appendChild(Object.assign(document.createElement("p"), { className: "muted", textContent: `Warning: ${SPREADSHEET_GUIDE_FILE_NAME} did not sync — run npm run dev again.` }));
   } catch (error) {
     console.error(error);
   }

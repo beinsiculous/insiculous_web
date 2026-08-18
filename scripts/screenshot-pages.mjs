@@ -2,7 +2,7 @@
 // any page that scrolls sideways.
 //
 // The studio pages wear BaseLayout's dark mono look (the Profile page among them); FortKnight and ForkKnife each
-// bring their own skin from app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
+// bring their own skin from public/app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
 //
 // Every page is shot at both widths, and BOTH passes measure the document's horizontal overflow: a viewport that
 // scrolls sideways is a layout bug at any size, not a preference, so a non-zero reading is reported per page and

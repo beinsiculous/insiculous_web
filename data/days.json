@@ -1,0 +1,175 @@
+{
+  "$schema": "./schema/days.schema.json",
+  "order": [
+    "sun-a",
+    "mon-b",
+    "tue-a",
+    "wed-b",
+    "thu-a",
+    "fri-b",
+    "sat-a",
+    "sun-b",
+    "mon-a",
+    "tue-b",
+    "wed-a",
+    "thu-b",
+    "fri-a",
+    "sat-b"
+  ],
+  "days": {
+    "sun-a": {
+      "index": 0,
+      "week": 1,
+      "weekday": "sunday",
+      "variant": "A",
+      "label": "Sunday A",
+      "shortKey": "Sun_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "mon-b": {
+      "index": 1,
+      "week": 1,
+      "weekday": "monday",
+      "variant": "B",
+      "label": "Monday B",
+      "shortKey": "Mon_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "tue-a": {
+      "index": 2,
+      "week": 1,
+      "weekday": "tuesday",
+      "variant": "A",
+      "label": "Tuesday A",
+      "shortKey": "Tue_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "wed-b": {
+      "index": 3,
+      "week": 1,
+      "weekday": "wednesday",
+      "variant": "B",
+      "label": "Wednesday B",
+      "shortKey": "Wed_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "thu-a": {
+      "index": 4,
+      "week": 1,
+      "weekday": "thursday",
+      "variant": "A",
+      "label": "Thursday A",
+      "shortKey": "Thu_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "fri-b": {
+      "index": 5,
+      "week": 1,
+      "weekday": "friday",
+      "variant": "B",
+      "label": "Friday B",
+      "shortKey": "Fri_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "sat-a": {
+      "index": 6,
+      "week": 1,
+      "weekday": "saturday",
+      "variant": "A",
+      "label": "Saturday A",
+      "shortKey": "Sat_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "midday"
+    },
+    "sun-b": {
+      "index": 7,
+      "week": 2,
+      "weekday": "sunday",
+      "variant": "B",
+      "label": "Sunday B",
+      "shortKey": "Sun_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    },
+    "mon-a": {
+      "index": 8,
+      "week": 2,
+      "weekday": "monday",
+      "variant": "A",
+      "label": "Monday A",
+      "shortKey": "Mon_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    },
+    "tue-b": {
+      "index": 9,
+      "week": 2,
+      "weekday": "tuesday",
+      "variant": "B",
+      "label": "Tuesday B",
+      "shortKey": "Tue_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    },
+    "wed-a": {
+      "index": 10,
+      "week": 2,
+      "weekday": "wednesday",
+      "variant": "A",
+      "label": "Wednesday A",
+      "shortKey": "Wed_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    },
+    "thu-b": {
+      "index": 11,
+      "week": 2,
+      "weekday": "thursday",
+      "variant": "B",
+      "label": "Thursday B",
+      "shortKey": "Thu_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    },
+    "fri-a": {
+      "index": 12,
+      "week": 2,
+      "weekday": "friday",
+      "variant": "A",
+      "label": "Friday A",
+      "shortKey": "Fri_A",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    },
+    "sat-b": {
+      "index": 13,
+      "week": 2,
+      "weekday": "saturday",
+      "variant": "B",
+      "label": "Saturday B",
+      "shortKey": "Sat_B",
+      "mainFocus": null,
+      "blockFocus": {},
+      "appointmentBlock": "early"
+    }
+  }
+}

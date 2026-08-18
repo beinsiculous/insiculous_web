@@ -1,6 +1,6 @@
 // The site's two faces (docs/app.md): FortKnight (the fortnight schedule) and ForkKnife (the meal plan), each with
 // its own Overview / building page / Questionnaire / Assistant pages under its own path; they share the profile
-// (/profile/) and the on-device settings. Each face carries its own `theme` (the skin in app/shared/themes.css) so
+// (/profile/) and the on-device settings. Each face carries its own `theme` (the skin in public/app/shared/themes.css) so
 // the two read as different sites. The studio pages of beinsiculous.com — including /profile/ — use their own
 // layout entirely (src/layouts/BaseLayout.astro).
 import { withBase } from "./paths.js";

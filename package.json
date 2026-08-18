@@ -5,13 +5,14 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "data": "python3 scripts/validate.py && python3 scripts/build.py",
     "build": "astro build && node scripts/postbuild-check.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "verify": "npm run check && npm run build && npm run a11y",
+    "verify": "npm run test:data && npm run check && npm run build && npm run a11y",
     "a11y": "node scripts/a11y-check.mjs",
-    "deploy": "npm run verify && wrangler deploy",
-    "sync:fortknight": "node scripts/sync-fortknight.mjs"
+    "test:data": "python3 -m unittest discover tests",
+    "deploy": "npm run verify && wrangler deploy"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.5",

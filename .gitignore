@@ -1,7 +1,7 @@
 # dependencies
 node_modules/
 
-# build output
+# build output (the Astro site)
 dist/
 
 # astro generated types/cache
@@ -10,8 +10,21 @@ dist/
 # wrangler local state
 .wrangler/
 
-# adversarial-review transient artifacts
-review/
+# python
+__pycache__/
+*.pyc
+
+# demo builds of the sample data sets
+# (python3 scripts/build.py --overlay examples/<set> --out build/examples/<set>)
+build/examples/
+
+# the archived workbook and the owner's own import document: personal data, deliberately
+# outside this public repository. Kept here so a stray copy can never be committed.
+source/
+
+# adversarial-review transient artifacts (see .claude/skills/adversarial-review/)
+review/*
+!review/.gitkeep
 
 # local-only claude settings
 .claude/settings.local.json

@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema/meta.schema.json",
+  "schemaVersion": 1,
+  "cycleLengthDays": 14,
+  "epoch": {
+    "date": "2026-09-06",
+    "dayKey": "sun-a",
+    "note": "Fallback anchor only. Default resolution is season-anchored: each season restarts the fortnight on its startDayKey (seasons.json). This epoch is Spooky Season 2026 = Sunday A."
+  },
+  "timezone": "America/Phoenix"
+}

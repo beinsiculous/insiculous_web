@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "theme": "hidden-fort",
+  "epochOverride": {"date": "2026-02-30", "dayKey": "sun-a"},
+  "timezone": null,
+  "activeSeasonId": null,
+  "activeWeightsId": "family",
+  "weightsProfiles": {
+    "solo": {"id": "solo", "questionnaire": {"answers": {"startup": {"groupSize": 1}}}},
+    "family": {"id": "family", "questionnaire": {"answers": {"startup": {"groupSize": 4}}}}
+  },
+  "aiProvider": {"provider": "anthropic", "model": "claude-opus-5", "apiKey": "sk-not-real", "baseUrl": null, "authMode": "api-key"},
+  "hidden": [],
+  "overrides": {},
+  "added": [],
+  "dayNotes": {}
+}

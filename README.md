@@ -1,14 +1,25 @@
-# Be Insiculous — studio site
+# Be Insiculous
 
-Static site for [Be Insiculous](https://beinsiculous.com), an
-independent game studio / solo-dev label. Built with [Astro](https://astro.build),
-deployed to Cloudflare as a static-assets Worker. The site is wired to embed WebAssembly game
-builds from the Insiculous 2D engine (Rust) as they land — the games are
-desktop-only until the engine's web export ships.
+Everything behind [beinsiculous.com](https://beinsiculous.com), in one repository. Built with
+[Astro](https://astro.build), deployed to Cloudflare as a static-assets Worker. Three surfaces that
+deliberately read as three different websites:
+
+- **The studio** (`/`, `/games/`, `/devlog/`, `/engine/`) — an independent game studio / solo-dev
+  label, wired to embed WebAssembly builds from the Insiculous 2D engine (Rust) as they land. The
+  games are desktop-only until the engine's web export ships.
+- **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
+  organised by Norse-wheel seasons, five daily blocks and seven life categories.
+- **ForkKnife** (`/forkknife/`) — the fortnight menu: meals, the dishes for each day, and the prep
+  and cooking tasks they imply.
+
+The two planners are *faces* of one app: they share the on-device profile at `/profile/`, and they
+are data-first — JSON files are the source of truth, Markdown docs are the assistant's context, and
+light Python scripts stand in for a backend. Users bring their own AI provider; nothing is stored
+server-side. See `CLAUDE.md` for the map and `docs/` for the contracts.
 
 ## Setup
 
-Requires Node 24 (see `.nvmrc`).
+Requires Node 24 (see `.nvmrc`) and Python 3 (stdlib only — nothing to install for the data tooling).
 
 ```sh
 npm ci        # reproducible install from package-lock.json
@@ -17,15 +28,42 @@ npm run dev   # dev server at http://localhost:4321
 
 ## Commands
 
-| Command           | Action                                                        |
-| ----------------- | ------------------------------------------------------------- |
-| `npm run dev`     | Dev server with hot reload                                    |
-| `npm run build`   | Build to `dist/` + postbuild checks (see below)               |
-| `npm run preview` | Serve the production build locally                            |
-| `npm run check`   | Type-check `.astro` files and content schemas                 |
-| `npm run a11y`    | Accessibility audit of every built page (axe-core; see below) |
-| `npm run verify`  | `check` + `build` + `a11y` — run before pushing; CI gates deploys on the same |
-| `npm run deploy`  | `verify`, then `wrangler deploy` (manual release; see below)  |
+| Command             | Action                                                        |
+| ------------------- | ------------------------------------------------------------- |
+| `npm run dev`       | Dev server with hot reload                                    |
+| `npm run data`      | `validate.py` then `build.py` — run after any change under `data/` |
+| `npm run test:data` | The Python suite, including the JavaScript parity tests       |
+| `npm run build`     | Build to `dist/` + postbuild checks (see below)               |
+| `npm run preview`   | Serve the production build locally                            |
+| `npm run check`     | Type-check `.astro` files and content schemas                 |
+| `npm run a11y`      | Accessibility audit of every built page (axe-core; see below) |
+| `npm run verify`    | `test:data` + `check` + `build` + `a11y` — run before pushing; CI gates deploys on the same |
+| `npm run deploy`    | `verify`, then `wrangler deploy` (manual release; see below)  |
+
+## The planner's data and tooling
+
+```
+data/       canonical, person-neutral JSON (+ schema/) — the vocabulary and nobody's schedule
+examples/workbook/   the original workbook as a sample data set (an overlay)
+build/      the generated bundle, committed — the site imports it directly
+scripts/    *.py tooling (fk_core/ is the shared library) beside the site's own .mjs gates
+tests/      the Python suite; several tests drive src/lib/shared/*.js through node
+docs/       domain, data model, weights, generator, questionnaire, importers, app, roadmap
+src/lib/shared/   the canonical browser modules — exact twins of scripts/fk_core/
+```
+
+The edit loop is: change `data/` → `npm run data` → `npm run test:data`. **Commit `build/` too** —
+the site imports the bundle, so skipping `build.py` ships a bundle that disagrees with the data
+beside it. `src/pages/bundle.json.js` re-serves that same module at `/bundle.json` for the pages
+that fetch it on the client, so there is exactly one bundle in the repository.
+
+Several `scripts/fk_core/*.py` modules have an exact JavaScript twin in `src/lib/shared/` (dates,
+weights, the generator, the meal plan, import documents, astronomy, allocations). The file headers
+name each pair and the tests run both on the same fixtures — change one, change the other.
+
+This repository is public and holds nobody's schedule. The archived workbook and the owner's own
+import document live outside it, in a gitignored `source/`; `tests/test_build.py`'s workbook
+cross-check skips unless `FORTKNIGHT_WORKBOOK` points at that copy.
 
 ## Content
 
@@ -94,10 +132,10 @@ the machinery:
   `src/components/AccessibilityBootScript.astro`. All CSS is `rem`/`clamp`-based so large
   text reflows; breakpoints that must track the reader's font size are in `rem` (see the
   40rem/24rem blocks in `src/styles/faces.css`).
-- **Face themes are synced**: `public/app/shared/themes.css` and `src/lib/shared/*` are
-  wholesale-copied from the FortKnight repo by `scripts/sync-fortknight.mjs` — never edit
-  them here; accessibility overrides for the faces live in `src/styles/faces.css` (the
-  high-contrast block there out-specifies the synced skin on purpose).
+- **Face themes**: each face's identity (palette, textures, fonts) lives in
+  `public/app/shared/themes.css`, which `FaceLayout.astro` links *after* `src/styles/faces.css`.
+  Accessibility overrides therefore live in `faces.css`, where the high-contrast block carries one
+  extra attribute per selector to out-specify the skin on purpose.
 
 Gates that keep it true (a regression blocks the deploy, like a broken build):
 
@@ -121,10 +159,10 @@ zoom at 320px. The PR template lists this.
 `public/_headers` rules apply to the served assets.
 
 **Production deploys happen in GitHub Actions, on every push to `main`**
-(`.github/workflows/deploy.yml`): install → `npm run check` → `npm run build`
-→ `npm run a11y` → `npx wrangler deploy` → a request to the live domain to confirm it serves.
-The deploy step only runs if the checks pass, so a broken build — or an accessibility
-regression — cannot reach the site. The workflow can also be run by hand from the Actions
+(`.github/workflows/deploy.yml`): install → `python3 scripts/validate.py` → the Python suite →
+`npm run check` → `npm run build` → `npm run a11y` → `npx wrangler deploy` → a request to the live
+domain to confirm it serves. The deploy step only runs if every gate passes, so a broken build, a
+broken data rule, or an accessibility regression cannot reach the site. The workflow can also be run by hand from the Actions
 tab (`workflow_dispatch`) to redeploy the current `main`.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):

@@ -1,6 +1,6 @@
 ---
 import FaceLayout from "../../layouts/FaceLayout.astro";
-import bundle from "../../data/bundle.json";
+import bundle from "../../../build/fortknight.bundle.json";
 import { withBase } from "../../lib/paths.js";
 import { PROFILE_PATH, facePath } from "../../lib/faces.js";
 import QuestionField from "../../components/QuestionField.astro";
@@ -8,7 +8,7 @@ import { MINUTE_GRID_MINUTES, formatClockTime, minutesToTimeString, timeStringTo
 
 // The questionnaire IS FortKnight's settings. The form is rendered from data/questionnaire.json (via the bundle) —
 // the sections without a `face` (ForkKnife's questionnaire renders the "forkknife" ones); the client script turns
-// the answers into the active profile's weights file with the shared rule in app/shared/weights-rules.js. Device
+// the answers into the active profile's weights file with the shared rule in src/lib/shared/weights-rules.js. Device
 // extras (cycle anchor, settings import) live elsewhere: the stored settings file is honoured as-is, and the
 // Assistant page applies a settings file.
 const questionnaire = bundle.questionnaire;

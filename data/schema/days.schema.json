@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/days.schema.json",
+  "title": "FortKnight days",
+  "description": "The 14 day keys of the fortnight, in cycle order, with main focus, per-block focus, and appointment block.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "order": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+      },
+      "minItems": 14,
+      "maxItems": 14
+    },
+    "days": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 13
+          },
+          "week": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "weekday": {
+            "type": "string",
+            "enum": [
+              "sunday",
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday"
+            ]
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "A",
+              "B"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "shortKey": {
+            "type": "string",
+            "pattern": "^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)_[AB]$"
+          },
+          "mainFocus": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "meals",
+              "cleaning",
+              "working",
+              "spirituality-development",
+              "friends-family",
+              "health",
+              "operations",
+              "flexible",
+              null
+            ],
+            "description": "The day's leading focus, or null when the data carries no schedule (neutral baseline)."
+          },
+          "mainFocusLabel": {
+            "type": "string"
+          },
+          "blockFocus": {
+            "type": "object",
+            "properties": {
+              "early": {
+                "type": "string",
+                "enum": [
+                  "meals",
+                  "cleaning",
+                  "working",
+                  "spirituality-development",
+                  "friends-family",
+                  "health",
+                  "operations",
+                  "flexible"
+                ]
+              },
+              "midday": {
+                "type": "string",
+                "enum": [
+                  "meals",
+                  "cleaning",
+                  "working",
+                  "spirituality-development",
+                  "friends-family",
+                  "health",
+                  "operations",
+                  "flexible"
+                ]
+              },
+              "late": {
+                "type": "string",
+                "enum": [
+                  "meals",
+                  "cleaning",
+                  "working",
+                  "spirituality-development",
+                  "friends-family",
+                  "health",
+                  "operations",
+                  "flexible"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "description": "Focus per focus block; empty when the data carries no schedule (neutral baseline) — a person's grid comes from their applied import."
+          },
+          "blockFocusLabels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "appointmentBlock": {
+            "type": "string",
+            "enum": [
+              "early",
+              "midday",
+              "late"
+            ],
+            "description": "Block reserved for appointments: week 1 = midday, week 2 = early."
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "index",
+          "week",
+          "weekday",
+          "variant",
+          "label",
+          "shortKey",
+          "mainFocus",
+          "blockFocus",
+          "appointmentBlock"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "order",
+    "days"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,319 @@
+{
+  "startup": {
+    "groupSize": 1,
+    "importJson": "",
+    "import": null
+  },
+  "subjectTime": {
+    "laundry": {
+      "minutesPerDay": {
+        "min": 15,
+        "max": 60
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "decoration": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 120
+      },
+      "peripheral": true,
+      "more": false
+    },
+    "dating": {
+      "minutesPerDay": {
+        "min": 60,
+        "max": 240
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "billable-hours": {
+      "minutesPerDay": {
+        "min": 120,
+        "max": 240
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "volunteering": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 600
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "leisure-rest": {
+      "minutesPerDay": {
+        "min": 60,
+        "max": 180
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "treatments": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 0
+      },
+      "peripheral": true,
+      "more": false
+    },
+    "conferences-courses": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 60
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "creative-study-or-expression": {
+      "minutesPerDay": {
+        "min": 120,
+        "max": 240
+      },
+      "peripheral": false,
+      "more": false,
+      "goal": true,
+      "currentMinutesPerDay": 60
+    },
+    "solo-learning-research-study": {
+      "minutesPerDay": {
+        "min": 120,
+        "max": 240
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "teaching-tutoring": {
+      "minutesPerDay": {
+        "min": 60,
+        "max": 120
+      },
+      "peripheral": false,
+      "more": false
+    },
+    "exercise": {
+      "minutesPerDay": {
+        "min": 30,
+        "max": 45
+      },
+      "peripheral": false,
+      "more": false,
+      "goal": true,
+      "currentMinutesPerDay": 0
+    }
+  },
+  "sentiment": {
+    "cleaning": "struggle",
+    "friends-family": "enjoy",
+    "operations": "struggle",
+    "working": "enjoy"
+  },
+  "delegable": [
+    "meals"
+  ],
+  "essential": [
+    "health",
+    "operations",
+    "working"
+  ],
+  "wakingWindow": {
+    "start": "06:00",
+    "end": "22:00"
+  },
+  "meals": {
+    "perDay": 3,
+    "meals": [
+      {
+        "slots": [
+          "early-morning",
+          "mid-morning"
+        ]
+      },
+      {
+        "slots": [
+          "afternoon"
+        ]
+      },
+      {
+        "slots": [
+          "evening"
+        ]
+      }
+    ]
+  },
+  "yearSplit": {
+    "scheme": "custom",
+    "sectionLabel": "era",
+    "sections": [
+      {
+        "title": "Planting",
+        "kind": "spring",
+        "gregorianEquivalent": "Mar – May",
+        "durationWeeks": {
+          "min": 10,
+          "max": 12
+        },
+        "start": {
+          "marker": "weather",
+          "description": "last frost",
+          "rule": {
+            "kind": "fixed-date",
+            "month": 4,
+            "day": 15,
+            "offsetDays": 0,
+            "snap": {
+              "weekday": "monday",
+              "direction": "on-or-after"
+            }
+          }
+        },
+        "startVariant": "a"
+      },
+      {
+        "title": "Growing",
+        "kind": "summer",
+        "gregorianEquivalent": "Jun – Aug",
+        "durationWeeks": {
+          "min": 13,
+          "max": 13
+        },
+        "start": {
+          "marker": "date",
+          "description": "summer solstice",
+          "rule": {
+            "kind": "solar",
+            "term": "summer-solstice",
+            "offsetDays": 0,
+            "snap": {
+              "weekday": "monday",
+              "direction": "on-or-after"
+            }
+          }
+        },
+        "startVariant": "b"
+      },
+      {
+        "title": "Harvest",
+        "kind": "autumn",
+        "gregorianEquivalent": "Sep – Oct",
+        "durationWeeks": {
+          "min": 8,
+          "max": 9
+        },
+        "start": {
+          "marker": "holiday",
+          "description": "Labor Day",
+          "rule": {
+            "kind": "nth-weekday",
+            "month": 9,
+            "weekday": "monday",
+            "occurrence": 1,
+            "offsetDays": 0,
+            "snap": {
+              "weekday": "monday",
+              "direction": "on-or-before"
+            }
+          }
+        },
+        "startVariant": "a"
+      },
+      {
+        "title": "Rest",
+        "kind": "winter",
+        "gregorianEquivalent": "Nov – Feb",
+        "durationWeeks": {
+          "min": 16,
+          "max": 18
+        },
+        "start": {
+          "marker": "manual",
+          "description": "when the garden is put to bed",
+          "rule": {
+            "kind": "manual",
+            "offsetDays": 0,
+            "snap": null
+          }
+        },
+        "startVariant": "b",
+        "knownStarts": {
+          "2026": "2026-11-15"
+        }
+      }
+    ]
+  },
+  "weekStart": "monday",
+  "standingAppointments": [
+    {
+      "title": "Therapy",
+      "weekdays": [
+        "tuesday",
+        "thursday"
+      ],
+      "start": "16:00",
+      "durationMinutes": 30,
+      "category": "health",
+      "cadence": {
+        "kind": "weekly"
+      }
+    },
+    {
+      "title": "Book club",
+      "weekdays": [
+        "thursday"
+      ],
+      "start": "19:00",
+      "durationMinutes": 90,
+      "category": "friends-family",
+      "cadence": {
+        "kind": "monthly-nth-weekday",
+        "nth": 1
+      }
+    },
+    {
+      "title": "Choir",
+      "weekdays": [
+        "wednesday"
+      ],
+      "start": "18:00",
+      "durationMinutes": 60,
+      "category": "spirituality-development",
+      "cadence": {
+        "kind": "every-other-week",
+        "firstDate": "2026-10-14"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Take out the bins",
+      "weekdays": [
+        "tuesday"
+      ],
+      "cadence": {
+        "kind": "weekly"
+      },
+      "timeOfDay": "evening",
+      "durationMinutes": 10,
+      "category": "cleaning"
+    }
+  ],
+  "appointmentWeekdays": [
+    "tuesday",
+    "thursday"
+  ],
+  "practices": [
+    "meditation",
+    "introspection"
+  ],
+  "agendaScope": "subjects",
+  "restDays": [
+    "saturday",
+    "sunday"
+  ],
+  "energyPeak": "morning",
+  "context": "Two kids at school on weekdays; deep cleaning every other Saturday (week B)."
+}

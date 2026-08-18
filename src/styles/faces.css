@@ -20,7 +20,7 @@
 
 /* ---------- theme ---------- */
 /* :root above is the base palette (a fallback seen only if themes.css fails to load). Each face's
-   identity (palette, textures, fonts) lives in app/shared/themes.css, loaded after this file;
+   identity (palette, textures, fonts) lives in public/app/shared/themes.css, loaded after this file;
    their *layout* rules and cursors are at the bottom of this file. */
 
 /* ---------- base ---------- */
@@ -87,10 +87,10 @@ main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 
 
 /* ---------- fortnight grid ---------- */
 .fortnight-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 0.5rem; }
-/* The two 900px queries in this file stay in px on purpose: app/shared/themes.css is mirrored from the FortKnight
-   repository and cannot be edited here, and its own `max-width: 900px` (the ForkKnife photo re-crop) has to fire at
-   the same width as ForkKnife's nav squeeze below. Everything else here is in rem — see the note at the phone
-   block — but these two cannot drift from a file this repository does not own. */
+/* The two 900px queries in this file stay in px on purpose: they have to fire at exactly the same width as
+   public/app/shared/themes.css's own `max-width: 900px` (the ForkKnife photo re-crop) and as ForkKnife's nav
+   squeeze below. Everything else here is in rem — see the note at the phone block — but these three cannot
+   drift from each other, so changing one means changing all three. */
 @media (max-width: 900px) { .fortnight-grid { grid-template-columns: repeat(2, 1fr); } }
 .day-card {
   display: block; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem;
@@ -618,9 +618,8 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 
 /* ---------- high contrast ---------- */
 /* The header's Aa control sets data-contrast="high" on <html> (AccessibilityControls.astro).
-   themes.css is synced from the FortKnight repo and cannot be edited here, and it loads AFTER
-   this file — so each selector below carries one more attribute than its :root[data-theme="…"]
-   rules to out-specify it in the cascade. Solid black panels, white ink, no photograph. */
+   public/app/shared/themes.css loads AFTER this file — so each selector below carries one more
+   attribute than its :root[data-theme="…"] rules to out-specify it in the cascade. Solid black panels, white ink, no photograph. */
 :root[data-theme="fort-knight"][data-contrast="high"] {
   --background: #000000; --panel: #000000; --panel-soft: #161310; --plank: #000000; --card: #000000;
   --ink: #ffffff; --muted: #e8e1d1; --nav-ink: #ffffff; --line: #a08a68;
