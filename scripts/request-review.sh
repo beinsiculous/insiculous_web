@@ -9,14 +9,16 @@
 # Writes the review to --out (default: review/review-N.md, N auto-incremented)
 # and prints the output path on stdout so callers can capture it.
 #
-# Reviewer invocation (verified against installed CLIs, Jul 2026):
+# Reviewer invocation (re-verified against installed CLIs, Aug 2026):
 #   claude: prompt piped on stdin to `claude -p`, response on stdout.
-#   kimi:   prompt piped on stdin to `kimi --quiet` (= --print --output-format
-#           text --final-message-only). NOTE: kimi's print mode auto-approves
-#           tool calls, so --work-dir is pinned to review/ to scope any tool
-#           use. Widening it to the repo root would let kimi read surrounding
-#           code (better regression context) at the cost of auto-approved
-#           write access — kept conservative on purpose.
+#   kimi:   prompt passed as the argument to `kimi -p` with --output-format text
+#           (-p is already non-interactive and cannot be combined with --auto).
+#           kimi-code dropped
+#           --quiet/--print/--final-message-only and, importantly, --work-dir,
+#           so the scoping that flag used to give is done by running kimi with
+#           its cwd set to review/ instead. Same trade as before: kimi cannot
+#           read the surrounding code (weaker regression context) but nothing
+#           outside review/ is exposed to auto-approved tool use.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -67,13 +69,16 @@ if [[ -z "$OUT" ]]; then
 fi
 
 echo "==> reviewer ($REVIEWER) critiquing $ARTIFACT -> $OUT" >&2
-{
+PROMPT="$(
     cat "$PROMPT_FILE"
     printf '\n=== %s UNDER REVIEW ===\n' "$LABEL"
     cat "$ARTIFACT"
-} | case "$REVIEWER" in
-        claude) claude -p ;;
-        kimi)   kimi --quiet --work-dir "$REVIEW_DIR" ;;
-    esac > "$OUT"
+)"
+
+case "$REVIEWER" in
+    claude) printf '%s' "$PROMPT" | claude -p > "$OUT" ;;
+    # cd into review/ so any auto-approved tool call is confined there.
+    kimi)   ( cd "$REVIEW_DIR" && kimi --output-format text -p "$PROMPT" ) > "$OUT" ;;
+esac
 
 echo "$OUT"
