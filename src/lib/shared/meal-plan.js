@@ -48,6 +48,12 @@ export function canTakeLeftovers(sourceMeal, targetMeal) {
   return (sourceMeal.slots || []).some((slot) => LEFTOVER_SOURCE_SLOTS.includes(slot)) && (targetMeal.slots || []).some((slot) => LEFTOVER_TARGET_SLOTS.includes(slot));
 }
 
+/** A dish's own answer to "does this one need prepping / cooking?": true or false override the meal, anything else
+ *  (absent, null) means follow the meal. Kept tri-state so an override reads as an override, never as a "no" flag. */
+export function stepOverride(value) {
+  return typeof value === "boolean" ? value : null;
+}
+
 /** [[meal slug, day key]] the item occupies: the first serving at its meal, the leftovers at leftoversMeal or the same meal. */
 export function itemServings(item) {
   const servings = [[item.meal, item.days[0]]];
@@ -117,7 +123,7 @@ export function normalizeMealPlan(document, meals) {
       }
     }
     const notes = item.notes;
-    items.push({ id: itemId(slug, days, leftoversMeal), meal: slug, dish, days, leftoversMeal, notes: notes ? String(notes).trim() : null });
+    items.push({ id: itemId(slug, days, leftoversMeal), meal: slug, dish, days, leftoversMeal, notes: notes ? String(notes).trim() : null, needsPrepped: stepOverride(item.needsPrepped), needsCooked: stepOverride(item.needsCooked) });
   });
   // One dish per meal per day: a later item that lands on a taken (meal, day) is reported and dropped (nothing invalid is stored).
   const seen = {};
@@ -187,7 +193,9 @@ export function weekdayOf(dayKey) {
 
 /** The menu's prep and cook tasks as import-document (version 2) tasks — what ForkKnife creates for the person to
  *  paste into Apply from assistant. Per item: the meal needs cooking -> "Cook <dish> (<Meal>)" on the first serving
- *  at the meal's slot; needs prepping -> "Prep <dish> (<Meal>)" the day before, in the evening; each repeats every
+ *  at the meal's slot; needs prepping -> "Prep <dish> (<Meal>)" the day before, in the evening — unless the dish
+ *  itself opted out (`needsCooked` / `needsPrepped` false on the item, the editor's "no cooking / no prep needed"),
+ *  which drops that task and its review line together; each repeats every
  *  other week from the next date of that day key (`datesByDayKey`: day key -> ISO date), so the app's cadence lands
  *  it on the right A/B week. Returns { tasks, review }. Twin of fk_core.meal_plan.tasks_from_meal_plan. */
 export function slugsToNames(meals) {
@@ -203,14 +211,14 @@ export function tasksFromMealPlan(plan, meals, datesByDayKey) {
     if (!meal) continue;
     const name = meal.name ?? item.meal;
     const firstDay = item.days[0];
-    if (meal.needsCooked && (meal.cookMinutes ?? 0) > 0) {
+    if (meal.needsCooked && (meal.cookMinutes ?? 0) > 0 && item.needsCooked !== false) {
       const slots = meal.slots || [];
       const when = slots.length ? (SLOT_TIME_OF_DAY[slots[0]] ?? "anytime") : "anytime";
       tasks.push({ title: `Cook ${item.dish} (${name})`, weekdays: [weekdayOf(firstDay)], repeats: `every other week from ${datesByDayKey[firstDay]}`, when, lasts: `${meal.cookMinutes} min`, category: "meals" });
       const leftoversWords = item.days.length === 2 ? `; leftovers ${dayLabel(item.days[1])}` + (item.leftoversMeal ? ` as ${slugsToNames(meals)[item.leftoversMeal] ?? item.leftoversMeal}` : "") : "";
       review.push(`Cook ${item.dish} for ${name} on ${dayLabel(firstDay)} (${meal.cookMinutes} min, ${when})${leftoversWords}`);
     }
-    if (meal.needsPrepped && (meal.prepMinutes ?? 0) > 0) {
+    if (meal.needsPrepped && (meal.prepMinutes ?? 0) > 0 && item.needsPrepped !== false) {
       const prepDay = previousDayKey(firstDay);
       tasks.push({ title: `Prep ${item.dish} (${name})`, weekdays: [weekdayOf(prepDay)], repeats: `every other week from ${datesByDayKey[prepDay]}`, when: PREP_TIME_OF_DAY, lasts: `${meal.prepMinutes} min`, category: "meals" });
       review.push(`Prep ${item.dish} for ${name} on ${dayLabel(prepDay)} evening (${meal.prepMinutes} min), the day before ${dayLabel(firstDay)}`);
@@ -229,7 +237,7 @@ export function forkknifeImportDocument(plan, meals, datesByDayKey, description 
     tasks,
     skipped: [],
     review,
-    mealPlan: { items: (plan?.items || []).map((item) => ({ meal: item.meal, dish: item.dish, days: [...item.days], leftoversMeal: item.leftoversMeal ?? null, notes: item.notes ?? null })) },
+    mealPlan: { items: (plan?.items || []).map((item) => ({ meal: item.meal, dish: item.dish, days: [...item.days], leftoversMeal: item.leftoversMeal ?? null, notes: item.notes ?? null, needsPrepped: stepOverride(item.needsPrepped), needsCooked: stepOverride(item.needsCooked) })) },
   };
 }
 

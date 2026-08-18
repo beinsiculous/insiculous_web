@@ -40,7 +40,11 @@ answers, cut around fixed activities (`docs/questionnaire.md`). Flexible blocks 
 Seven categories are the units everything is weighted in: `meals`, `cleaning`, `working`,
 `spirituality-development`, `friends-family`, `health`, `operations`. Each has subjects
 (e.g. `laundry` → cleaning, `pet-care` → friends-family) listed in `data/categories.json`.
-`flexible` is a pseudo-focus meaning "deliberately unassigned"; it is not a category.
+`flexible` is a pseudo-focus meaning "deliberately unassigned"; it is not a category. It is not a leftover
+either: `flexibleShare` is the part of the waking window the seven categories did not claim (`docs/weights.md`
+rule 3) — the fortnight's open time, where rest days, seasonal and occasional work, and anything not yet
+scheduled live. A subject on the `section` cadence, and one marked "not often", declare nothing precisely so
+that this time stays free for them.
 
 ## Seasons — the Norse wheel, flipped for Arizona
 The year is five seasons. Each starts on a Sunday chosen by a **rule** (so any year can be

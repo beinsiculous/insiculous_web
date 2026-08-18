@@ -1,6 +1,6 @@
 {
   "buildInfo": {
-    "buildHash": "78b816c4a9566fe0",
+    "buildHash": "8cd08f3d68218ef7",
     "schemaVersion": 1,
     "builtFrom": [
       "meta.json",
@@ -590,7 +590,7 @@
     "flexibleFocus": {
       "key": "flexible",
       "label": "Flexible",
-      "note": "Pseudo-focus used by days/blocks that are intentionally unassigned; not a category."
+      "note": "Pseudo-focus used by days/blocks that are intentionally unassigned; not a category. Its share (weights.flexibleShare) is the waking window the categories did not claim: rest days, seasonal and occasional work, catching up, and time kept open."
     },
     "subjects": {
       "cooking": {
@@ -868,7 +868,7 @@
       "minutes": {
         "min": 600,
         "max": 1080,
-        "step": 15
+        "step": 5
       },
       "track": {
         "start": "00:00",
@@ -878,10 +878,10 @@
     "blockSplit": {
       "standoutMultiplier": 1.25,
       "maxFocusBlocks": 4,
-      "cutGridMinutes": 15,
+      "cutGridMinutes": 5,
       "cutSearchMinutes": 90,
-      "straddlePenalty": 4,
-      "edgeBonus": 2,
+      "straddlePenalty": 60,
+      "edgeBonus": 30,
       "focusBlockKeys": {
         "1": [
           "flexible"
@@ -916,7 +916,7 @@
         "evening": "last",
         "varies": null
       },
-      "sessionGridMinutes": 15,
+      "sessionGridMinutes": 5,
       "maxSessionMinutes": 120,
       "practiceMinutes": 15,
       "mealMinutes": 30,
@@ -946,7 +946,7 @@
       "minutes": {
         "min": 0,
         "max": 180,
-        "step": 15
+        "step": 5
       },
       "defaultPrepMinutes": 15,
       "defaultCookMinutes": 30
@@ -2264,6 +2264,16 @@
           "label": "B (week 2 of the fortnight)"
         }
       ],
+      "subjectCadences": [
+        {
+          "id": "fortnight",
+          "label": "every fortnight"
+        },
+        {
+          "id": "section",
+          "label": "every section of the year"
+        }
+      ],
       "agendaScopes": [
         {
           "id": "subjects",
@@ -2584,7 +2594,7 @@
         },
         "peripheralByDefault": false,
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "planning": {
         "minutesPerDay": {
@@ -2596,8 +2606,12 @@
           "max": 15
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 2
+        },
         "moreMax": 90,
-        "step": 15
+        "step": 5
       },
       "preparation": {
         "minutesPerDay": {
@@ -2609,8 +2623,12 @@
           "max": 30
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 7
+        },
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "food-provisioning": {
         "minutesPerDay": {
@@ -2622,8 +2640,12 @@
           "max": 45
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 2
+        },
         "moreMax": 480,
-        "step": 15
+        "step": 5
       },
       "laundry": {
         "minutesPerDay": {
@@ -2635,8 +2657,12 @@
           "max": 30
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 3
+        },
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "decoration": {
         "minutesPerDay": {
@@ -2649,7 +2675,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "dishes": {
         "minutesPerDay": {
@@ -2662,7 +2688,7 @@
         },
         "peripheralByDefault": false,
         "moreMax": 180,
-        "step": 15
+        "step": 5
       },
       "organization": {
         "minutesPerDay": {
@@ -2674,8 +2700,12 @@
           "max": 15
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 3
+        },
         "moreMax": 120,
-        "step": 15
+        "step": 5
       },
       "packing": {
         "minutesPerDay": {
@@ -2688,7 +2718,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 180,
-        "step": 15
+        "step": 5
       },
       "sanitization": {
         "minutesPerDay": {
@@ -2700,8 +2730,12 @@
           "max": 30
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 4
+        },
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "billable-hours": {
         "minutesPerDay": {
@@ -2709,12 +2743,16 @@
           "max": 720
         },
         "default": {
-          "min": 0,
-          "max": 480
+          "min": 420,
+          "max": 540
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 10
+        },
         "moreMax": 1440,
-        "step": 15
+        "step": 5
       },
       "public-relations-management": {
         "minutesPerDay": {
@@ -2726,8 +2764,12 @@
           "max": 30
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 5
+        },
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "networking": {
         "minutesPerDay": {
@@ -2740,7 +2782,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "transportation-commute": {
         "minutesPerDay": {
@@ -2752,8 +2794,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 10
+        },
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "volunteering": {
         "minutesPerDay": {
@@ -2766,7 +2812,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 1200,
-        "step": 15
+        "step": 5
       },
       "coaching-mentoring": {
         "minutesPerDay": {
@@ -2778,8 +2824,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 4
+        },
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "conferences-courses": {
         "minutesPerDay": {
@@ -2792,7 +2842,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 720,
-        "step": 15
+        "step": 5
       },
       "creative-study-or-expression": {
         "minutesPerDay": {
@@ -2804,8 +2854,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 4
+        },
         "moreMax": 720,
-        "step": 15
+        "step": 5
       },
       "solo-learning-research-study": {
         "minutesPerDay": {
@@ -2817,8 +2871,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 5
+        },
         "moreMax": 720,
-        "step": 15
+        "step": 5
       },
       "seeking-council-advisement": {
         "minutesPerDay": {
@@ -2831,7 +2889,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "teaching-tutoring": {
         "minutesPerDay": {
@@ -2844,7 +2902,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 720,
-        "step": 15
+        "step": 5
       },
       "extracurricular-organization": {
         "minutesPerDay": {
@@ -2856,8 +2914,12 @@
           "max": 15
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 2
+        },
         "moreMax": 120,
-        "step": 15
+        "step": 5
       },
       "dating": {
         "minutesPerDay": {
@@ -2869,8 +2931,12 @@
           "max": 120
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 4
+        },
         "moreMax": 960,
-        "step": 15
+        "step": 5
       },
       "event-party-get-together-planning": {
         "minutesPerDay": {
@@ -2883,7 +2949,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 60,
-        "step": 15
+        "step": 5
       },
       "pet-care": {
         "minutesPerDay": {
@@ -2896,7 +2962,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 120,
-        "step": 15
+        "step": 5
       },
       "relationship-management": {
         "minutesPerDay": {
@@ -2909,7 +2975,7 @@
         },
         "peripheralByDefault": false,
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "appointments": {
         "minutesPerDay": {
@@ -2921,8 +2987,12 @@
           "max": 30
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 2
+        },
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "exercise": {
         "minutesPerDay": {
@@ -2934,8 +3004,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 4
+        },
         "moreMax": 150,
-        "step": 15
+        "step": 5
       },
       "hygiene": {
         "minutesPerDay": {
@@ -2948,7 +3022,7 @@
         },
         "peripheralByDefault": false,
         "moreMax": 120,
-        "step": 15
+        "step": 5
       },
       "journaling": {
         "minutesPerDay": {
@@ -2961,7 +3035,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 60,
-        "step": 15
+        "step": 5
       },
       "leisure-rest": {
         "minutesPerDay": {
@@ -2974,7 +3048,7 @@
         },
         "peripheralByDefault": false,
         "moreMax": 1440,
-        "step": 15
+        "step": 5
       },
       "medical-provisioning": {
         "minutesPerDay": {
@@ -2987,7 +3061,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 90,
-        "step": 15
+        "step": 5
       },
       "therapies": {
         "minutesPerDay": {
@@ -3000,7 +3074,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 120,
-        "step": 15
+        "step": 5
       },
       "treatments": {
         "minutesPerDay": {
@@ -3013,7 +3087,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 1440,
-        "step": 15
+        "step": 5
       },
       "budgeting": {
         "minutesPerDay": {
@@ -3025,8 +3099,12 @@
           "max": 15
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 1
+        },
         "moreMax": 180,
-        "step": 15
+        "step": 5
       },
       "errands": {
         "minutesPerDay": {
@@ -3038,8 +3116,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 4
+        },
         "moreMax": 360,
-        "step": 15
+        "step": 5
       },
       "financial-and-life-planning": {
         "minutesPerDay": {
@@ -3051,8 +3133,12 @@
           "max": 15
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "section",
+          "daysPerPeriod": 2
+        },
         "moreMax": 180,
-        "step": 15
+        "step": 5
       },
       "maintenance": {
         "minutesPerDay": {
@@ -3064,8 +3150,12 @@
           "max": 60
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 2
+        },
         "moreMax": 720,
-        "step": 15
+        "step": 5
       },
       "product-service-research": {
         "minutesPerDay": {
@@ -3078,7 +3168,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 180,
-        "step": 15
+        "step": 5
       },
       "provisioning": {
         "minutesPerDay": {
@@ -3090,8 +3180,12 @@
           "max": 30
         },
         "peripheralByDefault": false,
+        "cadenceByDefault": {
+          "cadence": "fortnight",
+          "daysPerPeriod": 2
+        },
         "moreMax": 240,
-        "step": 15
+        "step": 5
       },
       "stewardship": {
         "minutesPerDay": {
@@ -3104,7 +3198,7 @@
         },
         "peripheralByDefault": true,
         "moreMax": 720,
-        "step": 15
+        "step": 5
       }
     },
     "sections": [

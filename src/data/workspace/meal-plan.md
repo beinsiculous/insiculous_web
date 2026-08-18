@@ -45,7 +45,8 @@ schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (
     {"meal": "Breakfast", "dish": "Overnight oats", "days": ["Sunday A", "Tuesday A"]},
     {"meal": "Dinner", "dish": "Lentil soup", "days": ["sun-a", "wed-b"], "notes": "double the batch"},
     {"meal": "Dinner", "dish": "Tacos", "days": ["Saturday B", "Monday B"], "leftoversMeal": "Breakfast"},
-    {"meal": "Dinner", "dish": "Roast chicken", "days": ["Monday A"]}
+    {"meal": "Dinner", "dish": "Roast chicken", "days": ["Monday A"]},
+    {"meal": "Dinner", "dish": "Cheese and crackers", "days": ["Friday A"], "needsPrepped": false, "needsCooked": false}
   ]
 }
 ```
@@ -56,6 +57,11 @@ schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (
 - `leftoversMeal` — optional: the meal that eats the leftovers when it is not the same meal (name or slug; the
   cross-meal rule above applies).
 - `notes` — optional free text (shown on the ForkKnife list).
+- `needsPrepped` / `needsCooked` — optional, this **dish's** own answer where it differs from its meal's:
+  `false` means this dish needs no prepping / no cooking, so no Prep / Cook task is made for it (the editor's
+  *no prep needed* and *no cooking needed* checkboxes); `true` means "as the meal says". Absent or `null` follows
+  the meal, which is every dish that has never been told otherwise. A dish cannot opt *in* to a step its meal does
+  not have — the meal decides whether the step exists and how many minutes it takes, the dish only opts out.
 - `source` and top-level `notes` are optional provenance.
 
 Applying (the Assistant page, step 2 — it recognises `kind: "meal-plan"`; ForkKnife only downloads the template): every item is
@@ -70,6 +76,8 @@ The profile is re-derived and saved.
   `lasts` = the meal's `cookMinutes`;
 - a meal that **needs prepping** → `Prep <dish> (<Meal>)` on the weekday **before** the first serving (Saturday B
   before Sunday A — the fortnight wraps), `when: "evening"`, `lasts` = `prepMinutes`;
+- **a dish that opted out gets neither**: `needsCooked: false` on the item drops its Cook task, `needsPrepped: false`
+  its Prep task, and the matching `review` line goes with it, so the review and the tasks can never disagree;
 - every task `repeats: "every other week from <date>"` where the date is the next calendar date of that day key by
   the person's own seasons (`personDayKeyResolver`), so the app's every-other-week cadence lands it on the right
   A/B week; `category: "meals"`; leftover days get nothing.
@@ -81,8 +89,8 @@ and a link to the Assistant page.
 
 ## What reads the menu
 - **Spoon Feed** (`/forkknife/spoon-feed/`) and **Build** (`/fortknight/build/`) — where it is edited by hand: the
-  same editor on both, one section per meal with its coverage, its dishes, and one entry row (dish, first day,
-  leftovers day, *Add*).
+  same editor on both, one section per meal with its coverage, its dishes — each with the *no prep needed* /
+  *no cooking needed* checkboxes its meal's steps earn it — and one entry row (dish, first day, leftovers day, *Add*).
 - **ForkKnife's Overview** (`/forkknife/`) — the 14-day menu grid (one line per meal per day, `menuForDay`) and the tasks.
 - **Day pages** (`/fortknight/days/<dayKey>/`) — the menu line: "Breakfast: Overnight oats · Dinner: Lentil soup
   (leftovers) · Snack: —" (`dayPlan().menu`); the applied tasks show in their blocks (` · task`).

@@ -261,7 +261,7 @@ presets get rules too but are not customizable, and their vague markers stay bla
 | Day and year 3 year split | `yearSplit {scheme, sectionLabel, sections[{title, kind?, gregorianEquivalent?, durationWeeks?{min,max}, start{marker, description, rule?}, startVariant?, knownStarts?}]}` | `yearSplit` | each scheme (`options.yearSplitSchemes`) has a one-sentence `blurb`, shown under the option only while it is selected (the question carries no note); picking a preset takes its sections from `template` without showing them (they stay in the answers), **only Custom opens the section editor, and it starts from FortKnight's own five seasons** (`templateFrom: "seasons"` → `year_split_from_seasons()` / `yearSplitFromSeasons()` map `data/seasons.json`); `sectionLabel` = what a section is called (season, era, term…); markers: `date`, `rule`, `holiday`, `weather`, `manual` (`options.sectionMarkers`); 2–13 sections; default quarters (Q1–Q4). This is the seed for a profile's own seasons — the generator will turn it into `seasons.json`-shaped seasons later; **each section's `start.rule` is a computable start** (see "Section start rules" below): presets carry rules only where the marker is exact (quarters/months = the 1st, astrological dates, equinox/solstice, the Nth new moon), vague ones stay `null`; `startVariant` (`a`/`b`, default a) + `weekStart` give the section's start day key; `knownStarts {year: date}` are the typed starts of `manual` sections. The person's sections become their own `seasons.json`-shaped seasons (`seasons_from_year_split` / `seasonsFromYearSplit`) and drive date resolution on `/`, `/days/` and in the CLI |
 | Your week 1 appointment weekdays | `appointmentWeekdays[]` | `appointmentWeekdays` | empty = any day |
 | Your week 2 rest days | `restDays[]` | `restDays` | weekday ids (`options.weekdays`); empty = every day alike; no share effect — the generator pins those days' cells to `flexible` and proposes no sessions on them (`docs/generator.md`) |
-| Focus 1 hours per subject | `subjectTime[subject] = {minutesPerDay:{min,max}, peripheral, more, goal, currentMinutesPerDay?}` | `subjects[subject].{minutesPerDay, peripheral, goal, currentMinutesPerDay}` and, summed, `categories[*].share` | slider bounds in `questionnaire.subjectSliders`, integer minutes; "not often" = `peripheral`; "more" raises the ceiling to `moreMax` (twice the normal ceiling, capped at 24 h); **goal** = wanted in the schedule but not done at that level yet — the form then asks for the current actual; shares use the goal range; the generator's proposed sessions size each subject by its range midpoint within its category (`docs/generator.md`); the ramp from current to goal is open |
+| Focus 1 hours per subject | `subjectTime[subject] = {minutesPerDay:{min,max}, peripheral, more, goal, everyday, cadence?, daysPerPeriod?, specificDaysNote?, notOftenNote?, currentMinutesPerDay?}` | `subjects[subject].{minutesPerDay, peripheral, goal, currentMinutesPerDay, everyday, cadence, daysPerPeriod, specificDaysNote, notOftenNote}` and, summed, `categories[*].share` | slider bounds in `questionnaire.subjectSliders`, integer minutes on a 5-minute grid; **everyday** (the default) contributes the range midpoint, and unticking it asks how often instead — see "Cadence" below; "not often" = `peripheral`; "more" raises the ceiling to `moreMax` (twice the normal ceiling, capped at 24 h); **goal** = wanted in the schedule but not done at that level yet — the form then asks for the current actual; shares use the goal range; the generator's proposed sessions size each subject by its range midpoint within its category (`docs/generator.md`); the ramp from current to goal is open |
 | Focus 2 want more | — (superseded by the goal toggle; not asked) | `categories[*].wantMore` = any subject of the category has `goal: true`; ×`wantMoreMultiplier` (1.25) on that category's raw minutes | the draft's Q2 stays above for the record |
 | Focus 3 struggle / enjoy | `sentiment{category: struggle|enjoy}` | `categories[*].sentiment` (`neutral` when unmarked) | mutually exclusive per category |
 | Focus 4 hand off | `delegable[]` | `categories[*].delegable` | for the generator's emergency / vacation mode |
@@ -280,7 +280,27 @@ The form must be skimmable and submittable untouched, so it opens as a *typical 
   `peripheralByDefault` pre-ticks "not often" for atypical subjects (decoration, packing,
   networking, volunteering, conferences, seeking council, teaching, event planning, pet care,
   journaling, medical provisioning, therapies, treatments, product research, stewardship);
-  PR (includes social media) and coaching/mentoring (includes parenting) are typical;
+- **the typical person fits inside their own day.** `cadenceByDefault` unticks "everyday" for the 21
+  subjects nobody does daily, so the day declares **846 of its 960 minutes (88%)** and opens with
+  **1 h 54 min flexible** rather than the 113% it used to declare (everything then scaled down to fit
+  and nothing was ever left over). Durations were not trimmed to get there — only frequencies, at
+  roughly the rate time-use surveys find people doing each thing:
+
+  | | days a fortnight |
+  |---|---|
+  | meals | planning 2 · preparation 7 · food provisioning 2 (cooking stays daily) |
+  | cleaning | laundry 3 · organization 3 · sanitization 4 (dishes stays daily) |
+  | working | **billable hours 10** · commute 10 · PR 5 |
+  | spirituality & development | coaching/mentoring 4 · creative study 4 · solo learning 5 |
+  | friends & family | dating 4 · extracurricular organisation 2 (relationship management stays daily) |
+  | health | exercise 4 · appointments 2 (hygiene and leisure/rest stay daily) |
+  | operations | errands 4 · maintenance 2 · provisioning 2 · budgeting 1 · financial & life planning **every section**, 2 days |
+
+  `billable-hours` went the other way: `0–480` every day was a 28-hour week, so it is now `420–540`
+  on 10 days a fortnight — a real 40-hour week, and the commute rides the same ten days. `leisure-rest`
+  (120–240 daily) is deliberately untouched: it already sits below what surveys report for leisure, and
+  trimming rest to make room would have misrepresented the day. `food-provisioning` at 2 days a
+  fortnight matches the `shoppingCadence: "weekly"` default the same file carries;
 - `defaultAnswers` pre-ticks category boxes — `sentiment: {working: struggle, friends-family: enjoy}`,
   `delegable: [meals]`, `essential: [health, working]` — so Save passes the 1–3 rule untouched;
   `agendaScope: categories`, so the untouched day is unscheduled + early/midday/late; `restDays: [saturday]`,
@@ -291,6 +311,28 @@ The form must be skimmable and submittable untouched, so it opens as a *typical 
 `default_answers()` / `defaultAnswers()` in both ports read these; retune the numbers in data.
 Every subject has a `description` in `categories.json`; the form shows it as a tooltip on the
 subject name (category names get a tooltip listing their subjects).
+
+### Cadence (Focus 1)
+The slider always means **one day**: *how long can you spend on this in a single day*. What changes is how many
+days. A subject is in exactly one of four states:
+
+| state | asks | contributes to its category |
+|---|---|---|
+| **everyday** (default, `everyday: true`) | the slider | the range midpoint |
+| **every fortnight** (`cadence: "fortnight"`) | the slider + `daysPerPeriod` (1–13) + an optional `specificDaysNote` | `midpoint × daysPerPeriod ÷ 14` |
+| **every section** (`cadence: "section"` — the person's own year-split unit, labelled with their `sectionLabel`) | the slider + `daysPerPeriod` (1–`sectionDays`−1) + an optional `specificDaysNote` | nothing |
+| **not often** (`peripheral: true`) | an optional `notOftenNote` | nothing |
+
+A section is the year shared evenly between the person's sections (`section_days_from_year_split` /
+`sectionDaysFromYearSplit`; 365.25 ÷ 4 = 91 days for quarters). Sections' own `durationWeeks` are a rough label
+from their scheme — gregorian-months says four weeks for a 30-day month — so the year is divided instead.
+
+The two states that contribute nothing are the point of the feature, not a gap in it: shares are what was
+*declared* (rule 3 in `docs/weights.md`), so minutes a person moves off "everyday" are not handed to the other
+categories — they stay in `flexibleShare`, the fortnight's open time, which is where seasonal and occasional
+work actually gets done. Both notes are free text for the person's assistant, capped at 300 characters
+(`SUBJECT_NOTE_MAX_LENGTH`); nothing but the workspace files reads them. `answersProblem` (the app's save gate)
+checks the cadence id, the day count against its period, and the note length.
 
 ### Category sliders (UI only)
 Each category is one visible row — not often · least–most range · more — with its subjects
@@ -345,13 +387,14 @@ Subjects missing from `subjectTime` take their slider defaults (full range, not 
    *block key* — not the `flexible` pseudo-focus of `categories.json` — and the UI shows that
    block without a header). Focus block keys by count: 1 `flexible`; 2 `early, late`;
    3 `early, midday, late`; 4 `early, midday, afternoon, late`.
-6. **Cuts** start from an even split of the waking window and snap onto a `cutGridMinutes` (15)
+6. **Cuts** start from an even split of the waking window and snap onto a `cutGridMinutes` (5)
    grid within ± `cutSearchMinutes` (90). **Anchors** are the applied import document's
    `fixedActivities` (`priority 1` or `flexibility "no"`, timed; `source: "import"`) plus the
    profile's standing appointments, pooled across the fortnight — a data set's own activities
    never anchor a person's split (only an applied import document does); a candidate
-   cut costs `distance/grid + straddlePenalty × anchors it falls inside − edgeBonus × anchor edges
-   it lands on`. Straddling is allowed (soft penalty) as long as the activity is in scope; an
+   cut costs `distance in minutes + straddlePenalty (60) × anchors it falls inside − edgeBonus (30)
+   × anchor edges it lands on` — all three terms are minutes, so `cutGridMinutes` can be made finer
+   without re-tuning the penalties. Straddling is allowed (soft penalty) as long as the activity is in scope; an
    anchor that starts inside the unscheduled block, or runs into it, is reported in
    `blockSplit.warnings`. Flexible blocks carry no constraints (open scope).
 7. Anchors then vote for `preferredBlocks`: the block an anchor starts in counts once for each

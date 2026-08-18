@@ -118,9 +118,17 @@ timing: null | {estimatedStart, estimatedEnd, durationMinutes}, minutes, reason,
    `focus <C>: <placed>/<target> min`.
 5. **Spillover**: flexible cells on non-rest days take the neediest subject of any category, at most
    `maxSessionMinutes` (120) per session (the same subject still neediest extends its session), priority 4, reason
-   `spillover: <C> behind by <n> min`.
-6. **Warnings** (prefixed `activities:`): one line per category whose subjects did not all fit (`<C>: <n> of <target>
-   min unplaced — not enough cells (<subject n>, …)`), meals outside the blocks, cells whose anchors leave less room
+   `spillover: <C> behind by <n> min`. Catching up is one of the three things a flexible block is for; the other
+   two are seasonal and occasional work (the subjects on the `section` cadence, and those marked "not often" —
+   `docs/questionnaire.md` → Cadence) and staying open for an appointment. A profile that declares less than its
+   waking window has a real `flexibleShare`, so more flexible cells than spillover has anything to put in: those
+   are left **empty on purpose**, and go to the person's assistant as open time rather than being filled with
+   something invented.
+6. **Warnings** (prefixed `activities:`): one line per category whose subjects did not all fit (`<C>: <n> of
+   <target> min left for flexible time — too little to fill a cell of its own (<subject n>, …)`). That is a
+   statement about where the minutes went, not a failure: a category whose subjects are mostly on a cadence
+   (errands twice a fortnight, `docs/questionnaire.md` → Cadence) is too small to win whole cells and is done in
+   flexible time instead. Also: meals outside the blocks, cells whose anchors leave less room
    than their practices and meals need (`over-committed by anchors: …` — they are still listed, a meal or a daily
    habit is not optional), categories without subjects, and `the weights carry no subjects` for a thin file (the
    workbook baseline places nothing).

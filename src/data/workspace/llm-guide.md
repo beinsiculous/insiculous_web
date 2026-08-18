@@ -51,6 +51,16 @@ your draft, carrying the machine sections beside (or instead of) the readable li
   `meals` slots and their free-text `context` for where. Alternate what should alternate between
   week A (`*-a` day keys) and week B (`*-b`); `upcomingDates` in `fortknight-data.json` tells you
   which real dates each day key falls on.
+- `flexible` cells and the periodic backlog: a cell whose focus is `flexible` is open on purpose, not a gap
+  you should fill with more of the daily rhythm. Its time is what `flexibleShare` reserves — rest days,
+  catching up, staying free for an appointment, and the work that does not happen every day. That backlog is
+  in `weights.<id>.json` → `subjects`: an entry with `everyday: false` and `cadence: "section"` happens on
+  `daysPerPeriod` days of each section of their year, and one with `peripheral: true` is rarer still. Both
+  declare no daily minutes on purpose, so neither shows in any category's share — read their
+  `specificDaysNote` and `notOftenNote` (the person's own words: "Every other weekend", "When it breaks") and
+  put them in flexible cells, in the section they belong to. A subject with `cadence: "fortnight"` is
+  different: it *is* in the shares, on `daysPerPeriod` of the fortnight's fourteen days, so place it on that
+  many days rather than every day.
 - `fixedActivities`: only timed things that must anchor a day (work or school hours, a lesson) —
   activity shape from `data-model.md`, `priority: 1` or `flexibility: "no"`; everything else is
   focus, not a fixed activity.

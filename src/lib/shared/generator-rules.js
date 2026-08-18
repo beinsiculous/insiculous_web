@@ -1,7 +1,7 @@
 // Weights -> a proposed blockFocusGrid. Pure port of scripts/fk_core/generator.py — keep both in sync;
 // tests/test_generator.py runs both on the same fixtures and asserts identical output. The rule is written
 // out in the Python module's docstring and in docs/generator.md; tunables live in questionnaire.generator.
-import { DAY_KEY_ORDER, FLEXIBLE_FOCUS, WEEKDAY_NAMES } from "./fortknight-rules.js";
+import { DAY_KEY_ORDER, FLEXIBLE_FOCUS, WEEKDAY_NAMES, subjectDailyMinutes } from "./fortknight-rules.js";
 import { MINUTES_PER_DAY, blockKeyForTime, minutesToTimeString, timeStringToMinutes } from "./clock.js";
 import { dayLabel, menuForDay } from "./meal-plan.js";
 
@@ -17,7 +17,7 @@ export const DEFAULT_GENERATOR = {
   seasonFocusWeight: 0.1,
   alternationWeight: 0.1,
   energyPeakBlock: { morning: "first", midday: "middle", evening: "last", varies: null },
-  sessionGridMinutes: 15,
+  sessionGridMinutes: 5,
   maxSessionMinutes: 120,
   practiceMinutes: 15,
   mealMinutes: 30,
@@ -257,9 +257,12 @@ export function subjectPools(weights, categories) {
     const pool = [];
     for (const subjectId of categories.categories[categoryKey].subjects) {
       const subject = subjects[subjectId];
-      if (!subject || subject.peripheral) continue;
-      const minutesRange = subject.minutesPerDay || {};
-      pool.push([subjectId, ((minutesRange.min ?? 0) + (minutesRange.max ?? 0)) / 2]);
+      if (!subject || !subject.minutesPerDay) continue;
+      // The same weight that built the category's share; subjects contributing nothing (peripheral, or on the
+      // section cadence) are done in flexible time, not in cells.
+      const dailyMinutes = subjectDailyMinutes(subject);
+      if (dailyMinutes <= 0) continue;
+      pool.push([subjectId, dailyMinutes]);
     }
     pools[categoryKey] = pool;
   }
@@ -463,7 +466,8 @@ export function generateActivities(weights, grid, questionnaire, { categories, d
       const unplacedTotal = short.reduce((sum, [, minutes]) => sum + minutes, 0);
       const categoryTarget = pools[categoryKey].filter(([subjectId]) => subjectId in target).reduce((sum, [subjectId]) => sum + target[subjectId], 0);
       const details = short.map(([subjectId, minutes]) => `${subjectLabels[subjectId] ?? subjectId} ${minutes}`).join(", ");
-      warnings.push(`activities: ${categoryLabels[categoryKey] ?? categoryKey}: ${unplacedTotal} of ${categoryTarget} min unplaced — not enough cells (${details})`);
+      // Not a failure — a category too small to win whole cells (errands twice a fortnight) is done in flexible time.
+      warnings.push(`activities: ${categoryLabels[categoryKey] ?? categoryKey}: ${unplacedTotal} of ${categoryTarget} min left for flexible time — too little to fill a cell of its own (${details})`);
     }
   }
   const placedMinutes = Object.fromEntries(Object.keys(target).map((subjectId) => [subjectId, { target: target[subjectId], placed: placed[subjectId] }]));
