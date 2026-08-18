@@ -2,6 +2,8 @@
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/space-grotesk';
 import '../styles/global.css';
+import AccessibilityBootScript from '../components/AccessibilityBootScript.astro';
+import AccessibilityControls from '../components/AccessibilityControls.astro';
 
 interface Props {
   title: string;
@@ -35,16 +37,20 @@ const isActive = (href: string) =>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
+    <AccessibilityBootScript />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <title>{title}</title>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <header>
-      <nav class="container">
-        <a href="/" class="wordmark">be_insiculous<span class="cursor">▌</span></a>
-        <details class="menu">
+      <nav class="container" aria-label="Main">
+        <a href="/" class="wordmark">be_insiculous<span class="cursor" aria-hidden="true">▌</span></a>
+        <div class="nav-side">
+          <AccessibilityControls />
+          <details class="menu">
           <summary>
             <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
           </summary>
@@ -59,11 +65,12 @@ const isActive = (href: string) =>
               ))
             }
           </ul>
-        </details>
+          </details>
+        </div>
       </nav>
     </header>
 
-    <main class="container">
+    <main class="container" id="main" tabindex="-1">
       <slot />
     </main>
 
@@ -71,7 +78,7 @@ const isActive = (href: string) =>
       <div class="container">
         <p>
           © {new Date().getFullYear()} Be Insiculous — games &amp; engine by one
-          stubborn developer.
+          stubborn developer. · <a href="/accessibility/">Accessibility</a>
         </p>
       </div>
     </footer>
@@ -95,6 +102,13 @@ const isActive = (href: string) =>
     gap: 1rem;
     padding-top: 0.9rem;
     padding-bottom: 0.9rem;
+  }
+
+  .nav-side {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
   }
 
   .wordmark {

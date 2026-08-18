@@ -1,0 +1,188 @@
+---
+// On-page accessibility controls: text size and high contrast, persisted to localStorage and
+// applied via <html> font-size / data-contrast (see AccessibilityBootScript.astro, which applies
+// them before first paint). Everything on the site is rem/clamp-sized, so scaling the root font
+// scales the layout instead of breaking it — the cap of 125% is the largest step verified to
+// reflow cleanly at phone widths.
+//
+// Rendered once in each layout's header. A <details> disclosure like the mobile menu: no focus
+// management to get wrong, keyboard-reachable, and closed again by Escape (wired below).
+---
+
+<details class="a11y-controls">
+  <summary aria-label="Accessibility settings: text size and contrast">
+    <span aria-hidden="true">Aa</span>
+  </summary>
+  <div class="a11y-panel">
+    <div class="a11y-row" role="group" aria-label="Text size">
+      <button type="button" data-a11y="smaller" aria-label="Decrease text size">A−</button>
+      <button type="button" data-a11y="reset" aria-label="Reset text size">A</button>
+      <button type="button" data-a11y="larger" aria-label="Increase text size">A+</button>
+    </div>
+    <button type="button" class="a11y-contrast" data-a11y="contrast" aria-pressed="false">
+      High contrast
+    </button>
+  </div>
+</details>
+
+<script>
+  type A11ySettings = { fontScale?: number; contrast?: string };
+
+  const A11Y_KEY = "beinsiculous.a11y";
+  // Steps the +/- buttons walk through; index 1 (100%) is the default. Kept in sync with the
+  // values AccessibilityBootScript knows how to apply.
+  const A11Y_SCALES = [0.875, 1, 1.125, 1.25];
+
+  function a11yLoad(): A11ySettings {
+    try {
+      return JSON.parse(localStorage.getItem(A11Y_KEY) || "{}") || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function a11yApply(settings: A11ySettings) {
+    const root = document.documentElement;
+    root.style.fontSize =
+      settings.fontScale && settings.fontScale !== 1 ? `${settings.fontScale * 100}%` : "";
+    if (settings.contrast === "high") root.dataset.contrast = "high";
+    else delete root.dataset.contrast;
+
+    const scaleIndex = A11Y_SCALES.indexOf(settings.fontScale ?? 1);
+    for (const element of document.querySelectorAll("[data-a11y]")) {
+      if (!(element instanceof HTMLButtonElement)) continue;
+      const action = element.dataset.a11y;
+      if (action === "contrast") {
+        element.setAttribute("aria-pressed", settings.contrast === "high" ? "true" : "false");
+      } else if (action === "smaller") {
+        element.disabled = scaleIndex <= 0;
+      } else if (action === "larger") {
+        element.disabled = scaleIndex >= A11Y_SCALES.length - 1;
+      }
+    }
+  }
+
+  function a11ySave(settings: A11ySettings) {
+    try {
+      localStorage.setItem(A11Y_KEY, JSON.stringify(settings));
+    } catch {
+      // Storage blocked: the settings still apply for this page view.
+    }
+  }
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest("[data-a11y]");
+    if (button instanceof HTMLButtonElement) {
+      const settings = a11yLoad();
+      const action = button.dataset.a11y;
+      if (action === "contrast") {
+        settings.contrast = settings.contrast === "high" ? "normal" : "high";
+      } else {
+        const current = A11Y_SCALES.indexOf(settings.fontScale ?? 1);
+        const next =
+          action === "reset" ? 1 : Math.min(Math.max(current + (action === "larger" ? 1 : -1), 0), A11Y_SCALES.length - 1);
+        settings.fontScale = A11Y_SCALES[next];
+      }
+      a11ySave(settings);
+      a11yApply(settings);
+      return;
+    }
+    // Clicking anywhere outside the panel closes it.
+    const open = document.querySelector(".a11y-controls[open]");
+    if (open && !open.contains(target)) open.removeAttribute("open");
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const open = document.querySelector(".a11y-controls[open]");
+    const summary = open?.querySelector("summary");
+    if (open && summary instanceof HTMLElement) {
+      open.removeAttribute("open");
+      summary.focus();
+    }
+  });
+
+  // Reflect settings saved by another tab or applied by the boot script.
+  a11yApply(a11yLoad());
+</script>
+
+<style>
+  .a11y-controls {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .a11y-controls > summary {
+    display: grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--font-mono, monospace);
+    font-weight: 600;
+    color: inherit;
+    border-radius: 6px;
+  }
+
+  .a11y-controls > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .a11y-controls[open] > summary {
+    color: var(--accent);
+  }
+
+  /* Drops below the header; positioned against the sticky header (the containing block in both
+     layouts), like the mobile menu panel. */
+  .a11y-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--surface, #10170f);
+    border: 1px solid var(--border, currentColor);
+    border-radius: 8px;
+    z-index: 30;
+    white-space: nowrap;
+  }
+
+  .a11y-row {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .a11y-panel button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    font: inherit;
+    font-family: var(--font-mono, monospace);
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--border, currentColor);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .a11y-panel button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .a11y-panel button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .a11y-contrast[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--bg, #0a0f0c);
+    border-color: var(--accent);
+  }
+</style>

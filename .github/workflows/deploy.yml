@@ -44,6 +44,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Same gate as local `npm run verify`: axe-core over every built page. A new WCAG
+      # regression blocks the deploy exactly like a broken build does.
+      - name: Accessibility audit
+        run: |
+          npx playwright install --with-deps chromium
+          npm run a11y
+
       - name: Deploy to Cloudflare
         run: npx wrangler deploy
         env:

@@ -9,6 +9,9 @@
 // 3. Every `wasm`/`screenshots` path referenced in games frontmatter must
 //    exist as a file in dist/ — a typo'd path should fail the build, not
 //    surface when a visitor hits Play.
+// 4. Static accessibility checks on every built page: <html lang>, exactly one <h1>, alt on
+//    every <img>, no positive tabindex, no duplicate ids. (The deep audit is
+//    scripts/a11y-check.mjs, run by `npm run verify`.)
 
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
@@ -83,6 +86,43 @@ if (existsSync(DIST) && existsSync(CONTENT_GAMES)) {
           `Asset paths must point at real files under public/ (copied to dist/ at build).`
         );
       }
+    }
+  });
+}
+
+// Cheap static accessibility checks on the built HTML. The deep audit is scripts/a11y-check.mjs
+// (axe-core in a real browser, part of `npm run verify`); these run on every build with no browser
+// at all, so the obvious regressions fail fast.
+if (existsSync(DIST)) {
+  walk(DIST, (path) => {
+    if (!path.endsWith('.html')) return;
+    const html = readFileSync(path, 'utf8');
+
+    if (!/<html[^>]*\blang=/.test(html)) {
+      errors.push(`${path}: <html> has no lang attribute — screen readers need it to pick a voice.`);
+    }
+
+    const h1Count = (html.match(/<h1[\s>]/g) || []).length;
+    if (h1Count !== 1) {
+      errors.push(`${path}: expected exactly one <h1>, found ${h1Count}.`);
+    }
+
+    for (const img of html.matchAll(/<img\b[^>]*>/g)) {
+      if (!/\balt=/.test(img[0])) {
+        errors.push(`${path}: <img> without an alt attribute: ${img[0].slice(0, 120)}`);
+      }
+    }
+
+    // Positive tabindex breaks the natural focus order; 0 and -1 are the only legal values here.
+    const badTabindex = html.match(/tabindex="[1-9]/);
+    if (badTabindex) {
+      errors.push(`${path}: positive tabindex (${badTabindex[0]}) — use 0 or -1 only.`);
+    }
+
+    const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+    const duplicated = ids.filter((id, index) => ids.indexOf(id) !== index);
+    if (duplicated.length > 0) {
+      errors.push(`${path}: duplicate id(s): ${[...new Set(duplicated)].join(', ')}`);
     }
   });
 }

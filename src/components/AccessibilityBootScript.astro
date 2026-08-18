@@ -1,0 +1,20 @@
+---
+// Applies the visitor's saved accessibility settings (text size, contrast) before first paint,
+// so the page never flashes in the wrong size or palette. Must sit in <head>, before CSS that
+// reads the tokens — same pattern as FaceLayout's theme boot script. Kept in sync with the
+// storage key and shape in AccessibilityControls.astro.
+---
+
+<script is:inline>
+  try {
+    const saved = JSON.parse(localStorage.getItem("beinsiculous.a11y") || "{}");
+    if (typeof saved.fontScale === "number" && saved.fontScale !== 1) {
+      document.documentElement.style.fontSize = `${saved.fontScale * 100}%`;
+    }
+    if (saved.contrast === "high") {
+      document.documentElement.dataset.contrast = "high";
+    }
+  } catch {
+    // Corrupt or blocked storage: the defaults are already correct, so do nothing.
+  }
+</script>

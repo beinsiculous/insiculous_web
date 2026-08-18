@@ -44,9 +44,17 @@ const { src, title } = Astro.props;
   TODO(wasm wiring): when a build exists at `src`, replace the placeholder
   above with a <canvas> and activate a script like this (kept as an HTML
   comment so Astro ships zero client JS until then — do NOT use define:vars
-  on a commented-out script):
+  on a commented-out script). The canvas markup below is the accessible
+  baseline a playable build must ship with — name, focusability, fallback
+  text, and a controls note a player can read before starting:
 
-  <canvas id="game-canvas" width="960" height="540"></canvas>
+  <canvas id="game-canvas" width="960" height="540" tabindex="0"
+          role="img" aria-label="{title} — game canvas; focus it to play">
+    {title} runs on an HTML canvas and needs a keyboard. The controls are
+    listed below the game.
+  </canvas>
+  <p class="controls-note">Controls: arrow keys to move, Space to …,
+    P to pause. All keys are remappable in the game.</p>
   <script>
     const embed = document.querySelector('.game-embed');
     const src = embed?.getAttribute('data-wasm-src');

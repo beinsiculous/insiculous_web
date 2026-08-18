@@ -14,6 +14,7 @@
 //   PLAYWRIGHT_BROWSERS_PATH=<browsers> node scripts/screenshot-pages.mjs
 //   ONLY=mobile node scripts/screenshot-pages.mjs      (one viewport)
 //   FULL_PAGE=1 node scripts/screenshot-pages.mjs      (whole scroll height, not just the fold)
+//   LARGE_TEXT=1 node scripts/screenshot-pages.mjs     (extra pass: 125% text on a phone, overflow only)
 // Output: shots/<name>.png and shots/<name>-mobile.png (gitignored).
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
@@ -46,9 +47,22 @@ const pages = {
 const viewports = {
   desktop: { suffix: "", context: { viewport: { width: 1440, height: 900 } } },
   mobile: { suffix: "-mobile", context: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true } },
+  // LARGE_TEXT=1 only: the site at its largest Aa setting (125% root font), phone width. No shots —
+  // this pass exists purely to prove big text reflows instead of breaking the layout (WCAG 1.4.4/1.4.10).
+  largetext: {
+    suffix: "-largetext",
+    shots: false,
+    context: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true },
+    initScript: () => localStorage.setItem("beinsiculous.a11y", JSON.stringify({ fontScale: 1.25 })),
+  },
 };
 const only = process.env.ONLY;
-const chosen = only ? { [only]: viewports[only] } : viewports;
+const chosen = only
+  ? { [only]: viewports[only] }
+  : Object.fromEntries(
+      // largetext is opt-in (LARGE_TEXT=1) so a normal run stays two passes.
+      Object.entries(viewports).filter(([label]) => label !== "largetext" || process.env.LARGE_TEXT)
+    );
 if (only && !viewports[only]) {
   console.error(`ONLY must be one of: ${Object.keys(viewports).join(", ")}`);
   process.exit(1);
@@ -57,15 +71,18 @@ if (only && !viewports[only]) {
 mkdirSync("shots", { recursive: true });
 const browser = await chromium.launch();
 const overflowing = [];
-for (const [label, { suffix, context: contextOptions }] of Object.entries(chosen)) {
+for (const [label, { suffix, context: contextOptions, initScript, shots = true }] of Object.entries(chosen)) {
   const context = await browser.newContext(contextOptions);
   await context.addInitScript(() => {
     localStorage.setItem("fortknight.user-settings", JSON.stringify({ schemaVersion: 2 }));
   });
+  if (initScript) await context.addInitScript(initScript);
   const page = await context.newPage();
   for (const [name, path] of Object.entries(pages)) {
     await page.goto(`${baseUrl}/${path}`, { waitUntil: "networkidle" });
-    await page.screenshot({ path: `shots/${name}${suffix}.png`, fullPage: Boolean(process.env.FULL_PAGE) });
+    if (shots) {
+      await page.screenshot({ path: `shots/${name}${suffix}.png`, fullPage: Boolean(process.env.FULL_PAGE) });
+    }
     // scrollWidth beyond clientWidth is content the viewport cannot reach without scrolling sideways.
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth
