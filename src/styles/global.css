@@ -145,7 +145,7 @@ hr {
 }
 
 /* Phones: hand a little of the gutter back to the content. */
-@media (max-width: 640px) {
+@media (max-width: 40rem) {
   .container {
     padding: 0 1rem;
   }

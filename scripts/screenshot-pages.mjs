@@ -4,9 +4,10 @@
 // The studio pages wear BaseLayout's dark mono look (the Profile page among them); FortKnight and ForkKnife each
 // bring their own skin from app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
 //
-// Every page is shot at both widths. The mobile pass also measures the document's horizontal overflow: a phone
-// viewport that scrolls sideways is a layout bug, not a preference, so a non-zero reading is reported per page and
-// makes the run exit non-zero. Keep it at zero.
+// Every page is shot at both widths, and BOTH passes measure the document's horizontal overflow: a viewport that
+// scrolls sideways is a layout bug at any size, not a preference, so a non-zero reading is reported per page and
+// makes the run exit non-zero. The phone is where it actually bites, but a desktop reading is a bug too and this
+// will fail on it. Keep both at zero.
 //
 // Usage:
 //   npm run build && npm run preview (in another shell), then
