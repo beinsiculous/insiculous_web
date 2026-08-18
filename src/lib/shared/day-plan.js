@@ -1,6 +1,6 @@
 // One day of a person's fortnight, from their active profile: their blocks with the focus their grid gives them (own or imported), the
 // imported fixed activities of that day key, the standing appointments that land on it, and the menu
-// entries the import carried. Pure; canonical module (app/shared/), synced into the Astro app for the
+// entries the import carried. Pure; canonical module, mirrored by scripts/fk_core/derive.py and rendered by the
 // /days/<dayKey>/ page. Nothing here reads the bundle's own activities — those are the data set's, not
 // the person's (docs/app.md).
 import { recurringItemActivities, standingAppointmentActivities, timeStringToMinutes } from "./weights-rules.js";

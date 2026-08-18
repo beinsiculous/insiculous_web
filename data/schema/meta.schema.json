@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/meta.schema.json",
+  "title": "FortKnight meta",
+  "description": "Cycle length, epoch anchor (which calendar date is which day key), timezone.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "cycleLengthDays": {
+      "type": "integer",
+      "const": 14
+    },
+    "epoch": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "dayKey": {
+          "type": "string",
+          "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "dayKey"
+      ],
+      "additionalProperties": false
+    },
+    "timezone": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "cycleLengthDays",
+    "epoch",
+    "timezone"
+  ],
+  "additionalProperties": false
+}

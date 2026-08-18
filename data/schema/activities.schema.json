@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/activities.schema.json",
+  "title": "FortKnight activities",
+  "description": "Every scheduled activity of the baseline fortnight (one row per day-key \u00d7 block \u00d7 activity).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "activities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "dayKey": {
+            "type": "string",
+            "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+          },
+          "block": {
+            "type": "string",
+            "enum": [
+              "too-early",
+              "early",
+              "midday",
+              "late",
+              "too-late"
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "1 = fixed/most important, 5 = optional outing"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "meals",
+                "cleaning",
+                "working",
+                "spirituality-development",
+                "friends-family",
+                "health",
+                "operations"
+              ]
+            },
+            "minItems": 1
+          },
+          "flexibility": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "no",
+              "some",
+              "yes",
+              null
+            ]
+          },
+          "timing": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "estimatedStart": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "travelPrepComplete": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "timeStart": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "timeFinished": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "estimatedEnd": {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+              },
+              "estimatedEndSource": {
+                "type": "string",
+                "enum": [
+                  "formula",
+                  "literal"
+                ]
+              },
+              "durationMinutes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "prepMinutes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "estimatedStart",
+              "travelPrepComplete",
+              "timeStart",
+              "timeFinished",
+              "estimatedEnd",
+              "durationMinutes",
+              "prepMinutes"
+            ],
+            "additionalProperties": false
+          },
+          "detail": {
+            "type": "object",
+            "properties": {
+              "raw": {
+                "type": "string"
+              },
+              "kind": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "meal-prep",
+                  "url",
+                  "text",
+                  null
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "mealRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slot": {
+                      "type": "string",
+                      "enum": [
+                        "brunch",
+                        "snack",
+                        "dinner"
+                      ]
+                    },
+                    "mealKey": {
+                      "type": "string"
+                    },
+                    "days": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "slot",
+                    "mealKey",
+                    "days"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "raw",
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "raw": {
+            "type": "object",
+            "description": "Original spreadsheet cell text, keyed by column header. Never edited."
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "dayKey",
+          "block",
+          "priority",
+          "categories",
+          "flexibility",
+          "timing",
+          "detail"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "activities"
+  ],
+  "additionalProperties": false
+}

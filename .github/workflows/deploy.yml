@@ -1,7 +1,7 @@
-# The one path to production. Every push to main is type-checked and built before anything is
-# uploaded, so a broken build can never reach beinsiculous.com — the deploy step only runs if
-# `check` and `build` (which includes scripts/postbuild-check.mjs) both pass. `npm run verify`
-# runs the same two steps locally, so the two cannot drift.
+# The one path to production. Every push to main is validated, tested, type-checked and built
+# before anything is uploaded, so a broken build can never reach beinsiculous.com — the deploy step
+# only runs if the data gates, `check` and `build` (which includes scripts/postbuild-check.mjs) all
+# pass. `npm run verify` runs the same steps locally, so the two cannot drift.
 #
 # Secrets this needs (Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN   — an "Edit Cloudflare Workers" token, scoped to the account and to
@@ -35,8 +35,23 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      # The data tooling is stdlib-only, so there is nothing to install for it.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install
         run: npm ci
+
+      # The data gates come first: they are the cheapest, and a rule broken in scripts/fk_core/ or
+      # data/ is what the site would otherwise render happily. The test suite drives the canonical
+      # modules in src/lib/shared/ through node to check they still match their Python twins, so it
+      # needs the node that setup-node just provided.
+      - name: Validate data
+        run: python3 scripts/validate.py
+
+      - name: Data tests
+        run: python3 -m unittest discover tests
 
       - name: Type-check
         run: npm run check

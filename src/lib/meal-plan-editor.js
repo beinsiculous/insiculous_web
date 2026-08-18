@@ -1,6 +1,6 @@
 // The fortnight menu editor (docs/meal-plan.md), shared by ForkKnife's Spoon Feed page and FortKnight's Build page:
 // one section per meal — a coverage line, the committed dishes (Edit reveals the remove buttons) and one entry row
-// (dish, first day, leftovers day, Add). Every rule it enforces lives in app/shared/meal-plan.js; this module only
+// (dish, first day, leftovers day, Add). Every rule it enforces lives in src/lib/shared/meal-plan.js; this module only
 // draws it and hands back the edited items. Mount it once, then `setMeals` / `setItems` and `render`.
 import { allowedSecondDays, canTakeLeftovers, coverage, dayLabel, itemServings, mealSlug, normalizeMealPlan } from "./shared/meal-plan.js";
 

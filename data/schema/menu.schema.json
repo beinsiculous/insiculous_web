@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/menu.schema.json",
+  "title": "FortKnight seasonal menu",
+  "description": "Meals for one season keyed by meal key (which day keys share the dish).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "seasonId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "meals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string",
+            "enum": [
+              "brunch",
+              "snack",
+              "dinner"
+            ]
+          },
+          "number": {
+            "type": "integer"
+          },
+          "mealKey": {
+            "type": "string",
+            "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab](\\+(sun|mon|tue|wed|thu|fri|sat)-[ab])*$"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+            },
+            "minItems": 1
+          },
+          "menu": {
+            "type": "string"
+          },
+          "cookExtra": {
+            "type": "boolean"
+          },
+          "raw": {
+            "type": "object",
+            "description": "Original spreadsheet cell text, keyed by column header. Never edited."
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "slot",
+          "number",
+          "mealKey",
+          "days",
+          "menu",
+          "cookExtra"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "id",
+    "seasonId",
+    "meals"
+  ],
+  "additionalProperties": false
+}

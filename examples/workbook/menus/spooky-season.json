@@ -1,0 +1,412 @@
+{
+  "$schema": "../../../data/schema/menu.schema.json",
+  "id": "spooky-season",
+  "seasonId": "spooky-season",
+  "notes": [
+    "*Cook extra - leftovers as an ingredient later in the menu"
+  ],
+  "meals": [
+    {
+      "id": "brunch-1",
+      "slot": "brunch",
+      "number": 1,
+      "mealKey": "sun-a+tue-a",
+      "days": [
+        "sun-a",
+        "tue-a"
+      ],
+      "menu": "Breakfast burritos or STORE-BOUGHT pastries",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Sun_A+Tue_A",
+        "menu": "Breakfast burritos or STORE-BOUGHT pastries"
+      },
+      "sourceRow": 3
+    },
+    {
+      "id": "brunch-2",
+      "slot": "brunch",
+      "number": 2,
+      "mealKey": "mon-b+sat-b",
+      "days": [
+        "mon-b",
+        "sat-b"
+      ],
+      "menu": "French toast",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Sat_B+Mon_B",
+        "menu": "French toast"
+      },
+      "sourceRow": 4
+    },
+    {
+      "id": "brunch-3",
+      "slot": "brunch",
+      "number": 3,
+      "mealKey": "wed-b",
+      "days": [
+        "wed-b"
+      ],
+      "menu": "FLEXIBLE",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Wed_B\t",
+        "menu": "FLEXIBLE"
+      },
+      "sourceRow": 5
+    },
+    {
+      "id": "brunch-4",
+      "slot": "brunch",
+      "number": 4,
+      "mealKey": "thu-a+sat-a",
+      "days": [
+        "thu-a",
+        "sat-a"
+      ],
+      "menu": "Breakfast casserole",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Thu_A+Sat_A",
+        "menu": "Breakfast casserole"
+      },
+      "sourceRow": 6
+    },
+    {
+      "id": "brunch-5",
+      "slot": "brunch",
+      "number": 5,
+      "mealKey": "fri-b+sun-b",
+      "days": [
+        "fri-b",
+        "sun-b"
+      ],
+      "menu": "Smoothies B",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Fri_B+Sun_B\t",
+        "menu": "Smoothies B"
+      },
+      "sourceRow": 7
+    },
+    {
+      "id": "brunch-6",
+      "slot": "brunch",
+      "number": 6,
+      "mealKey": "mon-a",
+      "days": [
+        "mon-a"
+      ],
+      "menu": "OUT or fruit salad w/ scrambled eggs and STORE-BOUGHT pastries",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Mon_A\t",
+        "menu": "OUT or fruit salad w/ scrambled eggs and STORE-BOUGHT pastries"
+      },
+      "sourceRow": 8
+    },
+    {
+      "id": "brunch-7",
+      "slot": "brunch",
+      "number": 7,
+      "mealKey": "tue-b+thu-b",
+      "days": [
+        "tue-b",
+        "thu-b"
+      ],
+      "menu": "Breakfast salad w/ in-bread yokels or eggs bene",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Tue_B+Thu_B",
+        "menu": "Breakfast salad w/ in-bread yokels or eggs bene"
+      },
+      "sourceRow": 9
+    },
+    {
+      "id": "brunch-8",
+      "slot": "brunch",
+      "number": 8,
+      "mealKey": "wed-a+fri-a",
+      "days": [
+        "wed-a",
+        "fri-a"
+      ],
+      "menu": "Smoothies A",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Wed_A+Fri_A",
+        "menu": "Smoothies A"
+      },
+      "sourceRow": 10
+    },
+    {
+      "id": "dinner-1",
+      "slot": "dinner",
+      "number": 1,
+      "mealKey": "sun-a+thu-b",
+      "days": [
+        "sun-a",
+        "thu-b"
+      ],
+      "menu": "Soup w/ salad A",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Thu_B+Sun_A",
+        "menu": "Soup w/ salad A"
+      },
+      "sourceRow": 11
+    },
+    {
+      "id": "dinner-2",
+      "slot": "dinner",
+      "number": 2,
+      "mealKey": "mon-b+sat-b",
+      "days": [
+        "mon-b",
+        "sat-b"
+      ],
+      "menu": "FLEXIBLE",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Sat_B+Mon_B",
+        "menu": "FLEXIBLE"
+      },
+      "sourceRow": 12
+    },
+    {
+      "id": "dinner-3",
+      "slot": "dinner",
+      "number": 3,
+      "mealKey": "tue-a+thu-a",
+      "days": [
+        "tue-a",
+        "thu-a"
+      ],
+      "menu": "OUT or Homemade Enchiladas",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Tue_A+Thu_A\t",
+        "menu": "OUT or Homemade Enchiladas"
+      },
+      "sourceRow": 13
+    },
+    {
+      "id": "dinner-4",
+      "slot": "dinner",
+      "number": 4,
+      "mealKey": "wed-b+fri-b",
+      "days": [
+        "wed-b",
+        "fri-b"
+      ],
+      "menu": "Meatballs w/ (Wed) Spaghetti & red sauce (Fri) Sheet pan Vegetables",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Wed_B+Fri_B",
+        "menu": "Meatballs w/ (Wed) Spaghetti & red sauce (Fri) Sheet pan Vegetables"
+      },
+      "sourceRow": 14
+    },
+    {
+      "id": "dinner-5",
+      "slot": "dinner",
+      "number": 5,
+      "mealKey": "sat-a",
+      "days": [
+        "sat-a"
+      ],
+      "menu": "Steak w/ cabbage & corn on the cob",
+      "cookExtra": true,
+      "raw": {
+        "mealKey": "Sat_A",
+        "menu": "*Steak w/ cabbage & corn on the cob "
+      },
+      "sourceRow": 15
+    },
+    {
+      "id": "dinner-6",
+      "slot": "dinner",
+      "number": 6,
+      "mealKey": "sun-b+wed-a",
+      "days": [
+        "sun-b",
+        "wed-a"
+      ],
+      "menu": "Soup w/ salad B",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Sun_B+Wed_A",
+        "menu": "Soup w/ salad B"
+      },
+      "sourceRow": 16
+    },
+    {
+      "id": "dinner-7",
+      "slot": "dinner",
+      "number": 7,
+      "mealKey": "mon-a",
+      "days": [
+        "mon-a"
+      ],
+      "menu": "OUT or Homemade Lasagna",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Mon_A",
+        "menu": "OUT or Homemade Lasagna"
+      },
+      "sourceRow": 17
+    },
+    {
+      "id": "dinner-8",
+      "slot": "dinner",
+      "number": 8,
+      "mealKey": "tue-b+fri-a",
+      "days": [
+        "tue-b",
+        "fri-a"
+      ],
+      "menu": "Tacos (Tue B) Leftover steak from Dinner on Sat A (Fri A) Leftover chicken from Wed_A+Sat_B snack",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Tue_B+Fri_A",
+        "menu": "Tacos (Tue B) Leftover steak from Dinner on Sat A (Fri A) Leftover chicken from Wed_A+Sat_B snack"
+      },
+      "sourceRow": 18
+    },
+    {
+      "id": "snack-1",
+      "slot": "snack",
+      "number": 1,
+      "mealKey": "sun-a+fri-a",
+      "days": [
+        "sun-a",
+        "fri-a"
+      ],
+      "menu": "Chocolate chip cookies",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Fri_A+Sun_A",
+        "menu": "Chocolate chip cookies"
+      },
+      "sourceRow": 19
+    },
+    {
+      "id": "snack-2",
+      "slot": "snack",
+      "number": 2,
+      "mealKey": "mon-b+thu-a",
+      "days": [
+        "mon-b",
+        "thu-a"
+      ],
+      "menu": "Fruit salad",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Mon_B+Thu_A",
+        "menu": "Fruit salad"
+      },
+      "sourceRow": 20
+    },
+    {
+      "id": "snack-3",
+      "slot": "snack",
+      "number": 3,
+      "mealKey": "tue-a",
+      "days": [
+        "tue-a"
+      ],
+      "menu": "Mediterranean flatbreads",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Tue_A",
+        "menu": "Mediterranean flatbreads"
+      },
+      "sourceRow": 21
+    },
+    {
+      "id": "snack-4",
+      "slot": "snack",
+      "number": 4,
+      "mealKey": "wed-b+sat-a",
+      "days": [
+        "wed-b",
+        "sat-a"
+      ],
+      "menu": "Chocolate chip cookies",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Wed_B+Sat_A",
+        "menu": "Chocolate chip cookies"
+      },
+      "sourceRow": 22
+    },
+    {
+      "id": "snack-5",
+      "slot": "snack",
+      "number": 5,
+      "mealKey": "fri-b",
+      "days": [
+        "fri-b"
+      ],
+      "menu": "LEFTOVERS or potato salad",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Fri_B",
+        "menu": "LEFTOVERS or potato salad"
+      },
+      "sourceRow": 23
+    },
+    {
+      "id": "snack-6",
+      "slot": "snack",
+      "number": 6,
+      "mealKey": "sun-b+tue-b",
+      "days": [
+        "sun-b",
+        "tue-b"
+      ],
+      "menu": "Bugs!! Ants on a log etc.",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Sun_B+Tue_B",
+        "menu": "Bugs!! Ants on a log etc."
+      },
+      "sourceRow": 24
+    },
+    {
+      "id": "snack-7",
+      "slot": "snack",
+      "number": 7,
+      "mealKey": "mon-a+thu-b",
+      "days": [
+        "mon-a",
+        "thu-b"
+      ],
+      "menu": "Meze",
+      "cookExtra": false,
+      "raw": {
+        "mealKey": "Mon_A+Thu_B",
+        "menu": "Meze"
+      },
+      "sourceRow": 25
+    },
+    {
+      "id": "snack-8",
+      "slot": "snack",
+      "number": 8,
+      "mealKey": "wed-a+sat-b",
+      "days": [
+        "wed-a",
+        "sat-b"
+      ],
+      "menu": "Grilled chicken bbq sliders",
+      "cookExtra": true,
+      "raw": {
+        "mealKey": "Wed_A+Sat_B",
+        "menu": "*Grilled chicken bbq sliders"
+      },
+      "sourceRow": 26
+    }
+  ]
+}

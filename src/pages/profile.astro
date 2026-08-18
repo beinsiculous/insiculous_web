@@ -47,7 +47,7 @@ import "../styles/app-widgets.css";
   import { activeWeights } from "../lib/shared/weights-rules.js";
   import { downloadAll, renderFileRow } from "../lib/shared/workspace-files.js";
   import { localTodayIsoDate } from "../lib/shared/clock.js";
-  import { missingStaticTexts, staticTexts } from "../lib/workspace-static-texts.js";
+  import { staticTexts } from "../lib/workspace-static-texts.js";
   import { withBase } from "../lib/paths.js";
   import { facePath } from "../lib/faces.js";
 
@@ -89,8 +89,7 @@ import "../styles/app-widgets.css";
     const settings = loadSettings();
     documents = buildWorkspaceDocuments({ bundle, settings, staticTexts, todayIsoDate: localTodayIsoDate() });
     const active = activeWeights(settings);
-    elements.workspaceStatus.textContent = `${documents.length} files generated today${active ? ` for profile ${active.id}` : ""}.${active ? "" : ` Profile ${settings.activeWeightsId} is not saved yet, so there is no weights file.`}`
-      + (missingStaticTexts.length ? ` Warning: ${missingStaticTexts.join(", ")} did not sync — run npm run dev again.` : "");
+    elements.workspaceStatus.textContent = `${documents.length} files generated today${active ? ` for profile ${active.id}` : ""}.${active ? "" : ` Profile ${settings.activeWeightsId} is not saved yet, so there is no weights file.`}`;
     elements.fileList.replaceChildren(...documents.map(renderFileRow));
     elements.downloadAllButton.disabled = false;
   }

@@ -1,0 +1,139 @@
+{
+  "$schema": "../../data/schema/weights.schema.json",
+  "schemaVersion": 1,
+  "id": "baseline",
+  "source": "baseline",
+  "cycleLengthDays": 14,
+  "wakingWindow": {
+    "start": "08:00",
+    "end": "18:00",
+    "minutesPerDay": 600,
+    "minutesPerCycle": 8400
+  },
+  "categories": {
+    "meals": {
+      "share": 0.2357,
+      "minutesPerCycle": 1980,
+      "preferredBlocks": [
+        "early",
+        "late"
+      ]
+    },
+    "cleaning": {
+      "share": 0.2357,
+      "minutesPerCycle": 1980,
+      "preferredBlocks": [
+        "late",
+        "midday"
+      ]
+    },
+    "working": {
+      "share": 0.15,
+      "minutesPerCycle": 1260,
+      "preferredBlocks": [
+        "early",
+        "late"
+      ]
+    },
+    "spirituality-development": {
+      "share": 0.1786,
+      "minutesPerCycle": 1500,
+      "preferredBlocks": [
+        "midday",
+        "early"
+      ]
+    },
+    "friends-family": {
+      "share": 0.0,
+      "minutesPerCycle": 0,
+      "preferredBlocks": []
+    },
+    "health": {
+      "share": 0.0,
+      "minutesPerCycle": 0,
+      "preferredBlocks": []
+    },
+    "operations": {
+      "share": 0.0,
+      "minutesPerCycle": 0,
+      "preferredBlocks": []
+    }
+  },
+  "flexibleShare": 0.2,
+  "blockFocusGrid": {
+    "sun-a": {
+      "early": "meals",
+      "midday": "spirituality-development",
+      "late": "cleaning"
+    },
+    "mon-b": {
+      "early": "meals",
+      "midday": "cleaning",
+      "late": "working"
+    },
+    "tue-a": {
+      "early": "meals",
+      "midday": "spirituality-development",
+      "late": "cleaning"
+    },
+    "wed-b": {
+      "early": "meals",
+      "midday": "cleaning",
+      "late": "working"
+    },
+    "thu-a": {
+      "early": "meals",
+      "midday": "spirituality-development",
+      "late": "cleaning"
+    },
+    "fri-b": {
+      "early": "meals",
+      "midday": "cleaning",
+      "late": "working"
+    },
+    "sat-a": {
+      "early": "meals",
+      "midday": "spirituality-development",
+      "late": "cleaning"
+    },
+    "sun-b": {
+      "early": "working",
+      "midday": "flexible",
+      "late": "meals"
+    },
+    "mon-a": {
+      "early": "spirituality-development",
+      "midday": "flexible",
+      "late": "cleaning"
+    },
+    "tue-b": {
+      "early": "working",
+      "midday": "flexible",
+      "late": "meals"
+    },
+    "wed-a": {
+      "early": "spirituality-development",
+      "midday": "flexible",
+      "late": "cleaning"
+    },
+    "thu-b": {
+      "early": "working",
+      "midday": "flexible",
+      "late": "meals"
+    },
+    "fri-a": {
+      "early": "spirituality-development",
+      "midday": "flexible",
+      "late": "cleaning"
+    },
+    "sat-b": {
+      "early": "working",
+      "midday": "flexible",
+      "late": "meals"
+    }
+  },
+  "notes": [
+    "Derived from the baseline workbook's per-block focus grid by scripts/analyze_allocations.py.",
+    "The questionnaire will eventually produce a file of this same shape; a generator will turn it into a schedule."
+  ]
+}

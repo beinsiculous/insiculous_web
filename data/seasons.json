@@ -1,0 +1,242 @@
+{
+  "$schema": "./schema/seasons.schema.json",
+  "seasons": [
+    {
+      "id": "ostara",
+      "name": "Ostara",
+      "gregorianRange": "March - April",
+      "durationWeeks": {
+        "min": 1,
+        "max": 8
+      },
+      "startRule": {
+        "kind": "nth-weekday",
+        "month": 3,
+        "weekday": "sunday",
+        "occurrence": 2,
+        "offsetDays": 0,
+        "snap": null
+      },
+      "startDescription": "Second Sunday of March (US daylight saving time begins)",
+      "startDayKey": "sun-b",
+      "seasonMode": "outdoor",
+      "outdoorWindow": {
+        "uvAbove4": null
+      },
+      "focus": [
+        "meals",
+        "cleaning",
+        "working",
+        "health"
+      ],
+      "menuId": null,
+      "knownStarts": {
+        "2026": "2026-03-08"
+      },
+      "raw": {
+        "Season": "Ostara",
+        "Georgian Equivalent": "March - April",
+        "Duration": "1 - 8 weeks",
+        "Season Start - Sunday": "Daylight Savings Starts",
+        "2026.0": "46086.0",
+        "2026 Start Day": "Sunday B",
+        "Hours UV > 4": "",
+        "Main Focus": "Meals",
+        "Secondary Focus": "Cleaning",
+        "Tertiary Focus": "Working",
+        "Quaternary Focus": "Health"
+      },
+      "sourceRow": 2
+    },
+    {
+      "id": "fimbulsumar",
+      "name": "Fimbulsumar",
+      "gregorianRange": "April – September",
+      "durationWeeks": {
+        "min": 22,
+        "max": 24
+      },
+      "startRule": {
+        "kind": "easter",
+        "offsetDays": 0,
+        "snap": null
+      },
+      "startDescription": "Easter Sunday (Gregorian computus)",
+      "startDayKey": "sun-b",
+      "seasonMode": "indoor",
+      "outdoorWindow": {
+        "uvAbove4": null
+      },
+      "focus": [
+        "meals",
+        "spirituality-development",
+        "cleaning",
+        "working"
+      ],
+      "menuId": null,
+      "knownStarts": {
+        "2026": "2026-04-05"
+      },
+      "raw": {
+        "Season": "Fimbulsumar",
+        "Georgian Equivalent": "April – September",
+        "Duration": "22 - 24 weeks",
+        "Season Start - Sunday": "Easter",
+        "2026.0": "46117.0",
+        "2026 Start Day": "Sunday B",
+        "Hours UV > 4": "",
+        "Main Focus": "Meals",
+        "Secondary Focus": "Spirituality & Development",
+        "Tertiary Focus": "Cleaning",
+        "Quaternary Focus": "Working"
+      },
+      "sourceRow": 3
+    },
+    {
+      "id": "spooky-season",
+      "name": "Spooky Season",
+      "gregorianRange": "September – November",
+      "durationWeeks": {
+        "min": 9,
+        "max": 10
+      },
+      "startRule": {
+        "kind": "nth-weekday",
+        "month": 9,
+        "weekday": "monday",
+        "occurrence": 1,
+        "offsetDays": 0,
+        "snap": {
+          "weekday": "sunday",
+          "direction": "on-or-before"
+        }
+      },
+      "startDescription": "Sunday before Labor Day (first Monday of September)",
+      "startDayKey": "sun-a",
+      "seasonMode": "mixed",
+      "outdoorWindow": {
+        "uvAbove4": null
+      },
+      "focus": [
+        "meals",
+        "cleaning",
+        "working",
+        "spirituality-development"
+      ],
+      "menuId": null,
+      "knownStarts": {
+        "2026": "2026-09-06"
+      },
+      "raw": {
+        "Season": "Spooky Season",
+        "Georgian Equivalent": "September – November",
+        "Duration": "9 - 10 weeks",
+        "Season Start - Sunday": "Before Labor Day",
+        "2026.0": "46271.0",
+        "2026 Start Day": "Sunday A",
+        "Hours UV > 4": "",
+        "Main Focus": "Meals",
+        "Secondary Focus": "Cleaning",
+        "Tertiary Focus": "Working",
+        "Quaternary Focus": "Spirituality & Development"
+      },
+      "sourceRow": 4
+    },
+    {
+      "id": "christmas",
+      "name": "Christmas",
+      "gregorianRange": "November – January",
+      "durationWeeks": {
+        "min": 7,
+        "max": 8
+      },
+      "startRule": {
+        "kind": "nth-weekday",
+        "month": 11,
+        "weekday": "sunday",
+        "occurrence": 1,
+        "offsetDays": 0,
+        "snap": null
+      },
+      "startDescription": "First Sunday of November (US daylight saving time ends)",
+      "startDayKey": "sun-a",
+      "seasonMode": "outdoor",
+      "outdoorWindow": {
+        "uvAbove4": null
+      },
+      "focus": [
+        "meals",
+        "cleaning",
+        "health",
+        "friends-family"
+      ],
+      "menuId": null,
+      "knownStarts": {
+        "2026": "2026-11-01"
+      },
+      "raw": {
+        "Season": "Christmas",
+        "Georgian Equivalent": "November – January",
+        "Duration": "7 - 8 weeks",
+        "Season Start - Sunday": "Daylight Savings Ends",
+        "2026.0": "46327.0",
+        "2026 Start Day": "Sunday A",
+        "Hours UV > 4": "",
+        "Main Focus": "Meals",
+        "Secondary Focus": "Cleaning",
+        "Tertiary Focus": "Health",
+        "Quaternary Focus": "Friends & Family"
+      },
+      "sourceRow": 5
+    },
+    {
+      "id": "hogmanay",
+      "name": "Hogmanay",
+      "gregorianRange": "January – March",
+      "durationWeeks": {
+        "min": 10,
+        "max": 11
+      },
+      "startRule": {
+        "kind": "fixed-date",
+        "month": 12,
+        "day": 26,
+        "offsetDays": 0,
+        "snap": {
+          "weekday": "sunday",
+          "direction": "on-or-after"
+        }
+      },
+      "startDescription": "First Sunday after Christmas Day",
+      "startDayKey": "sun-a",
+      "seasonMode": "outdoor",
+      "outdoorWindow": {
+        "uvAbove4": null
+      },
+      "focus": [
+        "meals",
+        "working",
+        "cleaning",
+        "operations"
+      ],
+      "menuId": null,
+      "knownStarts": {
+        "2026": "2026-12-27"
+      },
+      "raw": {
+        "Season": "Hogmanay",
+        "Georgian Equivalent": "January – March",
+        "Duration": "10 - 11 weeks",
+        "Season Start - Sunday": "After Christmas",
+        "2026.0": "46383.0",
+        "2026 Start Day": "Sunday A",
+        "Hours UV > 4": "",
+        "Main Focus": "Meals",
+        "Secondary Focus": "Working",
+        "Tertiary Focus": "Cleaning",
+        "Quaternary Focus": "Operations"
+      },
+      "sourceRow": 6
+    }
+  ]
+}

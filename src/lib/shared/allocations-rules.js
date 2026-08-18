@@ -1,5 +1,5 @@
 // Time per category from a person's weights (the app's counterpart of scripts/fk_core/allocations.py, which
-// measures a data set). Pure; canonical module (app/shared/), synced into the Astro app for /allocations/.
+// measures a data set). Pure; canonical module, rendered by the Overview's allocation bars.
 import { FLEXIBLE_FOCUS } from "./fortknight-rules.js";
 
 /** Shares of a totals map, 4 decimals (0 everywhere when the total is 0) — mirror of fk_core.allocations._shares. */

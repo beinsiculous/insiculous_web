@@ -30,7 +30,7 @@ import { PROFILE_PATH, facePath } from "../../lib/faces.js";
   import { copyText, downloadText } from "../../lib/shared/download.js";
   import { localTodayIsoDate } from "../../lib/shared/clock.js";
   import { renderFileRow } from "../../lib/shared/workspace-files.js";
-  import { missingStaticTexts, staticTexts } from "../../lib/workspace-static-texts.js";
+  import { staticTexts } from "../../lib/workspace-static-texts.js";
   import { loadMealPlan, mealPlanTemplate } from "../../lib/forkknife.js";
   import { withBase } from "../../lib/paths.js";
 
@@ -64,7 +64,6 @@ import { PROFILE_PATH, facePath } from "../../lib/faces.js";
     const documents = buildWorkspaceDocuments({ bundle, settings, staticTexts, todayIsoDate: localTodayIsoDate() });
     const guide = documents.find((entry) => entry.fileName === MEAL_PLAN_GUIDE_FILE_NAME);
     guideRow.replaceChildren(...(guide ? [renderFileRow(guide)] : []));
-    if (missingStaticTexts.includes(MEAL_PLAN_GUIDE_FILE_NAME)) guideRow.appendChild(Object.assign(document.createElement("p"), { className: "muted", textContent: `Warning: ${MEAL_PLAN_GUIDE_FILE_NAME} did not sync — run npm run dev again.` }));
   }
 
   try {

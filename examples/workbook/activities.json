@@ -1,0 +1,2378 @@
+{
+  "$schema": "../../data/schema/activities.schema.json",
+  "activities": [
+    {
+      "id": "church--sun-a--early",
+      "title": "Church",
+      "dayKey": "sun-a",
+      "block": "early",
+      "priority": 1,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "some",
+      "timing": {
+        "estimatedStart": "10:00",
+        "travelPrepComplete": "10:10",
+        "timeStart": "10:25",
+        "timeFinished": "13:05",
+        "estimatedEnd": "13:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 160,
+        "prepMinutes": 10
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Church",
+        "Priority": "1.0",
+        "Day Key": "Sunday A",
+        "Estimated Start": "0.4166666666666667",
+        "Estimated End": "0.5520833333",
+        "Block": "Early",
+        "Flexibility": "Some",
+        "Travel/Prep Complete": "0.4236111111111111",
+        "Time Start": "0.4340277777777778",
+        "Time Finished": "0.5451388888888888",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 21
+    },
+    {
+      "id": "meal-prep--sun-a--early",
+      "title": "Meal Prep",
+      "dayKey": "sun-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Snack Mon_B+Thu_A & Snack Tue_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "snack",
+            "mealKey": "mon-b+thu-a",
+            "days": [
+              "mon-b",
+              "thu-a"
+            ]
+          },
+          {
+            "slot": "snack",
+            "mealKey": "tue-a",
+            "days": [
+              "tue-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Sunday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Snack Mon_B+Thu_A & Snack Tue_A"
+      },
+      "sourceRow": 22
+    },
+    {
+      "id": "cleaning--sun-a--late",
+      "title": "Cleaning",
+      "dayKey": "sun-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Creative Bagua",
+        "kind": "text",
+        "text": "Creative Bagua"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Sunday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Creative Bagua"
+      },
+      "sourceRow": 23
+    },
+    {
+      "id": "meal-prep--mon-b--early",
+      "title": "Meal Prep",
+      "dayKey": "mon-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dinner Tue_A+Thu_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "dinner",
+            "mealKey": "tue-a+thu-a",
+            "days": [
+              "tue-a",
+              "thu-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Monday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Dinner Tue_A+Thu_A"
+      },
+      "sourceRow": 15
+    },
+    {
+      "id": "laundry--mon-b--early",
+      "title": "Laundry",
+      "dayKey": "mon-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "LAUNDRY IN, SWITCH & HANG",
+        "kind": "text",
+        "text": "LAUNDRY IN, SWITCH & HANG"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Monday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "LAUNDRY IN, SWITCH & HANG"
+      },
+      "sourceRow": 52
+    },
+    {
+      "id": "laundry--mon-b--midday",
+      "title": "Laundry",
+      "dayKey": "mon-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Monday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 53
+    },
+    {
+      "id": "piano-tutor--mon-b--late",
+      "title": "Piano Tutor",
+      "dayKey": "mon-b",
+      "block": "late",
+      "priority": 3,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "15:00",
+        "travelPrepComplete": "15:00",
+        "timeStart": "15:00",
+        "timeFinished": "15:30",
+        "estimatedEnd": "15:30",
+        "estimatedEndSource": "literal",
+        "durationMinutes": 30,
+        "prepMinutes": 0
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Piano Tutor",
+        "Priority": "3.0",
+        "Day Key": "Monday B",
+        "Estimated Start": "0.625",
+        "Estimated End": "0.6458333333",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.625",
+        "Time Start": "0.625",
+        "Time Finished": "0.6458333333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 13
+    },
+    {
+      "id": "cleaning--mon-b--late",
+      "title": "Cleaning",
+      "dayKey": "mon-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Back Yard",
+        "kind": "text",
+        "text": "Back Yard"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Monday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Back Yard"
+      },
+      "sourceRow": 16
+    },
+    {
+      "id": "mall--mon-b--late",
+      "title": "Mall",
+      "dayKey": "mon-b",
+      "block": "late",
+      "priority": 5,
+      "categories": [
+        "friends-family"
+      ],
+      "flexibility": "yes",
+      "timing": {
+        "estimatedStart": "16:30",
+        "travelPrepComplete": "16:45",
+        "timeStart": "17:00",
+        "timeFinished": "18:30",
+        "estimatedEnd": "18:45",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 90,
+        "prepMinutes": 15
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Mall",
+        "Priority": "5.0",
+        "Day Key": "Monday B",
+        "Estimated Start": "0.6875",
+        "Estimated End": "0.78125",
+        "Block": "Late",
+        "Flexibility": "Yes",
+        "Travel/Prep Complete": "0.6979166666666666",
+        "Time Start": "0.7083333333333334",
+        "Time Finished": "0.7708333333333334",
+        "Category": "Friends & Family",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 14
+    },
+    {
+      "id": "open-for-appointments--tue-a--early",
+      "title": "Open for Appointments",
+      "dayKey": "tue-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "operations",
+        "health"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Open for Appointments",
+        "Priority": "4.0",
+        "Day Key": "Tuesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Operations/Health",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 35
+    },
+    {
+      "id": "meal-prep--tue-a--early",
+      "title": "Meal Prep",
+      "dayKey": "tue-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Brunch Wed_B & Brunch Thu_A+Sat_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "brunch",
+            "mealKey": "wed-b",
+            "days": [
+              "wed-b"
+            ]
+          },
+          {
+            "slot": "brunch",
+            "mealKey": "thu-a+sat-a",
+            "days": [
+              "thu-a",
+              "sat-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Tuesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Brunch Wed_B & Brunch Thu_A+Sat_A"
+      },
+      "sourceRow": 37
+    },
+    {
+      "id": "aquarium--tue-a--midday",
+      "title": "Aquarium",
+      "dayKey": "tue-a",
+      "block": "midday",
+      "priority": 5,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "yes",
+      "timing": {
+        "estimatedStart": "10:45",
+        "travelPrepComplete": "11:15",
+        "timeStart": "11:15",
+        "timeFinished": "13:45",
+        "estimatedEnd": "14:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 150,
+        "prepMinutes": 30
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Aquarium",
+        "Priority": "5.0",
+        "Day Key": "Tuesday A",
+        "Estimated Start": "0.4479166666666667",
+        "Estimated End": "0.59375",
+        "Block": "Midday",
+        "Flexibility": "Yes",
+        "Travel/Prep Complete": "0.46875",
+        "Time Start": "0.46875",
+        "Time Finished": "0.5729166666666666",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 36
+    },
+    {
+      "id": "cleaning--tue-a--late",
+      "title": "Cleaning",
+      "dayKey": "tue-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Fame & Wealth Baguas",
+        "kind": "text",
+        "text": "Fame & Wealth Baguas"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Tuesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Fame & Wealth Baguas"
+      },
+      "sourceRow": 38
+    },
+    {
+      "id": "meal-prep--wed-b--early",
+      "title": "Meal Prep",
+      "dayKey": "wed-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Snack Wed_B+Sat_A & Dinner Wed_B+Fri_B",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "snack",
+            "mealKey": "wed-b+sat-a",
+            "days": [
+              "wed-b",
+              "sat-a"
+            ]
+          },
+          {
+            "slot": "dinner",
+            "mealKey": "wed-b+fri-b",
+            "days": [
+              "wed-b",
+              "fri-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Wednesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Snack Wed_B+Sat_A & Dinner Wed_B+Fri_B"
+      },
+      "sourceRow": 48
+    },
+    {
+      "id": "laundry--wed-b--early",
+      "title": "Laundry",
+      "dayKey": "wed-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "LAUNDRY IN, SWITCH & HANG",
+        "kind": "text",
+        "text": "LAUNDRY IN, SWITCH & HANG"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Wednesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "LAUNDRY IN, SWITCH & HANG"
+      },
+      "sourceRow": 50
+    },
+    {
+      "id": "laundry--wed-b--midday",
+      "title": "Laundry",
+      "dayKey": "wed-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Wednesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 51
+    },
+    {
+      "id": "piano-tutor--wed-b--late",
+      "title": "Piano Tutor",
+      "dayKey": "wed-b",
+      "block": "late",
+      "priority": 3,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "15:00",
+        "travelPrepComplete": "15:00",
+        "timeStart": "15:00",
+        "timeFinished": "15:30",
+        "estimatedEnd": "15:30",
+        "estimatedEndSource": "literal",
+        "durationMinutes": 30,
+        "prepMinutes": 0
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Piano Tutor",
+        "Priority": "3.0",
+        "Day Key": "Wednesday B",
+        "Estimated Start": "0.625",
+        "Estimated End": "0.6458333333",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.625",
+        "Time Start": "0.625",
+        "Time Finished": "0.6458333333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 47
+    },
+    {
+      "id": "cleaning--wed-b--late",
+      "title": "Cleaning",
+      "dayKey": "wed-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Health Bagua",
+        "kind": "text",
+        "text": "Health Bagua"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Wednesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Health Bagua"
+      },
+      "sourceRow": 49
+    },
+    {
+      "id": "meal-prep--thu-a--early",
+      "title": "Meal Prep",
+      "dayKey": "thu-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Brunch Fri_B+Sun_B & Snack Fri_B",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "brunch",
+            "mealKey": "fri-b+sun-b",
+            "days": [
+              "fri-b",
+              "sun-b"
+            ]
+          },
+          {
+            "slot": "snack",
+            "mealKey": "fri-b",
+            "days": [
+              "fri-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Thursday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Brunch Fri_B+Sun_B & Snack Fri_B"
+      },
+      "sourceRow": 29
+    },
+    {
+      "id": "library--thu-a--midday",
+      "title": "Library",
+      "dayKey": "thu-a",
+      "block": "midday",
+      "priority": 5,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "some",
+      "timing": {
+        "estimatedStart": "11:45",
+        "travelPrepComplete": "12:15",
+        "timeStart": "12:15",
+        "timeFinished": "14:45",
+        "estimatedEnd": "15:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 150,
+        "prepMinutes": 30
+      },
+      "detail": {
+        "raw": "https://chandler.bibliocommons.com/events/6a4ee08388e9bf28002f8d44",
+        "kind": "url",
+        "url": "https://chandler.bibliocommons.com/events/6a4ee08388e9bf28002f8d44"
+      },
+      "raw": {
+        "Description": "Library",
+        "Priority": "5.0",
+        "Day Key": "Thursday A",
+        "Estimated Start": "0.4895833333333333",
+        "Estimated End": "0.6354166667",
+        "Block": "Midday",
+        "Flexibility": "Some",
+        "Travel/Prep Complete": "0.5104166666666666",
+        "Time Start": "0.5104166666666666",
+        "Time Finished": "0.6145833333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": "https://chandler.bibliocommons.com/events/6a4ee08388e9bf28002f8d44"
+      },
+      "sourceRow": 28
+    },
+    {
+      "id": "cleaning--thu-a--late",
+      "title": "Cleaning",
+      "dayKey": "thu-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Love, Career & Helpers Baguas & Deep Clean Fridge",
+        "kind": "text",
+        "text": "Love, Career & Helpers Baguas & Deep Clean Fridge"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Thursday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Love, Career & Helpers Baguas & Deep Clean Fridge"
+      },
+      "sourceRow": 30
+    },
+    {
+      "id": "meal-prep--fri-b--early",
+      "title": "Meal Prep",
+      "dayKey": "fri-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Brunch Mon_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "brunch",
+            "mealKey": "mon-a",
+            "days": [
+              "mon-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Friday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Brunch Mon_A"
+      },
+      "sourceRow": 8
+    },
+    {
+      "id": "laundry--fri-b--early",
+      "title": "Laundry",
+      "dayKey": "fri-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "LAUNDRY IN, SWITCH & HANG",
+        "kind": "text",
+        "text": "LAUNDRY IN, SWITCH & HANG"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Friday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "LAUNDRY IN, SWITCH & HANG"
+      },
+      "sourceRow": 54
+    },
+    {
+      "id": "laundry--fri-b--midday",
+      "title": "Laundry",
+      "dayKey": "fri-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Friday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 55
+    },
+    {
+      "id": "piano-lessons--fri-b--late",
+      "title": "Piano Lessons",
+      "dayKey": "fri-b",
+      "block": "late",
+      "priority": 1,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "14:00",
+        "travelPrepComplete": "14:45",
+        "timeStart": "15:00",
+        "timeFinished": "15:30",
+        "estimatedEnd": "16:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 30,
+        "prepMinutes": 45
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Piano Lessons",
+        "Priority": "1.0",
+        "Day Key": "Friday B",
+        "Estimated Start": "0.5833333333333334",
+        "Estimated End": "0.6770833333",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.6145833333333334",
+        "Time Start": "0.625",
+        "Time Finished": "0.6458333333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 7
+    },
+    {
+      "id": "cleaning--fri-b--late",
+      "title": "Cleaning",
+      "dayKey": "fri-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Knowledge & Family Baguas",
+        "kind": "text",
+        "text": "Knowledge & Family Baguas"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Friday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Knowledge & Family Baguas"
+      },
+      "sourceRow": 9
+    },
+    {
+      "id": "meal-prep--sat-a--late",
+      "title": "Meal Prep",
+      "dayKey": "sat-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dinner Sat_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "dinner",
+            "mealKey": "sat-a",
+            "days": [
+              "sat-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Saturday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Dinner Sat_A"
+      },
+      "sourceRow": 18
+    },
+    {
+      "id": "big-pool-walking-the-dogs--sat-a--late",
+      "title": "Big Pool/Walking the Dogs",
+      "dayKey": "sat-a",
+      "block": "late",
+      "priority": 5,
+      "categories": [
+        "friends-family"
+      ],
+      "flexibility": "yes",
+      "timing": {
+        "estimatedStart": "17:00",
+        "travelPrepComplete": "17:30",
+        "timeStart": "17:30",
+        "timeFinished": "19:00",
+        "estimatedEnd": "19:30",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 90,
+        "prepMinutes": 30
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Big Pool/Walking the Dogs",
+        "Priority": "5.0",
+        "Day Key": "Saturday A",
+        "Estimated Start": "0.7083333333333334",
+        "Estimated End": "0.8125",
+        "Block": "Late",
+        "Flexibility": "Yes",
+        "Travel/Prep Complete": "0.7291666666666666",
+        "Time Start": "0.7291666666666666",
+        "Time Finished": "0.7916666666666666",
+        "Category": "Friends & Family",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 17
+    },
+    {
+      "id": "church--sun-b--early",
+      "title": "Church",
+      "dayKey": "sun-b",
+      "block": "early",
+      "priority": 1,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "some",
+      "timing": {
+        "estimatedStart": "10:00",
+        "travelPrepComplete": "10:10",
+        "timeStart": "10:25",
+        "timeFinished": "13:05",
+        "estimatedEnd": "13:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 160,
+        "prepMinutes": 10
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Church",
+        "Priority": "1.0",
+        "Day Key": "Sunday B",
+        "Estimated Start": "0.4166666666666667",
+        "Estimated End": "0.5520833333",
+        "Block": "Early",
+        "Flexibility": "Some",
+        "Travel/Prep Complete": "0.4236111111111111",
+        "Time Start": "0.4340277777777778",
+        "Time Finished": "0.5451388888888888",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 24
+    },
+    {
+      "id": "laundry--sun-b--early",
+      "title": "Laundry",
+      "dayKey": "sun-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Sunday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 56
+    },
+    {
+      "id": "meal-prep--sun-b--midday",
+      "title": "Meal Prep",
+      "dayKey": "sun-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Snack Sun_B+Tue_B & Dinner Sun_B+Wed_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "snack",
+            "mealKey": "sun-b+tue-b",
+            "days": [
+              "sun-b",
+              "tue-b"
+            ]
+          },
+          {
+            "slot": "dinner",
+            "mealKey": "sun-b+wed-a",
+            "days": [
+              "sun-b",
+              "wed-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Sunday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Snack Sun_B+Tue_B & Dinner Sun_B+Wed_A"
+      },
+      "sourceRow": 25
+    },
+    {
+      "id": "cleaning--sun-b--midday",
+      "title": "Cleaning",
+      "dayKey": "sun-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Trashes",
+        "kind": "text",
+        "text": "Trashes"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Sunday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Trashes"
+      },
+      "sourceRow": 27
+    },
+    {
+      "id": "meal-prep--sun-b--late",
+      "title": "Meal Prep",
+      "dayKey": "sun-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dinner Mon_A & Snack Mon_A+Thu_B",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "dinner",
+            "mealKey": "mon-a",
+            "days": [
+              "mon-a"
+            ]
+          },
+          {
+            "slot": "snack",
+            "mealKey": "mon-a+thu-b",
+            "days": [
+              "mon-a",
+              "thu-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Sunday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Dinner Mon_A & Snack Mon_A+Thu_B"
+      },
+      "sourceRow": 26
+    },
+    {
+      "id": "zoo--mon-a--early",
+      "title": "Zoo",
+      "dayKey": "mon-a",
+      "block": "early",
+      "priority": 5,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "yes",
+      "timing": {
+        "estimatedStart": "06:45",
+        "travelPrepComplete": "07:15",
+        "timeStart": "07:15",
+        "timeFinished": "09:45",
+        "estimatedEnd": "10:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 150,
+        "prepMinutes": 30
+      },
+      "detail": {
+        "raw": "https://www.phoenixzoo.org/visit/#hours",
+        "kind": "url",
+        "url": "https://www.phoenixzoo.org/visit/#hours"
+      },
+      "raw": {
+        "Description": "Zoo",
+        "Priority": "5.0",
+        "Day Key": "Monday A",
+        "Estimated Start": "0.28125",
+        "Estimated End": "0.4270833333",
+        "Block": "Early",
+        "Flexibility": "Yes",
+        "Travel/Prep Complete": "0.3020833333333333",
+        "Time Start": "0.3020833333333333",
+        "Time Finished": "0.40625",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": "https://www.phoenixzoo.org/visit/#hours"
+      },
+      "sourceRow": 11
+    },
+    {
+      "id": "laundry--mon-a--midday",
+      "title": "Laundry",
+      "dayKey": "mon-a",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD",
+        "kind": "text",
+        "text": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Monday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD"
+      },
+      "sourceRow": 60
+    },
+    {
+      "id": "piano-tutor--mon-a--late",
+      "title": "Piano Tutor",
+      "dayKey": "mon-a",
+      "block": "late",
+      "priority": 3,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "15:00",
+        "travelPrepComplete": "15:00",
+        "timeStart": "15:00",
+        "timeFinished": "15:30",
+        "estimatedEnd": "15:30",
+        "estimatedEndSource": "literal",
+        "durationMinutes": 30,
+        "prepMinutes": 0
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Piano Tutor",
+        "Priority": "3.0",
+        "Day Key": "Monday A",
+        "Estimated Start": "0.625",
+        "Estimated End": "0.6458333333",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.625",
+        "Time Start": "0.625",
+        "Time Finished": "0.6458333333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 10
+    },
+    {
+      "id": "cleaning--mon-a--late",
+      "title": "Cleaning",
+      "dayKey": "mon-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Back Yard",
+        "kind": "text",
+        "text": "Back Yard"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Monday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Back Yard"
+      },
+      "sourceRow": 12
+    },
+    {
+      "id": "laundry--mon-a--late",
+      "title": "Laundry",
+      "dayKey": "mon-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "PUT AWAY, SWITCH & HANG",
+        "kind": "text",
+        "text": "PUT AWAY, SWITCH & HANG"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Monday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "PUT AWAY, SWITCH & HANG"
+      },
+      "sourceRow": 63
+    },
+    {
+      "id": "laundry--tue-b--early",
+      "title": "Laundry",
+      "dayKey": "tue-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Tuesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 57
+    },
+    {
+      "id": "meal-prep--tue-b--midday",
+      "title": "Meal Prep",
+      "dayKey": "tue-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Brunch Tue_B+Thu_B",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "brunch",
+            "mealKey": "tue-b+thu-b",
+            "days": [
+              "tue-b",
+              "thu-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Tuesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Brunch Tue_B+Thu_B"
+      },
+      "sourceRow": 39
+    },
+    {
+      "id": "meal-prep--tue-b--late",
+      "title": "Meal Prep",
+      "dayKey": "tue-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dinner Tue_B+Fri_A & Brunch Wed_A+Fri_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "dinner",
+            "mealKey": "tue-b+fri-a",
+            "days": [
+              "tue-b",
+              "fri-a"
+            ]
+          },
+          {
+            "slot": "brunch",
+            "mealKey": "wed-a+fri-a",
+            "days": [
+              "wed-a",
+              "fri-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Tuesday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Dinner Tue_B+Fri_A & Brunch Wed_A+Fri_A"
+      },
+      "sourceRow": 40
+    },
+    {
+      "id": "open-for-appointments--wed-a--early",
+      "title": "Open for Appointments",
+      "dayKey": "wed-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "operations",
+        "health"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Open for Appointments",
+        "Priority": "4.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Operations/Health",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 42
+    },
+    {
+      "id": "teaching--wed-a--early",
+      "title": "Teaching",
+      "dayKey": "wed-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "D&D",
+        "kind": "text",
+        "text": "D&D"
+      },
+      "raw": {
+        "Description": "Teaching",
+        "Priority": "4.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": "D&D"
+      },
+      "sourceRow": 46
+    },
+    {
+      "id": "meal-prep--wed-a--midday",
+      "title": "Meal Prep",
+      "dayKey": "wed-a",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Snack Wed_A+Sat_B",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "snack",
+            "mealKey": "wed-a+sat-b",
+            "days": [
+              "wed-a",
+              "sat-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Snack Wed_A+Sat_B"
+      },
+      "sourceRow": 43
+    },
+    {
+      "id": "laundry--wed-a--midday",
+      "title": "Laundry",
+      "dayKey": "wed-a",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD",
+        "kind": "text",
+        "text": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD"
+      },
+      "sourceRow": 61
+    },
+    {
+      "id": "cleaning--wed-a--late",
+      "title": "Cleaning",
+      "dayKey": "wed-a",
+      "block": "late",
+      "priority": 2,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Put out milk bottles",
+        "kind": "text",
+        "text": "Put out milk bottles"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "2.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Put out milk bottles"
+      },
+      "sourceRow": 44
+    },
+    {
+      "id": "piano-tutor--wed-a--late",
+      "title": "Piano Tutor",
+      "dayKey": "wed-a",
+      "block": "late",
+      "priority": 3,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "15:00",
+        "travelPrepComplete": "15:00",
+        "timeStart": "15:00",
+        "timeFinished": "15:30",
+        "estimatedEnd": "15:30",
+        "estimatedEndSource": "literal",
+        "durationMinutes": 30,
+        "prepMinutes": 0
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Piano Tutor",
+        "Priority": "3.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "0.625",
+        "Estimated End": "0.6458333333",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.625",
+        "Time Start": "0.625",
+        "Time Finished": "0.6458333333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 41
+    },
+    {
+      "id": "cleaning--wed-a--late--2",
+      "title": "Cleaning",
+      "dayKey": "wed-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Health Bagua",
+        "kind": "text",
+        "text": "Health Bagua"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Health Bagua"
+      },
+      "sourceRow": 45
+    },
+    {
+      "id": "laundry--wed-a--late",
+      "title": "Laundry",
+      "dayKey": "wed-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "PUT AWAY, SWITCH & HANG",
+        "kind": "text",
+        "text": "PUT AWAY, SWITCH & HANG"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Wednesday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "PUT AWAY, SWITCH & HANG"
+      },
+      "sourceRow": 64
+    },
+    {
+      "id": "laundry--thu-b--early",
+      "title": "Laundry",
+      "dayKey": "thu-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Thursday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 58
+    },
+    {
+      "id": "meal-prep--thu-b--midday",
+      "title": "Meal Prep",
+      "dayKey": "thu-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Brunch Sat_B+Mon_B",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "brunch",
+            "mealKey": "mon-b+sat-b",
+            "days": [
+              "mon-b",
+              "sat-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Thursday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Brunch Sat_B+Mon_B"
+      },
+      "sourceRow": 32
+    },
+    {
+      "id": "cleaning--thu-b--midday",
+      "title": "Cleaning",
+      "dayKey": "thu-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Clean Fridge",
+        "kind": "text",
+        "text": "Clean Fridge"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Thursday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Clean Fridge"
+      },
+      "sourceRow": 34
+    },
+    {
+      "id": "library--thu-b--midday",
+      "title": "Library",
+      "dayKey": "thu-b",
+      "block": "midday",
+      "priority": 5,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "some",
+      "timing": {
+        "estimatedStart": "11:45",
+        "travelPrepComplete": "12:15",
+        "timeStart": "12:15",
+        "timeFinished": "14:45",
+        "estimatedEnd": "15:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 150,
+        "prepMinutes": 30
+      },
+      "detail": {
+        "raw": "https://chandler.bibliocommons.com/events/6a4ee08388e9bf28002f8d44",
+        "kind": "url",
+        "url": "https://chandler.bibliocommons.com/events/6a4ee08388e9bf28002f8d44"
+      },
+      "raw": {
+        "Description": "Library",
+        "Priority": "5.0",
+        "Day Key": "Thursday B",
+        "Estimated Start": "0.4895833333333333",
+        "Estimated End": "0.6354166667",
+        "Block": "Midday",
+        "Flexibility": "Some",
+        "Travel/Prep Complete": "0.5104166666666666",
+        "Time Start": "0.5104166666666666",
+        "Time Finished": "0.6145833333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": "https://chandler.bibliocommons.com/events/6a4ee08388e9bf28002f8d44"
+      },
+      "sourceRow": 31
+    },
+    {
+      "id": "meal-prep--thu-b--late",
+      "title": "Meal Prep",
+      "dayKey": "thu-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dinner Thu_B+Sun_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "dinner",
+            "mealKey": "sun-a+thu-b",
+            "days": [
+              "sun-a",
+              "thu-b"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Thursday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Dinner Thu_B+Sun_A"
+      },
+      "sourceRow": 33
+    },
+    {
+      "id": "teaching--fri-a--early",
+      "title": "Teaching",
+      "dayKey": "fri-a",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Sentences",
+        "kind": "text",
+        "text": "Sentences"
+      },
+      "raw": {
+        "Description": "Teaching",
+        "Priority": "4.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": "Sentences"
+      },
+      "sourceRow": 6
+    },
+    {
+      "id": "meal-prep--fri-a--midday",
+      "title": "Meal Prep",
+      "dayKey": "fri-a",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Snack Fri_A+Sun_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "snack",
+            "mealKey": "sun-a+fri-a",
+            "days": [
+              "sun-a",
+              "fri-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Snack Fri_A+Sun_A"
+      },
+      "sourceRow": 4
+    },
+    {
+      "id": "laundry--fri-a--midday",
+      "title": "Laundry",
+      "dayKey": "fri-a",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD",
+        "kind": "text",
+        "text": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "LAUNDRY IN, SWITCH, HANG, SECOND LOAD IN, EXTRICATE & FOLD"
+      },
+      "sourceRow": 62
+    },
+    {
+      "id": "piano-lessons--fri-a--late",
+      "title": "Piano Lessons",
+      "dayKey": "fri-a",
+      "block": "late",
+      "priority": 1,
+      "categories": [
+        "spirituality-development"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "14:00",
+        "travelPrepComplete": "14:45",
+        "timeStart": "15:00",
+        "timeFinished": "15:30",
+        "estimatedEnd": "16:15",
+        "estimatedEndSource": "formula",
+        "durationMinutes": 30,
+        "prepMinutes": 45
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Piano Lessons",
+        "Priority": "1.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "0.5833333333333334",
+        "Estimated End": "0.6770833333",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.6145833333333334",
+        "Time Start": "0.625",
+        "Time Finished": "0.6458333333333334",
+        "Category": "Spirituality & Development",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 2
+    },
+    {
+      "id": "date-night-babysitter--fri-a--late",
+      "title": "Date Night Babysitter",
+      "dayKey": "fri-a",
+      "block": "late",
+      "priority": 1,
+      "categories": [
+        "friends-family"
+      ],
+      "flexibility": "no",
+      "timing": {
+        "estimatedStart": "17:00",
+        "travelPrepComplete": "18:00",
+        "timeStart": "18:00",
+        "timeFinished": "21:30",
+        "estimatedEnd": "22:30",
+        "estimatedEndSource": "literal",
+        "durationMinutes": 210,
+        "prepMinutes": 60
+      },
+      "detail": {
+        "raw": "",
+        "kind": null
+      },
+      "raw": {
+        "Description": "Date Night Babysitter",
+        "Priority": "1.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "0.7083333333333334",
+        "Estimated End": "0.9375",
+        "Block": "Late",
+        "Flexibility": "No",
+        "Travel/Prep Complete": "0.75",
+        "Time Start": "0.75",
+        "Time Finished": "0.8958333333333334",
+        "Category": "Friends & Family",
+        "Link/Tasks": ""
+      },
+      "sourceRow": 3
+    },
+    {
+      "id": "cleaning--fri-a--late",
+      "title": "Cleaning",
+      "dayKey": "fri-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Knowledge & Family Baguas",
+        "kind": "text",
+        "text": "Knowledge & Family Baguas"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Knowledge & Family Baguas"
+      },
+      "sourceRow": 5
+    },
+    {
+      "id": "laundry--fri-a--late",
+      "title": "Laundry",
+      "dayKey": "fri-a",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "PUT AWAY, SWITCH & HANG",
+        "kind": "text",
+        "text": "PUT AWAY, SWITCH & HANG"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Friday A",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "PUT AWAY, SWITCH & HANG"
+      },
+      "sourceRow": 65
+    },
+    {
+      "id": "laundry--sat-b--early",
+      "title": "Laundry",
+      "dayKey": "sat-b",
+      "block": "early",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "EXTRICATE, FOLD & PUT AWAY",
+        "kind": "text",
+        "text": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "raw": {
+        "Description": "Laundry",
+        "Priority": "4.0",
+        "Day Key": "Saturday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Early",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "EXTRICATE, FOLD & PUT AWAY"
+      },
+      "sourceRow": 59
+    },
+    {
+      "id": "cleaning--sat-b--midday",
+      "title": "Cleaning",
+      "dayKey": "sat-b",
+      "block": "midday",
+      "priority": 4,
+      "categories": [
+        "cleaning"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dishes",
+        "kind": "text",
+        "text": "Dishes"
+      },
+      "raw": {
+        "Description": "Cleaning",
+        "Priority": "4.0",
+        "Day Key": "Saturday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Midday",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Cleaning",
+        "Link/Tasks": "Dishes"
+      },
+      "sourceRow": 20
+    },
+    {
+      "id": "meal-prep--sat-b--late",
+      "title": "Meal Prep",
+      "dayKey": "sat-b",
+      "block": "late",
+      "priority": 4,
+      "categories": [
+        "meals"
+      ],
+      "flexibility": null,
+      "timing": null,
+      "detail": {
+        "raw": "Dinner Sat_B+Mon_B & Brunch Sun_A+Tue_A",
+        "kind": "meal-prep",
+        "mealRefs": [
+          {
+            "slot": "dinner",
+            "mealKey": "mon-b+sat-b",
+            "days": [
+              "mon-b",
+              "sat-b"
+            ]
+          },
+          {
+            "slot": "brunch",
+            "mealKey": "sun-a+tue-a",
+            "days": [
+              "sun-a",
+              "tue-a"
+            ]
+          }
+        ]
+      },
+      "raw": {
+        "Description": "Meal Prep",
+        "Priority": "4.0",
+        "Day Key": "Saturday B",
+        "Estimated Start": "null",
+        "Estimated End": "null",
+        "Block": "Late",
+        "Flexibility": "null",
+        "Travel/Prep Complete": "null",
+        "Time Start": "null",
+        "Time Finished": "null",
+        "Category": "Meals",
+        "Link/Tasks": "Dinner Sat_B+Mon_B & Brunch Sun_A+Tue_A"
+      },
+      "sourceRow": 19
+    }
+  ]
+}

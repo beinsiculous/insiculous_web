@@ -1,0 +1,343 @@
+{
+  "$schema": "./schema/categories.schema.json",
+  "order": [
+    "meals",
+    "cleaning",
+    "working",
+    "spirituality-development",
+    "friends-family",
+    "health",
+    "operations"
+  ],
+  "categories": {
+    "meals": {
+      "label": "Meals",
+      "subjects": [
+        "cooking",
+        "planning",
+        "preparation",
+        "food-provisioning"
+      ]
+    },
+    "cleaning": {
+      "label": "Cleaning",
+      "subjects": [
+        "laundry",
+        "decoration",
+        "dishes",
+        "organization",
+        "packing",
+        "sanitization"
+      ]
+    },
+    "working": {
+      "label": "Working",
+      "subjects": [
+        "billable-hours",
+        "public-relations-management",
+        "networking",
+        "transportation-commute",
+        "volunteering"
+      ]
+    },
+    "spirituality-development": {
+      "label": "Spirituality & Development",
+      "subjects": [
+        "coaching-mentoring",
+        "conferences-courses",
+        "creative-study-or-expression",
+        "solo-learning-research-study",
+        "seeking-council-advisement",
+        "teaching-tutoring"
+      ]
+    },
+    "friends-family": {
+      "label": "Friends & Family",
+      "subjects": [
+        "extracurricular-organization",
+        "dating",
+        "event-party-get-together-planning",
+        "pet-care",
+        "relationship-management"
+      ]
+    },
+    "health": {
+      "label": "Health",
+      "subjects": [
+        "appointments",
+        "exercise",
+        "hygiene",
+        "journaling",
+        "leisure-rest",
+        "medical-provisioning",
+        "therapies",
+        "treatments"
+      ]
+    },
+    "operations": {
+      "label": "Operations",
+      "subjects": [
+        "budgeting",
+        "errands",
+        "financial-and-life-planning",
+        "maintenance",
+        "product-service-research",
+        "provisioning",
+        "stewardship"
+      ]
+    }
+  },
+  "flexibleFocus": {
+    "key": "flexible",
+    "label": "Flexible",
+    "note": "Pseudo-focus used by days/blocks that are intentionally unassigned; not a category. Its share (weights.flexibleShare) is the waking window the categories did not claim: rest days, seasonal and occasional work, catching up, and time kept open."
+  },
+  "subjects": {
+    "cooking": {
+      "label": "Cooking",
+      "category": "meals",
+      "sourceRow": 2,
+      "description": "Making meals from ingredients, including cleanup at the stove."
+    },
+    "planning": {
+      "label": "Planning",
+      "category": "meals",
+      "sourceRow": 3,
+      "description": "Deciding what to eat over the fortnight: menus, portions, leftovers."
+    },
+    "preparation": {
+      "label": "Preparation",
+      "category": "meals",
+      "sourceRow": 4,
+      "description": "Prepping ahead: chopping, marinating, batch cooking, packing lunches."
+    },
+    "food-provisioning": {
+      "label": "Food provisioning",
+      "category": "meals",
+      "sourceRow": 5,
+      "description": "Getting food into the house: groceries, markets, deliveries."
+    },
+    "laundry": {
+      "label": "Laundry",
+      "category": "cleaning",
+      "sourceRow": 6,
+      "description": "Washing, drying, folding and putting away clothes and linens."
+    },
+    "decoration": {
+      "label": "Decoration",
+      "category": "cleaning",
+      "sourceRow": 7,
+      "description": "Seasonal or occasional decorating and styling of the home."
+    },
+    "dishes": {
+      "label": "Dishes",
+      "category": "cleaning",
+      "sourceRow": 8,
+      "description": "Dishes, counters and the kitchen after meals."
+    },
+    "organization": {
+      "label": "Organization",
+      "category": "cleaning",
+      "sourceRow": 9,
+      "description": "Tidying, decluttering and putting things where they live."
+    },
+    "packing": {
+      "label": "Packing",
+      "category": "cleaning",
+      "sourceRow": 10,
+      "description": "Packing and unpacking for trips or moves."
+    },
+    "sanitization": {
+      "label": "Sanitization",
+      "category": "cleaning",
+      "sourceRow": 11,
+      "description": "Deep cleaning: bathrooms, floors, disinfecting surfaces."
+    },
+    "billable-hours": {
+      "label": "Billable hours",
+      "category": "working",
+      "sourceRow": 12,
+      "description": "Paid work: employment, contracts, running a business."
+    },
+    "public-relations-management": {
+      "label": "Public relations management",
+      "category": "working",
+      "sourceRow": 13,
+      "description": "Reputation and presence: social media, posts, replies, reviews."
+    },
+    "networking": {
+      "label": "Networking",
+      "category": "working",
+      "sourceRow": 14,
+      "description": "Meeting people for work: events, coffees, introductions."
+    },
+    "transportation-commute": {
+      "label": "Transportation/commute",
+      "category": "working",
+      "sourceRow": 15,
+      "description": "Getting to and from work or job sites."
+    },
+    "volunteering": {
+      "label": "Volunteering",
+      "category": "working",
+      "sourceRow": 16,
+      "description": "Unpaid work for a cause or community."
+    },
+    "coaching-mentoring": {
+      "label": "Coaching/mentoring",
+      "category": "spirituality-development",
+      "sourceRow": 17,
+      "description": "Guiding others, including parenting and mentoring."
+    },
+    "conferences-courses": {
+      "label": "Conferences/courses",
+      "category": "spirituality-development",
+      "sourceRow": 18,
+      "description": "Attending talks, classes and structured courses."
+    },
+    "creative-study-or-expression": {
+      "label": "Creative study or expression",
+      "category": "spirituality-development",
+      "sourceRow": 19,
+      "description": "Making art, music, writing or other creative practice."
+    },
+    "solo-learning-research-study": {
+      "label": "Solo learning/research/study",
+      "category": "spirituality-development",
+      "sourceRow": 20,
+      "description": "Studying, reading and researching on your own."
+    },
+    "seeking-council-advisement": {
+      "label": "Seeking council/advisement",
+      "category": "spirituality-development",
+      "sourceRow": 21,
+      "description": "Getting guidance: advisors, mentors, spiritual direction."
+    },
+    "teaching-tutoring": {
+      "label": "Teaching/tutoring",
+      "category": "spirituality-development",
+      "sourceRow": 22,
+      "description": "Teaching or tutoring others."
+    },
+    "extracurricular-organization": {
+      "label": "Extracurricular organization",
+      "category": "friends-family",
+      "sourceRow": 23,
+      "description": "Organizing the family/friends calendar, clubs and activities."
+    },
+    "dating": {
+      "label": "Dating",
+      "category": "friends-family",
+      "sourceRow": 24,
+      "description": "Time with a partner or looking for one."
+    },
+    "event-party-get-together-planning": {
+      "label": "Event/party/get-together planning",
+      "category": "friends-family",
+      "sourceRow": 25,
+      "description": "Planning parties, gatherings and celebrations."
+    },
+    "pet-care": {
+      "label": "Pet care",
+      "category": "friends-family",
+      "sourceRow": 26,
+      "description": "Feeding, walking, grooming and vet visits."
+    },
+    "relationship-management": {
+      "label": "Relationship Management",
+      "category": "friends-family",
+      "sourceRow": 27,
+      "description": "Keeping up with friends and family: calls, visits, messages."
+    },
+    "appointments": {
+      "label": "Appointments",
+      "category": "health",
+      "sourceRow": 28,
+      "description": "Doctor, dentist, therapist and similar appointments."
+    },
+    "exercise": {
+      "label": "Exercise",
+      "category": "health",
+      "sourceRow": 29,
+      "description": "Workouts, sport, walks and other movement."
+    },
+    "hygiene": {
+      "label": "Hygiene",
+      "category": "health",
+      "sourceRow": 30,
+      "description": "Showering, grooming, dressing and self-care routines."
+    },
+    "journaling": {
+      "label": "Journaling",
+      "category": "health",
+      "sourceRow": 31,
+      "description": "Writing for reflection, gratitude or planning."
+    },
+    "leisure-rest": {
+      "label": "Leisure/Rest",
+      "category": "health",
+      "sourceRow": 32,
+      "description": "Downtime: rest, hobbies for fun, screens, naps."
+    },
+    "medical-provisioning": {
+      "label": "Medical provisioning",
+      "category": "health",
+      "sourceRow": 33,
+      "description": "Prescriptions, supplements and medical supplies."
+    },
+    "therapies": {
+      "label": "Therapies",
+      "category": "health",
+      "sourceRow": 34,
+      "description": "Physical, mental or occupational therapy sessions."
+    },
+    "treatments": {
+      "label": "Treatments",
+      "category": "health",
+      "sourceRow": 35,
+      "description": "Ongoing treatments and recovery time."
+    },
+    "budgeting": {
+      "label": "Budgeting",
+      "category": "operations",
+      "sourceRow": 36,
+      "description": "Tracking spending and keeping the budget current."
+    },
+    "errands": {
+      "label": "Errands",
+      "category": "operations",
+      "sourceRow": 37,
+      "description": "Post office, bank, returns, pickups and drop-offs."
+    },
+    "financial-and-life-planning": {
+      "label": "Financial and life planning",
+      "category": "operations",
+      "sourceRow": 38,
+      "description": "Longer-range money and life planning: savings, insurance, goals."
+    },
+    "maintenance": {
+      "label": "Maintenance",
+      "category": "operations",
+      "sourceRow": 39,
+      "description": "Fixing and upkeep: home, car, devices, garden."
+    },
+    "product-service-research": {
+      "label": "Product/service research",
+      "category": "operations",
+      "sourceRow": 40,
+      "description": "Comparing and choosing products, services and providers."
+    },
+    "provisioning": {
+      "label": "Provisioning",
+      "category": "operations",
+      "sourceRow": 41,
+      "description": "Household supplies that are not food."
+    },
+    "stewardship": {
+      "label": "Stewardship",
+      "category": "operations",
+      "sourceRow": 42,
+      "description": "Caring for property, land, community assets or shared resources."
+    }
+  }
+}

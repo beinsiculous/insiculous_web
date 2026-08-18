@@ -22,6 +22,20 @@ The reviewer's framing lives in `prompts/adversarial-plan-review.md` and
 `prompts/adversarial-code-review.md` — these are fixed; never edit them
 mid-review to soften or steer the critique.
 
+**Artifact lifecycle — clear the folder when the subject settles.** When the
+user calls the review settled (plan dispatched / diff committed), first fold
+anything durable into the real docs (roadmap, TODO, PROGRESS, log_archive —
+the artifacts themselves are transients, not the record), then delete them:
+```
+rm -f review/plan.md review/plan-v*.md review/review-*.md review/rebuttal-*.md review/draft.diff
+```
+The folder is empty between subjects, and numbering naturally restarts at
+`review-1.md`. Safety net: if a previous subject's artifacts are still
+present when a new subject starts (a session died before cleanup), clear
+them then instead — the reviewer's tool access is scoped to `review/`, so
+stale files leak into its context. Never clear mid-subject —
+`plan-vN.md`/`rebuttal-N.md` history is what makes later rounds coherent.
+
 ## Plan mode
 
 1. **Draft with the user.** Use your harness's plan mode if available. Where
@@ -63,9 +77,31 @@ mid-review to soften or steer the critique.
 4. Write `review/rebuttal-N.md` (every finding, ACCEPT or REBUT). Accepted
    findings become real edits in the working tree — make them with the user's
    approval, following the project's normal verification rules
-   (`cargo check` / tests per CLAUDE.md).
+   (`npm run data` → `npm run verify`, per CLAUDE.md — the second runs the Python
+   suite, `astro check`, the build and the accessibility gate).
 5. If edits were made and the user wants another round, regenerate the diff
    and repeat.
+
+## Hooks that route into this skill
+
+Both harnesses fire the same two scripts (`scripts/plan-review-hook.sh`,
+`scripts/commit-review-hook.sh`), which take `--harness=claude|kimi` and stay
+silent in repos that don't carry this skill (kimi's hooks are global):
+
+- **Plan gate** (PostToolUse on ExitPlanMode): every approved top-level plan
+  is instructed through plan mode of this skill before implementation.
+  Subagents implementing a section of an already-reviewed plan are exempt.
+- **Commit gate** (PreToolUse on Bash): a `git commit` with ≥100 pending
+  changed lines is DENIED until the diff goes through code mode. After the
+  findings are adjudicated with the user (or the user explicitly skips
+  review), retry the commit prefixed with `ADV_REVIEWED=1`. Small commits
+  pass silently.
+
+Claude's registrations live in `.claude/settings.json`; kimi's live in the
+global `~/.kimi-code/config.toml`. Behavior is covered by `tests/test_hooks.py`.
+
+Findings are always adjudicated with the user — an explicit user opt-out
+always wins (expressed via the same `ADV_REVIEWED=1` prefix).
 
 ## Rules
 

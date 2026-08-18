@@ -1,12 +1,12 @@
 ---
 import FaceLayout from "../../../layouts/FaceLayout.astro";
-import bundle from "../../../data/bundle.json";
+import bundle from "../../../../build/fortknight.bundle.json";
 import { DAY_KEY_ORDER } from "../../../lib/shared/fortknight-rules.js";
 import { withBase } from "../../../lib/paths.js";
 import { facePath } from "../../../lib/faces.js";
 
 // One day of the person's fortnight, rendered on the client from their active profile (their blocks and
-// the focus their grid gives each block (own or imported), imported fixed activities, standing appointments, imported menu entries — app/shared/day-plan.js).
+// the focus their grid gives each block (own or imported), imported fixed activities, standing appointments, imported menu entries — src/lib/shared/day-plan.js).
 // The server renders only the shell: the bundle's data set carries nobody's schedule (docs/app.md).
 export function getStaticPaths() {
   return DAY_KEY_ORDER.map((dayKey) => ({ params: { dayKey } }));

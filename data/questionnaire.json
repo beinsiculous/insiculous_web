@@ -1,0 +1,2565 @@
+{
+  "$schema": "./schema/questionnaire.schema.json",
+  "schemaVersion": 1,
+  "title": "FortKnight startup questionnaire",
+  "notes": [
+    "Question definitions and slider bounds for the questionnaire (docs/questionnaire.md). The app renders from this file; answers become a weights file via fk_core/weights.py (Python) or app/shared/weights-rules.js (JavaScript).",
+    "Slider bounds are integer minutes per day, transcribed from the draft's hours; the 'more' checkbox raises the ceiling to moreMax (twice the normal ceiling, capped at a day).",
+    "Block split: the unscheduled block (start + length) sets the waking window; categories whose share is at least standoutMultiplier x the mean non-peripheral share each earn a focus block (capped at maxFocusBlocks; none -> one flexible block); Agenda scope 'categories' (the default) adds one more focus block, still capped; cuts start from an even split and snap to a cutGridMinutes grid within +/- cutSearchMinutes, preferring the edges of fixed activities (edgeBonus) and avoiding straddling them (straddlePenalty, soft).",
+    "Typical-person defaults: each subject opens at its `default` range with `peripheralByDefault` deciding the 'not often' box; `defaultAnswers` pre-ticks category boxes so the form can be submitted untouched.",
+    "Goal toggle: a subject marked `goal` is something the person wants in the schedule but does not do yet at that level; the form asks for the current actual (`currentMinutesPerDay`). A category with any goal subject counts as `wantMore` (x wantMoreMultiplier). Shares still use the goal range; the generator can ramp from current to goal.",
+    "Rhythm & appointments: meals (count + time-of-day slots), year split (scheme + sections), standing appointments and tasks (weekdays + plain-language cadence; appointments become anchors alongside fixed activities and vote for their category's preferredBlocks; tasks are placed by a time-of-day word, never anchors), preferred appointment weekdays, and practices are recorded on the weights file for the generator. Startup Q2 lists the person's commitments (standing appointments) and tasks by hand; an import document (data/schema/import.schema.json, version 2 written for the person to read) is applied on the Assistant page: its commitments/standing appointments are appended to the standingAppointments answer, its tasks reach the day pages, its fixed activities become anchors and its block focus grid becomes the profile's blockFocusGrid (FortKnight's Overview); the default paste is FortKnight's empty example (build/derived/defaultImport.json); a person's own document — such as the workbook example set's (examples/workbook) — replaces it.",
+    "Year split: any scheme prefills an editable section table (title, type, Gregorian equivalent, duration in weeks, start markers: date, rule, holiday, weather, manual); the result is the person's own year — the generator will later turn it into seasons like data/seasons.json.",
+    "Agenda context (no share effect, recorded on the weights file for an assistant or generator): rest days (`restDays`), the person's energy peak (`energyPeak`), and free-text `context`. Section order is Startup, Your day and year, Your week, Focus, About you (FortKnight's questionnaire), then Your meals (face 'forkknife': ForkKnife's questionnaire — the meals question plus meal preferences the ForkKnife assistant page's prompt embeds); a section's optional `face` (default 'fortknight') says which questionnaire page renders it; the app renders sections and questions in file order."
+  ],
+  "wantMoreMultiplier": 1.25,
+  "wakingWindow": {
+    "default": {
+      "start": "06:00",
+      "end": "22:00"
+    },
+    "minutes": {
+      "min": 600,
+      "max": 1080,
+      "step": 5
+    },
+    "track": {
+      "start": "00:00",
+      "minutes": 2520
+    }
+  },
+  "blockSplit": {
+    "standoutMultiplier": 1.25,
+    "maxFocusBlocks": 4,
+    "cutGridMinutes": 5,
+    "cutSearchMinutes": 90,
+    "straddlePenalty": 60,
+    "edgeBonus": 30,
+    "focusBlockKeys": {
+      "1": [
+        "flexible"
+      ],
+      "2": [
+        "early",
+        "late"
+      ],
+      "3": [
+        "early",
+        "midday",
+        "late"
+      ],
+      "4": [
+        "early",
+        "midday",
+        "afternoon",
+        "late"
+      ]
+    }
+  },
+  "generator": {
+    "anchorPinCoverage": 0.5,
+    "overshootSlackCells": 0.5,
+    "preferredBlockWeight": 0.2,
+    "energyPeakWeight": 0.15,
+    "seasonFocusWeight": 0.1,
+    "alternationWeight": 0.1,
+    "energyPeakBlock": {
+      "morning": "first",
+      "midday": "middle",
+      "evening": "last",
+      "varies": null
+    },
+    "sessionGridMinutes": 5,
+    "maxSessionMinutes": 120,
+    "practiceMinutes": 15,
+    "mealMinutes": 30,
+    "mealSlotTimes": {
+      "early-morning": "07:00",
+      "mid-morning": "10:00",
+      "afternoon": "13:00",
+      "evening": "18:00",
+      "late-evening": "21:00",
+      "anytime": null
+    }
+  },
+  "essentialCategories": {
+    "min": 1,
+    "max": 3
+  },
+  "mealsPerDay": {
+    "min": 2,
+    "max": 5,
+    "default": 3
+  },
+  "slotsPerMeal": {
+    "min": 1,
+    "max": 2
+  },
+  "mealPrep": {
+    "minutes": {
+      "min": 0,
+      "max": 180,
+      "step": 5
+    },
+    "defaultPrepMinutes": 15,
+    "defaultCookMinutes": 30
+  },
+  "yearSections": {
+    "min": 2,
+    "max": 13
+  },
+  "options": {
+    "mealSlots": [
+      {
+        "id": "early-morning",
+        "label": "early morning"
+      },
+      {
+        "id": "mid-morning",
+        "label": "mid-morning"
+      },
+      {
+        "id": "afternoon",
+        "label": "afternoon"
+      },
+      {
+        "id": "evening",
+        "label": "evening"
+      },
+      {
+        "id": "late-evening",
+        "label": "late evening"
+      },
+      {
+        "id": "anytime",
+        "label": "anytime"
+      }
+    ],
+    "yearSplitSchemes": [
+      {
+        "id": "semesters",
+        "label": "Semesters (school, off-season)",
+        "blurb": "Two halves of a school year: a fall semester (Aug – Dec) and a spring semester (Jan – May).",
+        "sections": 2,
+        "sectionLabel": "semester",
+        "template": [
+          {
+            "title": "Fall semester",
+            "kind": "school",
+            "gregorianEquivalent": "Aug – Dec",
+            "durationWeeks": {
+              "min": 20,
+              "max": 20
+            },
+            "start": {
+              "marker": "date",
+              "description": "late August",
+              "rule": null
+            }
+          },
+          {
+            "title": "Spring semester",
+            "kind": "school",
+            "gregorianEquivalent": "Jan – May",
+            "durationWeeks": {
+              "min": 20,
+              "max": 20
+            },
+            "start": {
+              "marker": "date",
+              "description": "mid-January",
+              "rule": null
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "quarters",
+        "label": "Quarters (financial quarters)",
+        "blurb": "Four quarters starting January 1, April 1, July 1 and October 1.",
+        "sections": 4,
+        "sectionLabel": "quarter",
+        "template": [
+          {
+            "title": "Q1",
+            "kind": "quarter",
+            "gregorianEquivalent": "Jan – Mar",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "Jan 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 1,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Q2",
+            "kind": "quarter",
+            "gregorianEquivalent": "Apr – Jun",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "Apr 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 4,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Q3",
+            "kind": "quarter",
+            "gregorianEquivalent": "Jul – Sep",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "Jul 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 7,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Q4",
+            "kind": "quarter",
+            "gregorianEquivalent": "Oct – Dec",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "Oct 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 10,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "classic-seasons",
+        "label": "Classic four seasons",
+        "blurb": "Spring, summer, autumn and winter, each opening on its equinox or solstice.",
+        "sections": 4,
+        "sectionLabel": "season",
+        "template": [
+          {
+            "title": "Spring",
+            "kind": "spring",
+            "gregorianEquivalent": "Mar – May",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "spring equinox",
+              "rule": {
+                "kind": "solar",
+                "term": "spring-equinox",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Summer",
+            "kind": "summer",
+            "gregorianEquivalent": "Jun – Aug",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "summer solstice",
+              "rule": {
+                "kind": "solar",
+                "term": "summer-solstice",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Autumn",
+            "kind": "autumn",
+            "gregorianEquivalent": "Sep – Nov",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "autumn equinox",
+              "rule": {
+                "kind": "solar",
+                "term": "autumn-equinox",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Winter",
+            "kind": "winter",
+            "gregorianEquivalent": "Dec – Feb",
+            "durationWeeks": {
+              "min": 13,
+              "max": 13
+            },
+            "start": {
+              "marker": "date",
+              "description": "winter solstice",
+              "rule": {
+                "kind": "solar",
+                "term": "winter-solstice",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "gregorian-months",
+        "label": "Gregorian months",
+        "blurb": "Twelve months, each starting on the 1st.",
+        "sections": 12,
+        "sectionLabel": "month",
+        "template": [
+          {
+            "title": "January",
+            "kind": "month",
+            "gregorianEquivalent": "January",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "January 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 1,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "February",
+            "kind": "month",
+            "gregorianEquivalent": "February",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "February 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 2,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "March",
+            "kind": "month",
+            "gregorianEquivalent": "March",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "March 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 3,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "April",
+            "kind": "month",
+            "gregorianEquivalent": "April",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "April 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 4,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "May",
+            "kind": "month",
+            "gregorianEquivalent": "May",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "May 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 5,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "June",
+            "kind": "month",
+            "gregorianEquivalent": "June",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "June 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 6,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "July",
+            "kind": "month",
+            "gregorianEquivalent": "July",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "July 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 7,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "August",
+            "kind": "month",
+            "gregorianEquivalent": "August",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "August 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 8,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "September",
+            "kind": "month",
+            "gregorianEquivalent": "September",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "September 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 9,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "October",
+            "kind": "month",
+            "gregorianEquivalent": "October",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "October 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 10,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "November",
+            "kind": "month",
+            "gregorianEquivalent": "November",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "November 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 11,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "December",
+            "kind": "month",
+            "gregorianEquivalent": "December",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "December 1",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 12,
+                "day": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "lunar-months",
+        "label": "Lunar months",
+        "blurb": "Up to thirteen moons, each starting on a new moon.",
+        "sections": 13,
+        "sectionLabel": "moon",
+        "template": [
+          {
+            "title": "Moon 1",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 1,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 2",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 2,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 3",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 3,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 4",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 4,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 5",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 5,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 6",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 6,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 7",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 7,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 8",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 8,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 9",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 9,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 10",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 10,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 11",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 11,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 12",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 12,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Moon 13",
+            "kind": "lunar month",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "rule",
+              "description": "new moon",
+              "rule": {
+                "kind": "new-moon",
+                "index": 13,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "norse-wheel",
+        "label": "Norse wheel",
+        "blurb": "Eight seasons of the Norse year — Yule, Thorrablot, Disting, Ostara, Walpurgis, Midsummer, Freyfaxi, Winter Nights — the solstices and equinoxes fixing four of them.",
+        "sections": 8,
+        "sectionLabel": "season",
+        "template": [
+          {
+            "title": "Yule",
+            "kind": "midwinter",
+            "gregorianEquivalent": "late Dec – Jan",
+            "start": {
+              "marker": "date",
+              "description": "winter solstice",
+              "rule": {
+                "kind": "solar",
+                "term": "winter-solstice",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Thorrablot",
+            "kind": "deep winter",
+            "gregorianEquivalent": "late Jan – Feb",
+            "start": {
+              "marker": "date",
+              "description": "mid-January",
+              "rule": null
+            }
+          },
+          {
+            "title": "Disting",
+            "kind": "late winter",
+            "gregorianEquivalent": "Feb – Mar",
+            "start": {
+              "marker": "date",
+              "description": "early February",
+              "rule": null
+            }
+          },
+          {
+            "title": "Ostara",
+            "kind": "spring",
+            "gregorianEquivalent": "Mar – Apr",
+            "start": {
+              "marker": "date",
+              "description": "spring equinox",
+              "rule": {
+                "kind": "solar",
+                "term": "spring-equinox",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Walpurgis",
+            "kind": "late spring",
+            "gregorianEquivalent": "late Apr – May",
+            "start": {
+              "marker": "date",
+              "description": "end of April",
+              "rule": null
+            }
+          },
+          {
+            "title": "Midsummer",
+            "kind": "summer",
+            "gregorianEquivalent": "Jun – Jul",
+            "start": {
+              "marker": "date",
+              "description": "summer solstice",
+              "rule": {
+                "kind": "solar",
+                "term": "summer-solstice",
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Freyfaxi",
+            "kind": "harvest",
+            "gregorianEquivalent": "Aug",
+            "start": {
+              "marker": "date",
+              "description": "early August",
+              "rule": null
+            }
+          },
+          {
+            "title": "Winter Nights",
+            "kind": "autumn",
+            "gregorianEquivalent": "Oct – Nov",
+            "start": {
+              "marker": "date",
+              "description": "mid-October",
+              "rule": null
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "astrological",
+        "label": "Astrological signs",
+        "blurb": "Twelve signs, Aries (from March 21) through Pisces (from February 19).",
+        "sections": 12,
+        "sectionLabel": "sign",
+        "template": [
+          {
+            "title": "Aries",
+            "kind": "sign",
+            "gregorianEquivalent": "Mar 21 – Apr 19",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Mar 21",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 3,
+                "day": 21,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Taurus",
+            "kind": "sign",
+            "gregorianEquivalent": "Apr 20 – May 20",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Apr 20",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 4,
+                "day": 20,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Gemini",
+            "kind": "sign",
+            "gregorianEquivalent": "May 21 – Jun 20",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "May 21",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 5,
+                "day": 21,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Cancer",
+            "kind": "sign",
+            "gregorianEquivalent": "Jun 21 – Jul 22",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Jun 21",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 6,
+                "day": 21,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Leo",
+            "kind": "sign",
+            "gregorianEquivalent": "Jul 23 – Aug 22",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Jul 23",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 7,
+                "day": 23,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Virgo",
+            "kind": "sign",
+            "gregorianEquivalent": "Aug 23 – Sep 22",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Aug 23",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 8,
+                "day": 23,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Libra",
+            "kind": "sign",
+            "gregorianEquivalent": "Sep 23 – Oct 22",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Sep 23",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 9,
+                "day": 23,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Scorpio",
+            "kind": "sign",
+            "gregorianEquivalent": "Oct 23 – Nov 21",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Oct 23",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 10,
+                "day": 23,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Sagittarius",
+            "kind": "sign",
+            "gregorianEquivalent": "Nov 22 – Dec 21",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Nov 22",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 11,
+                "day": 22,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Capricorn",
+            "kind": "sign",
+            "gregorianEquivalent": "Dec 22 – Jan 19",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Dec 22",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 12,
+                "day": 22,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Aquarius",
+            "kind": "sign",
+            "gregorianEquivalent": "Jan 20 – Feb 18",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Jan 20",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 1,
+                "day": 20,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          },
+          {
+            "title": "Pisces",
+            "kind": "sign",
+            "gregorianEquivalent": "Feb 19 – Mar 20",
+            "durationWeeks": {
+              "min": 4,
+              "max": 4
+            },
+            "start": {
+              "marker": "date",
+              "description": "Feb 19",
+              "rule": {
+                "kind": "fixed-date",
+                "month": 2,
+                "day": 19,
+                "offsetDays": 0,
+                "snap": null
+              }
+            }
+          }
+        ],
+        "editable": false
+      },
+      {
+        "id": "custom",
+        "label": "Custom — your own seasons, a religious calendar, anything",
+        "blurb": "Name your own sections and how each one starts, in the editor below — it starts from FortKnight's five seasons.",
+        "sections": null,
+        "sectionLabel": "season",
+        "template": [],
+        "templateFrom": "seasons",
+        "editable": true
+      }
+    ],
+    "weekdays": [
+      {
+        "id": "sunday",
+        "label": "Sunday"
+      },
+      {
+        "id": "monday",
+        "label": "Monday"
+      },
+      {
+        "id": "tuesday",
+        "label": "Tuesday"
+      },
+      {
+        "id": "wednesday",
+        "label": "Wednesday"
+      },
+      {
+        "id": "thursday",
+        "label": "Thursday"
+      },
+      {
+        "id": "friday",
+        "label": "Friday"
+      },
+      {
+        "id": "saturday",
+        "label": "Saturday"
+      }
+    ],
+    "appointmentCadences": [
+      {
+        "id": "weekly",
+        "label": "every week",
+        "needs": "none"
+      },
+      {
+        "id": "every-other-week",
+        "label": "every other week",
+        "needs": "firstDate"
+      },
+      {
+        "id": "monthly-nth-weekday",
+        "label": "monthly, on the Nth weekday",
+        "needs": "nth"
+      },
+      {
+        "id": "monthly-date",
+        "label": "monthly, on a date",
+        "needs": "dayOfMonth"
+      },
+      {
+        "id": "one-off",
+        "label": "one-off, on a date",
+        "needs": "date"
+      }
+    ],
+    "practices": [
+      {
+        "id": "yoga",
+        "label": "yoga"
+      },
+      {
+        "id": "meditation",
+        "label": "meditation"
+      },
+      {
+        "id": "prayer",
+        "label": "prayer"
+      },
+      {
+        "id": "listening-to-thoughts-emotions",
+        "label": "actively listening to your own thoughts or emotions"
+      },
+      {
+        "id": "quieting-the-mind",
+        "label": "quieting of the mind"
+      },
+      {
+        "id": "religious-practices",
+        "label": "religious practices"
+      },
+      {
+        "id": "introspection",
+        "label": "introspection"
+      },
+      {
+        "id": "surrender",
+        "label": "surrender"
+      }
+    ],
+    "nthChoices": [
+      {
+        "id": "1",
+        "label": "first"
+      },
+      {
+        "id": "2",
+        "label": "second"
+      },
+      {
+        "id": "3",
+        "label": "third"
+      },
+      {
+        "id": "4",
+        "label": "fourth"
+      },
+      {
+        "id": "-1",
+        "label": "last"
+      }
+    ],
+    "sectionMarkers": [
+      {
+        "id": "date",
+        "label": "a date (fixed or by rule, e.g. spring equinox)"
+      },
+      {
+        "id": "rule",
+        "label": "a calendar rule (e.g. second Sunday of March, new moon)"
+      },
+      {
+        "id": "holiday",
+        "label": "a holiday"
+      },
+      {
+        "id": "weather",
+        "label": "weather (e.g. first frost, first snow, monsoon)"
+      },
+      {
+        "id": "manual",
+        "label": "I trigger it myself"
+      }
+    ],
+    "startRuleKinds": [
+      {
+        "id": "none",
+        "label": "no rule yet (words only)"
+      },
+      {
+        "id": "fixed-date",
+        "label": "a fixed date (month + day)"
+      },
+      {
+        "id": "nth-weekday",
+        "label": "the Nth weekday of a month"
+      },
+      {
+        "id": "easter",
+        "label": "Easter Sunday"
+      },
+      {
+        "id": "solar",
+        "label": "an equinox or solstice"
+      },
+      {
+        "id": "new-moon",
+        "label": "the Nth new moon of the year"
+      },
+      {
+        "id": "manual",
+        "label": "dates I type in, one per year"
+      }
+    ],
+    "solarTerms": [
+      {
+        "id": "spring-equinox",
+        "label": "spring (March) equinox"
+      },
+      {
+        "id": "summer-solstice",
+        "label": "summer (June) solstice"
+      },
+      {
+        "id": "autumn-equinox",
+        "label": "autumn (September) equinox"
+      },
+      {
+        "id": "winter-solstice",
+        "label": "winter (December) solstice"
+      }
+    ],
+    "snapDirections": [
+      {
+        "id": "on-or-after",
+        "label": "the week-start day on or after it"
+      },
+      {
+        "id": "on-or-before",
+        "label": "the week-start day on or before it"
+      },
+      {
+        "id": "none",
+        "label": "no snap — the exact date"
+      }
+    ],
+    "startVariants": [
+      {
+        "id": "a",
+        "label": "A (week 1 of the fortnight)"
+      },
+      {
+        "id": "b",
+        "label": "B (week 2 of the fortnight)"
+      }
+    ],
+    "subjectCadences": [
+      {
+        "id": "fortnight",
+        "label": "every fortnight"
+      },
+      {
+        "id": "section",
+        "label": "every section of the year"
+      }
+    ],
+    "agendaScopes": [
+      {
+        "id": "subjects",
+        "label": "Subjects: detailed, task-oriented agenda"
+      },
+      {
+        "id": "categories",
+        "label": "Categories: wide-scope focus where individual tasks are implied"
+      }
+    ],
+    "energyPeaks": [
+      {
+        "id": "morning",
+        "label": "morning — sharpest early, fading through the day"
+      },
+      {
+        "id": "midday",
+        "label": "midday — slow start, best in the middle of the day"
+      },
+      {
+        "id": "evening",
+        "label": "evening — sharpest late in the day"
+      },
+      {
+        "id": "varies",
+        "label": "it varies / no clear pattern"
+      }
+    ],
+    "timesOfDay": [
+      {
+        "id": "morning",
+        "label": "morning"
+      },
+      {
+        "id": "midday",
+        "label": "midday"
+      },
+      {
+        "id": "afternoon",
+        "label": "afternoon"
+      },
+      {
+        "id": "evening",
+        "label": "evening"
+      },
+      {
+        "id": "night",
+        "label": "night"
+      },
+      {
+        "id": "anytime",
+        "label": "anytime"
+      }
+    ],
+    "dietaryRules": [
+      {
+        "id": "omnivore",
+        "label": "omnivore"
+      },
+      {
+        "id": "vegetarian",
+        "label": "vegetarian"
+      },
+      {
+        "id": "vegan",
+        "label": "vegan"
+      },
+      {
+        "id": "pescatarian",
+        "label": "pescatarian"
+      },
+      {
+        "id": "halal",
+        "label": "halal"
+      },
+      {
+        "id": "kosher",
+        "label": "kosher"
+      },
+      {
+        "id": "gluten-free",
+        "label": "gluten-free"
+      },
+      {
+        "id": "dairy-free",
+        "label": "dairy-free"
+      },
+      {
+        "id": "nut-free",
+        "label": "nut-free"
+      },
+      {
+        "id": "low-carb",
+        "label": "low-carb"
+      },
+      {
+        "id": "low-sodium",
+        "label": "low-sodium"
+      }
+    ],
+    "cuisines": [
+      {
+        "id": "mediterranean",
+        "label": "Mediterranean"
+      },
+      {
+        "id": "mexican",
+        "label": "Mexican"
+      },
+      {
+        "id": "indian",
+        "label": "Indian"
+      },
+      {
+        "id": "chinese",
+        "label": "Chinese"
+      },
+      {
+        "id": "japanese",
+        "label": "Japanese"
+      },
+      {
+        "id": "thai",
+        "label": "Thai"
+      },
+      {
+        "id": "italian",
+        "label": "Italian"
+      },
+      {
+        "id": "middle-eastern",
+        "label": "Middle Eastern"
+      },
+      {
+        "id": "american",
+        "label": "American"
+      },
+      {
+        "id": "british-irish",
+        "label": "British / Irish"
+      },
+      {
+        "id": "west-african",
+        "label": "West African"
+      },
+      {
+        "id": "caribbean",
+        "label": "Caribbean"
+      },
+      {
+        "id": "other",
+        "label": "other"
+      }
+    ],
+    "cookingSkills": [
+      {
+        "id": "beginner",
+        "label": "beginner — simple recipes, few steps"
+      },
+      {
+        "id": "comfortable",
+        "label": "comfortable — most recipes, some technique"
+      },
+      {
+        "id": "confident",
+        "label": "confident — anything goes"
+      }
+    ],
+    "foodBudgets": [
+      {
+        "id": "tight",
+        "label": "tight"
+      },
+      {
+        "id": "moderate",
+        "label": "moderate"
+      },
+      {
+        "id": "generous",
+        "label": "generous"
+      }
+    ],
+    "kitchenKit": [
+      {
+        "id": "oven",
+        "label": "oven"
+      },
+      {
+        "id": "stovetop",
+        "label": "stovetop"
+      },
+      {
+        "id": "microwave",
+        "label": "microwave"
+      },
+      {
+        "id": "slow-cooker",
+        "label": "slow cooker"
+      },
+      {
+        "id": "pressure-cooker",
+        "label": "pressure cooker"
+      },
+      {
+        "id": "air-fryer",
+        "label": "air fryer"
+      },
+      {
+        "id": "blender",
+        "label": "blender"
+      },
+      {
+        "id": "freezer-space",
+        "label": "freezer space"
+      }
+    ],
+    "shoppingCadences": [
+      {
+        "id": "daily",
+        "label": "daily"
+      },
+      {
+        "id": "twice-a-week",
+        "label": "twice a week"
+      },
+      {
+        "id": "weekly",
+        "label": "weekly"
+      },
+      {
+        "id": "fortnightly",
+        "label": "fortnightly"
+      }
+    ]
+  },
+  "defaultAnswers": {
+    "sentiment": {
+      "working": "struggle",
+      "friends-family": "enjoy"
+    },
+    "delegable": [
+      "meals"
+    ],
+    "essential": [
+      "health",
+      "working"
+    ],
+    "meals": {
+      "perDay": 3,
+      "meals": [
+        {
+          "name": "Breakfast",
+          "slots": [
+            "early-morning"
+          ],
+          "needsPrepped": false,
+          "needsCooked": true,
+          "prepMinutes": 15,
+          "cookMinutes": 30
+        },
+        {
+          "name": "Dinner",
+          "slots": [
+            "evening"
+          ],
+          "needsPrepped": true,
+          "needsCooked": true,
+          "prepMinutes": 15,
+          "cookMinutes": 45
+        },
+        {
+          "name": "Snack",
+          "slots": [
+            "afternoon"
+          ],
+          "needsPrepped": true,
+          "needsCooked": false,
+          "prepMinutes": 15,
+          "cookMinutes": 30
+        }
+      ]
+    },
+    "yearSplitScheme": "quarters",
+    "weekStart": "sunday",
+    "standingAppointments": [],
+    "appointmentWeekdays": [
+      "wednesday"
+    ],
+    "practices": [
+      "listening-to-thoughts-emotions"
+    ],
+    "agendaScope": "categories",
+    "restDays": [
+      "saturday"
+    ],
+    "energyPeak": "varies",
+    "context": "",
+    "tasks": [],
+    "eaters": 1,
+    "dietaryRules": [],
+    "allergiesAndDislikes": "",
+    "favouriteCuisines": [],
+    "favouriteDishes": "",
+    "cookingSkill": "comfortable",
+    "foodBudget": "moderate",
+    "kitchenKit": [],
+    "shoppingCadence": "weekly"
+  },
+  "subjectSliders": {
+    "cooking": {
+      "minutesPerDay": {
+        "min": 30,
+        "max": 120
+      },
+      "default": {
+        "min": 30,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "moreMax": 240,
+      "step": 5
+    },
+    "planning": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 45
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 90,
+      "step": 5
+    },
+    "preparation": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 120
+      },
+      "default": {
+        "min": 15,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 7
+      },
+      "moreMax": 240,
+      "step": 5
+    },
+    "food-provisioning": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 240
+      },
+      "default": {
+        "min": 15,
+        "max": 45
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 480,
+      "step": 5
+    },
+    "laundry": {
+      "minutesPerDay": {
+        "min": 15,
+        "max": 180
+      },
+      "default": {
+        "min": 15,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 3
+      },
+      "moreMax": 360,
+      "step": 5
+    },
+    "decoration": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 120
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": true,
+      "moreMax": 240,
+      "step": 5
+    },
+    "dishes": {
+      "minutesPerDay": {
+        "min": 15,
+        "max": 90
+      },
+      "default": {
+        "min": 15,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "moreMax": 180,
+      "step": 5
+    },
+    "organization": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 60
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 3
+      },
+      "moreMax": 120,
+      "step": 5
+    },
+    "packing": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 90
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": true,
+      "moreMax": 180,
+      "step": 5
+    },
+    "sanitization": {
+      "minutesPerDay": {
+        "min": 15,
+        "max": 120
+      },
+      "default": {
+        "min": 15,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 4
+      },
+      "moreMax": 240,
+      "step": 5
+    },
+    "billable-hours": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 720
+      },
+      "default": {
+        "min": 420,
+        "max": 540
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 10
+      },
+      "moreMax": 1440,
+      "step": 5
+    },
+    "public-relations-management": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 180
+      },
+      "default": {
+        "min": 15,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 5
+      },
+      "moreMax": 360,
+      "step": 5
+    },
+    "networking": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 180
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 360,
+      "step": 5
+    },
+    "transportation-commute": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 120
+      },
+      "default": {
+        "min": 15,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 10
+      },
+      "moreMax": 240,
+      "step": 5
+    },
+    "volunteering": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 600
+      },
+      "default": {
+        "min": 0,
+        "max": 60
+      },
+      "peripheralByDefault": true,
+      "moreMax": 1200,
+      "step": 5
+    },
+    "coaching-mentoring": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 180
+      },
+      "default": {
+        "min": 30,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 4
+      },
+      "moreMax": 360,
+      "step": 5
+    },
+    "conferences-courses": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 360
+      },
+      "default": {
+        "min": 0,
+        "max": 60
+      },
+      "peripheralByDefault": true,
+      "moreMax": 720,
+      "step": 5
+    },
+    "creative-study-or-expression": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 360
+      },
+      "default": {
+        "min": 30,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 4
+      },
+      "moreMax": 720,
+      "step": 5
+    },
+    "solo-learning-research-study": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 360
+      },
+      "default": {
+        "min": 30,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 5
+      },
+      "moreMax": 720,
+      "step": 5
+    },
+    "seeking-council-advisement": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 180
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 360,
+      "step": 5
+    },
+    "teaching-tutoring": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 360
+      },
+      "default": {
+        "min": 0,
+        "max": 60
+      },
+      "peripheralByDefault": true,
+      "moreMax": 720,
+      "step": 5
+    },
+    "extracurricular-organization": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 60
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 120,
+      "step": 5
+    },
+    "dating": {
+      "minutesPerDay": {
+        "min": 15,
+        "max": 480
+      },
+      "default": {
+        "min": 60,
+        "max": 120
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 4
+      },
+      "moreMax": 960,
+      "step": 5
+    },
+    "event-party-get-together-planning": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 30
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": true,
+      "moreMax": 60,
+      "step": 5
+    },
+    "pet-care": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 60
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 120,
+      "step": 5
+    },
+    "relationship-management": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 120
+      },
+      "default": {
+        "min": 30,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "moreMax": 240,
+      "step": 5
+    },
+    "appointments": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 180
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 360,
+      "step": 5
+    },
+    "exercise": {
+      "minutesPerDay": {
+        "min": 15,
+        "max": 75
+      },
+      "default": {
+        "min": 15,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 4
+      },
+      "moreMax": 150,
+      "step": 5
+    },
+    "hygiene": {
+      "minutesPerDay": {
+        "min": 30,
+        "max": 60
+      },
+      "default": {
+        "min": 30,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "moreMax": 120,
+      "step": 5
+    },
+    "journaling": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 30
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": true,
+      "moreMax": 60,
+      "step": 5
+    },
+    "leisure-rest": {
+      "minutesPerDay": {
+        "min": 60,
+        "max": 720
+      },
+      "default": {
+        "min": 120,
+        "max": 240
+      },
+      "peripheralByDefault": false,
+      "moreMax": 1440,
+      "step": 5
+    },
+    "medical-provisioning": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 45
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": true,
+      "moreMax": 90,
+      "step": 5
+    },
+    "therapies": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 60
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 120,
+      "step": 5
+    },
+    "treatments": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 720
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 1440,
+      "step": 5
+    },
+    "budgeting": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 90
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 1
+      },
+      "moreMax": 180,
+      "step": 5
+    },
+    "errands": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 180
+      },
+      "default": {
+        "min": 15,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 4
+      },
+      "moreMax": 360,
+      "step": 5
+    },
+    "financial-and-life-planning": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 90
+      },
+      "default": {
+        "min": 0,
+        "max": 15
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "section",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 180,
+      "step": 5
+    },
+    "maintenance": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 360
+      },
+      "default": {
+        "min": 15,
+        "max": 60
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 720,
+      "step": 5
+    },
+    "product-service-research": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 90
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 180,
+      "step": 5
+    },
+    "provisioning": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 120
+      },
+      "default": {
+        "min": 15,
+        "max": 30
+      },
+      "peripheralByDefault": false,
+      "cadenceByDefault": {
+        "cadence": "fortnight",
+        "daysPerPeriod": 2
+      },
+      "moreMax": 240,
+      "step": 5
+    },
+    "stewardship": {
+      "minutesPerDay": {
+        "min": 0,
+        "max": 360
+      },
+      "default": {
+        "min": 0,
+        "max": 30
+      },
+      "peripheralByDefault": true,
+      "moreMax": 720,
+      "step": 5
+    }
+  },
+  "sections": [
+    {
+      "id": "startup",
+      "title": "Startup",
+      "questions": [
+        {
+          "id": "groupSize",
+          "kind": "number",
+          "prompt": "How many people are in your group?",
+          "note": "Groups stay on one device for now — one profile per person.",
+          "min": 1,
+          "default": 1
+        },
+        {
+          "id": "commitments",
+          "kind": "commitments",
+          "prompt": "Do you already use a calendar, task list, reminder and/or budget system?",
+          "note": "Add them one at a time on the Build page. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day's blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. Or have your assistant read your existing system and upload its import on the Assistant page; what it brought in is reviewed here and listed on the Build page."
+        }
+      ]
+    },
+    {
+      "id": "rhythm",
+      "title": "Your day and year",
+      "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda's scope. Your meals — names, prepping and cooking, when you eat them — are ForkKnife's questionnaire, and the fortnight menu itself is its Spoon Feed page.",
+      "questions": [
+        {
+          "id": "wakingWindow",
+          "kind": "waking-window",
+          "prompt": "When are you awake?",
+          "note": "Drag both ends — from waking up to winding down, 10–18 hours; the end may pass midnight. Outside it is your unscheduled block (wind-down, sleep, wake-up); inside it is cut into 1–4 focus blocks by your Focus answers."
+        },
+        {
+          "id": "weekStart",
+          "kind": "single-select",
+          "options": "weekdays",
+          "prompt": "On which day of the week do you start your week?",
+          "note": "The day your fortnight restarts on: sections snap to it by default, every section starts on that weekday (week A or B), and the fortnight grid begins with it."
+        },
+        {
+          "id": "yearSplit",
+          "kind": "year-split",
+          "prompt": "How do you like to split your year?"
+        }
+      ]
+    },
+    {
+      "id": "appointments",
+      "title": "Your week",
+      "questions": [
+        {
+          "id": "appointmentWeekdays",
+          "kind": "weekday-picks",
+          "prompt": "What weekday(s) do you like to schedule appointments on?",
+          "note": "Leave empty for any day."
+        },
+        {
+          "id": "restDays",
+          "kind": "weekday-picks",
+          "prompt": "Which weekdays are your days off?",
+          "note": "Rest days carry no work-type commitments; an assistant building your agenda keeps them lighter. Leave empty when every day is alike."
+        }
+      ]
+    },
+    {
+      "id": "focus",
+      "title": "Focus",
+      "intro": "How the waking window is divided between the categories, and how many focus blocks a day earns.",
+      "questions": [
+        {
+          "id": "subjectTime",
+          "kind": "subject-sliders",
+          "prompt": "How long can you spend on each in a single day?",
+          "note": "Slide the bar for each subject to set a time range. Mark a subject \"not often\" to keep it out of your agenda; a few peripheral ones may still appear, marked as such. Tick \"goal\" on anything you want in the schedule but do not do at that level yet, and say where you are today. A category with a goal in it gets extra weight."
+        },
+        {
+          "id": "sentiment",
+          "kind": "category-sentiment",
+          "prompt": "Mark which categories you struggle with, and which you enjoy.",
+          "note": "Do not mark any subjects you have a neutral relationship with."
+        },
+        {
+          "id": "delegable",
+          "kind": "category-checklist",
+          "prompt": "Which categories can you easily hand off to someone else? (delegate, defer, pause, pay for, take a sabbatical from, etc.)",
+          "intro": "During an active emergency (sick days, out of town, etc.), a grieving or transition period, a time of struggle (health, financial, emotional, etc.), crunch time, or recovery:"
+        },
+        {
+          "id": "essential",
+          "kind": "category-checklist",
+          "prompt": "Mark 1–3 categories you have to do personally, even under duress.",
+          "minChecked": 1,
+          "maxChecked": 3
+        },
+        {
+          "id": "practices",
+          "kind": "multi-select",
+          "options": "practices",
+          "prompt": "Mark which of the following practices you participate in or would like to participate in:",
+          "note": "Used for planning suggestions; it does not change your shares yet."
+        },
+        {
+          "id": "agendaScope",
+          "kind": "single-select",
+          "options": "agendaScopes",
+          "prompt": "Do you want your day to include subjects or just categories?",
+          "note": "Categories adds one wide-scope focus block to your day beside the blocks your standout categories earn (the default day is early, midday, late). Subjects keeps only the earned blocks; when nothing stands out, that is a single flexible block."
+        }
+      ]
+    },
+    {
+      "id": "about",
+      "title": "About you",
+      "intro": "Context an assistant needs to turn the answers above into an actual agenda; nothing here changes shares.",
+      "questions": [
+        {
+          "id": "energyPeak",
+          "kind": "single-select",
+          "options": "energyPeaks",
+          "prompt": "When in the day are you sharpest?",
+          "note": "Tells an assistant which block should carry your demanding focus (deep work, study, hard chores) and which carries the light ones. It does not change shares."
+        },
+        {
+          "id": "context",
+          "kind": "text",
+          "prompt": "Anything an assistant should know when building your agenda?",
+          "note": "Household and care duties, shift patterns, commutes, recovery or a season of life, what should alternate between week A and week B, anything the sliders cannot say. Kept with your answers and shared only through the workspace files you download.",
+          "placeholder": "e.g. Two kids at school 08:30-15:00; I work from home Mon-Wed and on site Thu-Fri; deep cleaning every other Saturday (week B)."
+        }
+      ]
+    },
+    {
+      "id": "meals",
+      "face": "forkknife",
+      "title": "Your meals",
+      "intro": "ForkKnife's questionnaire: your meals and what your assistant needs to draft the fortnight menu. The menu itself — which dish is which meal on each day — is built on the Spoon Feed page. Nothing here changes FortKnight's shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
+      "questions": [
+        {
+          "id": "meals",
+          "kind": "meals",
+          "prompt": "What are your meals, and does each need prepping or cooking?",
+          "note": "Between 2 and 5 meals. Name each, tick when you eat it (one or two times of day), and say whether a menu item of that meal needs prepping, cooking, or both — the sliders are how long that takes. Snacks usually only need prepping. Renaming a meal keeps its dishes; dropping a meal drops them."
+        },
+        {
+          "id": "eaters",
+          "kind": "number",
+          "prompt": "How many people eat these meals with you (including you)?",
+          "note": "Portions and leftovers are planned for this many.",
+          "min": 1,
+          "default": 1
+        },
+        {
+          "id": "dietaryRules",
+          "kind": "multi-select",
+          "options": "dietaryRules",
+          "prompt": "Which dietary rules apply to the menu?",
+          "note": "Tick all that apply; leave blank for no rule."
+        },
+        {
+          "id": "allergiesAndDislikes",
+          "kind": "text",
+          "prompt": "Allergies, intolerances, foods you won't eat?",
+          "note": "Free text; your assistant keeps them out of the menu.",
+          "placeholder": "e.g. shellfish allergy; no mushrooms; lactose only in small amounts."
+        },
+        {
+          "id": "favouriteCuisines",
+          "kind": "multi-select",
+          "options": "cuisines",
+          "prompt": "Which cuisines do you like most?",
+          "note": "Tick a few; the menu leans on them."
+        },
+        {
+          "id": "favouriteDishes",
+          "kind": "text",
+          "prompt": "Dishes you already cook and like?",
+          "note": "The assistant keeps them in the rotation.",
+          "placeholder": "e.g. lentil soup, tacos, roast chicken, overnight oats."
+        },
+        {
+          "id": "cookingSkill",
+          "kind": "single-select",
+          "options": "cookingSkills",
+          "prompt": "How would you rate your cooking?"
+        },
+        {
+          "id": "foodBudget",
+          "kind": "single-select",
+          "options": "foodBudgets",
+          "prompt": "What is your food budget like?"
+        },
+        {
+          "id": "kitchenKit",
+          "kind": "multi-select",
+          "options": "kitchenKit",
+          "prompt": "What is in your kitchen?",
+          "note": "Tick what the menu may rely on."
+        },
+        {
+          "id": "shoppingCadence",
+          "kind": "single-select",
+          "options": "shoppingCadences",
+          "prompt": "How often do you shop for food?",
+          "note": "Sets how fresh the ingredients can be and how far ahead the menu is bought."
+        }
+      ]
+    }
+  ]
+}

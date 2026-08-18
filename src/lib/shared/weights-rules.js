@@ -632,7 +632,7 @@ export function weightsFromAnswers(answers, categories, questionnaire, { weights
     energyPeak: answers.energyPeak ?? defaults.energyPeak,
     context: answers.context ?? defaults.context,
     questionnaire: questionnaireRecord,
-    notes: ["Derived from questionnaire answers by the rule in fk_core/weights.py / app/shared/weights-rules.js."],
+    notes: ["Derived from questionnaire answers by the rule in fk_core/weights.py / src/lib/shared/weights-rules.js."],
   };
   weights.proposal = proposalFromWeights(weights, questionnaire, { seasonFocus, seasonId, categories, dayKeyOrder: DAY_KEY_ORDER });
   return weights;
