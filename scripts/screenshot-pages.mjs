@@ -40,9 +40,11 @@ const pages = {
 };
 
 // "" is the desktop suffix so the existing shot names keep working; -mobile is the phone.
+// The phone pass emulates touch, so `@media (pointer: coarse)` — where the 44px tap targets and the bigger
+// dual-range thumbs live — is actually exercised rather than silently skipped.
 const viewports = {
-  desktop: { suffix: "", viewport: { width: 1440, height: 900 } },
-  mobile: { suffix: "-mobile", viewport: { width: 390, height: 844 } },
+  desktop: { suffix: "", context: { viewport: { width: 1440, height: 900 } } },
+  mobile: { suffix: "-mobile", context: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true } },
 };
 const only = process.env.ONLY;
 const chosen = only ? { [only]: viewports[only] } : viewports;
@@ -54,8 +56,8 @@ if (only && !viewports[only]) {
 mkdirSync("shots", { recursive: true });
 const browser = await chromium.launch();
 const overflowing = [];
-for (const [label, { suffix, viewport }] of Object.entries(chosen)) {
-  const context = await browser.newContext({ viewport });
+for (const [label, { suffix, context: contextOptions }] of Object.entries(chosen)) {
+  const context = await browser.newContext(contextOptions);
   await context.addInitScript(() => {
     localStorage.setItem("fortknight.user-settings", JSON.stringify({ schemaVersion: 2 }));
   });

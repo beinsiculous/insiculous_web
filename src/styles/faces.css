@@ -26,6 +26,10 @@
 /* ---------- base ---------- */
 * { box-sizing: border-box; }
 body { margin: 0; font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif; background: var(--background); color: var(--ink); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
+/* 100vh is the viewport with the mobile URL bar expanded, so it overshoots while the bar is collapsed — visible
+   here because both faces paint a fixed, full-viewport photograph behind the panels. The line above stays as the
+   fallback for anything without dvh. */
+body { min-height: 100dvh; }
 h1, h2 { font-weight: 600; margin: 0 0 0.5rem; }
 h1 { font-size: 1.5rem; }
 h2 { font-size: 1.1rem; }
@@ -322,12 +326,19 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
   [data-theme="fork-knife"] .site-nav .brand .logo { font-size: 1.25rem; }
   [data-theme="fork-knife"] .site-nav .nav-links { gap: 0.1rem; }
   [data-theme="fork-knife"] .site-nav .nav-link { font-size: 0.78rem; padding: 0.3rem 0.5rem; }
-  [data-theme="fork-knife"] .site-nav .nav-full { display: none; }
+  [data-theme="fork-knife"] .site-nav .nav-full { display: none; }   /* ForkKnife squeezes one step early, at 900px */
   [data-theme="fork-knife"] .site-nav .nav-short { display: inline; }
   [data-theme="fork-knife"] .site-nav .face-switch { margin-left: auto; gap: 0; }
   [data-theme="fork-knife"] .site-nav .face-link { padding: 0.15rem 0.25rem; }
   [data-theme="fork-knife"] .site-nav .nav-profile { display: none; }
-  [data-theme="fork-knife"] main { padding-top: 38vh; }
+  /* Enough of the photograph to clear the cleaver and the fork, but 38vh keeps growing with the viewport: a
+     portrait tablet at 1180px tall would open on 448px of blank paper. Cap it. */
+  [data-theme="fork-knife"] main { padding-top: min(38vh, 20rem); }
+}
+/* The footer sits after <main>, so main's padding-bottom does not clear the fixed bar for it — with the safe-area
+   inset that bar is ~70px tall, and "Times shown in …" was landing behind it at the end of the scroll. */
+[data-theme="fork-knife"] .site-footer {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
 }
 
 /* Settings: the profile bar (which saved answer set is being edited) */
@@ -345,6 +356,11 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 @media (max-width: 640px) {
   h1 { font-size: 1.3rem; }
   main > * { min-width: 0; }                 /* grid items default to min-content width */
+  /* Both faces ship a short label per pill (faces.js faceNav) and the markup renders both spans, but only
+     ForkKnife's bar ever swapped them — FortKnight's four full-length pills wrapped its sticky header onto about
+     four rows. The full name stays on each link's aria-label either way. */
+  .site-nav .nav-full { display: none; }
+  .site-nav .nav-short { display: inline; }
   .settings-form fieldset { min-inline-size: 0; }   /* the UA stylesheet gives fieldsets min-content */
   .site-nav { padding: 0.5rem 0.75rem; gap: 0.5rem; }
   .brand { margin-right: 0; }
@@ -362,12 +378,33 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
   .year-split .inline-field { flex-wrap: wrap; }
   .settings-form.questionnaire .year-split .inline-field input[type=text] { width: 100%; }
 
-  /* Meals grid: seven narrow columns, captions allowed to wrap. */
-  .meals-table { table-layout: fixed; }
-  .meals-table th, .meals-table td { padding: 0.2rem 0.1rem; }
-  .meals-table thead th { font-size: 0.65rem; overflow-wrap: break-word; }
-  .meals-table th[scope=row] { white-space: normal; font-size: 0.78rem; width: 3.2rem; }
-  .meals-table td { width: auto; }
+  /* Meals → one card per meal, like the three tables below. Four columns of live controls — a name, six slot
+     checkboxes, and two checkbox + slider + output pairs — cannot share 350px: squeezed, the sliders ran 70px past
+     the viewport (the only page left that scrolled sideways), and the name input resolved to 100% of a 51px fixed
+     column, because .settings-form's input rule (0,4,1) outweighs .meals-table .meal-name (0,2,0). The caption each
+     cell loses with the thead is redrawn by ::before.
+     Only .meals-table converts: the two plain .category-table uses on FortKnight's questionnaire are two and three
+     narrow columns and already fit. */
+  .meals-table, .meals-table tbody { display: block; }
+  .meals-table thead { display: none; }
+  .meals-table tr { display: block; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
+  .meals-table th, .meals-table td {
+    display: block; width: auto; padding: 0.15rem 0; border-bottom: 0; text-align: left;
+  }
+  .meals-table th[scope=row] { white-space: normal; }
+  .settings-form .meals-table .meal-name { width: 100%; }
+  .meals-table td::before { display: block; font-size: 0.72rem; color: var(--muted); }
+  .meals-table .meal-slots-cell::before { content: "eaten"; }
+  .meals-table td.meal-prep-cell:nth-child(3)::before { content: "needs prepping"; }
+  .meals-table td.meal-prep-cell:nth-child(4)::before { content: "needs cooking"; }
+  /* nowrap is what kept the slider beside its checkbox on one unbreakable line. */
+  .meals-table .meal-prep-cell {
+    white-space: normal; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem;
+  }
+  .meals-table .meal-prep-cell::before { flex: 1 1 100%; }
+  .meals-table .meal-slots-cell label { margin-right: 0.6rem; }
+  .meals-table .meal-minutes { display: inline-flex; align-items: center; gap: 0.35rem; flex: 1 1 8rem; min-width: 0; }
+  .meals-table .meal-minutes input[type=range] { width: auto; flex: 1 1 4rem; min-width: 0; }
 
   /* Category rows: name + boxes on the first line, the slider on its own full-width line. */
   .category-row.category-header { display: none; }
@@ -500,3 +537,40 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 .committed-items li > strong { flex: 0 1 auto; }
 .committed-items li > .remove-committed { margin-left: auto; padding: 0 0.5rem; line-height: 1.4; }
 .committed-empty { margin: 0.25rem 0; }
+@media (max-width: 640px) {
+  /* The entry row is a wrapping flex row that was never tuned, so the name, the two day dropdowns and Add landed
+     in awkward pairings. Give each control its own line: the leftovers dropdown in particular carries options like
+     "leftovers Wednesday B as Late evening snack", which max-width: 100% could only truncate. The desktop
+     `width: auto` on the selects stays load-bearing above this width — the form-wide 100% would stack the row. */
+  .meal-entry-row input[type=text] { flex: 1 1 100%; }
+  .meal-entry-row select { width: 100%; }
+  /* A capped, scrolling list inside a scrolling page is a trap for a thumb. */
+  .committed-items { max-height: none; }
+}
+
+/* ---------- touch ---------- */
+/* Keyed to the pointer, not the viewport: a touchscreen laptop needs these and a narrow desktop window does not.
+   Nothing here changes a mouse-driven page. */
+@media (pointer: coarse) {
+  .nav-link, .face-link {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+  }
+  .face-link { min-width: 44px; }
+  /* ForkKnife's phone bar sets gap: 0 on the switcher, which leaves 💧 and 🏰🛡️ flush against each other. */
+  [data-theme="fork-knife"] .site-nav .face-switch { gap: 0.25rem; }
+  /* The small in-row controls: row reordering, and the various remove buttons — all around 22px, some of them
+     barely 2px apart. */
+  .sections-table .row-actions button,
+  .rule-editor .known-start button,
+  .rule-editor .add-known-start,
+  .remove-appointment,
+  .remove-committed { min-height: 44px; min-width: 44px; }
+  .sections-table .row-actions button { margin-right: 0.35rem; }
+
+  /* The double sliders are the hardest thing on the site to use with a finger: two 14px thumbs overlaid on one
+     track, with z-index rules written for a mouse, and FortKnight's questionnaire renders about 98 of them. Bigger
+     thumbs make them usable rather than easy; the stacking behaviour above is unchanged. */
+  .dual-range { height: 1.75rem; }
+  .dual-range input[type=range]::-webkit-slider-thumb { width: 24px; height: 24px; margin-top: calc(0.875rem - 12px); }
+  .dual-range input[type=range]::-moz-range-thumb { width: 24px; height: 24px; }
+}
