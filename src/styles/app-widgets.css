@@ -94,7 +94,7 @@ select {
 .file-row code { overflow-wrap: anywhere; background: none; border: none; padding: 0; }
 .file-row button { font-size: 0.8rem; padding: 0.25rem 0.6rem; }
 
-@media (max-width: 640px) {
+@media (max-width: 40rem) {
   .panel { padding: 0.9rem; }
   /* The four-column row cannot hold a filename and three controls at this width: the name takes its own line and
      the size and the two buttons share the next one. */

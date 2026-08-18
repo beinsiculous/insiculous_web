@@ -164,7 +164,7 @@ const isActive = (href: string) =>
   /* A closed <details> hides its content, and browsers do it in two different ways: an older UA rule on the
      children, and newer Chrome's content-visibility on the generated ::details-content box. Override both, so the
      bar reads as an ordinary row here whether the element happens to be open or not. */
-  @media (min-width: 641px) {
+  @media (min-width: 40.0625rem) {
     .menu > ul {
       display: flex;
     }
@@ -178,7 +178,7 @@ const isActive = (href: string) =>
   /* Phone: the six links do not fit 390px, so they fold behind the ☰ and drop as a full-width panel under the
      header. The panel is positioned against <header>, which is sticky and therefore the containing block, so it
      spans the viewport rather than the container's column. */
-  @media (max-width: 640px) {
+  @media (max-width: 40rem) {
     summary {
       display: grid;
       place-items: center;
@@ -241,7 +241,7 @@ const isActive = (href: string) =>
     min-height: 70vh;
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 40rem) {
     main {
       padding-top: 1.75rem;
       padding-bottom: 2.5rem;

@@ -69,6 +69,10 @@ main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 
 
 /* ---------- fortnight grid ---------- */
 .fortnight-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 0.5rem; }
+/* The two 900px queries in this file stay in px on purpose: app/shared/themes.css is mirrored from the FortKnight
+   repository and cannot be edited here, and its own `max-width: 900px` (the ForkKnife photo re-crop) has to fire at
+   the same width as ForkKnife's nav squeeze below. Everything else here is in rem — see the note at the phone
+   block — but these two cannot drift from a file this repository does not own. */
 @media (max-width: 900px) { .fortnight-grid { grid-template-columns: repeat(2, 1fr); } }
 .day-card {
   display: block; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem;
@@ -288,7 +292,7 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
    cleaver on the right (~58%) — so the content is where the photographer left the blank space.
    Those are frame percentages, so the column is placed by viewport width, capped so it never
    grows past the paper. */
-@media (min-width: 1200px) {
+@media (min-width: 75rem) {
   [data-theme="fork-knife"] main {
     max-width: min(62rem, 41vw);
     margin-left: 19vw;
@@ -338,7 +342,10 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 /* The footer sits after <main>, so main's padding-bottom does not clear the fixed bar for it — with the safe-area
    inset that bar is ~70px tall, and "Times shown in …" was landing behind it at the end of the scroll. */
 [data-theme="fork-knife"] .site-footer {
-  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  /* The same clearance main takes above, so the gap does not depend on the bar's exact height: at 4rem the footer
+     text cleared the bar by 1px on a phone, which is not a margin. The bar is fixed at every width, so this is
+     deliberately not inside a media query. */
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
 }
 
 /* Settings: the profile bar (which saved answer set is being edited) */
@@ -352,8 +359,10 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 
 /* ---------- mobile (phones) ---------- */
 /* Everything below only narrows geometry; the wide layout above is untouched. Tables that were
-   built as rows of columns become stacked cards with their column captions drawn by ::before. */
-@media (max-width: 640px) {
+   built as rows of columns become stacked cards with their column captions drawn by ::before.
+   The breakpoint is 40rem rather than 640px so it tracks the reader's own font size: someone browsing at a 20px
+   root gets bigger text in the same column and needs these rules to come in sooner, which a px value would ignore. */
+@media (max-width: 40rem) {
   h1 { font-size: 1.3rem; }
   main > * { min-width: 0; }                 /* grid items default to min-content width */
   /* Both faces ship a short label per pill (faces.js faceNav) and the markup renders both spans, but only
@@ -509,7 +518,7 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 .retry-box { margin: 0.5rem 0 0.25rem; }
 .retry-box .retry-text { width: 100%; font: inherit; font-size: 0.85rem; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
 .retry-box .button-row { margin-top: 0.35rem; }
-@media (max-width: 640px) {
+@media (max-width: 40rem) {
   .import-review-table, .import-review-table tbody { display: block; }
   .import-review-table thead { display: none; }
   .import-review-table tr { display: block; padding: 0.35rem 0; border-bottom: 1px solid var(--line); }
@@ -537,7 +546,7 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 .committed-items li > strong { flex: 0 1 auto; }
 .committed-items li > .remove-committed { margin-left: auto; padding: 0 0.5rem; line-height: 1.4; }
 .committed-empty { margin: 0.25rem 0; }
-@media (max-width: 640px) {
+@media (max-width: 40rem) {
   /* The entry row is a wrapping flex row that was never tuned, so the name, the two day dropdowns and Add landed
      in awkward pairings. Give each control its own line: the leftovers dropdown in particular carries options like
      "leftovers Wednesday B as Late evening snack", which max-width: 100% could only truncate. The desktop
