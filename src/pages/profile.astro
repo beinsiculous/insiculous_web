@@ -1,7 +1,12 @@
 ---
 import FaceLayout from "../layouts/FaceLayout.astro";
-import { withBase } from "../lib/paths.js";
 import { facePath } from "../lib/faces.js";
+// The one page with no face, so it wears the studio's: beinsiculous.com's skin and chrome rather than either app's.
+// The fonts are the studio's two, imported here rather than in FaceLayout so the ten face pages — which do not use
+// them — do not carry them.
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/space-grotesk";
+import "../styles/studio-skin.css";
 
 // Profile (shared by FortKnight and ForkKnife): the active profile (name, Duplicate, Delete) and the assistant-workspace
 // downloads. The answers themselves are edited on each face's Questionnaire page (docs/app.md).
