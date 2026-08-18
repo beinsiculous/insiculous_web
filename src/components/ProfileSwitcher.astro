@@ -1,0 +1,71 @@
+---
+// The profile dropdown: shows once a profile is saved on this device; switching makes that profile active and
+// reloads the page so every page re-renders from it; "New profile…" creates an unsaved profile and opens the
+// questionnaire at `questionnaireHref` to answer and save it. Rename/Duplicate/Delete live on the Profile page.
+//
+// Rendered in exactly one place per page, never two: FaceLayout puts it in the header of the ten face pages, and
+// the Profile page puts it in its own first panel. The Profile page needs its own copy for two reasons — it is on
+// BaseLayout, which has no chrome to hold it, and ForkKnife hides the header copy outright below 900px
+// (src/styles/faces.css) on the promise that the Profile page carries one.
+//
+// The slot takes whatever belongs beside the dropdown; FaceLayout passes its ⚙ Profile link, so that link is
+// hidden until a profile is saved too. The Profile page passes nothing — you are already there.
+const { questionnaireHref } = Astro.props;
+---
+<div class="nav-profile" id="navProfile" hidden data-questionnaire-href={questionnaireHref}>
+  <label class="nav-profile-label">Profile <select id="navProfileSelect" aria-label="Profile"></select></label>
+  <slot />
+</div>
+<script>
+  import { createProfile, loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
+
+  const NEW_PROFILE_VALUE = "__new__";
+  const container = document.getElementById("navProfile");
+  const select = document.getElementById("navProfileSelect");
+
+  /** (Re)draw the dropdown from the device's settings; hidden until a profile is saved. */
+  function renderNavProfile() {
+    const settings = loadSettings();
+    const savedIds = profileIds(settings);
+    container.hidden = savedIds.length === 0;
+    select.replaceChildren();
+    if (!savedIds.length) return;
+    const activeId = settings.activeWeightsId;
+    const options = savedIds.map((id) => ({ value: id, label: id }));
+    if (activeId && !savedIds.includes(activeId)) options.push({ value: activeId, label: `${activeId} (not saved yet)` });
+    options.push({ value: NEW_PROFILE_VALUE, label: "New profile…" });
+    for (const { value, label } of options) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    }
+    select.value = activeId && options.some((option) => option.value === activeId) ? activeId : savedIds[0];
+  }
+
+  select.addEventListener("change", () => {
+    const current = loadSettings(); // another tab may have saved meanwhile
+    // A page with unsaved edits (the questionnaire) may veto the switch: it listens for this cancelable event.
+    const allowed = document.dispatchEvent(new CustomEvent("fortknight:profile-switch", { cancelable: true, detail: { to: select.value } }));
+    if (!allowed) { select.value = current.activeWeightsId; return; }
+    try {
+      if (select.value === NEW_PROFILE_VALUE) {
+        const name = prompt("Name for the new profile:");
+        if (!name) { select.value = current.activeWeightsId; return; }
+        createProfile(current, name);
+        saveSettings(current);
+        location.href = container.dataset.questionnaireHref;
+        return;
+      }
+      switchProfile(current, select.value);
+      saveSettings(current);
+      location.reload();
+    } catch (error) {
+      alert(error.message);
+      select.value = current.activeWeightsId;
+    }
+  });
+  // Pages that save or apply settings without reloading (Questionnaire Save, Assistant Apply) announce it.
+  document.addEventListener("fortknight:settings-saved", renderNavProfile);
+  renderNavProfile();
+</script>

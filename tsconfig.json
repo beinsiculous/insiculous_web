@@ -18,6 +18,7 @@
     "src/components/ApplyFromAssistant.astro",
     "src/components/DayCard.astro",
     "src/components/MenuDayCard.astro",
+    "src/components/ProfileSwitcher.astro",
     "src/components/QuestionField.astro",
     "src/lib",
     "scripts"

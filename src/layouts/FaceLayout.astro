@@ -1,22 +1,21 @@
 ---
 import "../styles/faces.css";
+import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import bundle from "../data/bundle.json";
 import { withBase } from "../lib/paths.js";
-import { DEFAULT_THEME, FACES, FACE_IDS, PROFILE_PATH, STUDIO, STUDIO_NAV, faceNav, facePath, studioPath } from "../lib/faces.js";
+import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
 
-// `face` is which of the site's two faces the page belongs to (docs/app.md): "fortknight" or "forkknife" — its menu is
-// Overview, the face's own building page (Spoon Feed / Build), Questionnaire, Assistant. Each face brings its own skin
-// (FACES[face].theme), so the two read as different sites. The switcher sits left of the brand: the Be Insiculous logo
-// back out to the studio site first, then the other face's logo.
-// `face` is null on the Profile page, which belongs to neither app but to the studio, and wears the studio's skin and
-// chrome instead: the be_insiculous wordmark, STUDIO_NAV, and no emoji switcher (the wordmark and that menu already
-// reach all three of its destinations). The profile dropdown and ⚙ Profile only show once a profile is saved here.
-const { title, face = null } = Astro.props;
-const currentFace = face ? FACES[face] : null;
+// The layout of the site's two faces (docs/app.md), and of those two only: every page rendered here belongs to
+// "fortknight" or "forkknife", so `face` is required. Its menu is Overview, the face's own building page (Spoon Feed /
+// Build), Questionnaire, Assistant. Each face brings its own skin (FACES[face].theme), so the two read as different
+// sites. The switcher sits left of the brand: the Be Insiculous logo back out to the studio site first, then the other
+// face's logo. The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
+// The Profile page the two faces share is NOT here — it belongs to beinsiculous.com and is a studio page on
+// BaseLayout (src/pages/profile.astro).
+const { title, face } = Astro.props;
+const currentFace = FACES[face];
 const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
-const navItems = currentFace
-  ? faceNav(face).map((item) => ({ ...item, href: facePath(face, item.path) }))
-  : STUDIO_NAV.map((item) => ({ ...item, href: withBase(item.path) })); // no shortLabel: the studio bar has room
+const navItems = faceNav(face).map((item) => ({ ...item, href: facePath(face, item.path) }));
 const profileHref = withBase(PROFILE_PATH);
 const pathname = Astro.url.pathname;
 function isActive(item) {
@@ -24,13 +23,10 @@ function isActive(item) {
   return pathname.startsWith(item.href);
 }
 const profileActive = pathname.startsWith(profileHref);
-const brandLabel = currentFace ? `${currentFace.logo} ${currentFace.label}` : STUDIO.label;
-const theme = currentFace ? currentFace.theme : DEFAULT_THEME;
-// Each face gets its own tab icon — an emoji drawn into an inline SVG, so there is no file to ship. The face-less
-// Profile page takes the studio's real favicon instead, the one every beinsiculous.com page uses.
-const favicon = currentFace
-  ? `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${currentFace.favicon}</text></svg>`
-  : withBase("favicon.svg");
+const brandLabel = `${currentFace.logo} ${currentFace.label}`;
+const theme = currentFace.theme;
+// Each face gets its own tab icon — an emoji drawn into an inline SVG, so there is no file to ship.
+const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${currentFace.favicon}</text></svg>`;
 ---
 <!doctype html>
 <html lang="en">
@@ -38,7 +34,7 @@ const favicon = currentFace
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title} · {brandLabel}</title>
-  <link rel="icon" type={currentFace ? undefined : "image/svg+xml"} href={favicon} />
+  <link rel="icon" href={favicon} />
   <link rel="stylesheet" href={withBase("app/shared/themes.css")} />
   <script is:inline define:vars={{ theme }}>
     // The page's face decides its skin; set before first paint so the base palette never shows.
@@ -47,21 +43,15 @@ const favicon = currentFace
 </head>
 <body>
   <header class="site-nav">
-    {currentFace && (
-      <nav class="face-switch" aria-label="Switch app">
-        <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
-        {otherFaces.map((other) => (
-          <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
-        ))}
-      </nav>
-    )}
-    {currentFace ? (
-      <a class="brand" href={facePath(face)}>
-        <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
-      </a>
-    ) : (
-      <a class="brand wordmark" href={studioPath()}>{STUDIO.wordmark}<span class="cursor" aria-hidden="true">▌</span></a>
-    )}
+    <nav class="face-switch" aria-label="Switch app">
+      <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
+      {otherFaces.map((other) => (
+        <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
+      ))}
+    </nav>
+    <a class="brand" href={facePath(face)}>
+      <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
+    </a>
     <nav class="nav-links">
       {navItems.map((item) => (
         <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
@@ -69,10 +59,9 @@ const favicon = currentFace
         </a>
       ))}
     </nav>
-    <div class="nav-profile" id="navProfile" hidden data-questionnaire-href={facePath(face || "fortknight", "questionnaire/")}>
-      <label class="nav-profile-label">Profile <select id="navProfileSelect" aria-label="Profile"></select></label>
+    <ProfileSwitcher questionnaireHref={facePath(face, "questionnaire/")}>
       <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
-    </div>
+    </ProfileSwitcher>
   </header>
   <main>
     <slot />
@@ -82,62 +71,6 @@ const favicon = currentFace
   </footer>
   <script define:vars={{ buildHash: bundle.buildInfo.buildHash, timezone: bundle.meta.timezone }}>
     console.log(`beinsiculous bundle ${buildHash} · ${timezone}`);
-  </script>
-  <script>
-    // The profile dropdown (top right): shows once a profile is saved on this device; switching makes that profile
-    // active and reloads the page so every page re-renders from it; "New profile…" creates an unsaved profile and opens
-    // the current face's questionnaire to answer and save it. Rename/Duplicate/Delete live on the Profile page.
-    import { createProfile, loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
-
-    const NEW_PROFILE_VALUE = "__new__";
-    const container = document.getElementById("navProfile");
-    const select = document.getElementById("navProfileSelect");
-
-    /** (Re)draw the dropdown from the device's settings; hidden until a profile is saved. */
-    function renderNavProfile() {
-      const settings = loadSettings();
-      const savedIds = profileIds(settings);
-      container.hidden = savedIds.length === 0;
-      select.replaceChildren();
-      if (!savedIds.length) return;
-      const activeId = settings.activeWeightsId;
-      const options = savedIds.map((id) => ({ value: id, label: id }));
-      if (activeId && !savedIds.includes(activeId)) options.push({ value: activeId, label: `${activeId} (not saved yet)` });
-      options.push({ value: NEW_PROFILE_VALUE, label: "New profile…" });
-      for (const { value, label } of options) {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = label;
-        select.appendChild(option);
-      }
-      select.value = activeId && options.some((option) => option.value === activeId) ? activeId : savedIds[0];
-    }
-
-    select.addEventListener("change", () => {
-      const current = loadSettings(); // another tab may have saved meanwhile
-      // A page with unsaved edits (the questionnaire) may veto the switch: it listens for this cancelable event.
-      const allowed = document.dispatchEvent(new CustomEvent("fortknight:profile-switch", { cancelable: true, detail: { to: select.value } }));
-      if (!allowed) { select.value = current.activeWeightsId; return; }
-      try {
-        if (select.value === NEW_PROFILE_VALUE) {
-          const name = prompt("Name for the new profile:");
-          if (!name) { select.value = current.activeWeightsId; return; }
-          createProfile(current, name);
-          saveSettings(current);
-          location.href = container.dataset.questionnaireHref;
-          return;
-        }
-        switchProfile(current, select.value);
-        saveSettings(current);
-        location.reload();
-      } catch (error) {
-        alert(error.message);
-        select.value = current.activeWeightsId;
-      }
-    });
-    // Pages that save or apply settings without reloading (Questionnaire Save, Assistant Apply) announce it.
-    document.addEventListener("fortknight:settings-saved", renderNavProfile);
-    renderNavProfile();
   </script>
 </body>
 </html>

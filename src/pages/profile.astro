@@ -1,20 +1,22 @@
 ---
-import FaceLayout from "../layouts/FaceLayout.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import { facePath } from "../lib/faces.js";
-// The one page with no face, so it wears the studio's: beinsiculous.com's skin and chrome rather than either app's.
-// The fonts are the studio's two, imported here rather than in FaceLayout so the ten face pages — which do not use
-// them — do not carry them.
-import "@fontsource-variable/jetbrains-mono";
-import "@fontsource-variable/space-grotesk";
-import "../styles/studio-skin.css";
+// This page belongs to beinsiculous.com rather than to either app, so it is a studio page like any other: BaseLayout,
+// global.css, the six-link header and the studio footer. Only the widgets it shares with the two faces come from
+// elsewhere (src/styles/app-widgets.css) — the panels, the buttons and the workspace file rows.
+import "../styles/app-widgets.css";
 
-// Profile (shared by FortKnight and ForkKnife): the active profile (name, Duplicate, Delete) and the assistant-workspace
-// downloads. The answers themselves are edited on each face's Questionnaire page (docs/app.md).
+// Profile (shared by FortKnight and ForkKnife): the active profile (switch, name, Duplicate, Delete) and the
+// assistant-workspace downloads. The answers themselves are edited on each face's Questionnaire page (docs/app.md).
+// The switcher lives here rather than in the header: BaseLayout has no chrome for it, and ForkKnife hides its own
+// header copy on a phone (faces.css) on the promise that this page carries one.
 ---
-<FaceLayout title="Profile">
+<BaseLayout title="Profile">
   <section class="panel">
     <h1>Profile</h1>
     <h2 id="profileHeading"></h2>
+    <ProfileSwitcher questionnaireHref={facePath("fortknight", "questionnaire/")} />
     <form class="button-row profile-name-form" id="profileNameForm">
       <label class="inline-field">Name <input type="text" id="profileNameInput" autocomplete="off" required /></label>
       <button type="submit" id="renameProfileButton">Rename</button>
@@ -25,7 +27,7 @@ import "../styles/studio-skin.css";
       <button type="button" id="duplicateProfileButton">Duplicate as…</button>
       <button type="button" id="deleteProfileButton">Delete</button>
     </div>
-    <p class="muted">The name becomes the profile's id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched, and new ones started, from the dropdown at the top right. Both apps share this profile: FortKnight's answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife's <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
+    <p class="muted">The name becomes the profile's id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched, and new ones started, from the dropdown above. Both apps share this profile: FortKnight's answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife's <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
   </section>
 
   <section class="panel">
@@ -37,7 +39,7 @@ import "../styles/studio-skin.css";
     </div>
     <div class="file-list" id="fileList"></div>
   </section>
-</FaceLayout>
+</BaseLayout>
 
 <script>
   import { buildWorkspaceDocuments } from "../lib/shared/workspace-docs.js";
@@ -77,7 +79,7 @@ import "../styles/studio-skin.css";
     if (active) {
       elements.profileStatus.textContent = `Saved on this device${active.questionnaire?.answeredAt ? ` (answers from ${active.questionnaire.answeredAt})` : ""}${savedCount > 1 ? `; ${savedCount} profiles saved` : ""}.`;
     } else if (savedCount) {
-      elements.profileStatus.textContent = `Not saved yet — answer the Questionnaire and Save. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown at the top right.`;
+      elements.profileStatus.textContent = `Not saved yet — answer the Questionnaire and Save. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown above.`;
     } else {
       elements.profileStatus.textContent = "No profile saved yet — answer the Questionnaire and Save; the Overview shows default answers until then.";
     }

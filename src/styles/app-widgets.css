@@ -1,0 +1,105 @@
+/* The handful of app widgets the studio's own pages need — currently just the shared Profile page
+   (src/pages/profile.astro), which is a beinsiculous.com page that happens to edit FortKnight and ForkKnife's
+   on-device profile.
+
+   The same widgets exist for the two faces in src/styles/faces.css, but that file cannot be shared here: it is a
+   global stylesheet for the face apps, and its bare element rules (`body { font-family: "Trebuchet MS"; display:
+   flex }`, `html, body { cursor: … }`, `h1 { font-size: 1.5rem }`) would fight global.css. So these are written
+   against the studio's own tokens instead of adapted from the faces' — this file has no coupling to faces.css and
+   needs no keeping in step with it. It is imported by the page, not by BaseLayout, so the marketing pages do not
+   carry CSS they never use.
+
+   Class names match faces.css because the markup is shared (ProfileSwitcher.astro, and the file rows built by
+   lib/shared/workspace-files.js). */
+
+[hidden] { display: none !important; }   /* display rules on classes must never beat the hidden attribute */
+
+/* ---------- panels ---------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+.panel + .panel { margin-top: 1.25rem; }
+.panel > h1:first-child, .panel > h2:first-child { margin-top: 0; }
+/* global.css gives h2 a 2.2em run-up, which is right between prose sections and far too much for a subtitle
+   sitting directly under the panel's h1 (the profile's name under "Profile"). */
+.panel > h1 + h2 { margin-top: 0.2em; }
+
+.muted { color: var(--text-dim); font-size: 0.9rem; }
+
+/* ---------- controls ---------- */
+/* Buttons as the studio draws them: the primary filled green with dark text, the rest outlined. */
+button {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+button[type="button"] {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  font-weight: 500;
+}
+button:hover:not(:disabled) { filter: brightness(1.1); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+input {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-bright);
+}
+select {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-bright);
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.inline-field { display: inline-flex; align-items: center; gap: 0.5rem; }
+.profile-name-form { margin: 0.4rem 0; }
+.profile-name-form input { width: 14rem; max-width: 100%; }
+
+/* ---------- the profile switcher, in the panel rather than in chrome ---------- */
+.nav-profile { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0.25rem; }
+.nav-profile-label {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);
+}
+.nav-profile select { max-width: 12rem; }
+
+/* ---------- assistant workspace files ---------- */
+.file-list { display: flex; flex-direction: column; gap: 0.35rem; }
+.file-row {
+  display: grid; grid-template-columns: 1fr auto auto auto; gap: 0.5rem; align-items: center;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface-raised);
+}
+.file-row code { overflow-wrap: anywhere; background: none; border: none; padding: 0; }
+.file-row button { font-size: 0.8rem; padding: 0.25rem 0.6rem; }
+
+@media (max-width: 640px) {
+  .panel { padding: 0.9rem; }
+  /* The four-column row cannot hold a filename and three controls at this width: the name takes its own line and
+     the size and the two buttons share the next one. */
+  .file-row { display: flex; flex-wrap: wrap; }
+  .file-row code { flex: 1 1 100%; }
+  .button-row button { flex: 1 1 auto; text-align: center; }
+  .file-row button { flex: 0 1 auto; }
+}
