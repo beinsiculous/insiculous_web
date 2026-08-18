@@ -104,6 +104,9 @@ code {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 0.1em 0.35em;
+  /* File names and paths are single unbreakable tokens; on a phone one of them would push the line out of the
+     viewport. `pre` has its own scroller below and is left alone. */
+  overflow-wrap: anywhere;
 }
 
 pre {
@@ -139,6 +142,13 @@ hr {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 1.25rem;
+}
+
+/* Phones: hand a little of the gutter back to the content. */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 1rem;
+  }
 }
 
 .section-label {

@@ -44,17 +44,22 @@ const isActive = (href: string) =>
     <header>
       <nav class="container">
         <a href="/" class="wordmark">be_insiculous<span class="cursor">▌</span></a>
-        <ul>
-          {
-            nav.map(({ href, label }) => (
-              <li>
-                <a href={href} aria-current={isActive(href) ? 'page' : undefined}>
-                  {label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+        <details class="menu">
+          <summary>
+            <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
+          </summary>
+          <ul>
+            {
+              nav.map(({ href, label }) => (
+                <li>
+                  <a href={href} aria-current={isActive(href) ? 'page' : undefined}>
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </details>
       </nav>
     </header>
 
@@ -121,12 +126,90 @@ const isActive = (href: string) =>
     }
   }
 
+  /* The menu is a native disclosure, so it needs no JavaScript: the ☰ opens it, Escape closes it, the keyboard
+     reaches it, and every navigation resets it because each page is a fresh document. The button only exists on a
+     phone; above that breakpoint the list is the plain row it has always been. */
+  .menu {
+    /* min-width: 0 lets the row shrink; without it the six links set an unshrinkable min-content floor and the
+       whole page scrolls sideways. */
+    min-width: 0;
+  }
+
+  summary {
+    display: none; /* no button at desktop widths */
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
   ul {
     display: flex;
     gap: 1.4rem;
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  /* A closed <details> hides its content, and browsers do it in two different ways: an older UA rule on the
+     children, and newer Chrome's content-visibility on the generated ::details-content box. Override both, so the
+     bar reads as an ordinary row here whether the element happens to be open or not. */
+  @media (min-width: 641px) {
+    .menu > ul {
+      display: flex;
+    }
+
+    .menu::details-content {
+      content-visibility: visible;
+      display: contents;
+    }
+  }
+
+  /* Phone: the six links do not fit 390px, so they fold behind the ☰ and drop as a full-width panel under the
+     header. The panel is positioned against <header>, which is sticky and therefore the containing block, so it
+     spans the viewport rather than the container's column. */
+  @media (max-width: 640px) {
+    summary {
+      display: grid;
+      place-items: center;
+      min-width: 44px;
+      min-height: 44px;
+      margin-right: -0.35rem;
+      font-size: 1.35rem;
+      color: var(--text);
+    }
+
+    .menu[open] > summary {
+      color: var(--accent);
+    }
+
+    .menu > ul {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      flex-direction: column;
+      gap: 0;
+      padding: 0.25rem 1.25rem 0.6rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    ul a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
+    }
   }
 
   ul a {
@@ -156,6 +239,13 @@ const isActive = (href: string) =>
     padding-top: 3rem;
     padding-bottom: 4rem;
     min-height: 70vh;
+  }
+
+  @media (max-width: 640px) {
+    main {
+      padding-top: 1.75rem;
+      padding-bottom: 2.5rem;
+    }
   }
 
   footer {
