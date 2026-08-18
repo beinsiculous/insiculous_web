@@ -37,8 +37,8 @@ example; it is published into the workspace file set beside this page.
 
 ### Writing it (for importers and assistants)
 - **`commitments`** — timed things: appointments, lessons, therapies, meetings, work or school
-  hours, standing calls. One record each; they become the person's commitments (the
-  questionnaire's standing appointments, Startup 2) and anchor their day's blocks.
+  hours, standing calls. One record each; they become the person's commitments (the standing
+  appointments listed and edited on the Build page, `/fortknight/build/`) and anchor their day's blocks.
 - **`tasks`** — recurring things to do that have a day but no fixed clock time (chores, errands,
   "call mum on Sundays"). They show on the day pages in the block their `when` falls in; they never
   anchor anything.
@@ -74,8 +74,8 @@ under *Not applied* in the review, the rest still applies.
 Alongside the readable lists a document may carry the objects the app consumes directly — an
 assistant-authored agenda (`docs/llm-guide.md` → *Building the person an agenda*), the workbook
 example (`build.py --overlay examples/workbook`), a future deterministic `.ics`/`.xlsx` importer:
-- `standingAppointments[*]` — **exactly** the questionnaire's standing-appointment shape
-  (`docs/questionnaire.md` → Startup 2): `title`, `weekdays[]`, `start` (`HH:MM`),
+- `standingAppointments[*]` — **exactly** the standing-appointment shape the Build page writes
+  (`docs/questionnaire.md` → Startup 2's answer keys): `title`, `weekdays[]`, `start` (`HH:MM`),
   `durationMinutes`, `category` (a `categories.json` key), and `cadence`:
   | `cadence.kind` | extra field | meaning |
   |---|---|---|
@@ -117,7 +117,7 @@ JavaScript normalizers on the same fixture and asserts identical output.
 ## Where it goes
 - **Assistant page, Apply from assistant** — paste or upload the document and Apply
   (`applyImportDocument()` in `app/shared/weights-rules.js`): its commitments / `standingAppointments`
-  are appended to the person's commitments and its tasks to their tasks (Startup 2's read-only
+  are appended to the person's commitments and its tasks to their tasks (the Build page's read-only
   lists, deduplicated on title + start/time of day + weekdays),
   the document itself is kept as `startup.import` (raw text under `startup.importJson`) and, on the
   next derivation, its fixed activities anchor the block split, its `blockFocusGrid`/`appointmentBlocks`
@@ -128,10 +128,11 @@ JavaScript normalizers on the same fixture and asserts identical output.
   the chat the document came from, so the assistant fixes and resends the whole document.
 - **Questionnaire, Startup 2** — a one-line note that a document was applied plus only the parts of the
   review the lists cannot show (what the assistant skipped, its review lines, parse problems —
-  `renderImportReview(…, { listApplied: false })`); the commitments and tasks themselves appear once, in
-  the lists below (a *Forget the applied import* link drops the document; the commitments it added stay
-  as rows until removed by hand). The rows are the person's own list:
-  add one at a time without any assistant.
+  `renderImportReview(…, { listApplied: false })`), and a count of the commitments and tasks the profile
+  now holds. A *Forget the applied import* link drops the document; the commitments and tasks it added
+  stay in the profile until removed by hand.
+- **Build page** (`/fortknight/build/`) — where the commitments and tasks themselves are listed, and
+  where the person adds their own, one at a time, without any assistant.
 - **An assistant-authored agenda** is this document too: when the person asks their assistant to
   draft the fortnight, it answers with `source.kind: "other"`, a `blockFocusGrid` over the person's
   own focus block keys, `fixedActivities` for the few timed anchors, and `notes` for its
@@ -150,7 +151,7 @@ Planned flow, all on-device:
    document — unknown durations default to 60 minutes, unknown categories to `health` for
    appointments, with a note explaining each guess.
 3. The reply is validated (same rules as `check_import_document`), shown as a review table
-   (done today, read-only: *Apply from assistant* on `/fortknight/assistant/` (or `/forkknife/assistant/`), and again under Startup 2 on `/fortknight/questionnaire/`),
+   (done today, read-only: *Apply from assistant* on `/fortknight/assistant/` (or `/forkknife/assistant/`), and again under Startup 2 on `/fortknight/questionnaire/`; what landed is listed on `/fortknight/build/`),
    then applied to the saved answers; still open: editing rows in that table before applying.
 `.ics` and `.xlsx` can be parsed without any assistant (deterministic importers under
 `scripts/importers/` / `app/shared/importers/`).

@@ -1,6 +1,6 @@
 {
   "buildInfo": {
-    "buildHash": "71e73cc78f5f0bb3",
+    "buildHash": "78b816c4a9566fe0",
     "schemaVersion": 1,
     "builtFrom": [
       "meta.json",
@@ -3124,14 +3124,14 @@
             "id": "commitments",
             "kind": "commitments",
             "prompt": "Do you already use a calendar, task list, reminder and/or budget system?",
-            "note": "Add them one at a time below. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day's blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. Or have your assistant read your existing system and upload its import on the Assistant page; what it brought in shows here."
+            "note": "Add them one at a time on the Build page. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day's blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. Or have your assistant read your existing system and upload its import on the Assistant page; what it brought in is reviewed here and listed on the Build page."
           }
         ]
       },
       {
         "id": "rhythm",
         "title": "Your day and year",
-        "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda's scope. Your meals — names, prepping and cooking, when you eat them and the fortnight menu — are ForkKnife's questionnaire.",
+        "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda's scope. Your meals — names, prepping and cooking, when you eat them — are ForkKnife's questionnaire, and the fortnight menu itself is its Spoon Feed page.",
         "questions": [
           {
             "id": "wakingWindow",
@@ -3242,7 +3242,7 @@
         "id": "meals",
         "face": "forkknife",
         "title": "Your meals",
-        "intro": "ForkKnife's questionnaire: your meals and what your assistant needs to draft the fortnight menu. Nothing here changes FortKnight's shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
+        "intro": "ForkKnife's questionnaire: your meals and what your assistant needs to draft the fortnight menu. The menu itself — which dish is which meal on each day — is built on the Spoon Feed page. Nothing here changes FortKnight's shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
         "questions": [
           {
             "id": "meals",

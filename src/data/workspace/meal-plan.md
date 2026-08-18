@@ -1,18 +1,21 @@
 # The meal plan (ForkKnife): the fortnight menu and its prep / cooking tasks
 
-**ForkKnife** is the site's second face (`docs/app.md`): its own Overview, Questionnaire and Assistant pages under
-`/forkknife/`, sharing the profile with FortKnight. Its **questionnaire** (the `face: "forkknife"` section of
+**ForkKnife** is the site's second face (`docs/app.md`): its own Overview, **Spoon Feed**, Questionnaire and Assistant
+pages under `/forkknife/`, sharing the profile with FortKnight. Its **questionnaire** (the `face: "forkknife"` section of
 `data/questionnaire.json`, "Your meals") is its settings: the meals question — a person's meals (Breakfast, Dinner,
 Snack by default; 2–5), when each is eaten (1–2 times of day, `meals.meals[].slots`), whether a menu item of that meal
 *needs prepping* and/or *cooking* and how long that takes — followed by the **meal preferences** the assistant prompt
 embeds (`eaters`, `dietaryRules`, `allergiesAndDislikes`, `favouriteCuisines`, `favouriteDishes`, `cookingSkill`,
 `foodBudget`, `kitchenKit`, `shoppingCadence`; option lists in `questionnaire.options`, defaults in
-`defaultAnswers`, kept whole under `weights.questionnaire.answers` — nothing here moves shares) and the **meal plan**
-editor: for each meal, the dishes and the day(s) they are eaten across the fortnight — by hand, or by applying a
-**meal-plan document** (this contract) on ForkKnife's Assistant page, whose step 1 hands the person a **prompt**
+`defaultAnswers`, kept whole under `weights.questionnaire.answers` — nothing here moves shares). The menu itself is not on that page:
+it is built on **Spoon Feed** (`/forkknife/spoon-feed/`, and by the same editor on FortKnight's Build page,
+`/fortknight/build/`) — for each meal, the dishes and the day(s) they are eaten across the fortnight — by hand, or by
+applying a **meal-plan document** (this contract) on ForkKnife's Assistant page, whose step 1 hands the person a **prompt**
 (`mealPlanPrompt`, `docs/assistant-workspace.md`) built from those answers, this contract and a template. Save keeps
-it all with the profile (`answers.mealPlan` → `weights.mealPlan`; ForkKnife saves only its own answer keys —
-`FORKKNIFE_ANSWER_KEYS` — over the profile as stored at that moment). ForkKnife's **Overview** shows the menu as the
+it all with the profile (`answers.mealPlan` → `weights.mealPlan`; every page saves only its own answer keys over the
+profile as stored at that moment — Spoon Feed writes `mealPlan` alone, Build writes it with the commitments and tasks,
+and ForkKnife's questionnaire writes `FORKKNIFE_ANSWER_KEYS`, carrying the menu through so that renaming a meal
+retags its dishes and dropping a meal drops them). ForkKnife's **Overview** shows the menu as the
 14-day grid and the **meal-prep and cooking tasks** the menu implies, as an import document (version 2) the person
 pastes into *Apply from assistant*, step 2 — so the tasks enter the profile the way everything else does. Rule and
 schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (`tasks`, `mealPlan`),
@@ -20,7 +23,7 @@ schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (
 
 ## The shape of a menu
 - A meal covers the 14 day keys with about **8 dishes**: 6 eaten twice (the second day is **leftovers**) and 2
-  eaten once. The page shows the coverage per meal ("8 dishes · 14/14 days") and the days still open.
+  eaten once. The editor shows the coverage per meal ("8 dishes · 14/14 days") and the days still open.
 - A dish's **second serving is never the next day and at most three days after the first**, and the fortnight
   wraps: after Saturday B the allowed days are Monday B, Tuesday A, Wednesday B. (`allowed_second_days`: first
   + 2, + 3, + 4 mod 14.)
@@ -77,6 +80,9 @@ the menu into the profile's meal plan. ForkKnife shows it with *Copy* / *Downloa
 and a link to the Assistant page.
 
 ## What reads the menu
+- **Spoon Feed** (`/forkknife/spoon-feed/`) and **Build** (`/fortknight/build/`) — where it is edited by hand: the
+  same editor on both, one section per meal with its coverage, its dishes, and one entry row (dish, first day,
+  leftovers day, *Add*).
 - **ForkKnife's Overview** (`/forkknife/`) — the 14-day menu grid (one line per meal per day, `menuForDay`) and the tasks.
 - **Day pages** (`/fortknight/days/<dayKey>/`) — the menu line: "Breakfast: Overnight oats · Dinner: Lentil soup
   (leftovers) · Snack: —" (`dayPlan().menu`); the applied tasks show in their blocks (` · task`).
