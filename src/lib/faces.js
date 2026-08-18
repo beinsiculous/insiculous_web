@@ -1,8 +1,8 @@
 // The site's two faces (docs/app.md): FortKnight (the fortnight schedule) and ForkKnife (the meal plan), each with
 // its own Overview / building page / Questionnaire / Assistant pages under its own path; they share the profile
-// (/profile/) and the on-device settings. `face` is null on the profile page, which falls back to DEFAULT_THEME.
-// Each face carries its own `theme` (the skin in app/shared/themes.css) so the two read as different sites; the
-// studio pages of beinsiculous.com are the third and use their own layout entirely.
+// (/profile/) and the on-device settings. Each face carries its own `theme` (the skin in app/shared/themes.css) so
+// the two read as different sites. The studio pages of beinsiculous.com — including /profile/ — use their own
+// layout entirely (src/layouts/BaseLayout.astro).
 import { withBase } from "./paths.js";
 
 // `build` is the face's own page for adding things by hand — ForkKnife's Spoon Feed (the fortnight menu) and
@@ -26,21 +26,12 @@ export function faceNav(faceId) {
 export function facePath(faceId, path = "") {
   return withBase(`${FACES[faceId].home}${path}`);
 }
+/** The shared Profile page. It belongs to the studio, not to either face, so it is a BaseLayout page like the rest
+ *  of beinsiculous.com; the faces only link to it. */
 export const PROFILE_PATH = "profile/";
-/** The skin of a page with no face — the shared Profile page, which belongs to the studio rather than to either
- *  app and wears its skin (src/styles/studio-skin.css). A third theme id that themes.css knows nothing about, so
- *  neither face's palette or photograph can reach it. */
-export const DEFAULT_THEME = "studio";
-/** The studio site (beinsiculous.com itself) that the two faces sit inside: its label, its logo (an emoji, like the
- *  faces') and the wordmark its own pages wear. */
-export const STUDIO = { label: "Be Insiculous", logo: "💧", wordmark: "be_insiculous" };
-/** The Profile page's menu — the studio's, trimmed: Home is the wordmark itself, and Devlog and Engine are studio
- *  reading rather than profile business. Paths are site paths, not face paths. */
-export const STUDIO_NAV = [
-  { path: "games/", label: "Games" },
-  { path: "fortknight/", label: "FortKnight" },
-  { path: "forkknife/", label: "ForkKnife" },
-];
+/** The studio site (beinsiculous.com itself) that the two faces sit inside: its label and its logo (an emoji, like
+ *  the faces'), worn by the face-switcher's way back out. */
+export const STUDIO = { label: "Be Insiculous", logo: "💧" };
 /** URL of the studio home. */
 export function studioPath() {
   return withBase("");
