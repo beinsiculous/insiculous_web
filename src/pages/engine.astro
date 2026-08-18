@@ -33,14 +33,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       picking, play/pause/stop with full world-snapshot restore. Scenes and
       prefabs are RON files, which is how Breakout's levels are authored.
     </p>
-    <img
-      src="/images/pong-in-editor.png"
-      alt="Insiculous Pong running inside the Insiculous 2D scene editor"
-      width="1288"
-      height="885"
-      loading="lazy"
-    />
-    <p class="caption">Insiculous Pong running live inside the scene editor.</p>
+    <a href="/images/pong-in-editor.png" class="shot-link">
+      <img
+        src="/images/pong-in-editor.png"
+        alt="Insiculous Pong running inside the Insiculous 2D scene editor"
+        width="1288"
+        height="885"
+        loading="lazy"
+      />
+    </a>
+    <p class="caption">
+      Insiculous Pong running live inside the scene editor.
+      <span class="caption-hint">Tap to open it full size.</span>
+    </p>
   </section>
 
   <section>
@@ -124,6 +129,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     border: 1px solid var(--border);
     border-radius: 8px;
     margin-top: 0.5rem;
+  }
+
+  /* A 1288px screenshot of a dockable editor is unreadable scaled into a phone, so the image links to itself. */
+  .shot-link {
+    display: block;
+  }
+
+  .shot-link:hover {
+    text-decoration: none;
+  }
+
+  /* Only worth saying where the image is actually too small to read. */
+  .caption-hint {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .caption-hint {
+      display: inline;
+    }
   }
 
   .caption {
