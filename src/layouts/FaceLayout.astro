@@ -2,17 +2,21 @@
 import "../styles/faces.css";
 import bundle from "../data/bundle.json";
 import { withBase } from "../lib/paths.js";
-import { DEFAULT_FAVICON, DEFAULT_THEME, FACES, FACE_IDS, PROFILE_PATH, SITE_NAME, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
+import { DEFAULT_THEME, FACES, FACE_IDS, PROFILE_PATH, STUDIO, STUDIO_NAV, faceNav, facePath, studioPath } from "../lib/faces.js";
 
 // `face` is which of the site's two faces the page belongs to (docs/app.md): "fortknight" or "forkknife" — its menu is
-// Overview, the face's own building page (Spoon Feed / Build), Questionnaire, Assistant — or null on the Profile page.
-// Each face brings its own skin (FACES[face].theme), so the two read as different sites. The switcher sits left of the
-// brand: the Be Insiculous logo back out to the studio site first, then the other face's logo. The profile dropdown and
-// ⚙ Profile only show once a profile is saved on this device.
+// Overview, the face's own building page (Spoon Feed / Build), Questionnaire, Assistant. Each face brings its own skin
+// (FACES[face].theme), so the two read as different sites. The switcher sits left of the brand: the Be Insiculous logo
+// back out to the studio site first, then the other face's logo.
+// `face` is null on the Profile page, which belongs to neither app but to the studio, and wears the studio's skin and
+// chrome instead: the be_insiculous wordmark, STUDIO_NAV, and no emoji switcher (the wordmark and that menu already
+// reach all three of its destinations). The profile dropdown and ⚙ Profile only show once a profile is saved here.
 const { title, face = null } = Astro.props;
 const currentFace = face ? FACES[face] : null;
 const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
-const navItems = currentFace ? faceNav(face).map((item) => ({ ...item, href: facePath(face, item.path) })) : [];
+const navItems = currentFace
+  ? faceNav(face).map((item) => ({ ...item, href: facePath(face, item.path) }))
+  : STUDIO_NAV.map((item) => ({ ...item, href: withBase(item.path) })); // no shortLabel: the studio bar has room
 const profileHref = withBase(PROFILE_PATH);
 const pathname = Astro.url.pathname;
 function isActive(item) {
@@ -20,10 +24,13 @@ function isActive(item) {
   return pathname.startsWith(item.href);
 }
 const profileActive = pathname.startsWith(profileHref);
-const brandLabel = currentFace ? `${currentFace.logo} ${currentFace.label}` : SITE_NAME;
+const brandLabel = currentFace ? `${currentFace.logo} ${currentFace.label}` : STUDIO.label;
 const theme = currentFace ? currentFace.theme : DEFAULT_THEME;
-// Each face gets its own tab icon too — an emoji drawn into an inline SVG, so there is no file to ship.
-const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${currentFace ? currentFace.favicon : DEFAULT_FAVICON}</text></svg>`;
+// Each face gets its own tab icon — an emoji drawn into an inline SVG, so there is no file to ship. The face-less
+// Profile page takes the studio's real favicon instead, the one every beinsiculous.com page uses.
+const favicon = currentFace
+  ? `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${currentFace.favicon}</text></svg>`
+  : withBase("favicon.svg");
 ---
 <!doctype html>
 <html lang="en">
@@ -31,7 +38,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title} · {brandLabel}</title>
-  <link rel="icon" href={favicon} />
+  <link rel="icon" type={currentFace ? undefined : "image/svg+xml"} href={favicon} />
   <link rel="stylesheet" href={withBase("app/shared/themes.css")} />
   <script is:inline define:vars={{ theme }}>
     // The page's face decides its skin; set before first paint so the base palette never shows.
@@ -40,19 +47,25 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 </head>
 <body>
   <header class="site-nav">
-    <nav class="face-switch" aria-label="Switch app">
-      <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
-      {otherFaces.map((other) => (
-        <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
-      ))}
-    </nav>
-    <a class="brand" href={currentFace ? facePath(face) : withBase("")}>
-      {currentFace ? <><span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}</> : SITE_NAME}
-    </a>
+    {currentFace && (
+      <nav class="face-switch" aria-label="Switch app">
+        <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
+        {otherFaces.map((other) => (
+          <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
+        ))}
+      </nav>
+    )}
+    {currentFace ? (
+      <a class="brand" href={facePath(face)}>
+        <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
+      </a>
+    ) : (
+      <a class="brand wordmark" href={studioPath()}>{STUDIO.wordmark}<span class="cursor" aria-hidden="true">▌</span></a>
+    )}
     <nav class="nav-links">
       {navItems.map((item) => (
         <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
-          <span class="nav-full">{item.label}</span><span class="nav-short">{item.shortLabel}</span>
+          <span class="nav-full">{item.label}</span>{item.shortLabel && <span class="nav-short">{item.shortLabel}</span>}
         </a>
       ))}
     </nav>

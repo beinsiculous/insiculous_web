@@ -5,7 +5,6 @@
 // studio pages of beinsiculous.com are the third and use their own layout entirely.
 import { withBase } from "./paths.js";
 
-export const SITE_NAME = "beinsiculous";
 // `build` is the face's own page for adding things by hand — ForkKnife's Spoon Feed (the fortnight menu) and
 // FortKnight's Build (the menu plus the commitments and tasks); the label differs, the place in the menu does not.
 export const FACES = {
@@ -28,11 +27,20 @@ export function facePath(faceId, path = "") {
   return withBase(`${FACES[faceId].home}${path}`);
 }
 export const PROFILE_PATH = "profile/";
-/** The skin and tab icon for pages with no face (the shared Profile page). */
-export const DEFAULT_THEME = FACES.fortknight.theme;
-export const DEFAULT_FAVICON = FACES.fortknight.favicon;
-/** The studio site (beinsiculous.com itself) that the two faces sit inside: its label and its logo (an emoji, like the faces'). */
-export const STUDIO = { label: "Be Insiculous", logo: "💧" };
+/** The skin of a page with no face — the shared Profile page, which belongs to the studio rather than to either
+ *  app and wears its skin (src/styles/studio-skin.css). A third theme id that themes.css knows nothing about, so
+ *  neither face's palette or photograph can reach it. */
+export const DEFAULT_THEME = "studio";
+/** The studio site (beinsiculous.com itself) that the two faces sit inside: its label, its logo (an emoji, like the
+ *  faces') and the wordmark its own pages wear. */
+export const STUDIO = { label: "Be Insiculous", logo: "💧", wordmark: "be_insiculous" };
+/** The Profile page's menu — the studio's, trimmed: Home is the wordmark itself, and Devlog and Engine are studio
+ *  reading rather than profile business. Paths are site paths, not face paths. */
+export const STUDIO_NAV = [
+  { path: "games/", label: "Games" },
+  { path: "fortknight/", label: "FortKnight" },
+  { path: "forkknife/", label: "ForkKnife" },
+];
 /** URL of the studio home. */
 export function studioPath() {
   return withBase("");
