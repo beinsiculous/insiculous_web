@@ -32,7 +32,7 @@ describe the workbook sample schedule, and a person's weights carry the block fo
   "notes": []
 }
 ```
-- `share` — fraction of the `wakingWindow` (baseline: early+midday+late = 8400 min per fortnight; questionnaire profiles: the answered waking window, e.g. 13440). Category shares + `flexibleShare` sum to 1 (`flexibleShare` is the workbook's flexible focus blocks in the baseline; for questionnaire profiles it is not an input, only the rounding remainder).
+- `share` — fraction of the `wakingWindow` (baseline: early+midday+late = 8400 min per fortnight; questionnaire profiles: the answered waking window, e.g. 13440). Category shares + `flexibleShare` sum to 1 (`flexibleShare` is the workbook's flexible focus blocks in the baseline; for questionnaire profiles it is not an input either — it is the part of the waking window the categories did not claim, the fortnight's open time).
 - `preferredBlocks` — blocks ordered by how much of the category's time they carry (a hint for a generator); keys must be focus blocks of this file's `blocks` (baseline: early/midday/late).
 - `blockFocusGrid` — optional; when present it is a fully-resolved answer (a focus per day and focus block) rather than only proportions. Baseline: the workbook's 14 × early/midday/late cells. Questionnaire profiles: the person's own grid (`answers.blockFocusGrid` — a proposal they adopted on `/fortknight/`) or else the applied import document's grid, restricted to the profile's focus blocks (`{}` when neither exists; unmatched block keys are reported in `blockSplit.warnings`), plus `appointmentBlocks` `{dayKey: blockKey}` from the import.
 - `meals` — `{perDay, meals[{name, slots[], needsPrepped, needsCooked, prepMinutes, cookMinutes}]}` (the questionnaire's meals, defaults filled); `mealPlan` — `{items[{id, meal (name slug), dish, days[1–2], notes}]}`, the ForkKnife menu (`docs/meal-plan.md`).
@@ -59,7 +59,8 @@ Both roll up `byCategory`, `byDay`, `byBlock`, `byCategoryAndBlock` and give `sh
 ## How the questionnaire maps onto this
 `docs/questionnaire.md` holds the questions and the mapping table. In short: per-subject
 minutes-per-day ranges (midpoints, peripheral subjects count 0) sum into category raw minutes,
-`wantMore` multiplies, and category shares split the waking window proportionally (no flexible reserve);
+`wantMore` multiplies, and a category's share is those minutes as a fraction of the waking window —
+what nobody claimed stays as `flexibleShare`, and only an over-declared day scales down to fit;
 the answered waking window sets the scope (its complement is the unscheduled block) and the standout categories + fixed activities set
 the profile's block split; sentiment / delegable / essential flags pass through for the generator. The rule lives in
 `fk_core/weights.py` and its JavaScript twin `app/shared/weights-rules.js`; the CLI is

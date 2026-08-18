@@ -4,7 +4,7 @@
 // into the canonical objects the rest of the app consumes (standing appointments, tasks). Pure port
 // of scripts/fk_core/import_document.py — keep both in sync (tests/test_import_document.py).
 import { WEEKDAY_NAMES } from "./fortknight-rules.js";
-import { describeDuration, formatClockTime, parseClockTime, parseDuration } from "./clock.js";
+import { describeDuration, formatClockTime, parseClockTime, parseDuration, roundUpToGrid } from "./clock.js";
 
 export const IMPORT_SCHEMA_VERSIONS = [1, 2];
 export const SOURCE_KINDS = ["text", "photo", "xlsx", "ics", "google-calendar", "other"];
@@ -118,7 +118,7 @@ function readItem(item, categories, { needsStart, allowWhen }) {
   if (!category) return { problem: `unknown category ${JSON.stringify(item.category)}` };
   const record = { title, weekdays, cadence: repeats.cadence, category };
   if (start) record.start = start;
-  record.durationMinutes = durationMinutes;
+  record.durationMinutes = roundUpToGrid(durationMinutes); // an assistant's "37 min" books as 40
   if (allowWhen) record.timeOfDay = timeOfDay ?? (start ? null : "anytime");
   if (typeof item.from === "string" && item.from.trim()) record.from = item.from.trim();
   return { record };

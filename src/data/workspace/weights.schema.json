@@ -144,6 +144,46 @@
             "minimum": 0,
             "maximum": 1440,
             "description": "Current actual minutes per day when goal is true; null otherwise."
+          },
+          "everyday": {
+            "type": "boolean",
+            "description": "Done every day (the default). When false, `cadence` says how often instead."
+          },
+          "daysPerPeriod": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "description": "Days per cadence period the subject happens on; null when everyday."
+          },
+          "cadence": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "fortnight",
+              "section",
+              null
+            ],
+            "description": "How often, when not everyday: `fortnight` counts towards the category's share on daysPerPeriod of the cycle's 14 days; `section` (the person's year-split unit) counts towards nothing and is done in flexible time. Null when everyday."
+          },
+          "specificDaysNote": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "Free text for the person's assistant: which days this actually happens on. Null when they did not say."
+          },
+          "notOftenNote": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 300,
+            "description": "Free text for the person's assistant: what 'not often' means for this subject ('when it breaks'). Null when they did not say."
           }
         },
         "required": [
@@ -157,7 +197,7 @@
       "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "Fraction not covered by category shares. Baseline (workbook) profiles: the flexible focus blocks. Questionnaire profiles: never an input — only the rounding remainder (1 when every subject is peripheral)."
+      "description": "Fraction not covered by category shares. Baseline (workbook) profiles: the flexible focus blocks. Questionnaire profiles: never an input — the part of the waking window the categories did not claim (1 when every subject is peripheral, 0 when the declared minutes fill or exceed the window)."
     },
     "unscheduledBlock": {
       "type": "object",
@@ -413,6 +453,20 @@
                   "string",
                   "null"
                 ]
+              },
+              "needsPrepped": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "This dish's own answer, overriding its meal: false = no prepping needed for this dish (no Prep task), true = as the meal says. Absent or null follows the meal (docs/meal-plan.md)."
+              },
+              "needsCooked": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "This dish's own answer, overriding its meal: false = no cooking needed for this dish (no Cook task), true = as the meal says. Absent or null follows the meal (docs/meal-plan.md)."
               }
             },
             "required": [

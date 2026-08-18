@@ -3,6 +3,17 @@
 
 export const MINUTES_PER_DAY = 24 * 60;
 
+/** Every minutes answer lands on a five-minute mark: a person's unrounded input rounds *up* to the next one
+ *  (a 12-minute walk is booked as 15). The questionnaire's sliders already step by this; typed and imported
+ *  minutes come through here. Mirror of fk_core.timeconv.round_up_to_grid — keep both in sync. */
+export const MINUTE_GRID_MINUTES = 5;
+
+export function roundUpToGrid(minutes, grid = MINUTE_GRID_MINUTES) {
+  const value = Number(minutes);
+  if (!Number.isFinite(value)) return value;
+  return Math.ceil(value / grid) * grid;
+}
+
 export function timeStringToMinutes(timeString) {
   const [hours, minutes] = timeString.split(":").map(Number);
   return hours * 60 + minutes;

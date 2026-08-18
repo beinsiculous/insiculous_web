@@ -16,6 +16,21 @@ export const DAY_KEY_ORDER = [
   "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b",
 ];
 export const CYCLE_LENGTH_DAYS = DAY_KEY_ORDER.length;
+export const SUBJECT_CADENCES = ["fortnight", "section"];
+
+/** What a subject contributes to its category's raw minutes, per day. The slider always means "how long in a
+ *  single day"; the cadence says how many days. Everyday subjects contribute their midpoint; a fortnight subject
+ *  contributes it on `daysPerPeriod` of the cycle's 14 days. A subject on the section cadence, and one marked
+ *  "not often" (peripheral), contribute nothing — they are done in the fortnight's flexible time rather than in
+ *  its rhythm, and it is their absence from the declaration that leaves that time free. Twin of
+ *  fk_core.keys.subject_daily_minutes; lives here so the generator can read it without importing weights-rules. */
+export function subjectDailyMinutes(subjectAnswer) {
+  if (subjectAnswer.peripheral) return 0;
+  const midpoint = (subjectAnswer.minutesPerDay.min + subjectAnswer.minutesPerDay.max) / 2;
+  if (subjectAnswer.everyday ?? true) return midpoint;
+  if (subjectAnswer.cadence === "fortnight") return (midpoint * Number(subjectAnswer.daysPerPeriod || 0)) / CYCLE_LENGTH_DAYS;
+  return 0;
+}
 export const START_RULE_KINDS = ["fixed-date", "nth-weekday", "easter", "solar", "new-moon", "manual"];
 export const SNAP_DIRECTIONS = ["on-or-after", "on-or-before"];
 export const NTH_OCCURRENCES = [1, 2, 3, 4, -1]; // -1 = the last one in the month

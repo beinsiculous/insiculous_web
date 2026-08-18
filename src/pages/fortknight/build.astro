@@ -31,20 +31,20 @@ const options = questionnaire?.options ?? {};
             <tbody id="appointmentEntry"></tbody>
             <tbody id="appointmentPrototype" hidden>
               <tr class="appointment-row">
-              <td><input type="text" data-field="title" placeholder="e.g. Piano lesson" /></td>
+              <td><input type="text" data-field="title" placeholder="e.g. Piano lesson" aria-label="commitment title" /></td>
               <td class="weekday-strip">{options.weekdays.map((weekday) => (
                 <label title={weekday.label}><input type="checkbox" data-field="weekday" value={weekday.id} /> {weekday.label.slice(0, 2)}</label>
               ))}</td>
               <td>
-                <select data-field="cadenceKind">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
+                <select data-field="cadenceKind" aria-label="how often it repeats">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
                 <input type="date" data-field="firstDate" data-needs="firstDate" aria-label="first date it happens" hidden />
                 <select data-field="nth" data-needs="nth" aria-label="which weekday of the month" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
                 <input type="number" data-field="dayOfMonth" data-needs="dayOfMonth" min="1" max="31" value="1" aria-label="day of month" hidden />
                 <input type="date" data-field="date" data-needs="date" aria-label="date" hidden />
               </td>
-              <td><input type="time" data-field="start" value="16:00" step="900" /></td>
-              <td><input type="number" data-field="durationMinutes" min="0" step="15" value="60" /></td>
-              <td><select data-field="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
+              <td><input type="time" data-field="start" value="16:00" step="900" aria-label="start time" /></td>
+              <td><input type="number" data-field="durationMinutes" min="0" step="5" value="60" aria-label="duration in minutes" /></td>
+              <td><select data-field="category" aria-label="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
               <td><button type="button" class="remove-appointment" aria-label="remove commitment">×</button></td>
               </tr>
             </tbody>
@@ -59,20 +59,20 @@ const options = questionnaire?.options ?? {};
             <tbody id="taskEntry"></tbody>
             <tbody id="taskPrototype" hidden>
               <tr class="task-row">
-              <td><input type="text" data-field="title" placeholder="e.g. Take out the bins" /></td>
+              <td><input type="text" data-field="title" placeholder="e.g. Take out the bins" aria-label="task title" /></td>
               <td class="weekday-strip">{options.weekdays.map((weekday) => (
                 <label title={weekday.label}><input type="checkbox" data-field="weekday" value={weekday.id} /> {weekday.label.slice(0, 2)}</label>
               ))}</td>
               <td>
-                <select data-field="cadenceKind">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
+                <select data-field="cadenceKind" aria-label="how often it repeats">{options.appointmentCadences.map((cadence) => <option value={cadence.id} data-needs={cadence.needs}>{cadence.label}</option>)}</select>
                 <input type="date" data-field="firstDate" data-needs="firstDate" aria-label="first date it happens" hidden />
                 <select data-field="nth" data-needs="nth" aria-label="which weekday of the month" hidden>{options.nthChoices.map((choice) => <option value={choice.id}>{choice.label}</option>)}</select>
                 <input type="number" data-field="dayOfMonth" data-needs="dayOfMonth" min="1" max="31" value="1" aria-label="day of month" hidden />
                 <input type="date" data-field="date" data-needs="date" aria-label="date" hidden />
               </td>
-              <td><select data-field="timeOfDay">{options.timesOfDay.map((time) => <option value={time.id}>{time.label}</option>)}</select></td>
-              <td><input type="number" data-field="durationMinutes" min="0" step="5" value="15" /></td>
-              <td><select data-field="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
+              <td><select data-field="timeOfDay" aria-label="time of day">{options.timesOfDay.map((time) => <option value={time.id}>{time.label}</option>)}</select></td>
+              <td><input type="number" data-field="durationMinutes" min="0" step="5" value="15" aria-label="duration in minutes" /></td>
+              <td><select data-field="category" aria-label="category">{categoryRows.map((category) => <option value={category.key}>{category.label}</option>)}</select></td>
               <td><button type="button" class="remove-task" aria-label="remove task">×</button></td>
               </tr>
             </tbody>
@@ -100,7 +100,7 @@ const options = questionnaire?.options ?? {};
   import { activeWeights, answersProblem, defaultAnswers, mealsWithDefaults, pickAnswers, standingAppointmentProblem, taskProblem, userWeightsFromAnswers } from "../../lib/shared/weights-rules.js";
   import { normalizeMealPlan } from "../../lib/shared/meal-plan.js";
   import { describeCadence } from "../../lib/shared/import-document.js";
-  import { describeDuration, formatClockTime, localTodayIsoDate } from "../../lib/shared/clock.js";
+  import { describeDuration, formatClockTime, localTodayIsoDate, roundUpToGrid } from "../../lib/shared/clock.js";
   import { mountMealPlanEditor } from "../../lib/meal-plan-editor.js";
   import { BUILD_ANSWER_KEYS } from "../../lib/answer-keys.js";
   import { promptProfileName } from "../../lib/profile-naming.js";
@@ -171,7 +171,7 @@ const options = questionnaire?.options ?? {};
       title: row.querySelector('[data-field="title"]').value.trim(),
       weekdays: [...row.querySelectorAll('[data-field="weekday"]:checked')].map((box) => box.value),
       cadence: readCadence(row),
-      durationMinutes: Number(row.querySelector('[data-field="durationMinutes"]').value) || 0,
+      durationMinutes: roundUpToGrid(Number(row.querySelector('[data-field="durationMinutes"]').value) || 0),
       category: row.querySelector('[data-field="category"]').value,
     };
   }

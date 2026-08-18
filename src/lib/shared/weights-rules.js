@@ -3,9 +3,9 @@
 // No DOM, no fetch: takes the bundle's `categories` and `questionnaire` (+ `days` for standing
 // appointments) as inputs; anchors come from the answers themselves (applied import + standing
 // appointments), the optional `activities` argument is only an extra-anchors hook.
-import { CYCLE_LENGTH_DAYS, DAY_KEY_ORDER, FLEXIBLE_FOCUS, NEW_MOON_MAX_INDEX, NTH_OCCURRENCES, SNAP_DIRECTIONS, START_RULE_KINDS, WEEKDAY_NAMES, dayKeyForDatePersonFirst, dayKeyFromWeekdayAndVariant, parseIsoDate, resolveDate } from "./fortknight-rules.js";
+import { CYCLE_LENGTH_DAYS, DAY_KEY_ORDER, FLEXIBLE_FOCUS, SUBJECT_CADENCES, subjectDailyMinutes, NEW_MOON_MAX_INDEX, NTH_OCCURRENCES, SNAP_DIRECTIONS, START_RULE_KINDS, WEEKDAY_NAMES, dayKeyForDatePersonFirst, dayKeyFromWeekdayAndVariant, parseIsoDate, resolveDate } from "./fortknight-rules.js";
 import { SOLAR_TERM_ORDER } from "./astronomy.js";
-import { MINUTES_PER_DAY, formatClockRange, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "./clock.js";
+import { MINUTES_PER_DAY, formatClockRange, formatClockTime, localTodayIsoDate, minutesToTimeString, roundUpToGrid, timeStringToMinutes } from "./clock.js";
 import { TIME_OF_DAY_WORDS, normalizeImportDocument } from "./import-document.js";
 import { proposalFromWeights } from "./generator-rules.js";
 import { mealPlanProblem, mealSlug, mergeMealPlan, normalizeMealPlan } from "./meal-plan.js";
@@ -32,7 +32,9 @@ export function defaultAnswers(questionnaire, categories) {
   const subjectTime = {};
   for (const subjectId of Object.keys(categories.subjects)) {
     const slider = questionnaire.subjectSliders[subjectId];
-    subjectTime[subjectId] = { minutesPerDay: { ...slider.default }, peripheral: Boolean(slider.peripheralByDefault), more: false, goal: false };
+    const cadence = slider.cadenceByDefault;
+    subjectTime[subjectId] = { minutesPerDay: { ...slider.default }, peripheral: Boolean(slider.peripheralByDefault), more: false, goal: false, everyday: !cadence,
+      ...(cadence ? { cadence: cadence.cadence, daysPerPeriod: cadence.daysPerPeriod } : {}) };
   }
   const preset = questionnaire.defaultAnswers || {};
   return {
@@ -125,8 +127,8 @@ export function mealsWithDefaults(mealsAnswer, questionnaire) {
       slots: [...(meal.slots || [])],
       needsPrepped: Boolean(meal.needsPrepped ?? preset.needsPrepped ?? false),
       needsCooked: Boolean(meal.needsCooked ?? preset.needsCooked ?? false),
-      prepMinutes: Math.trunc(Number(meal.prepMinutes ?? preset.prepMinutes ?? mealPrep.defaultPrepMinutes)),
-      cookMinutes: Math.trunc(Number(meal.cookMinutes ?? preset.cookMinutes ?? mealPrep.defaultCookMinutes)),
+      prepMinutes: roundUpToGrid(Math.trunc(Number(meal.prepMinutes ?? preset.prepMinutes ?? mealPrep.defaultPrepMinutes))),
+      cookMinutes: roundUpToGrid(Math.trunc(Number(meal.cookMinutes ?? preset.cookMinutes ?? mealPrep.defaultCookMinutes))),
     };
   });
   return { perDay: (mealsAnswer || {}).perDay ?? meals.length, meals };
@@ -207,6 +209,19 @@ export function yearSplitFromSeasons(seasons, scheme = "custom") {
     return section;
   });
   return { scheme, sectionLabel: "season", sections };
+}
+
+export const DAYS_PER_YEAR = 365.25;
+/** The longest a subject note may run — the person is writing for their assistant, not filling a diary. */
+export const SUBJECT_NOTE_MAX_LENGTH = 300;
+
+/** How many days one of the person's year-split sections lasts on average: the year shared evenly between them.
+ *  This is the period a `section` cadence counts against ("2 days per quarter"). Sections' own `durationWeeks`
+ *  are a rough label from their scheme (gregorian-months says 4 weeks for a 30-day month), so the year is
+ *  divided instead — deterministic, and right for schemes whose sections are unequal. */
+export function sectionDaysFromYearSplit(yearSplit) {
+  const sectionCount = (yearSplit?.sections || []).length;
+  return sectionCount ? DAYS_PER_YEAR / sectionCount : DAYS_PER_YEAR;
 }
 
 /** A preset scheme's template as a year split (the read-only presets; presets carry rules only where the marker is exact). */
@@ -327,10 +342,8 @@ export function recurringItemActivities(items, days, resolveDayKey = null, { idP
   return { activities, warnings };
 }
 
-export function subjectMidpointMinutes(subjectAnswer) {
-  if (subjectAnswer.peripheral) return 0;
-  return (subjectAnswer.minutesPerDay.min + subjectAnswer.minutesPerDay.max) / 2;
-}
+// The cadence rule lives in fortknight-rules.js (the generator reads it too); re-exported for existing importers.
+export { SUBJECT_CADENCES, subjectDailyMinutes };
 
 // ---------- waking window and block split ----------
 
@@ -422,7 +435,8 @@ export function chooseCuts(wakingMinutes, focusBlockCount, anchors, blockSplit) 
       if (candidate <= previous || candidate >= wakingMinutes || Math.abs(candidate - ideal) > search) continue;
       const straddles = inScope.filter((anchor) => anchor.startOffset < candidate && candidate < anchor.endOffset).length;
       const edges = inScope.filter((anchor) => candidate === anchor.startOffset || candidate === anchor.endOffset).length;
-      const cost = Math.abs(candidate - ideal) / grid + straddlePenalty * straddles - edgeBonus * edges;
+      // All three terms are minutes, so the grid can be made finer without re-tuning the penalties.
+      const cost = Math.abs(candidate - ideal) + straddlePenalty * straddles - edgeBonus * edges;
       const ranking = [cost, Math.abs(candidate - ideal), candidate];
       if (best === null || rankingLess(ranking, best.ranking)) best = { ranking, candidate };
     }
@@ -532,14 +546,17 @@ export function weightsFromAnswers(answers, categories, questionnaire, { weights
   const rawMinutes = {};
   for (const categoryKey of categoryOrder) {
     const subjectIds = categories.categories[categoryKey].subjects;
-    const total = subjectIds.reduce((sum, subjectId) => sum + subjectMidpointMinutes(subjectTime[subjectId]), 0);
+    const total = subjectIds.reduce((sum, subjectId) => sum + subjectDailyMinutes(subjectTime[subjectId]), 0);
     rawMinutes[categoryKey] = total * (wantMore.has(categoryKey) ? multiplier : 1);
   }
   const grandTotal = Object.values(rawMinutes).reduce((sum, value) => sum + value, 0);
+  // Shares are what was *declared*, as a fraction of the waking window — not a proportional split of it.
+  // A day nobody filled keeps its remainder as flexibleShare; only an over-declared day scales down.
+  const shareDenominator = Math.max(grandTotal, wakingWindowFromAnswer(wakingWindowAnswer).minutesPerDay);
 
   const weightsCategories = {};
   for (const categoryKey of categoryOrder) {
-    const share = grandTotal ? roundHalfUp(rawMinutes[categoryKey] / grandTotal, SHARE_DECIMALS) : 0;
+    const share = shareDenominator ? roundHalfUp(rawMinutes[categoryKey] / shareDenominator, SHARE_DECIMALS) : 0;
     weightsCategories[categoryKey] = {
       share,
       wantMore: wantMore.has(categoryKey),
@@ -568,11 +585,18 @@ export function weightsFromAnswers(answers, categories, questionnaire, { weights
   for (const subjectId of Object.keys(categories.subjects)) {
     const subjectAnswer = subjectTime[subjectId];
     const goal = Boolean(subjectAnswer.goal);
+    const everyday = subjectAnswer.everyday ?? true;
     weightsSubjects[subjectId] = {
       minutesPerDay: { ...subjectAnswer.minutesPerDay },
       peripheral: Boolean(subjectAnswer.peripheral),
       goal,
       currentMinutesPerDay: goal ? (subjectAnswer.currentMinutesPerDay ?? null) : null,
+      everyday: Boolean(everyday),
+      cadence: everyday ? null : (subjectAnswer.cadence ?? null),
+      daysPerPeriod: everyday ? null : (subjectAnswer.daysPerPeriod ?? null),
+      // Free text for the person's assistant: when this actually happens, and what "not often" means here.
+      specificDaysNote: subjectAnswer.specificDaysNote || null,
+      notOftenNote: subjectAnswer.notOftenNote || null,
     };
   }
   const questionnaireRecord = answeredAt
@@ -587,8 +611,8 @@ export function weightsFromAnswers(answers, categories, questionnaire, { weights
     wakingWindow,
     categories: weightsCategories,
     subjects: weightsSubjects,
-    // Not an input: the questionnaire assigns the whole waking window. This is the rounding remainder
-    // (1 when every subject is peripheral) so category shares + flexibleShare still sum to 1.
+    // Not an input: the waking window the categories did not claim — the fortnight's open time (1 when every
+    // subject is peripheral, 0 when the day is over-declared), so shares + flexibleShare = 1.
     flexibleShare: Math.max(0, roundHalfUp(1 - Object.values(weightsCategories).reduce((sum, category) => sum + category.share, 0), SHARE_DECIMALS)),
     unscheduledBlock: unscheduled,
     blocks,
@@ -759,12 +783,41 @@ export function mealNamesProblem(meals) {
 }
 
 /** Whole-answers check before deriving weights: returns a problem string or null. */
+/** Each subject's cadence answer: a known cadence, a day count inside its period, and notes within the limit.
+ *  A problem string or null. The period a `section` cadence counts against is the person's own section length
+ *  (`sectionDaysFromYearSplit`), and a count must leave at least one day out — a subject on every day of its
+ *  period is an everyday subject. */
+export function subjectTimeProblem(answers, questionnaire, categories) {
+  const cadenceIds = (questionnaire.options.subjectCadences || []).map((cadence) => cadence.id);
+  const sectionDays = Math.round(sectionDaysFromYearSplit(answers.yearSplit));
+  for (const [subjectId, subjectAnswer] of Object.entries(answers.subjectTime || {})) {
+    const label = categories.subjects[subjectId]?.label ?? subjectId;
+    for (const [key, note] of [["specificDaysNote", subjectAnswer.specificDaysNote], ["notOftenNote", subjectAnswer.notOftenNote]]) {
+      if (note === undefined || note === null) continue;
+      if (typeof note !== "string") return `${label}: ${key} must be text.`;
+      if (note.length > SUBJECT_NOTE_MAX_LENGTH) return `${label}: keep the note to ${SUBJECT_NOTE_MAX_LENGTH} characters (${note.length} written).`;
+    }
+    if (subjectAnswer.everyday === undefined || subjectAnswer.everyday || subjectAnswer.peripheral) continue;
+    if (!cadenceIds.includes(subjectAnswer.cadence)) {
+      return `${label}: how often is it? One of ${cadenceIds.join(", ")} (got ${JSON.stringify(subjectAnswer.cadence)}).`;
+    }
+    const periodDays = subjectAnswer.cadence === "fortnight" ? CYCLE_LENGTH_DAYS : sectionDays;
+    const days = subjectAnswer.daysPerPeriod;
+    if (!Number.isInteger(days) || days < 1 || days > periodDays - 1) {
+      return `${label}: pick 1–${periodDays - 1} days per ${subjectAnswer.cadence} (got ${JSON.stringify(days)}).`;
+    }
+  }
+  return null;
+}
+
 export function answersProblem(answers, questionnaire, categories) {
   const essentialBounds = questionnaire.essentialCategories || { min: 1, max: 3 };
   const essential = answers.essential || [];
   if (essential.length < essentialBounds.min || essential.length > essentialBounds.max) {
     return `Mark ${essentialBounds.min}–${essentialBounds.max} categories you have to do personally (${essential.length} marked).`;
   }
+  const subjectProblem = subjectTimeProblem(answers, questionnaire, categories);
+  if (subjectProblem) return subjectProblem;
   const weekdayIds = questionnaire.options.weekdays.map((weekday) => weekday.id);
   for (const [index, appointment] of (answers.standingAppointments || []).entries()) {
     const problem = standingAppointmentProblem(appointment, categories.order, weekdayIds);

@@ -4,7 +4,7 @@ import bundle from "../../data/bundle.json";
 import { withBase } from "../../lib/paths.js";
 import { PROFILE_PATH, facePath } from "../../lib/faces.js";
 import QuestionField from "../../components/QuestionField.astro";
-import { formatClockTime, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
+import { MINUTE_GRID_MINUTES, formatClockTime, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
 
 // The questionnaire IS FortKnight's settings. The form is rendered from data/questionnaire.json (via the bundle) —
 // the sections without a `face` (ForkKnife's questionnaire renders the "forkknife" ones); the client script turns
@@ -68,8 +68,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
                         <span class="check-cell"><input type="checkbox" data-role="category-peripheral" aria-label={`${category.label}: not often (all subjects)`} /></span>
                         <span class="range-cell">
                           <span class="dual-range">
-                            <input type="range" data-role="category-min" step="15" aria-label={`${category.label}: minimum minutes per day (all subjects)`} />
-                            <input type="range" data-role="category-max" step="15" aria-label={`${category.label}: maximum minutes per day (all subjects)`} />
+                            <input type="range" data-role="category-min" step={MINUTE_GRID_MINUTES} aria-label={`${category.label}: minimum minutes per day (all subjects)`} />
+                            <input type="range" data-role="category-max" step={MINUTE_GRID_MINUTES} aria-label={`${category.label}: maximum minutes per day (all subjects)`} />
                             <span class="range-label" data-role="category-range-label"></span>
                           </span>
                         </span>
@@ -80,7 +80,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
                         <summary class="muted">{categories.categories[category.key].subjects.length} subjects</summary>
                         <table class="subject-table" data-category={category.key}>
                           <thead>
-                            <tr><th scope="col">Subject</th><th scope="col">Not often</th><th scope="col">Time per day (least–most)</th><th scope="col">More</th><th scope="col">Goal</th></tr>
+                            <tr><th scope="col">Subject</th><th scope="col">Not often</th><th scope="col">Time in a single day (least–most)</th><th scope="col">More</th><th scope="col">Everyday</th><th scope="col">Goal</th></tr>
                           </thead>
                           <tbody>
                             {categories.categories[category.key].subjects.map((subjectId) => {
@@ -92,20 +92,41 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
                                   <td><input type="checkbox" data-role="peripheral" aria-label={`${subject.label}: not often`} /></td>
                                   <td class="range-cell">
                                     <span class="dual-range">
-                                      <input type="range" data-role="min" min={slider.minutesPerDay.min} max={slider.minutesPerDay.max} step={slider.step ?? 15} value={slider.default.min} aria-label={`${subject.label}: minimum minutes per day`} />
-                                      <input type="range" data-role="max" min={slider.minutesPerDay.min} max={slider.minutesPerDay.max} step={slider.step ?? 15} value={slider.default.max} aria-label={`${subject.label}: maximum minutes per day`} />
+                                      <input type="range" data-role="min" min={slider.minutesPerDay.min} max={slider.minutesPerDay.max} step={slider.step ?? MINUTE_GRID_MINUTES} value={slider.default.min} aria-label={`${subject.label}: minimum minutes per day`} />
+                                      <input type="range" data-role="max" min={slider.minutesPerDay.min} max={slider.minutesPerDay.max} step={slider.step ?? MINUTE_GRID_MINUTES} value={slider.default.max} aria-label={`${subject.label}: maximum minutes per day`} />
                                       <span class="range-label" data-role="range-label"></span>
                                     </span>
                                   </td>
                                   <td><input type="checkbox" data-role="more" aria-label={`${subject.label}: allow more`} /></td>
+                                  <td><input type="checkbox" data-role="everyday" checked aria-label={`${subject.label}: I do this every day`} /></td>
                                   <td><input type="checkbox" data-role="goal" aria-label={`${subject.label}: this is a goal, not what I do today`} /></td>
+                                </tr>
+                                <tr class="cadence-row" data-cadence-for={subjectId} hidden>
+                                  <td></td>
+                                  <td></td>
+                                  <td colspan="4" class="cadence-cell">
+                                    <span class="muted">I do this</span>
+                                    {questionnaire.options.subjectCadences.map((cadence) => (
+                                      <label class="cadence-choice"><input type="radio" name={`cadence-${subjectId}`} data-role="cadence" value={cadence.id} /> <span data-role="cadence-label" data-cadence={cadence.id}>{cadence.label}</span></label>
+                                    ))}
+                                    <label class="cadence-days">on <input type="number" data-role="daysPerPeriod" min="1" step="1" value="1" aria-label={`${subject.label}: days per period`} /> <span data-role="days-unit">days of it</span></label>
+                                    <label class="cadence-choice"><input type="checkbox" data-role="specific-days" /> Specific days?</label>
+                                    <textarea data-role="specific-days-note" rows="2" maxlength="300" hidden aria-label={`${subject.label}: which days, for your assistant`}></textarea>
+                                  </td>
+                                </tr>
+                                <tr class="not-often-row" data-not-often-for={subjectId} hidden>
+                                  <td></td>
+                                  <td></td>
+                                  <td colspan="4" class="cadence-cell">
+                                    <textarea data-role="not-often-note" rows="2" maxlength="300" aria-label={`${subject.label}: when does this happen, for your assistant`}></textarea>
+                                  </td>
                                 </tr>
                                 <tr class="goal-row" data-goal-for={subjectId} hidden>
                                   <td></td>
                                   <td></td>
-                                  <td colspan="3" class="range-cell">
+                                  <td colspan="4" class="range-cell">
                                     <span class="muted">Currently</span>
-                                    <input type="range" data-role="current" min="0" max={slider.minutesPerDay.max} step={slider.step ?? 15} value="0" aria-label={`${subject.label}: current minutes per day`} />
+                                    <input type="range" data-role="current" min="0" max={slider.minutesPerDay.max} step={slider.step ?? MINUTE_GRID_MINUTES} value="0" aria-label={`${subject.label}: current minutes per day`} />
                                     <span class="range-label" data-role="current-label"></span>
                                   </td>
                                 </tr>
@@ -116,6 +137,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
                       </details>
                     </div>
                   ))}
+                  <p class="declared-total" data-role="declared-total" aria-live="polite"></p>
                 </div>
               )}
 
@@ -124,7 +146,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
                   <thead><tr><th scope="col">Focus</th><th scope="col">✓</th></tr></thead>
                   <tbody>
                     {categoryRows.map((category) => (
-                      <tr><th scope="row">{category.label}</th><td><input type="checkbox" name={question.id} value={category.key} /></td></tr>
+                      <tr><th scope="row">{category.label}</th><td><input type="checkbox" name={question.id} value={category.key} aria-label={`${question.prompt}: ${category.label}`} /></td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -209,8 +231,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
               {question.kind === "waking-window" && (
                 <div class="waking-window">
                   <span class="dual-range">
-                    <input type="range" name="wakingStart" min="0" max={wakingTrack.minutes} step={questionnaire.wakingWindow.minutes.step ?? 15} value={wakingDefault.start} aria-label="waking window starts" />
-                    <input type="range" name="wakingEnd" min="0" max={wakingTrack.minutes} step={questionnaire.wakingWindow.minutes.step ?? 15} value={wakingDefault.end} aria-label="waking window ends" />
+                    <input type="range" name="wakingStart" min="0" max={wakingTrack.minutes} step={questionnaire.wakingWindow.minutes.step ?? MINUTE_GRID_MINUTES} value={wakingDefault.start} aria-label="waking window starts" />
+                    <input type="range" name="wakingEnd" min="0" max={wakingTrack.minutes} step={questionnaire.wakingWindow.minutes.step ?? MINUTE_GRID_MINUTES} value={wakingDefault.end} aria-label="waking window ends" />
                     <span class="range-label" data-role="waking-label"></span>
                   </span>
                   <div class="waking-ticks muted" aria-hidden="true">{wakingTicks.map((tick) => <span style={`left: ${tick.percent}%`}>{tick.label}</span>)}</div>
@@ -245,7 +267,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 </FaceLayout>
 
 <script>
-  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, formatClockRange, personDayKeyResolver, slugifyId, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
+  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, formatClockRange, personDayKeyResolver, sectionDaysFromYearSplit, slugifyId, subjectDailyMinutes, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
   import { NOT_FORTKNIGHT_QUESTIONNAIRE_KEYS } from "../../lib/answer-keys.js";
   import { loadSettings, profileIds, renameProfile, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
   import { renderImportReview } from "../../lib/shared/import-review.js";
@@ -253,7 +275,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
   import { checkedValues as checkedValuesIn, setChecked as setCheckedIn } from "../../lib/question-fields.js";
   import { MINUTES_PER_DAY, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
   import { downloadText } from "../../lib/shared/download.js";
-  import { WEEKDAY_NAMES, formatIsoDate, startDateForRule } from "../../lib/shared/fortknight-rules.js";
+  import { CYCLE_LENGTH_DAYS, WEEKDAY_NAMES, formatIsoDate, startDateForRule } from "../../lib/shared/fortknight-rules.js";
   import { withBase } from "../../lib/paths.js";
 
   const form = document.getElementById("questionnaireForm");
@@ -318,18 +340,119 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     maxInput.max = ceiling;
     orderThumbs(minInput, maxInput, movedInput);
     paintDualRange(minInput, maxInput, movedInput);
-    row.classList.toggle("peripheral", row.querySelector('[data-role="peripheral"]').checked);
+    const peripheral = row.querySelector('[data-role="peripheral"]').checked;
+    row.classList.toggle("peripheral", peripheral);
     row.querySelector('[data-role="range-label"]').textContent = `${formatMinutes(Number(minInput.value))} – ${formatMinutes(Number(maxInput.value))}`;
     const goalRow = goalRowFor(row);
     const currentInput = goalRow.querySelector('[data-role="current"]');
     goalRow.hidden = !row.querySelector('[data-role="goal"]').checked;
     currentInput.max = ceiling;
     goalRow.querySelector('[data-role="current-label"]').textContent = `${formatMinutes(Number(currentInput.value))} today`;
+    updateCadenceRows(row, peripheral);
+  }
+
+  // ----- cadence (Focus 1): everyday, or how often instead (docs/questionnaire.md -> Cadence) -----
+  /** "Not often" outranks the cadence: it is the answer for anything rarer than a section. */
+  function updateCadenceRows(row, peripheral = row.querySelector('[data-role="peripheral"]').checked) {
+    const everydayInput = row.querySelector('[data-role="everyday"]');
+    const cadenceRow = subRowFor(row, "cadence");
+    const notOftenRow = subRowFor(row, "not-often");
+    everydayInput.disabled = peripheral;
+    cadenceRow.hidden = peripheral || everydayInput.checked;
+    notOftenRow.hidden = !peripheral;
+    const cadence = cadenceRow.querySelector('[data-role="cadence"]:checked')?.value ?? null;
+    const daysInput = cadenceRow.querySelector('[data-role="daysPerPeriod"]');
+    const periodDays = cadence === "section" ? Math.round(sectionDaysFromYearSplit(readYearSplit())) : CYCLE_LENGTH_DAYS;
+    daysInput.max = Math.max(1, periodDays - 1);
+    if (Number(daysInput.value) > Number(daysInput.max)) daysInput.value = daysInput.max;
+    cadenceRow.querySelector('[data-role="days-unit"]').textContent = `of its ${periodDays} days`;
+    const noteInput = cadenceRow.querySelector('[data-role="specific-days-note"]');
+    noteInput.hidden = !cadenceRow.querySelector('[data-role="specific-days"]').checked;
+    for (const label of cadenceRow.querySelectorAll('[data-role="cadence-label"]')) {
+      if (label.dataset.cadence === "section") label.textContent = `every ${sectionLabelText()}`;
+    }
+    paintPlaceholder(noteInput, cadence === "section" ? "section" : "fortnight");
+    paintPlaceholder(notOftenRow.querySelector('[data-role="not-often-note"]'), "notOften");
+  }
+
+  /** What this row declares per day, by the same rule the weights use (fortnight rows count only the days they
+   *  happen on; section and "not often" rows count nothing). */
+  function rowDailyMinutes(row) {
+    const cadenceRow = subRowFor(row, "cadence");
+    return subjectDailyMinutes({
+      minutesPerDay: { min: Number(row.querySelector('[data-role="min"]').value), max: Number(row.querySelector('[data-role="max"]').value) },
+      peripheral: row.querySelector('[data-role="peripheral"]').checked,
+      everyday: row.querySelector('[data-role="everyday"]').checked,
+      cadence: cadenceRow.querySelector('[data-role="cadence"]:checked')?.value ?? null,
+      daysPerPeriod: Number(cadenceRow.querySelector('[data-role="daysPerPeriod"]').value) || 0,
+    });
+  }
+
+  /** The day as declared against the day there is. Shares are what was declared (docs/weights.md rule 3), so
+   *  what nobody claims stays open — this is the only place the person can see that trade before saving. */
+  function updateDeclaredTotal() {
+    const readout = form.querySelector('[data-role="declared-total"]');
+    if (!readout) return;
+    const declared = subjectRows().reduce((total, row) => total + rowDailyMinutes(row), 0);
+    const waking = Number(form.wakingEnd.value) - Number(form.wakingStart.value);
+    const over = declared - waking;
+    readout.classList.toggle("over", over > 0);
+    readout.textContent = over > 0
+      ? `You have asked for ${formatMinutes(Math.round(declared))} of a ${formatMinutes(waking)} day — ${formatMinutes(Math.round(over))} more than there is, so every category is scaled down to fit. Move what you do not do daily off "everyday".`
+      : `You have asked for ${formatMinutes(Math.round(declared))} of a ${formatMinutes(waking)} day — ${formatMinutes(Math.round(waking - declared))} stays flexible.`;
+  }
+
+  function subRowFor(row, kind) {
+    return form.querySelector(`tr[data-${kind}-for="${row.dataset.subject}"]`);
   }
 
   function goalRowFor(row) {
     return form.querySelector(`tr[data-goal-for="${row.dataset.subject}"]`);
   }
+
+  /** The year split as the editor currently holds it — only its section count matters for a cadence period. */
+  function readYearSplit() {
+    return { sections: readSections() };
+  }
+
+  /** The person's word for a section of their year ("quarter", "term", "moon"), from the year-split editor. */
+  function sectionLabelText() {
+    return form.sectionLabel?.value.trim() || "season";
+  }
+
+  // Placeholders rotate so the box shows what an answer looks like; clicking in clears them for good.
+  const NOTE_PLACEHOLDERS = {
+    fortnight: ["Every Wednesday", "On days we eat out", "Every other weekend"],
+    section: ["snow, rain, heat or gloom of night", "The first Tuesday of every Month", "The last day of every SECTION"],
+    notOften: ["Friday the 13th", "When it breaks", "Everyday for a week after christmas"],
+  };
+  let placeholderIndex = 0;
+  const cyclingNotes = new Set();
+
+  function paintPlaceholder(noteInput, kind) {
+    if (noteInput.dataset.placeholderCleared === "yes") return;
+    noteInput.dataset.placeholderKind = kind;
+    cyclingNotes.add(noteInput);
+    const options = NOTE_PLACEHOLDERS[kind];
+    noteInput.placeholder = options[placeholderIndex % options.length].replace("SECTION", sectionLabelText());
+  }
+
+  /** A saved note fills the box and retires its placeholder; an empty one keeps cycling. */
+  function setNoteValue(noteInput, value) {
+    noteInput.value = value ?? "";
+    if (noteInput.value) clearPlaceholder(noteInput);
+  }
+
+  function clearPlaceholder(noteInput) {
+    noteInput.dataset.placeholderCleared = "yes";
+    noteInput.placeholder = "";
+    cyclingNotes.delete(noteInput);
+  }
+
+  setInterval(() => {
+    placeholderIndex += 1;
+    for (const noteInput of cyclingNotes) paintPlaceholder(noteInput, noteInput.dataset.placeholderKind);
+  }, 4000);
 
   // ----- category row <-> subject rows (UI only; subjects stay the source of truth) -----
   function categoryBlocks() {
@@ -340,8 +463,10 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     return [...block.querySelectorAll("tr[data-subject]")];
   }
 
+  /** The rows the category slider adds up and redistributes over: the everyday ones. A subject on a cadence
+   *  is not part of the category's daily rhythm (its scaled contribution shows in the day's total below). */
   function activeRows(block) {
-    return blockRows(block).filter((row) => !row.querySelector('[data-role="peripheral"]').checked);
+    return blockRows(block).filter((row) => !row.querySelector('[data-role="peripheral"]').checked && row.querySelector('[data-role="everyday"]').checked);
   }
 
   function setTriState(checkbox, rows, role) {
@@ -405,7 +530,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       entry.next = Math.min(entry.high, Math.max(entry.low, snapped));
     }
     let remainder = target - entries.reduce((total, entry) => total + entry.next, 0);
-    for (let guard = 0; guard < 200 && Math.abs(remainder) >= 15; guard += 1) {
+    for (let guard = 0; guard < 200 && Math.abs(remainder) >= MINUTE_GRID_MINUTES; guard += 1) {
       const direction = remainder > 0 ? 1 : -1;
       const candidates = entries.filter((entry) => (direction > 0 ? entry.next + entry.step <= entry.high : entry.next - entry.step >= entry.low));
       if (!candidates.length) break;
@@ -713,11 +838,24 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     const subjectTime = {};
     for (const row of subjectRows()) {
       const goal = row.querySelector('[data-role="goal"]').checked;
+      const peripheral = row.querySelector('[data-role="peripheral"]').checked;
+      const everyday = row.querySelector('[data-role="everyday"]').checked;
+      const cadenceRow = subRowFor(row, "cadence");
+      const specificDaysNote = cadenceRow.querySelector('[data-role="specific-days-note"]').value.trim();
+      const notOftenNote = subRowFor(row, "not-often").querySelector('[data-role="not-often-note"]').value.trim();
       subjectTime[row.dataset.subject] = {
         minutesPerDay: { min: Number(row.querySelector('[data-role="min"]').value), max: Number(row.querySelector('[data-role="max"]').value) },
-        peripheral: row.querySelector('[data-role="peripheral"]').checked,
+        peripheral,
         more: row.querySelector('[data-role="more"]').checked,
         goal,
+        everyday,
+        // Only what was answered: a cadence when the subject is not everyday, notes when they wrote one.
+        ...(everyday || peripheral ? {} : {
+          cadence: cadenceRow.querySelector('[data-role="cadence"]:checked')?.value ?? null,
+          daysPerPeriod: Number(cadenceRow.querySelector('[data-role="daysPerPeriod"]').value) || null,
+        }),
+        ...(!everyday && !peripheral && cadenceRow.querySelector('[data-role="specific-days"]').checked && specificDaysNote ? { specificDaysNote } : {}),
+        ...(peripheral && notOftenNote ? { notOftenNote } : {}),
         ...(goal ? { currentMinutesPerDay: Number(goalRowFor(row).querySelector('[data-role="current"]').value) } : {}),
       };
     }
@@ -761,6 +899,14 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       row.querySelector('[data-role="peripheral"]').checked = Boolean(subjectAnswer.peripheral);
       row.querySelector('[data-role="goal"]').checked = Boolean(subjectAnswer.goal);
       goalRowFor(row).querySelector('[data-role="current"]').value = subjectAnswer.currentMinutesPerDay ?? 0;
+      // Cadence: answers saved before it existed have no `everyday` key and are everyday (docs/questionnaire.md).
+      row.querySelector('[data-role="everyday"]').checked = subjectAnswer.everyday ?? true;
+      const cadenceRow = subRowFor(row, "cadence");
+      for (const choice of cadenceRow.querySelectorAll('[data-role="cadence"]')) choice.checked = choice.value === subjectAnswer.cadence;
+      cadenceRow.querySelector('[data-role="daysPerPeriod"]').value = subjectAnswer.daysPerPeriod ?? 1;
+      cadenceRow.querySelector('[data-role="specific-days"]').checked = Boolean(subjectAnswer.specificDaysNote);
+      setNoteValue(cadenceRow.querySelector('[data-role="specific-days-note"]'), subjectAnswer.specificDaysNote);
+      setNoteValue(subRowFor(row, "not-often").querySelector('[data-role="not-often-note"]'), subjectAnswer.notOftenNote);
       updateSubjectRow(row); // apply the ceiling before setting values
       row.querySelector('[data-role="min"]').value = subjectAnswer.minutesPerDay.min;
       row.querySelector('[data-role="max"]').value = subjectAnswer.minutesPerDay.max;
@@ -849,6 +995,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     renderProfileBar();
     const savedAnswers = activeWeights(settings)?.questionnaire?.answers;
     populate(savedAnswers || defaultAnswers(bundle.questionnaire, bundle.categories));
+    updateDeclaredTotal();
     renderPreview();
     dirty = false;
     status.textContent = savedAnswers ? `Loaded the saved answers of profile ${settings.activeWeightsId}.` : `Profile ${settings.activeWeightsId} is new — answer and Save to keep it.`;
@@ -870,6 +1017,12 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       for (const row of blockRows(block)) {
         row.addEventListener("input", (event) => { updateSubjectRow(row, event.target); syncCategoryFromSubjects(block); });
         goalRowFor(row).addEventListener("input", () => updateSubjectRow(row));
+        for (const kind of ["cadence", "not-often"]) {
+          const subRow = subRowFor(row, kind);
+          subRow.addEventListener("input", () => { updateSubjectRow(row); syncCategoryFromSubjects(block); });
+          subRow.addEventListener("change", () => { updateSubjectRow(row); syncCategoryFromSubjects(block); });
+          for (const noteInput of subRow.querySelectorAll("textarea")) noteInput.addEventListener("focus", () => clearPlaceholder(noteInput));
+        }
       }
       block.querySelector('[data-role="category-min"]').addEventListener("input", () => applyCategoryRange(block, "min"));
       block.querySelector('[data-role="category-max"]').addEventListener("input", () => applyCategoryRange(block, "max"));
@@ -900,6 +1053,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     });
     form.addEventListener("change", () => { dirty = true; }); // radios/checkboxes/selects; row add/remove/move dispatch "input"
     for (const thumb of [form.wakingStart, form.wakingEnd]) thumb?.addEventListener("input", () => updateWakingWindow(thumb));
+    form.addEventListener("input", updateDeclaredTotal);
+    form.addEventListener("change", updateDeclaredTotal);
     form.addEventListener("input", () => {
       dirty = true;
       if (bundle) renderPreview();

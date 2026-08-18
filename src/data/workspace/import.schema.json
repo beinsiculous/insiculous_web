@@ -367,6 +367,20 @@
                   "string",
                   "null"
                 ]
+              },
+              "needsPrepped": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "This dish's own answer, overriding its meal: false = no prepping needed for this dish (no Prep task), true = as the meal says. Absent or null follows the meal (docs/meal-plan.md)."
+              },
+              "needsCooked": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "This dish's own answer, overriding its meal: false = no cooking needed for this dish (no Cook task), true = as the meal says. Absent or null follows the meal (docs/meal-plan.md)."
               }
             },
             "required": [
