@@ -23,7 +23,8 @@ npm run dev   # dev server at http://localhost:4321
 | `npm run build`   | Build to `dist/` + postbuild checks (see below)               |
 | `npm run preview` | Serve the production build locally                            |
 | `npm run check`   | Type-check `.astro` files and content schemas                 |
-| `npm run verify`  | `check` + `build` — run this before pushing; CI runs the same |
+| `npm run a11y`    | Accessibility audit of every built page (axe-core; see below) |
+| `npm run verify`  | `check` + `build` + `a11y` — run before pushing; CI gates deploys on the same |
 | `npm run deploy`  | `verify`, then `wrangler deploy` (manual release; see below)  |
 
 ## Content
@@ -74,6 +75,45 @@ Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
 If a game ever needs threads/SharedArrayBuffer, uncomment the COOP/COEP block
 in `public/_headers`.
 
+**Playable-game accessibility requirements** (part of the convention): keyboard controls
+listed next to the embed, remappable keys, a pause, and no timing-only inputs. The canvas
+itself ships with an accessible name, focusability and fallback text — the marked-up example
+in `src/components/GameEmbed.astro` is the baseline to copy.
+
+## Accessibility
+
+Target: **WCAG 2.2 AA** (statement for visitors: `/accessibility/`). The principles, then
+the machinery:
+
+- **No separate "blind mode".** One codebase, properly semantic — landmarks, one `<h1>` per
+  page, ordered headings, labelled controls, alt text — so screen readers work natively. A
+  parallel accessible site would rot.
+- **Text size & contrast**: the `Aa` header control (both layouts) scales the root font
+  (87.5%–125%) and toggles a high-contrast palette; persisted in `localStorage` under
+  `beinsiculous.a11y` and applied before first paint by
+  `src/components/AccessibilityBootScript.astro`. All CSS is `rem`/`clamp`-based so large
+  text reflows; breakpoints that must track the reader's font size are in `rem` (see the
+  40rem/24rem blocks in `src/styles/faces.css`).
+- **Face themes are synced**: `public/app/shared/themes.css` and `src/lib/shared/*` are
+  wholesale-copied from the FortKnight repo by `scripts/sync-fortknight.mjs` — never edit
+  them here; accessibility overrides for the faces live in `src/styles/faces.css` (the
+  high-contrast block there out-specifies the synced skin on purpose).
+
+Gates that keep it true (a regression blocks the deploy, like a broken build):
+
+- `scripts/postbuild-check.mjs` (every build): `<html lang>`, exactly one `<h1>`, `alt` on
+  every `<img>`, no positive `tabindex`, no duplicate ids.
+- `scripts/a11y-check.mjs` (`npm run verify`, and CI between Build and Deploy): serves
+  `dist/`, runs axe-core (wcag2a/2aa/22aa) on **every** route, exits 1 on any violation.
+  `A11Y_ONLY=<substring>` filters routes while iterating.
+- `scripts/screenshot-pages.mjs` with `LARGE_TEXT=1`: extra pass proving no page scrolls
+  sideways at 125% text on a phone.
+
+axe finds about half of real-world issues. For changes to layouts or interactive
+components, also do the manual pass: keyboard-only walkthrough (Tab/Shift-Tab, Enter,
+Escape), one screen-reader run (VoiceOver/NVDA) on the changed pages, and 200% browser
+zoom at 320px. The PR template lists this.
+
 ## Deploying to Cloudflare (Workers static assets)
 
 `wrangler.toml` declares a static-assets Worker serving `dist/` at
@@ -82,9 +122,9 @@ in `public/_headers`.
 
 **Production deploys happen in GitHub Actions, on every push to `main`**
 (`.github/workflows/deploy.yml`): install → `npm run check` → `npm run build`
-→ `npx wrangler deploy` → a request to the live domain to confirm it serves.
-The deploy step only runs if the check and the build pass, so a broken build
-cannot reach the site. The workflow can also be run by hand from the Actions
+→ `npm run a11y` → `npx wrangler deploy` → a request to the live domain to confirm it serves.
+The deploy step only runs if the checks pass, so a broken build — or an accessibility
+regression — cannot reach the site. The workflow can also be run by hand from the Actions
 tab (`workflow_dispatch`) to redeploy the current `main`.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):

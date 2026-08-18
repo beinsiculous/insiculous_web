@@ -10,7 +10,7 @@ const { face } = Astro.props;
   <h3><span class="step-number">2</span> Paste it here and Apply</h3>
   <p class="muted">Paste (or upload) the JSON your assistant handed back. It can be an import file (your commitments and tasks, readable — check the list it shows below), a meal-plan document (your fortnight menu, shown on <a href={facePath("forkknife")}>ForkKnife</a>), a weights file (the app derives the weights from the answers in it), or a settings file. Any of them can be applied on either app's Assistant page, because the profile is shared.</p>
   <div class="paste-box">
-    <textarea id="assistantJson" rows="6" placeholder={face === "forkknife"
+    <textarea id="assistantJson" rows="6" aria-label="JSON from your assistant" placeholder={face === "forkknife"
       ? '{"schemaVersion": 1, "kind": "meal-plan", "source": {"kind": "assistant", "description": "Autumn menu"}, "items": [{"meal": "Dinner", "dish": "Lentil soup", "days": ["Sunday A", "Wednesday B"]}]}'
       : '{"schemaVersion": 2, "source": {"kind": "xlsx"}, "commitments": [{"title": "Piano lesson", "repeats": "every week", "weekdays": ["friday"], "start": "2:00 PM", "lasts": "1 h", "category": "spirituality-development"}], "tasks": [], "skipped": [], "review": []}'}></textarea>
   </div>
@@ -20,7 +20,7 @@ const { face } = Astro.props;
     <a href={facePath(face, FACES[face].build.path)}>Open {FACES[face].build.label} →</a>
     {face === "forkknife" && <a href={facePath("forkknife")}>Open the Overview →</a>}
   </div>
-  <p class="muted" id="applyStatus"></p>
+  <p class="muted" id="applyStatus" role="status" aria-live="polite"></p>
   <div class="apply-outcome" id="applyOutcome" role="status" aria-live="polite" hidden>
     <div class="apply-outcome-badge apply-outcome-check" id="applyOutcomeCheck" aria-hidden="true">
       <svg viewBox="0 0 24 24" width="88" height="88" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>

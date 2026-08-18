@@ -1,6 +1,8 @@
 ---
 import "../styles/faces.css";
 import ProfileSwitcher from "../components/ProfileSwitcher.astro";
+import AccessibilityBootScript from "../components/AccessibilityBootScript.astro";
+import AccessibilityControls from "../components/AccessibilityControls.astro";
 import bundle from "../data/bundle.json";
 import { withBase } from "../lib/paths.js";
 import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
@@ -40,8 +42,10 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
     // The page's face decides its skin; set before first paint so the base palette never shows.
     document.documentElement.dataset.theme = theme;
   </script>
+  <AccessibilityBootScript />
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
     <nav class="face-switch" aria-label="Switch app">
       <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
@@ -59,15 +63,16 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         </a>
       ))}
     </nav>
+    <AccessibilityControls />
     <ProfileSwitcher questionnaireHref={facePath(face, "questionnaire/")}>
       <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
     </ProfileSwitcher>
   </header>
-  <main>
+  <main id="main" tabindex="-1">
     <slot />
   </main>
   <footer class="site-footer muted">
-    Times shown in {bundle.meta.timezone}
+    Times shown in {bundle.meta.timezone} · <a href={withBase("accessibility/")}>Accessibility</a>
   </footer>
   <script define:vars={{ buildHash: bundle.buildInfo.buildHash, timezone: bundle.meta.timezone }}>
     console.log(`beinsiculous bundle ${buildHash} · ${timezone}`);

@@ -34,7 +34,7 @@ const mealCounts = Array.from({ length: questionnaire.mealsPerDay.max - question
   )}
 
   {question.kind === "text" && (
-    <textarea name={question.id} rows="4" placeholder={question.placeholder ?? ""}></textarea>
+    <textarea name={question.id} rows="4" placeholder={question.placeholder ?? ""} aria-label={question.prompt}></textarea>
   )}
 
   {question.kind === "meals" && (

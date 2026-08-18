@@ -26,6 +26,24 @@
   --max-width: 68rem;
 }
 
+/* High-contrast variant (the header's Aa control sets data-contrast on <html>). Pure black ground,
+   white text, brighter accent and borders — every combination stays well above 7:1. */
+:root[data-contrast='high'] {
+  --bg: #000000;
+  --surface: #000000;
+  --surface-raised: #101410;
+  --border: #6b7f70;
+  --border-bright: #9db5a3;
+
+  --accent: #7dffab;
+  --accent-dim: #4dfb8b;
+  --accent-glow: rgba(125, 255, 171, 0.18);
+
+  --text: #f2f7f4;
+  --text-bright: #ffffff;
+  --text-dim: #b6c4ba;
+}
+
 /* ------------------------------------------------------------------ */
 /* reset + base                                                        */
 /* ------------------------------------------------------------------ */
@@ -97,6 +115,23 @@ a:hover {
   text-underline-offset: 3px;
 }
 
+/* Links inside prose must be distinguishable without relying on color (WCAG 1.4.1): underline
+   them. Chrome around the prose — nav, cards, buttons-that-are-links — keeps the plain look. */
+p a,
+li a,
+td a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Keyboard focus must be obvious everywhere. The browser default outline was the only indicator
+   before, and it vanished against this palette. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
@@ -134,9 +169,39 @@ hr {
   color: var(--bg);
 }
 
+/* Motion is decorative on this site; switch it all off for users who ask for that at OS level. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* layout helpers                                                      */
 /* ------------------------------------------------------------------ */
+
+/* First focusable element on the page; invisible until focused, then drops over the header. */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 6px 6px;
+}
+
+.skip-link:focus {
+  top: 0;
+}
 
 .container {
   max-width: var(--max-width);

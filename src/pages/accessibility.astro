@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Accessibility — Be Insiculous"
+  description="Accessibility statement for beinsiculous.com: what this site does to work for everyone, its known limits, and how to report a barrier."
+>
+  <h1>Accessibility</h1>
+
+  <p>
+    This site aims for <strong>WCAG 2.2 level AA</strong>. It is built so the tools you already
+    have — screen readers, browser zoom, OS display settings, switch devices — work with it
+    directly, rather than offering a separate "accessible mode" that would lag behind the main
+    site.
+  </p>
+
+  <h2>What this site does</h2>
+  <ul>
+    <li>Semantic structure throughout: landmarks, one <code>&lt;h1&gt;</code> per page, ordered headings, labelled form fields.</li>
+    <li>Full keyboard access, with a visible focus indicator and a "Skip to content" link at the top of every page.</li>
+    <li>Text size and contrast controls in the header (the <strong>Aa</strong> button): text up to 125% and a high-contrast palette. Your choice is remembered on this device. The layout is built from relative units, so large text reflows instead of breaking — including on a phone.</li>
+    <li>Respects your system settings: reduced motion disables animations; the site also works with your browser's own zoom and font settings.</li>
+    <li>Text is real text (not images of text), links in paragraphs are underlined, and nothing meaningful is conveyed by color alone.</li>
+  </ul>
+
+  <h2>Known limits</h2>
+  <ul>
+    <li>The games themselves will run on an HTML <code>&lt;canvas&gt;</code>, which is inherently visual. When the browser builds ship, each one will document its keyboard controls and offer remappable keys and pause, but they will not be screen-reader playable.</li>
+    <li>The FortKnight and ForkKnife planners sync some shared code from a separate project; accessibility fixes there are applied on this site's side where possible.</li>
+  </ul>
+
+  <h2>How it stays this way</h2>
+  <p>
+    Every change to the site is checked before it can go live: an automated
+    <a href="https://www.deque.com/axe/">axe-core</a> audit of every page (WCAG 2.0/2.2 A and AA),
+    static HTML checks in the build, and a manual keyboard / zoom review for layout changes. A
+    regression blocks the deploy.
+  </p>
+
+  <h2>Report a barrier</h2>
+  <p>
+    If something on this site doesn't work for you, that's a bug — please report it via the
+    <a href="https://github.com/milyramic/insiculous_web/issues">issue tracker</a> and it will be
+    treated as a defect, not a feature request.
+  </p>
+</BaseLayout>
