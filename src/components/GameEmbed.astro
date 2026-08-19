@@ -113,7 +113,10 @@ const { src, title, width = 800, height = 600 } = Astro.props;
     padding: 1rem;
   }
 
-  .game-embed.playable canvas {
+  /* :global — the engine REPLACES the placeholder canvas with winit's own
+     element, which lacks Astro's scoping attribute; a scoped rule would die
+     at that swap (the launch "uncentered canvas" bug). */
+  .game-embed.playable :global(canvas) {
     display: block;
     margin: 0 auto;
     max-width: 100%;
