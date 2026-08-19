@@ -82,7 +82,15 @@ const { src, title, width = 800, height = 600 } = Astro.props;
     } else {
       if (status) status.textContent = 'Loading game…';
       try {
-        const init = (await import(/* @vite-ignore */ src)).default;
+        // The Function indirection keeps this import NATIVE in every mode.
+        // A bare import() breaks under `astro dev`: esbuild strips the
+        // @vite-ignore pragma, Vite's analyzer then rewrites the request
+        // (?import) and 500s it — public/ files may not be imported through
+        // the transform pipeline. Built output never had the problem.
+        const dynamicImport = new Function('u', 'return import(u)') as (
+          u: string
+        ) => Promise<{ default: () => Promise<unknown> }>;
+        const init = (await dynamicImport(src)).default;
         await init();
         // The engine takes over from here: it swaps its canvas in, clears
         // the status line, and focuses the game.
@@ -113,7 +121,10 @@ const { src, title, width = 800, height = 600 } = Astro.props;
     padding: 1rem;
   }
 
-  .game-embed.playable canvas {
+  /* :global — the engine REPLACES the placeholder canvas with winit's own
+     element, which lacks Astro's scoping attribute; a scoped rule would die
+     at that swap (the launch "uncentered canvas" bug). */
+  .game-embed.playable :global(canvas) {
     display: block;
     margin: 0 auto;
     max-width: 100%;

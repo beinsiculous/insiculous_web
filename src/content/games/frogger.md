@@ -1,7 +1,10 @@
 ---
 title: 'Insiculous Frogger'
 blurb: 'Five lanes of traffic, five of water, diving turtles — and a crocodile in the home row.'
-status: 'alpha'
+status: 'playable'
+wasm: '/games/frogger/v1/game.js'
+width: 720
+height: 768
 screenshots: []
 order: 6
 ---
@@ -16,5 +19,6 @@ Game 6 of the series and the first built on the engine's tilemap component
 — the entire board is a single tilemap entity. Two-frog co-op, localized in
 English and Pirate, chaos modes included.
 
-Built on Insiculous 2D. Desktop build (Vulkan / Metal / DX12) — a browser
-version is planned once the engine's web export lands.
+Built on Insiculous 2D. Playable right here in the browser (WebGPU —
+Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
+(Vulkan / Metal / DX12) run the same code natively.

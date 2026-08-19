@@ -1,7 +1,8 @@
 ---
 title: 'Insiculous Invaders'
 blurb: 'Space Invaders with destructible barriers, UFO bonus runs, and true two-cannon co-op.'
-status: 'alpha'
+status: 'playable'
+wasm: '/games/invaders/v1/game.js'
 screenshots: []
 order: 3
 ---
@@ -14,5 +15,6 @@ Co-op is the real draw: two cannons on screen with independent lives and
 scores, defending the same barriers against the same descending wave.
 Fifteen achievements, chaos modes included.
 
-Built on Insiculous 2D. Desktop build (Vulkan / Metal / DX12) — a browser
-version is planned once the engine's web export lands.
+Built on Insiculous 2D. Playable right here in the browser (WebGPU —
+Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
+(Vulkan / Metal / DX12) run the same code natively.

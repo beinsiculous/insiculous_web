@@ -1,7 +1,8 @@
 ---
 title: 'Insiculous Asteroids'
 blurb: 'Vector-wireframe Asteroids with splitting rocks, i-frames, and sharpshooter streaks.'
-status: 'alpha'
+status: 'playable'
+wasm: '/games/asteroids/v1/game.js'
 screenshots: []
 order: 5
 ---
@@ -14,5 +15,6 @@ reward not missing.
 Endless by design: the run only ends when the ships do. Two-player co-op
 shares a single rock field. Fifteen achievements, chaos modes included.
 
-Built on Insiculous 2D. Desktop build (Vulkan / Metal / DX12) — a browser
-version is planned once the engine's web export lands.
+Built on Insiculous 2D. Playable right here in the browser (WebGPU —
+Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
+(Vulkan / Metal / DX12) run the same code natively.
