@@ -26,7 +26,12 @@ jobs:
   deploy:
     name: Verify and deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 30, not 15: the accessibility step's `playwright install --with-deps` apt-installs fonts, and a
+    # slow Ubuntu mirror can stretch that from ~1 min to ~15 (2026-08-19: 9m25s for a single 5.6 MB
+    # font package, which killed a deploy at the old limit while wrangler was still queued behind it).
+    # The durable fix is to stop apt-installing on every run — a Playwright container image, or
+    # dropping --with-deps — but that changes what the gate runs on, so it is its own change.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
 
