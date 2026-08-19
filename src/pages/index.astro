@@ -59,25 +59,5 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     flex-wrap: wrap;
   }
 
-  .button {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    padding: 0.6rem 1.1rem;
-    border-radius: 6px;
-    background: var(--accent);
-    color: var(--bg);
-    font-weight: 700;
-  }
-
-  .button:hover {
-    text-decoration: none;
-    filter: brightness(1.1);
-  }
-
-  .button.secondary {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent-dim);
-    font-weight: 500;
-  }
+  /* .button / .button.secondary now live in src/styles/global.css — the devlog uses them too. */
 </style>

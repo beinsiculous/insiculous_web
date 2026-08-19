@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SupportLink from '../../components/SupportLink.astro';
+import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../../lib/site-links.js';
 
 const posts = (await getCollection('devlog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -12,7 +14,16 @@ const posts = (await getCollection('devlog')).sort(
   description="Development notes on games and the Insiculous 2D engine."
 >
   <p class="section-label">devlog</p>
-  <h1>Devlog</h1>
+  <div class="title-row">
+    <h1>Devlog</h1>
+    <a
+      class="coffee-link"
+      href={KOFI_URL}
+      title={KOFI_TITLE}
+      aria-label={KOFI_LABEL}
+      target="_blank"
+      rel="noopener noreferrer">☕</a>
+  </div>
   <p class="intro">
     Notes from the trenches — engine internals, game progress, and the
     occasional coding-agent war story.
@@ -33,9 +44,39 @@ const posts = (await getCollection('devlog')).sort(
       ))
     }
   </ul>
+
+  <SupportLink blurb="These notes are free and always will be. If they have been useful, there is a tip jar." />
 </BaseLayout>
 
 <style>
+  /* The ☕ sits beside the heading, not inside it: an emoji inside <h1> would be folded into the
+     heading's accessible name and read out as part of "Devlog" in a heading list. Wrapping keeps
+     125% text at 390px from pushing the page sideways. */
+  .title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .title-row h1 {
+    margin-bottom: 0;
+  }
+
+  /* global.css sets no emoji stack the way faces.css does for .face-link. */
+  .coffee-link {
+    font-size: 1.35rem;
+    line-height: 1;
+    text-decoration: none;
+    opacity: 0.8;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  }
+
+  .coffee-link:hover {
+    opacity: 1;
+    text-decoration: none;
+  }
+
   .intro {
     max-width: 42em;
     margin-bottom: 2.5rem;

@@ -1,0 +1,78 @@
+---
+// The devlog's one ask: a Ko-fi link at the foot of the listing and of every post. Rendered here
+// rather than in the footer because the moment a reader has just finished a post is the moment
+// the ask makes sense.
+//
+// A plain link, never Ko-fi's <script> widget: the site ships no third-party runtime resources
+// (fonts are self-hosted, every script inline and local), and their markup would sit outside the
+// axe gate that blocks the deploy. The URL and its labels come from src/lib/site-links.js, which
+// the face switcher and the devlog heading share.
+// KOFI_LABEL is not used here: this link has visible text, so the new-tab cue is a
+// visually-hidden span inside it rather than an aria-label that would replace the whole name.
+import { KOFI_URL, KOFI_TITLE } from "../lib/site-links.js";
+
+interface Props {
+  /** The line above the button. The post-page wording is the default; the listing passes its own. */
+  blurb?: string;
+}
+
+const {
+  blurb = "The engine, the games and these notes are a one-person operation, and the devlog is free. If a post saved you an afternoon, you can put a coffee on the tab.",
+} = Astro.props;
+---
+
+<section class="support">
+  <p>{blurb}</p>
+  <a class="button" href={KOFI_URL} title={KOFI_TITLE} target="_blank" rel="noopener noreferrer">
+    <span class="cup" aria-hidden="true">☕</span> buy me a coffee
+    <span class="visually-hidden"> (opens in a new tab)</span>
+    <span class="external-cue" aria-hidden="true">↗︎</span>
+  </a>
+</section>
+
+<style>
+  /* The block is set apart from the content above it rather than dressed up — a rule, some air,
+     and the studio's own button. */
+  .support {
+    margin-top: 3.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    /* flex-wrap on the row below, and a max-width here, so 125% text at 390px still reflows
+       instead of pushing the page sideways (scripts/screenshot-pages.mjs gates on that). */
+    max-width: 44em;
+  }
+
+  .support p {
+    margin: 0;
+    max-width: 42em;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+
+  /* The ☕ needs a font that actually has it; global.css sets no emoji stack the way faces.css
+     does for .face-link. Scoped to the cup alone — pulling the arrow into an emoji font renders
+     it in emoji presentation (a blue tile) against the green button. */
+  .cup {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", var(--font-mono);
+  }
+
+  /* The new-tab cue. U+FE0E on the character forces text presentation; the mono font keeps it
+     the same ink as the label. */
+  .external-cue {
+    font-family: var(--font-mono);
+    opacity: 0.75;
+  }
+
+  /* BaseLayout's copy of this is scoped to the layout, so it does not reach in here. */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>

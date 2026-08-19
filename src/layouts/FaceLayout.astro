@@ -6,6 +6,7 @@ import AccessibilityControls from "../components/AccessibilityControls.astro";
 import bundle from "../../build/fortknight.bundle.json";
 import { withBase } from "../lib/paths.js";
 import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
+import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 
 // The layout of the site's two faces (docs/app.md), and of those two only: every page rendered here belongs to
 // "fortknight" or "forkknife", so `face` is required. Its menu is Overview, the face's own building page (Spoon Feed /
@@ -47,11 +48,15 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
-    <nav class="face-switch" aria-label="Switch app">
+    {/* "Site links" rather than "Switch app": the row carries the tip jar as well as the two faces
+        now. The ☕ sits inside this nav rather than beside it because ForkKnife's theme moves the
+        whole switcher (order/gap, faces.css) — a sibling would detach from the row on that face. */}
+    <nav class="face-switch" aria-label="Site links">
       <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
       {otherFaces.map((other) => (
         <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
       ))}
+      <a class="face-link" href={KOFI_URL} title={KOFI_TITLE} aria-label={KOFI_LABEL} target="_blank" rel="noopener noreferrer">☕</a>
     </nav>
     <a class="brand" href={facePath(face)}>
       <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
