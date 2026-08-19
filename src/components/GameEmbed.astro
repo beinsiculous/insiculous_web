@@ -1,84 +1,124 @@
 ---
 /**
- * Placeholder embed area for a WASM game build.
+ * Embed area for a WASM game build.
  *
  * `src` is the path to the wasm-bindgen JS glue under public/, following the
  * drop-in convention: public/games/<slug>/v<N>/game.js
  * (see README "WASM builds" for the full convention).
  *
- * No client JS ships from this component yet — the wiring example below is
- * an HTML comment on purpose. Turn it into a real <script> when a build exists.
+ * With `src` set this renders a real playable embed: a WebGPU gate
+ * (browsers without a usable adapter never run the module), a status line,
+ * and the `#game-canvas` placeholder the engine swaps its own canvas into
+ * (the engine copies id/width/height/tabindex/role/aria-label over and
+ * focuses it). Without `src` it stays the dashed "coming soon" placeholder.
+ *
+ * ONE playable embed per page: the engine finds its placeholder by the
+ * fixed id `game-canvas`, so a second playable embed on the same page will
+ * not initialize. Game detail pages render exactly one by construction; a
+ * future multi-game page needs engine-side scoping first.
  */
 interface Props {
   src?: string;
   title: string;
+  /** Canvas pixel size — must match the game's native window size. */
+  width?: number;
+  height?: number;
 }
 
-const { src, title } = Astro.props;
+const { src, title, width = 800, height = 600 } = Astro.props;
 ---
 
-<div class="game-embed" data-wasm-src={src}>
-  <div class="placeholder">
-    <span class="glyph" aria-hidden="true">▚▞</span>
-    <p class="status">
-      {src ? 'wasm build not wired up yet' : 'browser build coming'}
-    </p>
-    <p class="hint">
-      {
-        src
-          ? `expected glue module: ${src}`
-          : 'desktop-only for now — playable here once the engine’s web export lands'
+{
+  src ? (
+    <div class="game-embed playable" data-wasm-src={src}>
+      <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
+      <canvas
+        id="game-canvas"
+        width={width}
+        height={height}
+        tabindex="0"
+        role="img"
+        aria-label={`${title} — game canvas; focus it to play`}
+      >
+        {title} runs on an HTML canvas and needs a keyboard or gamepad. The
+        controls are listed below the game.
+      </canvas>
+      <p class="controls-note">
+        Click the game to give it keyboard focus. Menus: W/S or arrows to
+        navigate, Space/Enter to confirm, Esc to go back — a gamepad works
+        too. All keys are remappable in the game.
+      </p>
+    </div>
+  ) : (
+    <div class="game-embed">
+      <div class="placeholder">
+        <span class="glyph" aria-hidden="true">▚▞</span>
+        <p class="status">browser build coming</p>
+        <p class="hint">
+          desktop-only for now — playable here once the engine’s web export
+          lands
+        </p>
+      </div>
+      <span class="visually-hidden">
+        Placeholder game embed for {title} — browser build coming
+      </span>
+    </div>
+  )
+}
+
+<script>
+  const embed = document.querySelector('.game-embed.playable');
+  const src = embed?.getAttribute('data-wasm-src');
+  const status = document.getElementById('game-loading');
+  if (src) {
+    // Gate BEFORE the import: browsers without WebGPU (or with the API but
+    // no usable adapter) never download the wasm module.
+    const gpu = 'gpu' in navigator ? (navigator as any).gpu : null;
+    const adapter = gpu ? await gpu.requestAdapter().catch(() => null) : null;
+    if (!adapter) {
+      if (status)
+        status.textContent =
+          'This game needs WebGPU — available in Chrome and Edge. In Firefox, enable dom.webgpu.enabled in about:config and fully restart the browser.';
+    } else {
+      if (status) status.textContent = 'Loading game…';
+      try {
+        const init = (await import(/* @vite-ignore */ src)).default;
+        await init();
+        // The engine takes over from here: it swaps its canvas in, clears
+        // the status line, and focuses the game.
+      } catch (e) {
+        if (status) status.textContent = 'Failed to start: ' + e;
+        throw e;
       }
-    </p>
-  </div>
-  <span class="visually-hidden">
-    {
-      src
-        ? `Game embed area for ${title} — build not wired up yet`
-        : `Placeholder game embed for ${title} — browser build coming`
     }
-  </span>
-</div>
-
-<!--
-  TODO(wasm wiring): when a build exists at `src`, replace the placeholder
-  above with a <canvas> and activate a script like this (kept as an HTML
-  comment so Astro ships zero client JS until then — do NOT use define:vars
-  on a commented-out script). The canvas markup below is the accessible
-  baseline a playable build must ship with — name, focusability, fallback
-  text, and a controls note a player can read before starting:
-
-  <canvas id="game-canvas" width="960" height="540" tabindex="0"
-          role="img" aria-label="{title} — game canvas; focus it to play">
-    {title} runs on an HTML canvas and needs a keyboard. The controls are
-    listed below the game.
-  </canvas>
-  <p class="controls-note">Controls: arrow keys to move, Space to …,
-    P to pause. All keys are remappable in the game.</p>
-  <script>
-    const embed = document.querySelector('.game-embed');
-    const src = embed?.getAttribute('data-wasm-src');
-    if (src) {
-      const init = (await import(src)).default;
-      await init(); // wasm-bindgen with target web entry point
-    }
-  </script>
-
-  If Vite warns about the dynamic import, prefix the specifier with its
-  vite-ignore block-comment pragma. The `src` path must be absolute
-  (e.g. /games/<slug>/v1/game.js) — a relative path would resolve against
-  the current page URL and 404.
--->
+  }
+</script>
 
 <style>
   .game-embed {
-    aspect-ratio: 16 / 9;
     background: var(--surface);
     border: 1px dashed var(--border-bright);
     border-radius: 10px;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .game-embed:not(.playable) {
+    aspect-ratio: 16 / 9;
     display: grid;
     place-items: center;
-    margin: 1.5rem 0 2rem;
+  }
+
+  .game-embed.playable {
+    border-style: solid;
+    padding: 1rem;
+  }
+
+  .game-embed.playable canvas {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    background: #000;
+    outline: none;
   }
 
   .placeholder {
@@ -101,6 +141,20 @@ const { src, title } = Astro.props;
     font-size: 0.85rem;
     color: var(--text-bright);
     margin: 0 0 0.3rem;
+  }
+
+  .game-embed.playable .status {
+    text-align: center;
+    min-height: 1.2em;
+    margin-bottom: 0.6rem;
+  }
+
+  .controls-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin: 0.8rem 0 0;
   }
 
   .hint {
