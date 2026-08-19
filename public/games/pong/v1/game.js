@@ -391,10 +391,6 @@ function __wbg_get_imports() {
             const ret = arg0.gpu;
             return ret;
         },
-        __wbg_height_6eec812c213259a1: function(arg0) {
-            const ret = arg0.height;
-            return ret;
-        },
         __wbg_height_9f27216001e3c804: function(arg0) {
             const ret = arg0.height;
             return ret;
@@ -441,16 +437,6 @@ function __wbg_get_imports() {
             let result;
             try {
                 result = arg0 instanceof GPUCanvasContext;
-            } catch (_) {
-                result = false;
-            }
-            const ret = result;
-            return ret;
-        },
-        __wbg_instanceof_HtmlCanvasElement_ed02ed9136056019: function(arg0) {
-            let result;
-            try {
-                result = arg0 instanceof HTMLCanvasElement;
             } catch (_) {
                 result = false;
             }
@@ -1581,10 +1567,6 @@ function __wbg_get_imports() {
             arg0.webkitRequestFullscreen();
         },
         __wbg_width_20c45c895834b83f: function(arg0) {
-            const ret = arg0.width;
-            return ret;
-        },
-        __wbg_width_6d9315ecc7140ff6: function(arg0) {
             const ret = arg0.width;
             return ret;
         },
