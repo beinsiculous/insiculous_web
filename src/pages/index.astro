@@ -2,37 +2,64 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Be Insiculous — independent game studio">
+<BaseLayout
+  title="Be Insiculous — a small studio"
+  description="Be Insiculous — a small studio: 2D games on our own Rust engine, and planning tools for ordinary life."
+>
   <section class="hero">
-    <p class="section-label">independent game studio</p>
+    <p class="section-label">a small studio</p>
     <h1>Be Insiculous</h1>
     <p class="lede">
-      One developer, a Rust engine, and a long-running habit of building 2D
-      games from the metal up.
+      A few of us, a Rust engine, and two kinds of thing: 2D games, and
+      planning tools for ordinary life.
     </p>
   </section>
 
+  <!-- The art-policy paragraph is quoted from docs/thesis.md, which is where that wording is
+       maintained; it matches the sentence on /games/. Change it there first. -->
   <section>
+    <h2>The games</h2>
     <p>
-      Be Insiculous is a solo studio. After years of independent game and
-      engine development, everything here runs on <strong>Insiculous 2D</strong>
-      — a 2D engine written in Rust, built for the games I actually want to
-      make rather than the ones a general-purpose engine expects. Six arcade
-      games in alpha so far — a running take on the 20 Games Challenge —
-      each one two-player, each one with the engine's signature escalating
-      <em>chaos modes</em>.
+      Six arcade games so far, all in alpha, all running on
+      <strong>Insiculous 2D</strong> — our own 2D engine, written in Rust.
+      Each one is two-player, and each has an escalating <em>chaos mode</em>
+      that bends the rules of the original. They are a run at the 20 Games
+      Challenge: desktop builds today, browser versions when the engine's web
+      export ships.
     </p>
     <p>
-      These days the engine pulls double duty: it powers the games on this
-      site and serves as a <a href="/engine/">proving ground for agentic
-      coding tools</a> — real tasks on a live, opinionated Rust codebase,
-      judged on whether the result actually survives.
+      The games listed on this site are free and use AI art. The games we sell
+      carry none — those are made by our own artists, and they ship on Steam
+      and the app stores rather than here.
+    </p>
+    <p>
+      The engine pulls double duty: it runs the games, and it is a
+      <a href="/engine/">proving ground for agentic coding tools</a> — real
+      tasks on a live Rust codebase.
     </p>
     <!-- PLACEHOLDER: add a paragraph on current focus (e.g. Deion the Insiculous / web export) when you're ready to talk about it publicly. -->
   </section>
 
+  <section>
+    <h2>The planner</h2>
+    <p>
+      <a href="/fortknight/">FortKnight</a> and
+      <a href="/forkknife/">ForkKnife</a> are two views of one planner.
+      FortKnight is the schedule: a repeating fourteen-day cycle, a page per
+      day, and where your time actually goes by category. ForkKnife is the
+      menu: the meals, the dish for each day, and the prep and cooking tasks
+      that come with them.
+    </p>
+    <p>
+      It runs in your browser with no account and no server — your profile
+      stays on your device. There is no AI in the app either: if you want help
+      from an assistant, you download your files and take them to your own.
+    </p>
+  </section>
+
   <section class="cta">
     <a class="button" href="/games/">browse the games →</a>
+    <a class="button" href="/fortknight/">open the planner →</a>
     <a class="button secondary" href="/devlog/">read the devlog →</a>
   </section>
 </BaseLayout>
