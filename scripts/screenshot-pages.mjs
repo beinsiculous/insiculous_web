@@ -4,7 +4,7 @@
 // The studio pages wear BaseLayout's dark mono look (the Profile page among them); FortKnight and ForkKnife each
 // bring their own skin from public/app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
 //
-// Every page is shot at both widths, and BOTH passes measure the document's horizontal overflow: a viewport that
+// Every page is shot at the two shot widths, and EVERY pass measures the document's horizontal overflow: a viewport that
 // scrolls sideways is a layout bug at any size, not a preference, so a non-zero reading is reported per page and
 // makes the run exit non-zero. The phone is where it actually bites, but a desktop reading is a bug too and this
 // will fail on it. Keep both at zero.
@@ -47,6 +47,11 @@ const pages = {
 const viewports = {
   desktop: { suffix: "", context: { viewport: { width: 1440, height: 900 } } },
   mobile: { suffix: "-mobile", context: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true } },
+  // 641px: the first pixel above the 40rem phone breakpoint, where the wide layout has to stand on its
+  // own. It is the worst case, and the only one worth gating — a panel pinned to its min-content width
+  // stays that wide at every larger size, so a friendlier 768 or 1024 "tablet" passes while the bug is
+  // still there (that is exactly how a 739px panel went unnoticed until it was measured here).
+  tablet: { suffix: "-tablet", shots: false, context: { viewport: { width: 641, height: 900 } } },
   // LARGE_TEXT=1 only: the site at its largest Aa setting (125% root font), phone width. No shots —
   // this pass exists purely to prove big text reflows instead of breaking the layout (WCAG 1.4.4/1.4.10).
   largetext: {
@@ -60,7 +65,7 @@ const only = process.env.ONLY;
 const chosen = only
   ? { [only]: viewports[only] }
   : Object.fromEntries(
-      // largetext is opt-in (LARGE_TEXT=1) so a normal run stays two passes.
+      // largetext is opt-in (LARGE_TEXT=1); desktop, mobile and tablet always run.
       Object.entries(viewports).filter(([label]) => label !== "largetext" || process.env.LARGE_TEXT)
     );
 if (only && !viewports[only]) {

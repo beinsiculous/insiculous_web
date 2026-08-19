@@ -1,7 +1,9 @@
-"""The assistant-workspace contract (src/lib/shared/workspace-docs.js) and the settings migration
-(src/lib/shared/user-settings.js), driven through node — the same way tests/test_weights.py checks the
+"""The assistant-workspace contract (src/lib/shared/workspace-docs.js), the settings migration
+(src/lib/shared/user-settings.js) and the profile-name generator (src/lib/shared/profile-names.js),
+driven through node — the same way tests/test_weights.py checks the
 JavaScript weights port. Python has no twin of these modules yet (docs/roadmap.md)."""
 import json
+import re
 import shutil
 import unittest
 
@@ -237,6 +239,65 @@ class SettingsMigrationTests(unittest.TestCase):
             report = ValidationReport()
             check_against_schema_file(settings, "user-settings", report)
             self.assertTrue(report.ok, report.render())
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class ProfileNamesTests(unittest.TestCase):
+    """src/lib/shared/profile-names.js: a device's first profile is named adjective-noun-title."""
+
+    WEIGHTS_ID_PATTERN = json.loads(
+        (REPOSITORY_ROOT / "data" / "schema" / "weights.schema.json").read_text(encoding="utf-8")
+    )["properties"]["id"]["pattern"]
+
+    def tables(self):
+        script = module_import("profile-names.js", "ADJECTIVES", "NOUNS", "TITLES") + \
+            "process.stdout.write(JSON.stringify({ADJECTIVES, NOUNS, TITLES}));"
+        return run_node(script, {})
+
+    def test_every_word_is_a_valid_id_fragment(self):
+        tables = self.tables()
+        self.assertEqual([len(tables["ADJECTIVES"]), len(tables["NOUNS"]), len(tables["TITLES"])], [30, 28, 30])
+        for table_name, words in tables.items():
+            self.assertEqual(len(set(words)), len(words), f"{table_name} has a duplicate")
+            for word in words:
+                # Every word must already be id-shaped: a generated name is used without slugifying.
+                self.assertRegex(word, self.WEIGHTS_ID_PATTERN, f"{table_name}: {word}")
+
+    def test_generated_names_span_the_tables_and_stay_valid_ids(self):
+        script = module_import("profile-names.js", "randomProfileName") + """
+            const names = [];
+            for (let step = 0; step < 200; step += 1) names.push(randomProfileName(() => step / 200));
+            process.stdout.write(JSON.stringify({
+                lowest: randomProfileName(() => 0),
+                highest: randomProfileName(() => 0.9999999999),  // must not run off the end of a table
+                names,
+            }));
+        """
+        result = run_node(script, {})
+        self.assertEqual(result["lowest"], "humorous-library-poet", "random() -> 0 takes the first of each table")
+        self.assertEqual(result["highest"], "super-obligation-employee", "random() just under 1 takes the last")
+        for name in result["names"]:
+            self.assertRegex(name, self.WEIGHTS_ID_PATTERN, name)
+
+    def test_unused_name_avoids_taken_ids_and_falls_back_to_a_suffix(self):
+        script = module_import("profile-names.js", "unusedProfileName") + """
+            // A random() pinned to one name: every roll collides, so the suffix loop is the only way out —
+            // the callers hand the result to newProfileId, which throws on a name already taken.
+            const pinned = () => 0;
+            process.stdout.write(JSON.stringify({
+                free: unusedProfileName([], pinned),
+                skipped: unusedProfileName(["humorous-library-poet"], pinned),
+                twice: unusedProfileName(["humorous-library-poet", "humorous-library-poet-2"], pinned),
+                noTaken: unusedProfileName(null, pinned),
+            }));
+        """
+        result = run_node(script, {})
+        self.assertEqual(result["free"], "humorous-library-poet")
+        self.assertEqual(result["skipped"], "humorous-library-poet-2", "an exhausted roll gets a suffix, never a collision")
+        self.assertEqual(result["twice"], "humorous-library-poet-3")
+        self.assertEqual(result["noTaken"], "humorous-library-poet", "no taken list is not an error")
+        for name in result.values():
+            self.assertRegex(name, self.WEIGHTS_ID_PATTERN, name)
 
 
 if __name__ == "__main__":

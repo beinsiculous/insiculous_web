@@ -146,7 +146,7 @@ const options = questionnaire?.options ?? {};
     status.textContent = "Unsaved changes.";
   }
 
-  function save() {
+  async function save() {
     const { stored, answers } = mergedAnswersForSave();
     const problem = answersProblem(answers, bundle.questionnaire, bundle.categories);
     if (problem) { status.textContent = problem; return; }
@@ -160,7 +160,7 @@ const options = questionnaire?.options ?? {};
     }
     settings = stored;
     dirty = false;
-    const note = firstSave ? promptProfileName(settings.activeWeightsId) : "";
+    const note = firstSave ? await promptProfileName(settings.activeWeightsId) : "";
     settings = loadSettings();
     document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
     renderProfileBar();

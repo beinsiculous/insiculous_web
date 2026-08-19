@@ -73,15 +73,34 @@ select {
 .button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; }
 .profile-name-form { margin: 0.4rem 0; }
-.profile-name-form input { width: 14rem; max-width: 100%; }
+.profile-name-form .inline-field { min-width: 0; }   /* else the field pins the row at the input's width */
+.profile-name-form input { width: 22rem; min-width: 0; max-width: 100%; }  /* fits the longest generated id */
 
 /* ---------- the profile switcher, in the panel rather than in chrome ---------- */
-.nav-profile { display: flex; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0.25rem; }
+.nav-profile { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0.25rem; }
 .nav-profile-label {
-  display: inline-flex; align-items: center; gap: 0.4rem;
+  display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; max-width: 100%;
   font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);
 }
-.nav-profile select { max-width: 12rem; }
+.nav-profile select { max-width: min(20rem, 100%); min-width: 0; }
+/* 20rem shows a whole generated id and its arrow; the min() lets a narrow screen take it back without a
+   media query, which this file needs because /profile/ is a studio page and never loads faces.css. */
+
+/* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
+/* Built in JS and appended to <body>, so it inherits nothing from the page. The same class names carry
+   an independent rule set in faces.css — these two files are not shared (see the header). */
+.name-dialog {
+  padding: 0; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface-raised); color: var(--text-bright);
+  width: min(28rem, calc(100vw - 2rem)); max-width: 100%;
+}
+.name-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+.name-dialog-form { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.1rem; }
+.name-dialog h2 { margin: 0; font-size: 1rem; }
+.name-dialog .inline-field { min-width: 0; }
+.name-dialog input { width: 100%; min-width: 0; }
+.name-dialog-error:empty { display: none; }
+.name-dialog-error { color: var(--text-bright); margin: 0; }
 
 /* ---------- assistant workspace files ---------- */
 .file-list { display: flex; flex-direction: column; gap: 0.35rem; }

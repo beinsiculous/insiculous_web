@@ -179,8 +179,11 @@ const isActive = (href: string) =>
      children, and newer Chrome's content-visibility on the generated ::details-content box. Override both, so the
      bar reads as an ordinary row here whether the element happens to be open or not. */
   @media (min-width: 40.0625rem) {
+    /* Wrap: six links do not fit the moment the phone panel stops, only once the viewport is wide
+       enough for all of them in a row. Without this the header overflowed from 641px upwards. */
     .menu > ul {
       display: flex;
+      flex-wrap: wrap;
     }
 
     .menu::details-content {

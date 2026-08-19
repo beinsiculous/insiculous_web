@@ -62,7 +62,7 @@
         "null"
       ],
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
-      "description": "The profile in use (default username); FortKnight's Overview, the assistant workspace and Apply from assistant all read and write this one."
+      "description": "The profile in use (a generated adjective-noun-title name on a device with nothing saved); FortKnight's Overview, the assistant workspace and Apply from assistant all read and write this one."
     },
     "hidden": {
       "type": "array",

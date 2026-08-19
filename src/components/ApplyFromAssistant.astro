@@ -142,12 +142,14 @@ const { face } = Astro.props;
     clearTimeout(outcomeTimer);
     outcomeTimer = setTimeout(() => { elements.applyOutcome.hidden = true; }, 2200);
   }
-  elements.applyButton.addEventListener("click", () => {
+  elements.applyButton.addEventListener("click", async () => {
     elements.applyOutcome.hidden = true;
     try {
       const applied = applyAssistantDocument(elements.assistantJson.value);
       elements.applyStatus.textContent = applied.message;
-      if (applied.createdProfileId) elements.applyStatus.textContent += promptProfileName(applied.createdProfileId);
+      // Name the new profile before the outcome badge: showApplyOutcome paints a 2.2s full-viewport
+      // overlay, and the two must never be on screen together.
+      if (applied.createdProfileId) elements.applyStatus.textContent += await promptProfileName(applied.createdProfileId);
       document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
       showApplyOutcome(applied.clean, applied.clean ? "Applied — nothing was rejected." : "Applied, but some entries were skipped — see the review below.");
     } catch (error) {

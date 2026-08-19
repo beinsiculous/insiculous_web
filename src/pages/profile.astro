@@ -19,6 +19,7 @@ import "../styles/app-widgets.css";
     <ProfileSwitcher questionnaireHref={facePath("fortknight", "questionnaire/")} />
     <form class="button-row profile-name-form" id="profileNameForm">
       <label class="inline-field">Name <input type="text" id="profileNameInput" autocomplete="off" required /></label>
+      <button type="button" id="regenerateNameButton">Regenerate</button>
       <button type="submit" id="renameProfileButton">Rename</button>
       <span class="muted" id="renameStatus"></span>
     </form>
@@ -44,6 +45,8 @@ import "../styles/app-widgets.css";
 <script>
   import { buildWorkspaceDocuments } from "../lib/shared/workspace-docs.js";
   import { deleteProfile, duplicateProfile, loadSettings, profileIds, renameProfile, saveSettings } from "../lib/shared/user-settings.js";
+  import { unusedProfileName } from "../lib/shared/profile-names.js";
+  import { askProfileName } from "../lib/profile-name-dialog.js";
   import { activeWeights } from "../lib/shared/weights-rules.js";
   import { downloadAll, renderFileRow } from "../lib/shared/workspace-files.js";
   import { localTodayIsoDate } from "../lib/shared/clock.js";
@@ -58,6 +61,7 @@ import "../styles/app-widgets.css";
     renameStatus: document.getElementById("renameStatus"),
     profileStatus: document.getElementById("profileStatus"),
     profileActions: document.getElementById("profileActions"),
+    regenerateNameButton: document.getElementById("regenerateNameButton"),
     duplicateProfileButton: document.getElementById("duplicateProfileButton"),
     deleteProfileButton: document.getElementById("deleteProfileButton"),
     workspaceStatus: document.getElementById("workspaceStatus"),
@@ -107,6 +111,14 @@ import "../styles/app-widgets.css";
     }
   }
 
+  elements.regenerateNameButton.addEventListener("click", () => {
+    const current = loadSettings();
+    // Every id newProfileId would reject, the active one included even when it is not saved yet —
+    // otherwise a roll can hand back the name already in force and Rename silently does nothing.
+    elements.profileNameInput.value = unusedProfileName([...profileIds(current), current.activeWeightsId]);
+    elements.renameStatus.textContent = "";
+  });
+
   elements.profileNameForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const current = loadSettings();
@@ -116,11 +128,23 @@ import "../styles/app-widgets.css";
     // The name is the id (weights.<id>.json): everything saved under the old id moves; the nav dropdown follows on reload.
     if (withProfiles((settings) => renameProfile(settings, settings.activeWeightsId, name), elements.renameStatus)) location.reload();
   });
-  elements.duplicateProfileButton.addEventListener("click", () => {
+  elements.duplicateProfileButton.addEventListener("click", async () => {
     const current = loadSettings();
-    const name = prompt(`Name for the copy of ${current.activeWeightsId}:`);
-    if (!name) return;
-    if (withProfiles((settings) => duplicateProfile(settings, settings.activeWeightsId, name))) location.reload();
+    const takenIds = [...profileIds(current), current.activeWeightsId];
+    const copied = await askProfileName({
+      title: `Name the copy of ${current.activeWeightsId}`,
+      name: unusedProfileName(takenIds),
+      takenIds,
+      confirmLabel: "Duplicate",
+      canCancel: true,
+      commit(typed) {
+        const settings = loadSettings(); // re-read here: the dialog may have been open a while
+        duplicateProfile(settings, settings.activeWeightsId, typed);
+        saveSettings(settings);
+        return settings.activeWeightsId;
+      },
+    });
+    if (copied) location.reload();
   });
   elements.deleteProfileButton.addEventListener("click", () => {
     const current = loadSettings();

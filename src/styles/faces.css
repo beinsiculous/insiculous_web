@@ -151,13 +151,14 @@ input:disabled, select:disabled { opacity: 0.55; }
 .questionnaire .question h2 { font-size: 1rem; margin-bottom: 0.25rem; }
 .questionnaire .question-intro { font-style: italic; margin: 0.5rem 0 0.25rem; }
 .questionnaire textarea { width: 100%; padding: 0.35rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--panel-soft); color: var(--ink); }
-.questionnaire .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; margin-right: 1rem; }
+.questionnaire .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; margin-right: 1rem; min-width: 0; max-width: 100%; }
+.questionnaire .inline-field input, .questionnaire .inline-field select { min-width: 0; max-width: 100%; }
 .settings-form.questionnaire .inline-field input:not([type=range]), .settings-form.questionnaire .inline-field select { width: auto; }
 .questionnaire .inline-field input[type=number] { width: 6rem; }
 .questionnaire input[type=range] { width: auto; padding: 0; background: transparent; border: 0; accent-color: var(--accent); }
 .category-list { margin: 0.5rem 0 1rem; }
 .category-block { border-top: 1px solid var(--line); }
-.category-row { display: grid; grid-template-columns: 11rem 4.5rem minmax(12rem, 1fr) 3.5rem 4rem; gap: 0.5rem; align-items: center; padding: 0.4rem 0 0.1rem; font-size: 0.9rem; }
+.category-row { display: grid; grid-template-columns: minmax(5rem, 11rem) 4.5rem minmax(5rem, 1fr) 3.5rem 4rem; gap: 0.5rem; align-items: center; padding: 0.4rem 0 0.1rem; font-size: 0.9rem; }
 .category-row.category-header { font-size: 0.78rem; padding-top: 0.2rem; }
 .category-name { font-weight: 600; }
 .check-cell { text-align: center; }
@@ -259,12 +260,17 @@ tr.peripheral .range-cell { opacity: 0.45; }
 .sections-table.read-only .row-actions { display: none; }
 .sections-table.read-only th:last-child { display: none; }
 .appointments-table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.88rem; }
+/* Backstop: if these tables still want more than the panel gives them, they scroll inside their own
+   box rather than pushing the page sideways. */
+.appointments-editor, .tasks-editor { overflow-x: auto; }
 .appointments-table th, .appointments-table td { text-align: left; padding: 0.25rem 0.3rem; border-bottom: 1px solid var(--line); font-weight: normal; }
 .appointments-table thead th { color: var(--muted); font-size: 0.78rem; }
-.appointments-table input, .appointments-table select { width: 100%; min-width: 5rem; }
-.appointments-table input[type=number] { min-width: 4rem; }
+.appointments-table input, .appointments-table select { width: 100%; min-width: 3.5rem; }
+.appointments-table input[type=number] { min-width: 3rem; }
 .appointments-table .remove-appointment { padding: 0.1rem 0.5rem; }
-.appointments-table .weekday-strip { white-space: nowrap; }
+/* Wraps rather than forcing ~200px of nowrap into the table's min-content (it kept the page wider
+   than a tablet); the 24px targets below are unaffected. */
+.appointments-table .weekday-strip { display: flex; flex-wrap: wrap; }
 .appointments-table .weekday-strip label { display: inline-flex; flex-direction: column; align-items: center; font-size: 0.7rem; margin: 0 0.1rem; }
 /* 1.5rem = 24px, the WCAG 2.2 minimum pointer target; the labels stay small, the box does not. */
 .appointments-table .weekday-strip input { width: 1.5rem; height: 1.5rem; min-width: 0; margin: 0; }
@@ -279,8 +285,10 @@ tr.peripheral .range-cell { opacity: 0.45; }
 .waking-ticks span:first-child::before { left: 0; }
 .waking-ticks span:last-child { transform: translateX(-100%); }
 .waking-ticks span:last-child::before { left: auto; right: 0; }
-.block-bar { display: flex; width: 100%; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 0.5rem 0; font-size: 0.78rem; }
-.block-segment { padding: 0.35rem 0.4rem; background: var(--panel-soft); border-right: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.block-bar { display: flex; width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 0.5rem 0; font-size: 0.78rem; }
+/* min-width: 0 is what lets the ellipsis work: without it a flex item floors at its content width and
+   the bar's min-content is the sum of every untruncated label. */
+.block-segment { min-width: 0; padding: 0.35rem 0.4rem; background: var(--panel-soft); border-right: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .block-segment:last-child { border-right: 0; }
 .block-segment.unscheduled { background: var(--flexible); color: var(--muted); }
 .block-warnings { margin: 0.25rem 0 0 1rem; padding: 0; }
@@ -377,14 +385,46 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
   padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
 }
 
-/* Settings: the profile bar (which saved answer set is being edited) */
+/* `main` is a grid, so every panel is a grid item and its default `min-width: auto` resolves to
+   min-content — the column, and with it the page, can then be wider than the viewport. These two
+   neutralisers used to live in the 40rem block, which left every width above 640px pinned to the
+   widest panel's min-content and made 641-758px scroll sideways. They belong at every width; the
+   structures that made the demand (the appointments table, .block-bar, .category-row) shrink below. */
+main > * { min-width: 0; }
+.settings-form fieldset { min-inline-size: 0; }   /* the UA stylesheet gives fieldsets min-content */
+
+/* Settings: the profile bar (which saved answer set is being edited).
+   The name box and the nav dropdown are sized for a whole profile id rather than a placeholder: generated
+   names ([Adjective]-[Noun]-[Title], src/lib/shared/profile-names.js) run to 35 characters, which measures
+   20.4rem of text in the input and 18.4rem in the smaller select font. Both keep a max-width so the phone
+   rules below can still shrink them. */
 .profile-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.5rem 0; }
 .profile-name-form { align-items: center; margin: 0.4rem 0; }
-.profile-name-form .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; }
-.profile-name-form input { padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--panel-soft); color: var(--ink); width: 14rem; max-width: 100%; }
-.nav-profile { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+.profile-name-form .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.profile-name-form input { padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--panel-soft); color: var(--ink); width: 22rem; min-width: 0; max-width: 100%; }
+.nav-profile { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .nav-profile-label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); }
-.nav-profile select { padding: 0.25rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 0.85rem; background: var(--panel-soft); color: var(--ink); max-width: 12rem; }
+.nav-profile select { padding: 0.25rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 0.85rem; background: var(--panel-soft); color: var(--ink); max-width: 20rem; min-width: 0; }
+
+/* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
+/* Built in JS and appended to <body>: the face skin's tokens still reach it, but no page rule does.
+   Mirrors the rule set in app-widgets.css under the same class names (the two files are not shared). */
+.name-dialog {
+  padding: 0; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--panel); color: var(--ink); box-shadow: var(--shadow);
+  width: min(28rem, calc(100vw - 2rem)); max-width: 100%;
+}
+.name-dialog::backdrop { background: rgba(35, 35, 31, 0.55); }
+.name-dialog-form { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.1rem; }
+.name-dialog h2 { margin: 0; font-size: 1.05rem; }
+.name-dialog .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.name-dialog input {
+  width: 100%; min-width: 0; padding: 0.35rem 0.5rem; border: 1px solid var(--line);
+  border-radius: 6px; font: inherit; background: var(--panel-soft); color: var(--ink);
+}
+.name-dialog button { cursor: var(--cursor-pointer); }
+.name-dialog-error:empty { display: none; }
+.name-dialog-error { color: var(--ink); margin: 0; }
 
 /* ---------- mobile (phones) ---------- */
 /* Everything below only narrows geometry; the wide layout above is untouched. Tables that were
@@ -393,16 +433,19 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
    root gets bigger text in the same column and needs these rules to come in sooner, which a px value would ignore. */
 @media (max-width: 40rem) {
   h1 { font-size: 1.3rem; }
-  main > * { min-width: 0; }                 /* grid items default to min-content width */
   /* Both faces ship a short label per pill (faces.js faceNav) and the markup renders both spans, but only
      ForkKnife's bar ever swapped them — FortKnight's four full-length pills wrapped its sticky header onto about
      four rows. The full name stays on each link's aria-label either way. */
   .site-nav .nav-full { display: none; }
   .site-nav .nav-short { display: inline; }
-  .settings-form fieldset { min-inline-size: 0; }   /* the UA stylesheet gives fieldsets min-content */
   .site-nav { padding: 0.5rem 0.75rem; gap: 0.5rem; }
   .brand { margin-right: 0; }
-  .nav-profile { margin-left: 0; width: 100%; }
+  /* A long profile id must not push this row past the viewport: ids are names people choose, and a
+     generated one runs to 35 characters against the old placeholder's 8. The row wraps, and the select
+     gives up its 20rem cap and its content-based minimum so it can shrink beside the ⚙ Profile link. */
+  .nav-profile { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  .nav-profile-label { max-width: 100%; flex: 1 1 auto; }
+  .nav-profile select { max-width: 100%; }
   main { padding: 0.75rem; gap: 0.75rem; }
   .panel { padding: 0.9rem; }
   .pick-list { columns: 1; }
