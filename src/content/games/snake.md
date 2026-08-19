@@ -1,7 +1,8 @@
 ---
 title: 'Insiculous Snake'
 blurb: 'Grid snake with buffered turns — and a versus mode where head-on collisions have rules.'
-status: 'alpha'
+status: 'playable'
+wasm: '/games/snake/v1/game.js'
 screenshots: []
 order: 4
 ---
@@ -14,5 +15,6 @@ The twist is the **two-player versus mode**: every death has a cause — wall,
 self-bite, the other snake, or a head-on crash — and the game resolves
 winner or draw accordingly. Thirteen achievements, chaos modes included.
 
-Built on Insiculous 2D. Desktop build (Vulkan / Metal / DX12) — a browser
-version is planned once the engine's web export lands.
+Built on Insiculous 2D. Playable right here in the browser (WebGPU —
+Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
+(Vulkan / Metal / DX12) run the same code natively.

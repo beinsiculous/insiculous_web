@@ -27,7 +27,12 @@ const relatedPosts = (await getCollection('devlog'))
   </header>
   <p class="blurb">{game.data.blurb}</p>
 
-  <GameEmbed src={game.data.wasm} title={game.data.title} />
+  <GameEmbed
+    src={game.data.wasm}
+    title={game.data.title}
+    width={game.data.width}
+    height={game.data.height}
+  />
 
   <article>
     <Content />

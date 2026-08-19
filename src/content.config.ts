@@ -17,6 +17,10 @@ const games = defineCollection({
       // Must be absolute (leading slash). Bump the version folder (v1 -> v2)
       // on every update instead of overwriting in place.
       wasm: z.string().startsWith('/').optional(),
+      // Canvas pixel size for the playable embed — must match the game's
+      // native window size. Omit for the 800x600 default.
+      width: z.number().int().positive().optional(),
+      height: z.number().int().positive().optional(),
       screenshots: z.array(z.string().startsWith('/')).default([]),
       order: z.number().default(0),
     })
