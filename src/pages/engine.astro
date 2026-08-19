@@ -21,7 +21,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <code>audio</code>, <code>ui</code>, <code>editor</code> — tied
       together by <code>engine_core</code>. The ECS is hand-written and
       deliberately simple: per-type storage with generational entity IDs,
-      events, resources, and systems. No archetype sorcery — it's built for
+      events, resources, and systems. No archetype indirection — it is built for
       debuggability and testability over raw throughput, and every game so
       far has run comfortably on it.
     </p>
@@ -80,9 +80,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       The design rule from day one: <em>everything must be CLI-testable</em>.
       Over a thousand tests run headless without a GPU, which is also what
       makes the codebase workable for coding agents. Browser export
-      (WebAssembly) is designed and on the roadmap but not shipped yet —
-      which is why the embed slots on this site are still placeholders
-      rather than play buttons.
+      (WebAssembly) is in progress: the feasibility spike passed in July
+      2026, and the work that remains is a known refactor — which is why the
+      embed slots on this site are still placeholders rather than play
+      buttons.
     </p>
   </section>
 
@@ -106,8 +107,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p>
       There's no leaderboard and no pass-rate percentage, deliberately. The
       evaluation is whether an agent's work survives review, the test suite,
-      and actual play — judged by the one human who has to live with the
-      codebase afterward. What provenance there is lives in the git history
+      and actual play — judged by whoever has to maintain the codebase
+      afterward. What provenance there is lives in the git history
       rather than in a scoreboard — commit trailers recording which models
       worked on a change, and per-agent branches that make approaches
       comparable on identical tasks.
