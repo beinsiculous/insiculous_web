@@ -39,8 +39,11 @@ const { game } = Astro.props;
     transform: translateY(-2px);
   }
 
+  /* Wraps: the status badge is `white-space: nowrap`, so on a narrow phone at the larger text sizes the
+     Aa control offers it cannot shrink and pushed the card past the viewport. */
   .card-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
     gap: 0.75rem;

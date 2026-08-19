@@ -75,6 +75,30 @@ const server = createServer((req, res) => {
 await new Promise((resolveListen) => server.listen(0, resolveListen));
 const port = server.address().port;
 
+const SEEDED_PROFILE = {
+  schemaVersion: 3, theme: "fort-knight", epochOverride: null, timezone: null, activeSeasonId: null,
+  weightsProfiles: { "lucky-garden-poet": { id: "lucky-garden-poet", questionnaire: { answers: {} } } },
+  activeWeightsId: "lucky-garden-poet", hidden: [], overrides: {}, added: [], dayNotes: {},
+};
+
+// [route, function run in the page that opens the dialog and returns whether it managed to]
+// /profile/ carries the studio's rule set (app-widgets.css); a face page carries faces.css.
+const DIALOG_ROUTES = [
+  ["/profile/", () => {
+    const button = document.getElementById("duplicateProfileButton");
+    if (!button || button.hidden) return false;
+    button.click();
+    return true;
+  }],
+  ["/fortknight/questionnaire/", () => {
+    const select = document.getElementById("navProfileSelect");
+    if (!select || ![...select.options].some((option) => option.value === "__new__")) return false;
+    select.value = "__new__";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  }],
+];
+
 const failures = [];
 let analyzed = 0;
 const browser = await chromium.launch();
@@ -97,6 +121,38 @@ try {
       failures.push(`${route}  [${violation.id}] ${violation.help}\n    ${targets}`);
     }
   }
+
+  // The profile-name dialog (src/lib/profile-name-dialog.js) is built in JavaScript and only exists once
+  // something opens it, so the page sweep above can never see it — and postbuild-check, which reads
+  // static HTML, cannot either. It is the site's only <dialog>, and its CSS is written twice (once in
+  // app-widgets.css for the studio's /profile/, once in faces.css for the faces), so both rule sets are
+  // checked here: open it on one page of each and run the same rules against it.
+  // Both controls that open it are hidden until a profile is actually saved, so this pass needs a
+  // richer seed than the sweep above: one saved profile, which is also the state a real person is in
+  // when they meet the dialog.
+  const dialogContext = await browser.newContext();
+  await dialogContext.addInitScript((settings) => {
+    localStorage.setItem("fortknight.user-settings", settings);
+  }, JSON.stringify(SEEDED_PROFILE));
+  const dialogPage = await dialogContext.newPage();
+  for (const [route, open] of DIALOG_ROUTES) {
+    await dialogPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
+    const opened = await dialogPage.evaluate(open);
+    if (!opened) {
+      failures.push(`${route}  [dialog] could not open the profile-name dialog — the a11y pass over it did not run`);
+      continue;
+    }
+    await dialogPage.waitForSelector("dialog.name-dialog[open]", { timeout: 5000 });
+    const results = await new AxeBuilder({ page: dialogPage })
+      .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
+      .analyze();
+    analyzed++;
+    for (const violation of results.violations) {
+      const targets = violation.nodes.map((node) => node.target.join(" ")).join("; ");
+      failures.push(`${route} (dialog open)  [${violation.id}] ${violation.help}\n    ${targets}`);
+    }
+  }
+  await dialogContext.close();
 } finally {
   await browser.close();
   server.close();

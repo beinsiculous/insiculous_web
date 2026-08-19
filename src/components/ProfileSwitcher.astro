@@ -18,6 +18,8 @@ const { questionnaireHref } = Astro.props;
 </div>
 <script>
   import { createProfile, loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
+  import { unusedProfileName } from "../lib/shared/profile-names.js";
+  import { askProfileName } from "../lib/profile-name-dialog.js";
 
   const NEW_PROFILE_VALUE = "__new__";
   const container = document.getElementById("navProfile");
@@ -43,17 +45,33 @@ const { questionnaireHref } = Astro.props;
     select.value = activeId && options.some((option) => option.value === activeId) ? activeId : savedIds[0];
   }
 
-  select.addEventListener("change", () => {
+  select.addEventListener("change", async () => {
     const current = loadSettings(); // another tab may have saved meanwhile
+    // Captured before the dialog opens: a settings-saved listener firing meanwhile rebuilds the options,
+    // so Cancel must restore from this, not from a re-read afterwards.
+    const previousId = current.activeWeightsId;
     // A page with unsaved edits (the questionnaire) may veto the switch: it listens for this cancelable event.
     const allowed = document.dispatchEvent(new CustomEvent("fortknight:profile-switch", { cancelable: true, detail: { to: select.value } }));
-    if (!allowed) { select.value = current.activeWeightsId; return; }
+    if (!allowed) { select.value = previousId; return; }
     try {
       if (select.value === NEW_PROFILE_VALUE) {
-        const name = prompt("Name for the new profile:");
-        if (!name) { select.value = current.activeWeightsId; return; }
-        createProfile(current, name);
-        saveSettings(current);
+        // Nothing exists until a name comes back, so this dialog keeps its Cancel. The taken list holds the
+        // active id even when unsaved: newProfileId rejects it too, and on a fresh device it is the name shown.
+        const takenIds = [...profileIds(current), previousId];
+        const created = await askProfileName({
+          title: "Name the new profile",
+          name: unusedProfileName(takenIds),
+          takenIds,
+          confirmLabel: "Create profile",
+          canCancel: true,
+          commit(typed) {
+            const settings = loadSettings(); // re-read here: the dialog may have been open a while
+            createProfile(settings, typed);
+            saveSettings(settings);
+            return settings.activeWeightsId;
+          },
+        });
+        if (!created) { select.value = previousId; return; }
         location.href = container.dataset.questionnaireHref;
         return;
       }
@@ -62,7 +80,7 @@ const { questionnaireHref } = Astro.props;
       location.reload();
     } catch (error) {
       alert(error.message);
-      select.value = current.activeWeightsId;
+      select.value = previousId;
     }
   });
   // Pages that save or apply settings without reloading (Questionnaire Save, Assistant Apply) announce it.

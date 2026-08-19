@@ -149,8 +149,8 @@ so node imports them directly — `tests/helpers.py` drives them that way): `for
   "epochOverride": null,
   "timezone": null,
   "activeSeasonId": null,
-  "weightsProfiles": {"username": {"id": "username", "questionnaire": {"answers": {}}, "…": "…"}},
-  "activeWeightsId": "username",
+  "weightsProfiles": {"lucky-garden-poet": {"id": "lucky-garden-poet", "questionnaire": {"answers": {}}, "…": "…"}},
+  "activeWeightsId": "lucky-garden-poet",
   "hidden": [],
   "overrides": {},
   "added": [],
@@ -167,9 +167,31 @@ profile has not been saved). The questionnaire answers ride inside each profile 
 every save/import. Device extras (`epochOverride`, `timezone`, …) are device-wide, not per profile.
 Nothing secret lives in the file, so export is never redacted.
 
+A device with no saved profile shows a generated `[Adjective]-[Noun]-[Title]` name —
+`lucky-garden-poet` — instead of a shared placeholder: the tables live in
+`src/lib/shared/profile-names.js`, the name is rolled once and kept under the
+`fortknight.default-profile-id` key, and `loadSettings` applies it wherever nothing is saved and the
+active id is still the bare fallback. That covers a device that has never visited, a version 2 record
+whose `weights` was null, and the reload after the last profile is deleted — so an existing device
+sitting on an unsaved `username` picks up a generated name on its next load too. `DEFAULT_WEIGHTS_ID`
+stays `username` as the deterministic fallback for an unnamed imported file, which keeps
+`migrateSettings` pure.
+
+Naming happens in one dialog (`src/lib/profile-name-dialog.js`, the site's only `<dialog>`): a name box, a
+**Regenerate** button that rolls another generated name, and a confirm button. It is used by both
+questionnaires, Build, Spoon Feed, Apply from assistant, *New profile…* and *Duplicate as…*. **Cancel appears
+only where it would mean something** — the create paths, where nothing exists until a name comes back. After
+a save the profile is already written, so there is nothing to cancel and the button is absent; Escape closes
+the dialog and keeps the generated name. A name already in use keeps the dialog open with the reason, rather
+than closing and reporting it elsewhere. `showModal()` supplies the focus trap, Escape and focus restore.
+
 The nav's profile dropdown (shown once a profile is saved) switches profiles and creates new ones
 (*New…*, an unsaved slot showing typical defaults until the questionnaire is saved — the id survives page
-loads); the first Save of an unsaved profile (the default `username` included) prompts for its name (Cancel keeps the id); the Profile page renames (the name field first on the page: the id changes with it — `renameProfile` moves the saved answers under the new id, the active id follows), copies (*Duplicate as…*) and deletes the active one (the last one included — the
+loads); the first Save of an unsaved profile (the generated default included) opens the naming dialog; the
+Profile page renames (the name field first on the page: the id changes with it — `renameProfile` moves the
+saved answers under the new id, the active id follows), with *Regenerate* beside it dropping a fresh
+generated name into that field, which Rename then takes. It also copies (*Duplicate as…*) and deletes the
+active one (the last one included — the
 device is then back to a blank, unsaved default) — operations in `src/lib/shared/user-settings.js`; leaving the
 questionnaire with unsaved edits triggers the browser's leave-page prompt. Names are slugified into ids
 (`slugifyId`).
@@ -177,7 +199,8 @@ questionnaire with unsaved edits triggers the browser's leave-page prompt. Names
 Migration (`migrateSettings()` in `src/lib/shared/user-settings.js`, on load and on import): version 1
 files (`weightsProfiles` + `activeWeightsId`, an `aiProvider` block with an API key) keep all their
 profiles and lose the AI block; version 2 files (a single `weights`) become one profile under its
-id (`username` when unnamed). Every profile key is normalised to a kebab-case id; a missing `activeWeightsId`
+id (`username` when unnamed — the deterministic fallback, not the generated name). Every profile key is
+normalised to a kebab-case id; a missing `activeWeightsId`
 falls back to the first profile (one that names no saved profile is kept — a profile started and not saved yet). The migrated record is written back at once and
 the pre-migration record (minus the AI block) is kept under its own key,
 `fortknight.user-settings.v<N>-backup` (never reused across versions); on the v2 → v3 step the

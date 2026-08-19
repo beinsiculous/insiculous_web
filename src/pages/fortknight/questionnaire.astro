@@ -267,9 +267,10 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 </FaceLayout>
 
 <script>
-  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, formatClockRange, personDayKeyResolver, sectionDaysFromYearSplit, slugifyId, subjectDailyMinutes, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
+  import { DEFAULT_AGENDA_SCOPE, DEFAULT_ENERGY_PEAK, DEFAULT_START_VARIANT, DEFAULT_WEEK_START, FLEXIBLE_BLOCK_KEY, activeWeights, answersProblem, currentSeasonForAnswers, defaultAnswers, pickAnswers, formatClockRange, personDayKeyResolver, sectionDaysFromYearSplit, subjectDailyMinutes, weightsFromAnswers, yearSplitFromScheme, yearSplitFromSeasons } from "../../lib/shared/weights-rules.js";
   import { NOT_FORTKNIGHT_QUESTIONNAIRE_KEYS } from "../../lib/answer-keys.js";
-  import { loadSettings, profileIds, renameProfile, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
+  import { loadSettings, profileIds, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
+  import { promptProfileName } from "../../lib/profile-naming.js";
   import { renderImportReview } from "../../lib/shared/import-review.js";
   import { dayLabel } from "../../lib/shared/meal-plan.js";
   import { checkedValues as checkedValuesIn, setChecked as setCheckedIn } from "../../lib/question-fields.js";
@@ -1059,7 +1060,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       dirty = true;
       if (bundle) renderPreview();
     });
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!bundle) return;
       const answers = readAnswers();
@@ -1073,26 +1074,13 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       setActiveWeights(settings, weights);
       saveSettings(settings);
       dirty = false;
-      let savedId = weights.id;
-      if (firstSave) {
-        // The profile now exists: let the person name it (the name is the id; Cancel or the same name keeps it).
-        const name = prompt("Saved. Name this profile:", savedId);
-        if (name && slugifyId(name) !== savedId) {
-          try {
-            renameProfile(settings, savedId, name);
-            saveSettings(settings);
-            savedId = settings.activeWeightsId;
-          } catch (error) {
-            status.textContent = `Saved profile ${savedId}, but not renamed: ${error.message}. Rename it on the Profile page.`;
-            renderProfileBar();
-            document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
-            return;
-          }
-        }
-      }
+      // The profile now exists: the shared dialog names it (it holds its own errors, so there is no
+      // rename-failed branch here any more) and reports what it did for the status line.
+      const note = firstSave ? await promptProfileName(weights.id) : "";
+      settings = loadSettings();
       renderProfileBar();
       document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
-      status.textContent = `Saved profile ${savedId} on this device.`;
+      status.textContent = `Saved profile ${settings.activeWeightsId} on this device.${note}`;
     });
     document.getElementById("downloadWeightsButton").addEventListener("click", () => {
       if (!bundle) return;

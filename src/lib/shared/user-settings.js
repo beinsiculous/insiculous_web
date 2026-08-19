@@ -3,12 +3,16 @@
 // weights.questionnaire.answers), one of them active, plus device-only extras. Nothing secret lives here.
 import { DAY_KEY_ORDER } from "./fortknight-rules.js";
 import { DEFAULT_WEIGHTS_ID, activeWeights, slugifyId } from "./weights-rules.js";
+import { randomProfileName } from "./profile-names.js";
 import { classifyAssistantDocument } from "./workspace-docs.js";
 
 const STORAGE_KEY = "fortknight.user-settings";
 /** The pre-migration record of each schema step, kept (minus the old AI-provider block and its key) so a bad
  *  migration can be recovered: fortknight.user-settings.v1-backup, .v2-backup, … — one key per version, never reused. */
 const backupStorageKey = (schemaVersion) => `${STORAGE_KEY}.v${Number.isInteger(schemaVersion) ? schemaVersion : 1}-backup`;
+/** Where this device's generated default profile name lives — its own key, so a first visit costs one
+ *  small write instead of a whole settings record nobody asked to save yet. */
+const DEVICE_NAME_KEY = "fortknight.default-profile-id";
 export const SETTINGS_SCHEMA_VERSION = 3;
 /** The default profile id (kept under its old name for the pages that import it). */
 export const USER_WEIGHTS_ID = DEFAULT_WEIGHTS_ID;
@@ -31,8 +35,9 @@ export function defaultSettings() {
 
 /** Bring any stored/exported settings object up to the current shape (pure).
  *  v1 → v3: `weightsProfiles` + `activeWeightsId` are kept as they are (the AI-provider block, including
- *  any API key, is dropped); v2 → v3: the single `weights` becomes the one profile under its id (`username`
- *  when unnamed) and is made active. Every profile's `id` is normalised to its key; unknown keys are dropped.
+ *  any API key, is dropped); v2 → v3: the single `weights` becomes the one profile under its id (the
+ *  DEFAULT_WEIGHTS_ID fallback when unnamed; loadSettings swaps that for the device's generated name
+ *  when no profile is saved) and is made active. Every profile's `id` is normalised to its key; unknown keys are dropped.
  *  `recoveredProfiles` (optional, id -> weights) are added when their id is free — how loadSettings() hands
  *  back the profiles the v1 → v2 step parked in the backup. */
 export function migrateSettings(parsed, recoveredProfiles = null) {
@@ -113,10 +118,43 @@ function parkedProfiles() {
   }
 }
 
+let deviceProfileId = null; // resolved once per JS context, then reused
+
+/** This device's generated default profile name (adjective-noun-title) — made once, then remembered.
+ *  Memoised because loadSettings() runs several times per page view (the Profile page alone reads it
+ *  three times) and every one of them must show the same name. Each localStorage call is guarded on
+ *  its own: with storage blocked the name is stable for the page view but cannot outlive it, which is
+ *  the best available behaviour rather than a placeholder everybody shares. */
+export function deviceDefaultProfileId() {
+  if (deviceProfileId) return deviceProfileId;
+  try {
+    const stored = localStorage.getItem(DEVICE_NAME_KEY);
+    if (stored) return (deviceProfileId = stored);
+  } catch (error) {
+    console.warn("device profile name unreadable, generating one", error);
+  }
+  deviceProfileId = randomProfileName();
+  try {
+    localStorage.setItem(DEVICE_NAME_KEY, deviceProfileId);
+  } catch (error) {
+    console.warn("device profile name not stored, it lasts this page view only", error);
+  }
+  return deviceProfileId;
+}
+
+/** A device with nothing saved shows its generated name rather than the bare fallback id. Applied on the
+ *  way out of loadSettings so the pure functions above stay pure: a fresh device, a v2 record whose
+ *  `weights` was null, and the reload after the last profile is deleted all land here. */
+function withDeviceDefaultName(settings) {
+  const noneSaved = Object.keys(settings.weightsProfiles || {}).length === 0;
+  if (noneSaved && settings.activeWeightsId === DEFAULT_WEIGHTS_ID) settings.activeWeightsId = deviceDefaultProfileId();
+  return settings;
+}
+
 export function loadSettings() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return defaultSettings();
+    if (!stored) return withDeviceDefaultName(defaultSettings());
     const parsed = JSON.parse(stored);
     const isOlder = !Number.isInteger(parsed.schemaVersion) || parsed.schemaVersion < SETTINGS_SCHEMA_VERSION;
     // v2 → v3 recovers the profiles the earlier collapse parked in the backup (lossless; the person can delete them).
@@ -128,10 +166,10 @@ export function loadSettings() {
       localStorage.setItem(backupStorageKey(parsed.schemaVersion), JSON.stringify(backup)); // its own key: the v1 backup stays intact
       saveSettings(settings); // purge old fields (and the key) from the live record right away
     }
-    return settings;
+    return withDeviceDefaultName(settings);
   } catch (error) {
     console.warn("settings unreadable, using defaults", error);
-    return defaultSettings();
+    return withDeviceDefaultName(defaultSettings());
   }
 }
 

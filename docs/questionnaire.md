@@ -21,8 +21,9 @@ as the owner drafted them, how each answer lands in the weights contract, and th
   questionnaire *is* its face's settings; all four pages write the same profile, each only its own answer keys
   (`FORKKNIFE_ANSWER_KEYS` for ForkKnife's questionnaire, `mealPlan` for Spoon Feed, `mealPlan` +
   `standingAppointments` + `tasks` for Build, the rest for FortKnight's), over the profile as stored at save time. Named profiles per device, one active (`docs/app.md` → User settings): Save derives
-  the active profile's weights (`settings.weightsProfiles[activeWeightsId]`, default id
-  `username` by default, answers inside at `questionnaire.answers`); Download gives `weights.<id>.json`. An
+  the active profile's weights (`settings.weightsProfiles[activeWeightsId]`, a generated
+  `[Adjective]-[Noun]-[Title]` id such as `lucky-garden-poet` until the person names it, answers inside
+  at `questionnaire.answers`); Download gives `weights.<id>.json`. An
   assistant in the person's own workspace can hand back a weights file or an import document
   (`docs/assistant-workspace.md`; an agenda it drafts is an import document — `docs/llm-guide.md`).
 

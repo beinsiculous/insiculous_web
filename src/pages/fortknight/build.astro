@@ -291,7 +291,7 @@ const options = questionnaire?.options ?? {};
   /** The whole answers object at save time: the profile as stored *right now* (another tab, the Questionnaire or
    *  Spoon Feed may have saved meanwhile) with only this page's keys written over it. Re-deriving the weights is
    *  what turns the commitments back into the block-split anchors. */
-  function save() {
+  async function save() {
     const stored = loadSettings();
     stored.activeWeightsId = settings.activeWeightsId; // the profile shown on this page, not whichever another tab switched to
     const base = activeWeights(stored)?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories);
@@ -309,7 +309,7 @@ const options = questionnaire?.options ?? {};
     }
     settings = stored;
     dirty = false;
-    const note = firstSave ? promptProfileName(settings.activeWeightsId) : "";
+    const note = firstSave ? await promptProfileName(settings.activeWeightsId) : "";
     settings = loadSettings();
     document.dispatchEvent(new CustomEvent("fortknight:settings-saved"));
     renderProfileBar();
