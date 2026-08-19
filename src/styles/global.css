@@ -124,6 +124,33 @@ td a {
   text-underline-offset: 3px;
 }
 
+/* The studio's button-shaped link. Lived in src/pages/index.astro's scoped <style> until the
+   devlog needed one too; a rule copied into a second file is a rule that drifts. Note the two
+   faces have their own unrelated .button in src/styles/faces.css — no page loads both, because
+   global.css is imported only by BaseLayout.astro and faces.css only by FaceLayout.astro. */
+.button {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+.button:hover {
+  text-decoration: none;
+  filter: brightness(1.1);
+}
+
+.button.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  font-weight: 500;
+}
+
 /* Keyboard focus must be obvious everywhere. The browser default outline was the only indicator
    before, and it vanished against this palette. */
 :focus-visible {

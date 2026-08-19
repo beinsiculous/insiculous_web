@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SupportLink from '../../components/SupportLink.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('devlog');
@@ -41,6 +42,8 @@ const game = post.data.game ? await getEntry(post.data.game) : undefined;
 
     <Content />
   </article>
+
+  <SupportLink />
 
   <p class="back"><a href="/devlog/">← all posts</a></p>
 </BaseLayout>
