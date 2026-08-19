@@ -8,7 +8,7 @@ on 2026-08-17, and the FortKnight repository that had stayed canonical for the d
 here on 2026-08-18 — one project, one repo, no sync step.)
 
 ## The site
-beinsiculous.com is one Astro 5 build, deployed to Cloudflare as a static-assets Worker. It carries three surfaces
+beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries three surfaces
 that deliberately look like three different websites:
 the **Be Insiculous studio** (`/`, `/games/`, `/devlog/`, `/engine/` — its own `BaseLayout.astro`),
 and the two planner faces under `FaceLayout.astro`, each with its own skin.
@@ -36,7 +36,7 @@ Multi-page, no UI framework. `npm install` once, then:
   belongs to none of them, so it takes the studio's: `DEFAULT_THEME` is a third theme id, `studio`, whose skin lives
   in the site's own `src/styles/studio-skin.css` (`themes.css` is mirrored from this repo and knows only the two
   faces), and its chrome is the studio's too — the `be_insiculous` wordmark, a `STUDIO_NAV` of Games · FortKnight ·
-  ForkKnife, the studio `favicon.svg`, and no emoji switcher, those three links already going everywhere it went. Both faces read and write the same on-device profile (one localStorage, one `settings.weightsProfiles`) —
+  ForkKnife, the studio `beinsiculous.jpg` tab icon, and no emoji switcher, those three links already going everywhere it went. Both faces read and write the same on-device profile (one localStorage, one `settings.weightsProfiles`) —
   each face's questionnaire is its settings, and each of the four writing pages saves only its own answer keys over
   the profile *as stored at save time* (`pickAnswers` in `weights-rules.js` over the key sets named in the site's
   `src/lib/answer-keys.js`: Spoon Feed owns `mealPlan`, Build owns `mealPlan` + `standingAppointments` + `tasks`,
