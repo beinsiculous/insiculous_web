@@ -1,7 +1,8 @@
 ---
 title: 'Insiculous Pong'
 blurb: 'Neon Pong with power-ups, a rippling spring-mass grid, and four escalating chaos modes.'
-status: 'alpha'
+status: 'playable'
+wasm: '/games/pong/v1/game.js'
 screenshots: ['/images/pong-in-editor.png']
 order: 1
 ---
@@ -16,5 +17,6 @@ modes**: Normal, Insane, Ridiculous, and *Insiculous* — all of it at once.
 Six achievements to chase, and the whole thing is localized in English and
 Pirate.
 
-Built on Insiculous 2D. Desktop build (Vulkan / Metal / DX12) — a browser
-version is planned once the engine's web export lands.
+Built on Insiculous 2D. Playable right here in the browser (WebGPU —
+Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
+(Vulkan / Metal / DX12) run the same code natively.
