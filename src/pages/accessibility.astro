@@ -27,7 +27,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <h2>Known limits</h2>
   <ul>
     <li>The games themselves will run on an HTML <code>&lt;canvas&gt;</code>, which is inherently visual. When the browser builds ship, each one will document its keyboard controls and offer remappable keys and pause, but they will not be screen-reader playable.</li>
-    <li>The FortKnight and ForkKnife planners sync some shared code from a separate project; accessibility fixes there are applied on this site's side where possible.</li>
+    <li>The FortKnight and ForkKnife planners render most of their pages in the browser from your saved profile, so their interactive views need JavaScript; the prerendered fallback is limited.</li>
   </ul>
 
   <h2>How it stays this way</h2>
