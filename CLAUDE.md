@@ -114,7 +114,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 ## Where to look
 | need | file |
 |------|------|
-| why any of this exists — what each surface argues, and the art policy's wording | `docs/thesis.md` |
+| why any of this exists — the studio's banner, the two registers (studio professional / the four projects quirky), what each surface argues, and the art policy's wording | `docs/thesis.md` |
 | concepts and vocabulary | `docs/domain.md` |
 | every JSON file and field | `docs/data-model.md`, `data/schema/*.schema.json` |
 | how the workbook mapped to JSON, known quirks | `docs/workbook-mapping.md` |

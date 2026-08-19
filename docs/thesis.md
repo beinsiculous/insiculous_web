@@ -1,7 +1,7 @@
 # Thesis
 
-What each thing here argues, and what it refuses to do. Four theses: the game studio, FortKnight,
-ForkKnife, and the company over all three.
+What the studio is, how it speaks, and what each thing here argues — the games and the engine,
+FortKnight, ForkKnife, and the company over all three, each with what it refuses to do.
 
 This is a positioning document, not a contract. Nothing builds from it and no schema references it —
 but the site copy does, and so should anyone deciding whether a proposed feature belongs. It is also
@@ -11,12 +11,43 @@ refined here first and mirrored outward.
 > Not published into anyone's assistant workspace — it is not in `WORKSPACE_STATIC_DOCUMENTS`
 > (`src/lib/shared/workspace-docs.js`) and must not be added to it.
 
+## How the studio presents itself
+
+**Be Insiculous is an Artificial Intelligence Development Studio.** That is the banner on `/`, spelled
+out, and it is the frame the games and the planner both sit inside: the engine is co-developed with
+coding agents and serves as a proving ground for them, and FortKnight and ForkKnife are tools an
+agent drives. The tagline in the footer of every page says the whole of it in eleven words —
+**"Built with AI, for AI, and the humans in the loop"** — and every clause of that is literal, not
+rhetorical:
+
+- **with AI** — the engine and this site are built with coding agents, under guardrails and review.
+- **for AI** — the planner's whole assistant workspace is a document set whose only reader is an AI,
+  and the engine is deliberately shaped so an agent can work in it (per-crate instruction files, live
+  tech-debt ledgers, everything runnable headless from the CLI).
+- **and the humans in the loop** — no leaderboard, no pass-rate, no credentials held on anyone's
+  behalf, and a person adjudicating every finding.
+
+### Two registers, and which page gets which
+
+The studio layer is, in practice, the resume for everyone here: it exists partly to help the studio
+become more professional *literally*, by looking legitimate to people who might hire or buy. So it
+**dresses for the job** — plain, confident, professional. No self-deprecation, no in-jokes, no
+manifesto voice.
+
+The **four projects each keep their own bubble of quirk**, and the quirk should be specific to each
+rather than one house style: FortKnight (`/fortknight/`), ForkKnife (`/forkknife/`), the games
+(`/games/`) and the devlog (`/devlog/`). Everything else — `/`, `/engine/`, `/404`, `/accessibility/`,
+`/profile/`, and the shared header, footer and meta copy — is the studio speaking and takes the
+professional register. When it is unclear which layer a page belongs to, ask that question first.
+
 ---
 
-## Be Insiculous — the game studio
+## The games and the engine
 
 **Make the machine as well as the game, keep both small enough to hold in your head, and put a
-second person on the couch.**
+second person on the couch.** The games are the studio's proving ground as much as its output: an
+engine built to be worked in by agents is the clearest thing an AI development studio can show for
+itself.
 
 ### The claims
 
