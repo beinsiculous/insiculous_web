@@ -87,7 +87,7 @@ its settings (`/fortknight/questionnaire/`, `/forkknife/questionnaire/`), and th
 `activeWeightsId`). Python scripts never
 call an LLM either.
 
-## The site (Astro 5, Node 24)
+## The site (Astro 7, Node 24)
 Static build, deployed to Cloudflare as a static-assets Worker. No UI framework; the face pages are
 plain untyped JavaScript, so `tsconfig.json` excludes them from `astro check` and the Python parity
 tests are what keep them honest. Three gates run on every build and block the deploy:

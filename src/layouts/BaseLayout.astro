@@ -35,12 +35,19 @@ const isActive = (href: string) =>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/jpeg" href="/beinsiculous.jpg" />
+    <link rel="apple-touch-icon" href="/beinsiculous.jpg" />
     <meta name="description" content={description} />
     <AccessibilityBootScript />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(currentPath, Astro.site)} />
+    <link rel="canonical" href={new URL(currentPath, Astro.site)} />
+    <meta property="og:image" content={new URL('/beinsiculous.jpg', Astro.site)} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Be Insiculous devlog" href="/rss.xml" />
     <title>{title}</title>
   </head>
   <body>
