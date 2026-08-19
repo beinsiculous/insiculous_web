@@ -19,6 +19,11 @@ const games = (await getCollection('games')).sort(
     alpha desktop builds — full gameplay loops, polish ongoing. In-browser
     WebAssembly versions arrive when the engine's web export ships.
   </p>
+  <p class="intro art-policy">
+    The games listed here are free and use AI art. The games we sell carry
+    none — those are made by our own artists, and they ship on Steam and the
+    app stores rather than here.
+  </p>
 
   <div class="grid">
     {games.map((game) => <GameCard game={game} />)}
@@ -29,6 +34,14 @@ const games = (await getCollection('games')).sort(
   .intro {
     max-width: 42em;
     margin-bottom: 2rem;
+  }
+
+  /* The art policy — wording comes from docs/thesis.md; edit it there first. It is a blanket
+     statement, true only while every game listed on this page uses AI art. */
+  .art-policy {
+    color: var(--text-bright);
+    border-left: 2px solid var(--accent);
+    padding-left: 1rem;
   }
 
   .grid {

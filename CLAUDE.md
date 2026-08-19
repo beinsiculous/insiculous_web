@@ -114,6 +114,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 ## Where to look
 | need | file |
 |------|------|
+| why any of this exists — what each surface argues, and the art policy's wording | `docs/thesis.md` |
 | concepts and vocabulary | `docs/domain.md` |
 | every JSON file and field | `docs/data-model.md`, `data/schema/*.schema.json` |
 | how the workbook mapped to JSON, known quirks | `docs/workbook-mapping.md` |
@@ -131,4 +132,6 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | how an assistant should propose changes | `docs/llm-guide.md` |
 | assistant workspace (file set, reply contract) | `docs/assistant-workspace.md` |
 | what comes next | `docs/roadmap.md` |
+| ForkKnife's full chain: questions → the agent interviewing back → menu, recipes, prep, cooking, shopping (design, not built) | `docs/forkknife-chain.md` |
+| forts, the four roles, boards, a real login — the household/community direction (design, not built) | `docs/fortress.md` |
 | adversarial review workflow | `.claude/skills/adversarial-review/SKILL.md`, `.kimi-code/skills/adversarial-review/SKILL.md`, `scripts/request-review.sh`, `prompts/` |

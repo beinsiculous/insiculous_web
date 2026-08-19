@@ -30,6 +30,25 @@ class WorkspaceDocumentsTests(unittest.TestCase):
             self.assertTrue((REPOSITORY_ROOT / source).is_file(), f"{file_name}: {source} missing")
         self.assertIn("llm-guide.md", listing)
 
+    def test_published_set_is_exactly_the_blessed_contracts(self):
+        """Publishing a file into a person's own AI workspace is the sensitive act, so the set is
+        pinned here: adding anything to WORKSPACE_STATIC_DOCUMENTS fails this test until someone
+        blesses it deliberately. docs/ also holds design records — docs/thesis.md, docs/fortress.md
+        and docs/forkknife-chain.md each say at the top that they are not published — and the second
+        assertion names them so the failure message says why when one of them slips in."""
+        published = set(run_node(module_import("workspace-docs.js", "WORKSPACE_STATIC_DOCUMENTS") + "process.stdout.write(JSON.stringify(WORKSPACE_STATIC_DOCUMENTS));", {}).values())
+        blessed = {
+            "docs/llm-guide.md", "docs/domain.md", "docs/data-model.md", "docs/weights.md",
+            "docs/questionnaire.md", "docs/generator.md", "docs/importers.md",
+            "docs/import-from-spreadsheet.md", "docs/meal-plan.md",
+            "data/schema/import.schema.json", "data/schema/meal-plan.schema.json",
+            "data/schema/weights.schema.json", "data/schema/user-settings.schema.json",
+        }
+        self.assertEqual(published, blessed, "the published workspace file set changed: bless the addition here, or take it back out")
+        for design_document in ("docs/thesis.md", "docs/fortress.md", "docs/forkknife-chain.md"):
+            self.assertTrue((REPOSITORY_ROOT / design_document).is_file(), f"{design_document} missing")
+            self.assertNotIn(design_document, published, f"{design_document} is design, not a shipped contract: it must not be published into anyone's assistant workspace")
+
     def test_document_set_and_upcoming_dates(self):
         bundle = load_bundle()
         settings = {"schemaVersion": 3, "epochOverride": None, "weightsProfiles": {}, "activeWeightsId": "my-weights"}
