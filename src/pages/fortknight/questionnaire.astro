@@ -45,8 +45,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
             <QuestionField question={question} index={questionIndex} options={options} questionnaire={questionnaire}>
               {question.kind === "commitments" && (
                 <div class="commitments">
-                  <p class="import-pointer">Add them one at a time on <a href={facePath("fortknight", "build/")}>the Build page →</a></p>
-                  <p class="import-pointer">Or had your assistant read your calendar or planner? <a href={facePath("fortknight", "assistant/")}>Upload its import file on the Assistant page →</a></p>
+                  <p class="import-pointer"><a href={facePath("fortknight", "build/")}>Open the Build page →</a></p>
+                  <p class="import-pointer"><a href={facePath("fortknight", "assistant/")}>Upload an import on the Assistant page →</a></p>
                   <p class="muted" id="buildCounts"></p>
                   <details class="applied-import" id="appliedImport">
                     <summary class="muted" id="importStatus"></summary>
@@ -207,7 +207,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
                             <label data-rule-kinds="new-moon" hidden>new moon № <input type="number" data-field="ruleIndex" min="1" max="13" value="1" aria-label="which new moon of the year" /></label>
                             <span class="known-starts" data-rule-kinds="manual" hidden>
                               <span class="known-start-rows"></span>
-                              <button type="button" class="add-known-start" aria-label="add a year's start date">Add date</button>
+                              <button type="button" class="add-known-start" aria-label="add a year’s start date">Add date</button>
                             </span>
                           </span>
                           <span class="rule-tail" data-rule-kinds="fixed-date nth-weekday easter solar new-moon manual" hidden>
@@ -252,7 +252,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       <p class="muted" id="epochOverrideNotice" hidden>A date override is stored on this device (<span id="epochOverrideText"></span>): the date resolver pins that date to that day instead of following the seasons. <button type="button" class="link-button" id="clearEpochOverrideButton">Clear override</button></p>
     </form>
     ) : (
-      <p class="muted">The app's data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
+      <p class="muted">The app’s data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
     )}
   </section>
 
@@ -260,8 +260,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     <h2>Preview — share of the fortnight</h2>
     <p class="muted">Recomputed as you answer.</p>
     <div id="sharePreview"></div>
-    <h2>Preview — your day's blocks</h2>
-    <p class="muted">Your waking window sets the day's scope; the rest is unscheduled. Each standout category earns a focus block — if none do, you get one flexible block. Blocks are cut around your fixed activities and appointments.</p>
+    <h2>Preview — your day’s blocks</h2>
+    <p class="muted">Your waking window sets the day’s scope; the rest is unscheduled. Each standout category earns a focus block — if none do, you get one flexible block. Blocks are cut around your fixed activities and appointments.</p>
     <div id="blockPreview"></div>
   </section>
 </FaceLayout>
@@ -424,8 +424,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
   // Placeholders rotate so the box shows what an answer looks like; clicking in clears them for good.
   const NOTE_PLACEHOLDERS = {
     fortnight: ["Every Wednesday", "On days we eat out", "Every other weekend"],
-    section: ["snow, rain, heat or gloom of night", "The first Tuesday of every Month", "The last day of every SECTION"],
-    notOften: ["Friday the 13th", "When it breaks", "Everyday for a week after christmas"],
+    section: ["snow, rain, heat or gloom of night", "The first Tuesday of every month", "The last day of every SECTION"],
+    notOften: ["Friday the 13th", "When it breaks", "Every day for a week after Christmas"],
   };
   let placeholderIndex = 0;
   const cyclingNotes = new Set();
@@ -684,7 +684,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     const start = startDateForRule(rule, year, readKnownStarts(row));
     preview.textContent = start
       ? `${year}: ${WEEKDAY_NAMES[start.getUTCDay()].slice(0, 3)} ${formatIsoDate(start)}`
-      : `no start in ${year}${kind === "manual" ? " — add that year's date" : ""}`;
+      : `no start in ${year}${kind === "manual" ? " — add that year’s date" : ""}`;
   }
 
   function addSectionRow(section = null) {
@@ -807,7 +807,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     const status = document.getElementById("importStatus");
     const forget = document.getElementById("forgetImportButton");
     const details = document.getElementById("appliedImport");
-    details.open = false; // collapsed by default; the person opens it to read the assistant's review
+    details.open = false; // collapsed by default; the person opens it to read the assistant’s review
     details.classList.toggle("empty", !appliedImport);
     if (appliedImport) {
       status.textContent = `Applied from your assistant${appliedImport.source?.kind ? ` (${appliedImport.source.kind})` : ""}. Its commitments and tasks are in this profile — they are listed on the Build page; any focus grid and fixed activities come with your answers.`;
@@ -953,7 +953,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     const standingCount = weights.blockSplit.anchors.filter((anchor) => anchor.source === "standing-appointment").length;
     const anchorNote = `${anchorCount} anchor${anchorCount === 1 ? "" : "s"} (${anchorCount - standingCount} imported fixed activit${anchorCount - standingCount === 1 ? "y" : "ies"}, ${standingCount} standing appointment${standingCount === 1 ? "" : "s"}).`;
     const gridDays = Object.keys(weights.blockFocusGrid || {}).length;
-    const gridNote = gridDays ? ` Block focus imported for ${gridDays} day${gridDays === 1 ? "" : "s"}.` : " No focus grid yet — apply an import in the Commitments section below to see one on the Overview.";
+    const gridNote = gridDays ? ` Block focus imported for ${gridDays} day${gridDays === 1 ? "" : "s"}.` : " No focus grid yet — apply an import on the Assistant page to see one on the Overview.";
     blockPreview.innerHTML = `
       <div class="block-bar" aria-label="day split, ${totalMinutes} minutes">${bars}</div>
       <p class="muted">Waking window ${formatClockRange(weights.wakingWindow.start, weights.wakingWindow.end)} (${formatMinutes(weights.wakingWindow.minutesPerDay)}).
@@ -1089,10 +1089,10 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     });
     document.getElementById("resetAnswersButton").addEventListener("click", () => {
       if (!bundle) return;
-      populate(defaultAnswers(bundle.questionnaire, bundle.categories)); // this page's questions only; ForkKnife's answers stay
+      populate(defaultAnswers(bundle.questionnaire, bundle.categories)); // this page’s questions only; ForkKnife’s answers stay
       renderPreview();
       dirty = true;
-      status.textContent = "Reset to defaults (not saved) — your meals and menu are ForkKnife's and stay as they are.";
+      status.textContent = "Reset to defaults (not saved) — your meals and menu are ForkKnife’s and stay as they are.";
     });
     document.getElementById("clearEpochOverrideButton").addEventListener("click", () => {
       settings = loadSettings();
@@ -1114,7 +1114,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
       bundle = await response.json();
       populateFromSettings();
     } catch (error) {
-      status.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+      status.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
       console.error(error);
     }
   }
