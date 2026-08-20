@@ -59,10 +59,17 @@ stripped=$(printf '%s' "$cmd" | sed "s/'[^']*'//g; s/\"[^\"]*\"//g")
 # `eval "git commit ..."` cannot slip past by hiding it inside quotes
 # (FortKnight review-1 F2). A commit message that merely mentions "git commit"
 # trips the gate too — a harmless false positive.
-case "$cmd" in
-    *"git commit"*) ;;
-    *) exit 0 ;;
-esac
+# `git commit` as a literal substring missed every redirected commit — the
+# whole class this gate exists for in a nested working set, since
+# `git -C <repo> commit` does not contain it.
+#
+# Between `git` and `commit`, allow git's own flags and each flag's value
+# (`-C nested`, `-c k=v`, `-C "with space"`). A bare token that is NOT a flag
+# value ends the match, so `git log --grep=commit` is still not a commit: `log`
+# is neither a flag nor a flag's value.
+q="'"
+commit_pattern="\\bgit\\b([[:space:]]+(-[^[:space:]]+|\"[^\"]*\"|$q[^$q]*$q)([[:space:]]+(\"[^\"]*\"|$q[^$q]*$q|[^-[:space:]][^[:space:]]*))?)*[[:space:]]+commit([[:space:]]|$)"
+printf '%s' "$cmd" | grep -qE "$commit_pattern" || exit 0
 # Door 1: the review happened. The token counts only as a leading env
 # assignment (or one right after && / ;) — never as free text inside a commit
 # message (review-3 F3).
@@ -166,7 +173,109 @@ if [ -n "$skip_reason" ] || [ -n "$skip_signer" ]; then
     fi
 fi
 
-top="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+deny() {
+    if [ "$HARNESS" = "kimi" ]; then
+        printf '%s\n' "$1" >&2
+        exit 2
+    fi
+    jq -n --arg r "$1" '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $r}}'
+    exit 0
+}
+
+participates() {
+    [ -f "$1/.kimi-code/skills/adversarial-review/SKILL.md" ] || [ -f "$1/.claude/skills/adversarial-review/SKILL.md" ]
+}
+
+# Which repository is this commit actually for?
+#
+# In a nested working set (an admin repo with the project repos cloned inside
+# it) the commit is usually issued from the parent, so the repo being committed
+# to is NOT the one this hook stands in. Sizing the parent's diff there finds 0
+# changed lines and waves a 500-line commit through, silently — worse than no
+# gate at all.
+#
+# Resolution is per SEGMENT. The command is split on && || ; | and the segments
+# are walked in order: a `cd` segment moves the working directory for everything
+# after it, and only the segment that actually commits owns the -C that counts.
+# Taking any -C in the command was a real bypass — `git -C small status; git
+# commit` sized `small`, found nothing, and let the real commit land unreviewed
+# (code review F1, reproduced before this was written).
+#
+# The gate never interprets a path: it hands one directory to git and denies
+# anything it cannot reduce to exactly one repository. Failing closed is the only
+# safe direction for a gate whose failure is invisible. Matching runs on
+# $stripped (quoted segments removed), so a commit message cannot redirect it.
+redirect_problem=""
+target_dir=""
+commit_segments=0
+walking_dir=""
+while IFS= read -r segment; do
+    case "$segment" in *[![:space:]]*) ;; *) continue ;; esac
+    segment=" $segment"          # so a segment-leading `cd`/`-C` still matches
+
+    segment_cd=""
+    case "$segment" in
+        *[[:space:]]cd[[:space:]]*)
+            segment_cd=$(printf '%s' "$segment" | sed -n 's/.*[[:space:]]cd[[:space:]]\{1,\}\([^[:space:]]\{1,\}\).*/\1/p') ;;
+    esac
+
+    if printf '%s' "$segment" | grep -qE "$commit_pattern"; then
+        commit_segments=$((commit_segments + 1))
+        case "$segment" in
+            *--git-dir*|*--work-tree*|*GIT_DIR=*)
+                redirect_problem="it points git at a repository through --git-dir, --work-tree or GIT_DIR=" ;;
+        esac
+        segment_c=$(printf '%s' "$segment" | sed -n 's/.*[[:space:]]-C[[:space:]]*\([^[:space:]]\{1,\}\).*/\1/p')
+        if [ -n "$segment_c" ]; then
+            target_dir="$segment_c"
+        else
+            target_dir="$walking_dir"
+            case "$segment" in
+                *[[:space:]]-C*)
+                    redirect_problem="its target directory is quoted or empty, so this gate cannot resolve it" ;;
+            esac
+        fi
+    fi
+
+    if [ -n "$segment_cd" ]; then
+        case "$segment_cd" in
+            /*) walking_dir="$segment_cd" ;;
+            *)  walking_dir="${walking_dir:+$walking_dir/}$segment_cd" ;;
+        esac
+    fi
+done <<SEGMENTS
+$(printf '%s' "$stripped" | awk '{gsub(/&&|\|\||;|\|/, "\n"); print}')
+SEGMENTS
+
+# A subshell's working directory cannot be followed from out here, and two
+# commits in one command cannot both be sized. Both are denied, not guessed.
+case "$stripped" in
+    *"("*) redirect_problem="it runs the commit inside a subshell, whose working directory this gate cannot follow" ;;
+esac
+if [ "$commit_segments" -gt 1 ]; then
+    redirect_problem="it commits to more than one repository in one command — run one commit per command so each is sized against its own repo"
+fi
+case "$target_dir" in
+    *'$'*) redirect_problem="its target directory is a shell variable this gate cannot expand" ;;
+esac
+
+if [ -z "$redirect_problem" ] && [ -n "$target_dir" ]; then
+    git -C "$target_dir" rev-parse --show-toplevel >/dev/null 2>&1 || \
+        redirect_problem="'$target_dir' is not inside a git repository"
+fi
+if [ -n "$redirect_problem" ]; then
+    # Only marked repos get an opinion. With the target unresolvable, judge
+    # participation by where we stand — an unmarked working directory stays
+    # silent, which is what keeps kimi's globally-registered hooks scoped.
+    # Accepted residual risk, code review F2: an unmarked cwd committing into a
+    # marked repo through an unresolvable path is not gated. Bounded, because in
+    # the intended working set the cwd is the admin repo, which is marked.
+    stand="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+    participates "$stand" || exit 0
+    deny "Blocked: this gate must size the diff of the repository being committed to, and $redirect_problem. Commit through 'git -C <repo> commit ...' with an unquoted path, or run the commit from inside <repo>. This is deliberate: a redirect the gate cannot resolve would otherwise measure the wrong repository, find nothing, and let an unreviewed commit land silently."
+fi
+
+top="$(git -C "${target_dir:-.}" rev-parse --show-toplevel 2>/dev/null)" || exit 0
 cd "$top"
 # Repo guard: only repos that carry the adversarial-review skill participate.
 [ -f .kimi-code/skills/adversarial-review/SKILL.md ] && : || \
@@ -202,8 +311,4 @@ else
     reason="Blocked by project convention: big commits get an adversarial CODE review before landing. The pending diff is ${lines} changed lines (threshold ${THRESHOLD}). Write the diff (git diff --cached > review/draft.diff; use git diff if staging happens in the same command), run scripts/request-review.sh code review/draft.diff --reviewer=${REVIEWER}, present and adjudicate every finding with the user, apply accepted fixes — then retry the commit with the command prefixed ADV_REVIEWED=1, which asserts the review HAPPENED and nothing else (if this exact diff was already reviewed this session, that counts). ${skip_door} Clear review/ artifacts first ONLY if they belong to a previous, settled review subject."
 fi
 
-if [ "$HARNESS" = "kimi" ]; then
-    printf '%s\n' "$reason" >&2
-    exit 2
-fi
-jq -n --arg r "$reason" '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $r}}'
+deny "$reason"
