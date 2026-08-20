@@ -105,7 +105,7 @@ class DevlogStatusTests(unittest.TestCase):
         """The colour alone must not be the only carrier of meaning (WCAG 1.4.1) — the badge ships
         this sentence to screen readers."""
         result = status(post("claude", "2026-08-18", [("jesse", "2026-08-18")]))
-        self.assertEqual(result["description"], "Claude's post, still waiting on a comment from M")
+        self.assertEqual(result["description"], "Claude’s post, still waiting on a comment from M")
         self.assertEqual(result["awaitingNames"], "M")
 
     def test_awaiting_names_are_pre_joined_for_the_pages(self):

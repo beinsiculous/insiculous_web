@@ -167,7 +167,7 @@ export function restrictedBlockFocusGrid(sourceGrid, focusBlockKeys, allowedFocu
     grid[dayKey] = cells;
   }
   if (unmatched.length) {
-    warnings.unshift(`${sourceName}: focus for ${unmatched.length === 1 ? "block" : "blocks"} ${unmatched.join(", ")} does not match this profile's blocks (${focusBlockKeys.join(", ")}); dropped`);
+    warnings.unshift(`${sourceName}: focus for ${unmatched.length === 1 ? "block" : "blocks"} ${unmatched.join(", ")} does not match this profile’s blocks (${focusBlockKeys.join(", ")}); dropped`);
   }
   return { grid, warnings };
 }
@@ -750,7 +750,7 @@ export function wakingWindowProblem(wakingWindow, questionnaire) {
   if (!wakingWindow || !isTime(wakingWindow.start) || !isTime(wakingWindow.end)) return "The waking window needs a start and an end time (HH:MM).";
   const minutesPerDay = wakingWindowFromAnswer(wakingWindow).minutesPerDay;
   if (minutesPerDay < bounds.min || minutesPerDay > bounds.max) {
-    return `The waking window must be ${bounds.min / 60}–${bounds.max / 60} hours (${formatClockTime(wakingWindow.start)} – ${formatClockTime(wakingWindow.end)} is ${Math.round(minutesPerDay / 6) / 10}).`;
+    return `The waking window must be ${bounds.min / 60}–${bounds.max / 60} hours (${formatClockRange(wakingWindow.start, wakingWindow.end)} is ${Math.round(minutesPerDay / 6) / 10} hours).`;
   }
   return null;
 }
@@ -762,9 +762,9 @@ export function blockFocusGridProblem(grid, categoryOrder) {
   const allowedFocus = [...categoryOrder, FLEXIBLE_FOCUS];
   for (const [dayKey, cells] of Object.entries(grid)) {
     if (!DAY_KEY_ORDER.includes(dayKey)) return `Your block focus grid names an unknown day key (${dayKey}).`;
-    if (typeof cells !== "object" || cells === null || Array.isArray(cells)) return `Your block focus grid's ${dayKey} must map block keys to a focus.`;
+    if (typeof cells !== "object" || cells === null || Array.isArray(cells)) return `Your block focus grid’s ${dayKey} must map block keys to a focus.`;
     for (const [blockKey, focus] of Object.entries(cells)) {
-      if (!allowedFocus.includes(focus)) return `Your block focus grid's ${dayKey}.${blockKey} has an unknown focus (${focus}).`;
+      if (!allowedFocus.includes(focus)) return `Your block focus grid’s ${dayKey}.${blockKey} has an unknown focus (${focus}).`;
     }
   }
   return null;
@@ -865,7 +865,7 @@ export function answersProblem(answers, questionnaire, categories) {
   const mealsProblem = mealNamesProblem(filledMeals);
   if (mealsProblem) return mealsProblem;
   const planProblem = mealPlanProblem(answers.mealPlan, filledMeals);
-  if (planProblem) return `Meal plan: ${planProblem} — fix it on ForkKnife's Questionnaire.`;
+  if (planProblem) return `Meal plan: ${planProblem} — fix it on ForkKnife’s Spoon Feed page.`;
   return null;
 }
 

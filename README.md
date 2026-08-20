@@ -194,7 +194,9 @@ the machinery:
 Gates that keep it true (a regression blocks the deploy, like a broken build):
 
 - `scripts/postbuild-check.mjs` (every build): `<html lang>`, exactly one `<h1>`, `alt` on
-  every `<img>`, no positive `tabindex`, no duplicate ids.
+  every `<img>`, no positive `tabindex`, no duplicate ids. It also gates the prose
+  (`scripts/lib/prose-check.mjs`): no word glued to an inline tag, and no straight apostrophe
+  in rendered text.
 - `scripts/a11y-check.mjs` (`npm run verify`, and CI between Build and Deploy): serves
   `dist/`, runs axe-core (wcag2a/2aa/22aa) on **every** route, exits 1 on any violation.
   `A11Y_ONLY=<substring>` filters routes while iterating.

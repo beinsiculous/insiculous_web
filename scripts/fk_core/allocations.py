@@ -99,7 +99,7 @@ def allocate_by_activities(activities, blocks):
                 by_category_and_block[category][block_key] += per_category_minutes
     rounded = lambda mapping: {key: round(value) for key, value in mapping.items()}  # noqa: E731
     return {
-        "method": "Timed activities count duration + prep minutes; untimed activities split the block's remaining minutes evenly; multi-category activities split evenly across categories.",
+        "method": "Timed activities count duration + prep minutes; untimed activities split the block’s remaining minutes evenly; multi-category activities split evenly across categories.",
         "byCategory": rounded(by_category),
         "shareByCategory": _shares(by_category),
         "byDay": {day_key: rounded(totals) for day_key, totals in by_day.items()},

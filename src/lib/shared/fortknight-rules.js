@@ -72,7 +72,7 @@ export function weekdayOnOrBefore(date, targetWeekdayNumber) {
 /** occurrence 1..4 = the nth such weekday; -1 = the last one. `month` is 1-12. */
 export function nthWeekdayOfMonth(year, month, targetWeekdayNumber, occurrence) {
   if (occurrence === -1) {
-    const lastOfMonth = addDays(utcDate(year, month, 1), -1); // month index `month` = the next month's first day
+    const lastOfMonth = addDays(utcDate(year, month, 1), -1); // month index `month` = the next month’s first day
     return weekdayOnOrBefore(lastOfMonth, targetWeekdayNumber);
   }
   return addDays(weekdayOnOrAfter(utcDate(year, month - 1, 1), targetWeekdayNumber), 7 * (occurrence - 1));
