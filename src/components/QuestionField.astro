@@ -47,7 +47,7 @@ const mealCounts = Array.from({ length: questionnaire.mealsPerDay.max - question
         </select>
       </label>
       <table class="category-table meals-table">
-        <thead><tr><th scope="col">Meal</th><th scope="col">Eaten ({questionnaire.slotsPerMeal.min}–{questionnaire.slotsPerMeal.max} times of day)</th><th scope="col">Needs prepping</th><th scope="col">Needs cooking</th></tr></thead>
+        <thead><tr><th scope="col">Meal</th><th scope="col">Eaten ({questionnaire.slotsPerMeal.min}–{questionnaire.slotsPerMeal.max} times a day)</th><th scope="col">Needs prepping</th><th scope="col">Needs cooking</th></tr></thead>
         <tbody>
           {mealIndexes.map((mealIndex) => (
             <tr class="meal-row" data-meal-index={mealIndex}>

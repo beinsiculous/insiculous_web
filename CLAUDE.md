@@ -91,7 +91,10 @@ call an LLM either.
 Static build, deployed to Cloudflare as a static-assets Worker. No UI framework; the face pages are
 plain untyped JavaScript, so `tsconfig.json` excludes them from `astro check` and the Python parity
 tests are what keep them honest. Three gates run on every build and block the deploy:
-`scripts/postbuild-check.mjs` (structure + static a11y), `scripts/a11y-check.mjs` (axe-core over
+`scripts/postbuild-check.mjs` (structure + static a11y + prose: `scripts/lib/prose-check.mjs`
+gates a word glued to an inline tag and a straight apostrophe — Astro drops the newline between a
+word and an inline tag on the next source line, so keep the tag on the word's line),
+`scripts/a11y-check.mjs` (axe-core over
 **every** built page, WCAG 2.2 AA), and `scripts/screenshot-pages.mjs` (no page scrolls sideways, on a
 phone and at 125% text). Target is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
 codebase. After changing a layout or an interactive component, also do the manual pass the PR template

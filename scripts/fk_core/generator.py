@@ -348,7 +348,7 @@ def generate_activities(weights, grid, questionnaire, categories, fallback_block
                     chosen = (slot, slot_time, block_key)
                     break
             if chosen is None:
-                warning = f"activities: meal {meal_index + 1}: {'slot' if len(slots) == 1 else 'slots'} {', '.join(slots) or '(none)'} fall outside the focus blocks; not placed"
+                warning = f"activities: meal {meal_index + 1}: {'slot' if len(slots) == 1 else 'slots'} {', '.join(slots) or '(none)'} {'falls' if len(slots) == 1 else 'fall'} outside the focus blocks; not placed"
                 if warning not in meal_warnings:
                     meal_warnings.append(warning)
                 continue
@@ -465,7 +465,7 @@ def generate_activities(weights, grid, questionnaire, categories, fallback_block
         if short:
             unplaced_total = sum(minutes for _, minutes in short)
             category_target = sum(target[subject_id] for subject_id, _ in pools[category_key] if subject_id in target)
-            details = ", ".join(f"{subject_labels.get(subject_id, subject_id)} {minutes}" for subject_id, minutes in short)
+            details = ", ".join(f"{subject_labels.get(subject_id, subject_id)} {minutes} min" for subject_id, minutes in short)
             warnings.append(f"activities: {category_labels.get(category_key, category_key)}: {unplaced_total} of {category_target} min left for flexible time — too little to fill a cell of its own ({details})")
     return {"activities": activities, "placedMinutes": {subject_id: {"target": target[subject_id], "placed": placed[subject_id]} for subject_id in target}, "warnings": warnings}
 

@@ -1,6 +1,6 @@
 ---
 // Step 2 of both assistant pages (docs/assistant-workspace.md): paste (or upload) what the person's assistant handed
-// back — an import document, a meal-plan document, a weights file or a settings file — and Apply it to the active
+// back — an import document, a meal-plan document, a weights file, or a settings file — and Apply it to the active
 // profile on this device. Which face the page belongs to only changes the links (data-face reaches the script).
 import { FACES, facePath } from "../lib/faces.js";
 
@@ -8,7 +8,7 @@ const { face } = Astro.props;
 ---
 <div class="apply-step" id="applyStep" data-face={face}>
   <h3><span class="step-number">2</span> Paste it here and Apply</h3>
-  <p class="muted">Paste (or upload) the JSON your assistant handed back. It can be an import file (your commitments and tasks, readable — check the list it shows below), a meal-plan document (your fortnight menu, shown on <a href={facePath("forkknife")}>ForkKnife</a>), a weights file (the app derives the weights from the answers in it), or a settings file. Any of them can be applied on either app's Assistant page, because the profile is shared.</p>
+  <p class="muted">Paste (or upload) the JSON your assistant handed back. It can be an import file (your commitments and tasks, in readable form — check the list it shows below), a meal-plan document (your fortnight menu, shown on <a href={facePath("forkknife")}>ForkKnife</a>), a weights file (the app derives the weights from the answers in it), or a settings file. Any of them can be applied on either app’s Assistant page, because the profile is shared.</p>
   <div class="paste-box">
     <textarea id="assistantJson" rows="6" aria-label="JSON from your assistant" placeholder={face === "forkknife"
       ? '{"schemaVersion": 1, "kind": "meal-plan", "source": {"kind": "assistant", "description": "Autumn menu"}, "items": [{"meal": "Dinner", "dish": "Lentil soup", "days": ["Sunday A", "Wednesday B"]}]}'
@@ -30,8 +30,8 @@ const { face } = Astro.props;
   </div>
   <div class="import-review" id="importReview"></div>
   {face === "fortknight"
-    ? <p class="muted">Then check the review that appears: what landed, what your assistant skipped and why. Wrong line? Open the <a href={facePath("fortknight", "build/")}>Build page</a>, press <em>Edit</em> over the commitments or the tasks and remove it.</p>
-    : <p class="muted">Then check the message: how many dishes landed and which were not applied (a meal the profile does not have, a day rule broken). The dishes show on the <a href={facePath("forkknife")}>Overview</a> and the day pages; wrong dish? Open <a href={facePath("forkknife", "spoon-feed/")}>Spoon Feed</a>, press <em>Edit</em> under that meal and remove it.</p>}
+    ? <p class="muted">Then check the review that appears: what landed, what your assistant skipped, and why. Wrong line? Open the <a href={facePath("fortknight", "build/")}>Build page</a>, press <em>Edit</em> over the commitments or the tasks and remove it.</p>
+    : <p class="muted">Then check the message: how many dishes landed and which were not applied (a meal the profile does not have, a day rule broken). The dishes show on the <a href={facePath("forkknife")}>Overview</a> and the day pages. Wrong dish? Open <a href={facePath("forkknife", "spoon-feed/")}>Spoon Feed</a>, press <em>Edit</em> under that meal and remove it.</p>}
 </div>
 
 <script>
@@ -92,7 +92,7 @@ const { face } = Astro.props;
       deriveAndSave(answers, settings, settings.activeWeightsId);
       renderImportReview(elements.importReview, parsed, bundle.categories, [...merged.rejected, ...merged.mealPlanProblems.map((problem) => `meal plan: ${problem}`)]);
       const ownGridNote = parsed.blockFocusGrid && answers.blockFocusGrid && Object.keys(answers.blockFocusGrid).length
-        ? " Note: the grid you adopted on the FortKnight Overview still wins over this import's focus grid — drop your grid there to see the import's."
+        ? " Note: the grid you adopted on the FortKnight Overview still wins over this import’s focus grid — drop your grid there to see the import’s."
         : "";
       const menuNote = merged.mealPlanApplied || merged.mealPlanProblems.length
         ? ` Menu: ${merged.mealPlanApplied} item${merged.mealPlanApplied === 1 ? "" : "s"} added to the meal plan${merged.mealPlanProblems.length ? ` (${merged.mealPlanProblems.length} not applied: ${merged.mealPlanProblems.join("; ")})` : ""}.`
@@ -171,7 +171,7 @@ const { face } = Astro.props;
     bundle = await response.json();
     elements.applyButton.disabled = false;
   } catch (error) {
-    elements.applyStatus.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    elements.applyStatus.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
     console.error(error);
   }
 </script>

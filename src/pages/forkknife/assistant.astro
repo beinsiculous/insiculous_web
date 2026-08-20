@@ -17,7 +17,7 @@ import { PROFILE_PATH, facePath } from "../../lib/faces.js";
       <h3><span class="step-number">1</span> Get the JSON from your assistant</h3>
       <p class="muted">Send your assistant this prompt — it carries your meals and the preferences you answered on the <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a>: <button type="button" class="link-button" id="copyPromptButton">Copy the prompt</button></p>
       <p class="prompt-text" id="mealPlanPrompt"></p>
-      <p class="muted">Upload <code>meal-plan.md</code> with it — the file below, also in the Profile page's file set. It tells the assistant the document shape and the leftovers rules. Would you rather write the menu yourself? The <button type="button" class="link-button" id="downloadTemplateButton">template</button> is the same shape with your meals filled in.</p>
+      <p class="muted">Upload <code>meal-plan.md</code> with it — the file below, also in the Profile page’s file set. It tells the assistant the document shape and the leftovers rules. Would you rather write the menu yourself? The <button type="button" class="link-button" id="downloadTemplateButton">template</button> is the same shape with your meals filled in.</p>
       <div class="file-list" id="mealPlanGuideRow"></div>
     </div>
 
@@ -73,7 +73,7 @@ import { PROFILE_PATH, facePath } from "../../lib/faces.js";
     renderPrompt(bundle);
     document.addEventListener("fortknight:settings-saved", () => renderPrompt(bundle));
   } catch (error) {
-    promptText.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    promptText.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
     console.error(error);
   }
 </script>
