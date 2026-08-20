@@ -66,6 +66,116 @@ def run_hook(script, harness, command, cwd):
 
 
 @unittest.skipUnless(shutil.which("git") and shutil.which("jq"), "needs git and jq")
+class NestedWorkingSetTest(unittest.TestCase):
+    """The admin-repo layout: project repos cloned inside a parent repo.
+
+    The commit is issued from the parent, so the repository being committed to
+    is not the one the hook stands in. Sizing the parent's diff there finds
+    nothing and waves a big commit through — silently, which is the worst way
+    for a gate to fail. Anything the hook cannot reduce to one repository is
+    denied rather than guessed.
+    """
+
+    def setUp(self):
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary_directory.cleanup)
+        self.parent = Path(self.temporary_directory.name) / "admin"
+        self.parent.mkdir()
+        make_repository(self.parent)
+        self.nested = self.parent / "nested"
+        self.nested.mkdir()
+        make_repository(self.nested)
+        stage_changes(self.nested, BIG_LINES)
+        self.small = self.parent / "small"
+        self.small.mkdir()
+        make_repository(self.small)
+        stage_changes(self.small, 3)
+
+    def assert_denied(self, command):
+        result = run_hook(COMMIT_HOOK, "claude", command, self.parent)
+        self.assertIn('"deny"', result.stdout, f"expected a denial for: {command}")
+
+    def assert_allowed(self, command):
+        result = run_hook(COMMIT_HOOK, "claude", command, self.parent)
+        self.assertNotIn('"deny"', result.stdout, f"expected no denial for: {command}")
+
+    def test_dash_c_into_a_big_nested_repo_is_denied(self):
+        """The headline case: `git commit` is not even a substring of this."""
+        self.assert_denied("git -C nested commit -m x")
+
+    def test_dash_c_without_a_space_is_denied(self):
+        self.assert_denied("git -Cnested commit -m x")
+
+    def test_cd_into_a_big_nested_repo_is_denied(self):
+        self.assert_denied("cd nested && git commit -m x")
+
+    def test_git_dir_is_denied_as_unresolvable(self):
+        self.assert_denied("git --git-dir=nested/.git commit -m x")
+
+    def test_git_dir_environment_variable_is_denied_as_unresolvable(self):
+        self.assert_denied("GIT_DIR=nested/.git git commit -m x")
+
+    def test_subshell_is_denied_as_unresolvable(self):
+        self.assert_denied("(cd nested && git commit -m x)")
+
+    def test_quoted_target_is_denied_as_unresolvable(self):
+        """Quoted segments are stripped before matching, so the path is gone."""
+        self.assert_denied('git -C "nested" commit -m x')
+
+    def test_chained_directory_changes_compose_to_the_real_target(self):
+        """`cd nested && cd ..` lands back in the parent, so the parent is sized.
+
+        Composing is better than refusing: the gate ends up measuring the repo
+        the commit truly lands in rather than denying a legitimate command.
+        """
+        self.assert_allowed("cd nested && cd .. && git commit -m x")   # parent has nothing staged
+        stage_changes(self.parent, BIG_LINES)
+        self.assert_denied("cd nested && cd .. && git commit -m x")
+
+    def test_a_dash_c_belonging_to_another_command_does_not_redirect_the_gate(self):
+        """Code review F1: `git -C small status; git commit` sized `small`.
+
+        The -C belonged to a different git call, so the gate measured the wrong
+        repository, found nothing, and let the real commit land unreviewed.
+        """
+        stage_changes(self.parent, BIG_LINES)
+        self.assert_denied("git -C small status; git commit -m x")
+
+    def test_committing_to_two_repos_in_one_command_is_denied(self):
+        """Code review F3: only the last -C was sized, so the first went ungated."""
+        self.assert_denied("git -C nested commit -m a && git -C small commit -m b")
+
+    def test_commit_tree_is_not_a_commit(self):
+        """Code review F4: `\\bcommit\\b` matched commit-tree and commit-graph."""
+        stage_changes(self.parent, BIG_LINES)
+        self.assert_allowed("git commit-tree abc123 -m x")
+
+    def test_a_variable_target_is_denied_rather_than_guessed(self):
+        self.assert_denied("git -C $PROJECT commit -m x")
+
+    def test_dash_c_into_a_small_repo_still_passes(self):
+        self.assert_allowed("git -C small commit -m x")
+
+    def test_a_message_mentioning_the_flags_is_not_a_redirect(self):
+        self.assert_allowed("git commit -m 'mentions -C and cd in the text'")
+
+    def test_reading_commands_are_not_commits(self):
+        """`git log --grep=commit` must not be mistaken for a commit."""
+        self.assert_allowed("git log --grep=commit")
+
+    def test_an_unmarked_parent_stays_silent(self):
+        plain = Path(self.temporary_directory.name) / "plain"
+        plain.mkdir()
+        make_repository(plain, with_marker=False)
+        nested = plain / "nested"
+        nested.mkdir()
+        make_repository(nested)
+        stage_changes(nested, BIG_LINES)
+        result = run_hook(COMMIT_HOOK, "claude", "git --git-dir=nested/.git commit -m x", plain)
+        self.assertEqual(result.stdout, "")
+
+
+@unittest.skipUnless(shutil.which("git") and shutil.which("jq"), "needs git and jq")
 class CommitReviewHookTest(unittest.TestCase):
     def setUp(self):
         self.temporary_directory = tempfile.TemporaryDirectory()
