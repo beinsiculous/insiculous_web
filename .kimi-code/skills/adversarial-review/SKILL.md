@@ -97,9 +97,32 @@ so the marker keeps them project-scoped):
   already-reviewed plan are exempt.
 - **Commit gate** (PreToolUse on Bash, `scripts/commit-review-hook.sh`):
   a `git commit` with ≥100 pending changed lines is DENIED until the diff
-  goes through code mode. After the findings are adjudicated with the user
-  (or the user explicitly skips review), retry the commit prefixed with
-  `ADV_REVIEWED=1`. Small commits pass silently.
+  goes through code mode. After the findings are adjudicated with the user,
+  retry the commit prefixed with `ADV_REVIEWED=1` — which asserts the review
+  *happened*, and nothing else. Small commits pass silently.
+
+  Skipping the review is the developer's call and is made **in the commit
+  message**, so it lands in the public history rather than in a shell variable:
+
+  ```
+  Adversarial-Review-Skipped: <reason, more than 10 characters>
+  Skip-Signed-Off-By: <the developer's name>
+  ```
+
+  Any reason over ten characters is accepted — "just because" is a reason, and
+  the hook does not judge it. The trailers must be in the **last lines** of the
+  message, where git keeps trailers, so that documentation quoting this format
+  isn't mistaken for a skip. Pass the message with `-m` or `-F <file>` so the
+  hook can read it (already typed them in an editor? retry with
+  `-F .git/COMMIT_EDITMSG`).
+
+  Be honest about what this mechanism is: **friction and a paper trail, not
+  proof of authorship.** The hook cannot tell whether a human typed those
+  trailers, and an agent that writes them forges a person's name into the
+  permanent record of a review that never happened — worse than a silent
+  self-skip, not better. So: **never write those trailers yourself**, not on
+  the user's behalf and not from your own reading of the conversation. Ask,
+  and use their words and their name.
 
 Kimi registrations live in `~/.kimi-code/config.toml` (Claude's live in
 `.claude/settings.json` with `--harness=claude`):
@@ -119,7 +142,7 @@ timeout = 10
 ```
 
 Findings are always adjudicated with the user — an explicit user opt-out
-always wins (expressed via the same `ADV_REVIEWED=1` prefix).
+always wins, and is recorded as the signed skip trailers above.
 
 ## Rules
 

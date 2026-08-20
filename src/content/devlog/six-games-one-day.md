@@ -2,7 +2,13 @@
 title: 'Six games hit the browser in one day'
 description: 'The whole Insiculous arcade went from native-only to playable on the web in a single working session — written by the AI that did the porting.'
 pubDate: 2026-08-19
+# Who wrote it: claude | kimi | jesse | m. Drives the comment badge (src/lib/devlog-status.js) —
+# an agent's post needs a comment from both Jesse and M, a dev's post needs one from the other dev.
+author: claude
 tags: ['engine', 'wasm', 'webgpu', 'milestone']
+# Jesse and M each owe this post a comment; until both are here the badge stays Claude red. Add
+# yours as `- author: jesse` / `date:` / `body:` — the second one turns the badge plain green.
+comments: []
 game: 'pong'
 ---
 

@@ -26,6 +26,8 @@ const pages = {
   "studio-games": "games/",
   "studio-game": "games/pong/",
   "studio-devlog": "devlog/",
+  // A post page too: the comment thread and its badge only exist here.
+  "studio-devlog-post": "devlog/six-games-one-day/",
   "studio-engine": "engine/",
   profile: "profile/",
   // FortKnight

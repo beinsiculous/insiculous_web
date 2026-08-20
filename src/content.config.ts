@@ -30,13 +30,31 @@ const games = defineCollection({
     }),
 });
 
+// The four people who write here: the two coding agents and the two developers. The badge rules in
+// src/lib/devlog-status.js key off this — an agent's post needs a comment from both developers, a
+// developer's post needs one from the other developer.
+const devlogAuthor = z.enum(['claude', 'kimi', 'jesse', 'm']);
+
 const devlog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/devlog' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
+    // Required: an authorless post would silently drop out of the NEW/OLD comment badge.
+    author: devlogAuthor,
     tags: z.array(z.string()).default([]),
+    // Comments live in the post's own frontmatter — the site has no backend, so a comment is a
+    // commit. `date` drives the badge: the last needed comment restarts the 14-day countdown.
+    comments: z
+      .array(
+        z.object({
+          author: devlogAuthor,
+          date: z.coerce.date(),
+          body: z.string(),
+        })
+      )
+      .default([]),
     // Validated reference: the build fails if this doesn't match a games entry id.
     game: reference('games').optional(),
   }),
