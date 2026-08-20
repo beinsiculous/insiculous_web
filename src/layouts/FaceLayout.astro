@@ -22,7 +22,7 @@ const navItems = faceNav(face).map((item) => ({ ...item, href: facePath(face, it
 const profileHref = withBase(PROFILE_PATH);
 const pathname = Astro.url.pathname;
 function isActive(item) {
-  if (item.exact) return pathname === item.href || pathname.startsWith(`${item.href}days/`); // the day pages belong to the Overview's grid
+  if (item.exact) return pathname === item.href || pathname.startsWith(`${item.href}days/`); // the day pages belong to the Overview’s grid
   return pathname.startsWith(item.href);
 }
 const profileActive = pathname.startsWith(profileHref);
@@ -50,7 +50,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
     {/* "Site links" rather than "Switch app": the row carries the tip jar as well as the two faces
-        now. The ☕ sits inside this nav rather than beside it because ForkKnife's theme moves the
+        now. The ☕ sits inside this nav rather than beside it because ForkKnife’s theme moves the
         whole switcher (order/gap, faces.css) — a sibling would detach from the row on that face. */}
     <nav class="face-switch" aria-label="Site links">
       <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>

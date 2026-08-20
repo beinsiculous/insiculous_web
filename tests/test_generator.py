@@ -323,8 +323,8 @@ class ActivityTests(unittest.TestCase):
                          [("Breakfast", "18:00", "meal slot evening"), ("Dinner", "21:00", "meal slot late-evening")])  # unnamed test meals take the default names by position
         early_bird = derive(answers_with(restDays=[], wakingWindow={"start": "05:00", "end": "17:00"}, meals={"perDay": 2, "meals": [{"slots": ["anytime"]}, {"slots": ["late-evening"]}]}))
         result = generate_activities(early_bird, early_bird["proposal"]["blockFocusGrid"], QUESTIONNAIRE, DATA["categories"])
-        self.assertIn("activities: meal 1: slot anytime fall outside the focus blocks; not placed", result["warnings"])
-        self.assertIn("activities: meal 2: slot late-evening fall outside the focus blocks; not placed", result["warnings"])
+        self.assertIn("activities: meal 1: slot anytime falls outside the focus blocks; not placed", result["warnings"])
+        self.assertIn("activities: meal 2: slot late-evening falls outside the focus blocks; not placed", result["warnings"])
         self.assertFalse(any(activity["kind"] == "meal" for activity in result["activities"]))
 
     def test_deterministic_under_shuffled_subject_order(self):

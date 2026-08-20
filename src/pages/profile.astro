@@ -31,7 +31,7 @@ import "../styles/app-widgets.css";
       <button type="button" id="duplicateProfileButton">Duplicate as…</button>
       <button type="button" id="deleteProfileButton">Delete</button>
     </div>
-    <p class="muted">The name becomes the profile's id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched, and new ones started, from the dropdown above. Both apps share this profile: FortKnight's answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife's <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
+    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched, and new ones started, from the dropdown above. Both apps share this profile: FortKnight’s answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife’s <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
   </section>
 
   <section class="panel">
@@ -169,7 +169,7 @@ import "../styles/app-widgets.css";
     bundle = await response.json();
     renderFiles();
   } catch (error) {
-    elements.workspaceStatus.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    elements.workspaceStatus.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
     console.error(error);
   }
 </script>

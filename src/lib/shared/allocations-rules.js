@@ -47,7 +47,7 @@ export function allocationsFromWeights(weights, categoryOrder, dayKeyOrder) {
   if (weights.proposal?.blockFocusGrid) {
     views.byProposal = {
       ...allocateByBlockFocus(weights.proposal.blockFocusGrid, focusBlocks, categoryOrder, dayKeyOrder),
-      method: "The generator's proposed grid: each focus block gives its full duration to the focus proposed for it (Overview → Proposed grid).",
+      method: "The generator’s proposed grid: each focus block gives its full duration to the focus proposed for it (Overview → Proposed grid).",
     };
   }
   return views;

@@ -101,6 +101,6 @@ export function statusFor(post, now) {
     awaitingNames: names(awaiting),
     complete: false,
     ageDays,
-    description: `${AUTHOR_LABELS[author]}'s post, still waiting on a comment from ${names(awaiting)}`,
+    description: `${AUTHOR_LABELS[author]}’s post, still waiting on a comment from ${names(awaiting)}`,
   };
 }

@@ -245,7 +245,7 @@
     }
   },
   "byActivities": {
-    "method": "Timed activities count duration + prep minutes; untimed activities split the block's remaining minutes evenly; multi-category activities split evenly across categories.",
+    "method": "Timed activities count duration + prep minutes; untimed activities split the block’s remaining minutes evenly; multi-category activities split evenly across categories.",
     "byCategory": {
       "meals": 0,
       "cleaning": 0,

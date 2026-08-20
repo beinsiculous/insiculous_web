@@ -12,9 +12,19 @@
 // 4. Static accessibility checks on every built page: <html lang>, exactly one <h1>, alt on
 //    every <img>, no positive tabindex, no duplicate ids. (The deep audit is
 //    scripts/a11y-check.mjs, run by `npm run verify`.)
+// 5. No word glued to an inline tag ("it is a<a>proving ground</a>"): Astro drops the newline
+//    between a word and an inline tag that sit on different source lines, so correct-looking
+//    copy can ship without the space. The rule lives in scripts/lib/glue-check.mjs; its three
+//    exclusions (aria-hidden, .visually-hidden, empty elements) are the false-positive budget —
+//    widen that list rather than loosening the patterns, and add the case to
+//    tests/test_postbuild_check.py.
+// 6. No straight apostrophe in rendered prose: the site's copy uses ’, which Markdown content gets
+//    from smartypants — without this the .astro pages drift the other way and the two spellings sit
+//    side by side on one page.
 
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
+import { findGluedBoundaries, findStraightApostrophes } from './lib/prose-check.mjs';
 
 // Anchor to the project root regardless of cwd.
 const ROOT = resolve(import.meta.dirname, '..');
@@ -123,6 +133,18 @@ if (existsSync(DIST)) {
     const duplicated = ids.filter((id, index) => ids.indexOf(id) !== index);
     if (duplicated.length > 0) {
       errors.push(`${path}: duplicate id(s): ${[...new Set(duplicated)].join(', ')}`);
+    }
+
+    // A lost space between a word and an inline tag — keep the tag on the same source line as
+    // the word beside it, rather than letting a line break fall on the boundary.
+    for (const boundary of findGluedBoundaries(html)) {
+      errors.push(`${path}: word glued to an inline tag (${boundary.kind}): …${boundary.snippet}…`);
+    }
+
+    // The site's prose uses curly apostrophes; Markdown content gets them from smartypants, so a
+    // straight one in an .astro page shows up next to a curly one on the same page.
+    for (const apostrophe of findStraightApostrophes(html)) {
+      errors.push(`${path}: straight apostrophe in prose (use ’): …${apostrophe.snippet}…`);
     }
   });
 }

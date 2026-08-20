@@ -1,6 +1,6 @@
 {
   "buildInfo": {
-    "buildHash": "8cd08f3d68218ef7",
+    "buildHash": "adc4a785d084c938",
     "schemaVersion": 1,
     "builtFrom": [
       "meta.json",
@@ -2049,7 +2049,7 @@
         {
           "id": "custom",
           "label": "Custom — your own seasons, a religious calendar, anything",
-          "blurb": "Name your own sections and how each one starts, in the editor below — it starts from FortKnight's five seasons.",
+          "blurb": "Name your own sections and how each one starts, in the editor below — it starts from FortKnight’s five seasons.",
           "sections": null,
           "sectionLabel": "season",
           "template": [],
@@ -3218,14 +3218,14 @@
             "id": "commitments",
             "kind": "commitments",
             "prompt": "Do you already use a calendar, task list, reminder and/or budget system?",
-            "note": "Add them one at a time on the Build page. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day's blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. Or have your assistant read your existing system and upload its import on the Assistant page; what it brought in is reviewed here and listed on the Build page."
+            "note": "Add them one at a time on the Build page. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day’s blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. Or have your assistant read your existing system and upload its import on the Assistant page; what it brought in is reviewed here and listed on the Build page."
           }
         ]
       },
       {
         "id": "rhythm",
         "title": "Your day and year",
-        "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda's scope. Your meals — names, prepping and cooking, when you eat them — are ForkKnife's questionnaire, and the fortnight menu itself is its Spoon Feed page.",
+        "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda’s scope. Your meals — names, prepping and cooking, when you eat them — are ForkKnife’s questionnaire, and the fortnight menu itself is its Spoon Feed page.",
         "questions": [
           {
             "id": "wakingWindow",
@@ -3336,7 +3336,7 @@
         "id": "meals",
         "face": "forkknife",
         "title": "Your meals",
-        "intro": "ForkKnife's questionnaire: your meals and what your assistant needs to draft the fortnight menu. The menu itself — which dish is which meal on each day — is built on the Spoon Feed page. Nothing here changes FortKnight's shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
+        "intro": "ForkKnife’s questionnaire: your meals and what your assistant needs to draft the fortnight menu. The menu itself — which dish is which meal on each day — is built on the Spoon Feed page. Nothing here changes FortKnight’s shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
         "questions": [
           {
             "id": "meals",
@@ -3362,7 +3362,7 @@
           {
             "id": "allergiesAndDislikes",
             "kind": "text",
-            "prompt": "Allergies, intolerances, foods you won't eat?",
+            "prompt": "Allergies, intolerances, foods you won’t eat?",
             "note": "Free text; your assistant keeps them out of the menu.",
             "placeholder": "e.g. shellfish allergy; no mushrooms; lactose only in small amounts."
           },
@@ -4641,7 +4641,7 @@
         }
       },
       "byActivities": {
-        "method": "Timed activities count duration + prep minutes; untimed activities split the block's remaining minutes evenly; multi-category activities split evenly across categories.",
+        "method": "Timed activities count duration + prep minutes; untimed activities split the block’s remaining minutes evenly; multi-category activities split evenly across categories.",
         "byCategory": {
           "meals": 0,
           "cleaning": 0,

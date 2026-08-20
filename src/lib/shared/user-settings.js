@@ -20,7 +20,7 @@ export const USER_WEIGHTS_ID = DEFAULT_WEIGHTS_ID;
 export function defaultSettings() {
   return {
     schemaVersion: SETTINGS_SCHEMA_VERSION,
-    theme: "fort-knight", // ignored: the page's face picks its skin. Field kept so old exports still import cleanly
+    theme: "fort-knight", // ignored: the page’s face picks its skin. Field kept so old exports still import cleanly
     epochOverride: null,
     timezone: null,
     activeSeasonId: null,
@@ -58,7 +58,7 @@ export function migrateSettings(parsed, recoveredProfiles = null) {
     profiles[id] = { ...weights, id };
     renamed[key] = id;
   }
-  if (source.weights && typeof source.weights === "object") { // v2's single profile
+  if (source.weights && typeof source.weights === "object") { // v2’s single profile
     const id = profileIdFrom(source.weights.id);
     profiles[id] = { ...source.weights, id };
     migrated.activeWeightsId = id;
