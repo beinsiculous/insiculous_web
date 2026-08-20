@@ -84,7 +84,7 @@ const isActive = (href: string) =>
     <footer>
       <div class="container">
         <p>
-          © {new Date().getFullYear()} Be Insiculous — Built with AI, for AI, and
+          © {new Date().getFullYear()} Be Insiculous — built with AI, for AI, and
           the humans in the loop. · <a href="/accessibility/">Accessibility</a>
         </p>
       </div>
@@ -183,7 +183,7 @@ const isActive = (href: string) =>
   }
 
   /* A closed <details> hides its content, and browsers do it in two different ways: an older UA rule on the
-     children, and newer Chrome's content-visibility on the generated ::details-content box. Override both, so the
+     children, and newer Chrome’s content-visibility on the generated ::details-content box. Override both, so the
      bar reads as an ordinary row here whether the element happens to be open or not. */
   @media (min-width: 40.0625rem) {
     /* Wrap: six links do not fit the moment the phone panel stops, only once the viewport is wide
@@ -201,7 +201,7 @@ const isActive = (href: string) =>
 
   /* Phone: the six links do not fit 390px, so they fold behind the ☰ and drop as a full-width panel under the
      header. The panel is positioned against <header>, which is sticky and therefore the containing block, so it
-     spans the viewport rather than the container's column. */
+     spans the viewport rather than the container’s column. */
   @media (max-width: 40rem) {
     summary {
       display: grid;

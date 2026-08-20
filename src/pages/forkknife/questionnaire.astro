@@ -17,7 +17,7 @@ const options = questionnaire?.options ?? {};
 <FaceLayout title="Questionnaire" face="forkknife">
   <section class="panel">
     <h1>Questionnaire</h1>
-    <p class="muted">Your meals and how you eat are ForkKnife's settings; they live in the same profile as your FortKnight answers, on this device. Save keeps them here; the <a href={withBase(PROFILE_PATH)}>Profile page</a> turns the whole profile into files for your own AI workspace, and the <a href={facePath("forkknife", "assistant/")}>Assistant page</a> asks your assistant to draft the menu from what you answer here.</p>
+    <p class="muted">Your meals and how you eat are ForkKnife’s settings; they live in the same profile as your FortKnight answers, on this device. Save keeps them here; the <a href={withBase(PROFILE_PATH)}>Profile page</a> turns the whole profile into files for your own AI workspace, and the <a href={facePath("forkknife", "assistant/")}>Assistant page</a> asks your assistant to draft the menu from what you answer here.</p>
     <p class="profile-bar" id="profileBar"><strong id="profileName"></strong> <span class="muted" id="profileStatus"></span></p>
     {questionnaire ? (
     <form id="forkknifeForm" class="settings-form questionnaire">
@@ -41,7 +41,7 @@ const options = questionnaire?.options ?? {};
       <p class="muted" id="questionnaireStatus"></p>
     </form>
     ) : (
-      <p class="muted">The app's data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
+      <p class="muted">The app’s data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
     )}
   </section>
 </FaceLayout>
@@ -181,7 +181,7 @@ const options = questionnaire?.options ?? {};
     form.addEventListener("change", () => { if (bundle) markDirty(); });
     document.getElementById("resetAnswersButton").addEventListener("click", () => {
       if (!bundle) return;
-      populate(defaultAnswers(bundle.questionnaire, bundle.categories)); // this page's keys only; FortKnight's answers stay
+      populate(defaultAnswers(bundle.questionnaire, bundle.categories)); // this page’s keys only; FortKnight’s answers stay
       dirty = true;
       status.textContent = "Reset to defaults (not saved) — the meals and preferences. Your menu is kept, minus the dishes of any meal these defaults do not have.";
     });
@@ -192,7 +192,7 @@ const options = questionnaire?.options ?? {};
       resyncMealsEditor = wireMealsEditor(form, bundle.questionnaire, onMealsChange);
       populateFromSettings();
     } catch (error) {
-      status.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+      status.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
       console.error(error);
     }
   }

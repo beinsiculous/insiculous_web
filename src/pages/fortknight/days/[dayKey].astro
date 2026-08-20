@@ -56,7 +56,7 @@ const day = bundle.days.days[dayKey];
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     bundle = await response.json();
   } catch (error) {
-    body.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    body.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
     console.error(error);
   }
 
@@ -107,10 +107,12 @@ const day = bundle.days.days[dayKey];
     body.replaceChildren();
     if (!plan.hasImport && !plan.blocks.some((block) => block.activities.some((activity) => activity.source !== "proposed"))) {
       const note = element("p", "muted");
-      note.append("Nothing on this day yet. Add commitments and tasks in the Questionnaire, or apply an import on the ");
+      note.append("Nothing on this day yet. Add commitments and tasks on the ");
+      const buildLink = element("a", null, "Build page");
+      buildLink.href = facePath("fortknight", "build/");
       const link = element("a", null, "Assistant page");
       link.href = facePath("fortknight", "assistant/");
-      note.append(link, ".");
+      note.append(buildLink, ", or apply an import on the ", link, ".");
       body.appendChild(note);
     }
     if (plan.menu.length) {

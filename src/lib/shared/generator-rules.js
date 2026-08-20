@@ -325,7 +325,7 @@ export function generateActivities(weights, grid, questionnaire, { categories, d
     for (const practiceId of practices) {
       emit("practice", practiceId, `Practice: ${practiceLabels[practiceId] ?? practiceId}`, dayKey, practiceBlock, 2, [SPIRITUALITY_CATEGORY], settings.practiceMinutes, "daily practice");
     }
-    const menu = menuForDay(mealPlan, meals, dayKey); // the ForkKnife menu names each meal's dish (its prep/cook tasks arrive as tasks)
+    const menu = menuForDay(mealPlan, meals, dayKey); // the ForkKnife menu names each meal’s dish (its prep/cook tasks arrive as tasks)
     meals.forEach((meal, mealIndex) => {
       const slots = [...(meal.slots || [])];
       let chosen = null;
@@ -339,7 +339,7 @@ export function generateActivities(weights, grid, questionnaire, { categories, d
         }
       }
       if (chosen === null) {
-        const warning = `activities: meal ${mealIndex + 1}: ${slots.length === 1 ? "slot" : "slots"} ${slots.join(", ") || "(none)"} fall outside the focus blocks; not placed`;
+        const warning = `activities: meal ${mealIndex + 1}: ${slots.length === 1 ? "slot" : "slots"} ${slots.join(", ") || "(none)"} ${slots.length === 1 ? "falls" : "fall"} outside the focus blocks; not placed`;
         if (!mealWarnings.includes(warning)) mealWarnings.push(warning);
         return;
       }
@@ -465,7 +465,7 @@ export function generateActivities(weights, grid, questionnaire, { categories, d
     if (short.length) {
       const unplacedTotal = short.reduce((sum, [, minutes]) => sum + minutes, 0);
       const categoryTarget = pools[categoryKey].filter(([subjectId]) => subjectId in target).reduce((sum, [subjectId]) => sum + target[subjectId], 0);
-      const details = short.map(([subjectId, minutes]) => `${subjectLabels[subjectId] ?? subjectId} ${minutes}`).join(", ");
+      const details = short.map(([subjectId, minutes]) => `${subjectLabels[subjectId] ?? subjectId} ${minutes} min`).join(", ");
       // Not a failure — a category too small to win whole cells (errands twice a fortnight) is done in flexible time.
       warnings.push(`activities: ${categoryLabels[categoryKey] ?? categoryKey}: ${unplacedTotal} of ${categoryTarget} min left for flexible time — too little to fill a cell of its own (${details})`);
     }

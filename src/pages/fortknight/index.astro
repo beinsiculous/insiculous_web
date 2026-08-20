@@ -45,7 +45,7 @@ import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
   </section>
   <section class="panel">
     <h2>Time by category (per fortnight)</h2>
-    <p class="muted" id="allocationsStatus">Your answers set the weights. The focus grid is your layout. The proposed grid is the generator's suggestion.</p>
+    <p class="muted" id="allocationsStatus">Your answers set the weights. The focus grid is your layout. The proposed grid is the generator’s suggestion.</p>
     <div id="allocationBars">
       <noscript><p class="muted">These bars need JavaScript to show your data.</p></noscript>
       <AllocationBars allocations={bundle.derived.allocations} />
@@ -93,7 +93,7 @@ import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
     if (!response.ok) throw new Error(`${response.status}`);
     bundle = await response.json();
   } catch {
-    dateResolution.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+    dateResolution.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
   }
 
   // The person's calendar: their week start (grid order) and their own seasons (date resolution).
@@ -135,7 +135,7 @@ import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
     const views = allocationsFromWeights(withProposal, bundle.categories.order, bundle.days.order);
     renderAllocationBars(allocationBars, views, focusLabel);
     const saved = Boolean(activeWeights(settings));
-    const shownViews = ["your weights", ...(views.byBlockFocus ? ["your focus grid"] : []), ...(views.byProposal ? [`the generator's proposal${season ? ` for ${season.name}` : ""}`] : [])];
+    const shownViews = ["your weights", ...(views.byBlockFocus ? ["your focus grid"] : []), ...(views.byProposal ? [`the generator’s proposal${season ? ` for ${season.name}` : ""}`] : [])];
     const shown = shownViews.length === 1 ? shownViews[0] : `${shownViews.slice(0, -1).join(", ")} and ${shownViews[shownViews.length - 1]}`;
     allocationsStatus.textContent = `Profile ${weights.id}${saved ? "" : " (not saved yet — default answers)"}. Showing ${shown}.${views.byBlockFocus ? "" : " No focus grid yet."}`;
   }

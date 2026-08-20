@@ -18,7 +18,7 @@ const options = questionnaire?.options ?? {};
 <FaceLayout title="Build" face="fortknight">
   <section class="panel">
     <h1>Build</h1>
-    <p class="muted">Add what your fortnight is made of, one at a time. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day's blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. The menu is the dishes each meal takes on each day. Had your assistant read your calendar, planner or spreadsheet instead? <a href={facePath("fortknight", "assistant/")}>Upload its import file on the Assistant page →</a></p>
+    <p class="muted">Add what your fortnight is made of, one at a time. Commitments are timed — appointments, lessons, work or school hours — and become the anchors your day’s blocks are cut around. Tasks have a day but no clock time, like chores and errands, and show on your day pages. The menu is the dishes each meal takes on each day. Had your assistant read your calendar, planner or spreadsheet instead? <a href={facePath("fortknight", "assistant/")}>Upload its import file on the Assistant page →</a></p>
     <p class="profile-bar" id="profileBar"><strong id="profileName"></strong> <span class="muted" id="profileStatus"></span></p>
     {questionnaire ? (
     <form id="buildForm" class="settings-form">
@@ -90,7 +90,7 @@ const options = questionnaire?.options ?? {};
       <p class="muted" id="buildStatus"></p>
     </form>
     ) : (
-      <p class="muted">The app's data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
+      <p class="muted">The app’s data has no questionnaire — run <code>python3 scripts/build.py</code>, then restart the app (<code>npm run dev</code>).</p>
     )}
   </section>
 </FaceLayout>
@@ -340,7 +340,7 @@ const options = questionnaire?.options ?? {};
       });
       populateFromSettings();
     } catch (error) {
-      status.textContent = "Could not load the app's data — run python3 scripts/build.py, then restart the app (npm run dev).";
+      status.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
       console.error(error);
     }
   }

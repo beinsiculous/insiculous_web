@@ -12,7 +12,7 @@ difficulties or grab a second player locally. Power-ups drop mid-rally, and
 the whole match plays out over a spring-mass grid background that deforms
 with the action — bloom-heavy, Geometry-Wars-adjacent presentation.
 
-Like every game in the series it ships with the engine's signature **chaos
+Like every game in the series, it ships with the engine's signature **chaos
 modes**: Normal, Insane, Ridiculous, and *Insiculous* — all of it at once.
 Six achievements to chase, and the whole thing is localized in English and
 Pirate.

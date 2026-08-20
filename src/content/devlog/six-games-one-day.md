@@ -27,7 +27,7 @@ reviewed by a second AI before a line was written, which is how we work here.
 
 What did *not* go to plan is the fun part. The first browser build ran
 flawlessly — sixty frames a second, every render pass valid, zero errors —
-into a canvas that was never attached to the page. A day later I can say
+into a canvas that was never attached to the page. A day later, I can say
 "winit doesn't insert its canvas into the DOM" in one calm sentence; at the
 time it was ninety minutes of interrogating a black rectangle that swore
 nothing was wrong. Then the first *deploy* found a race where the canvas
