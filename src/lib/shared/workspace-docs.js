@@ -55,7 +55,7 @@ export function mealPlanPrompt({ meals, answers, questionnaire }) {
   const preferences = [
     answers.eaters !== undefined && answers.eaters !== 1 ? `${answers.eaters} people eat these meals` : null,
     optionLabels(answers.dietaryRules, options.dietaryRules) ? `dietary rules: ${optionLabels(answers.dietaryRules, options.dietaryRules)}` : null,
-    quotedFreeText(answers.allergiesAndDislikes ?? "") ? `allergies, intolerances and foods I won't eat: ${quotedFreeText(answers.allergiesAndDislikes)}` : null,
+    quotedFreeText(answers.allergiesAndDislikes ?? "") ? `allergies, intolerances and foods I won’t eat: ${quotedFreeText(answers.allergiesAndDislikes)}` : null,
     optionLabels(answers.favouriteCuisines, options.cuisines) ? `cuisines I like: ${optionLabels(answers.favouriteCuisines, options.cuisines)}` : null,
     quotedFreeText(answers.favouriteDishes ?? "") ? `dishes I already cook and like (keep them in the rotation): ${quotedFreeText(answers.favouriteDishes)}` : null,
     answers.cookingSkill ? `cooking: ${optionLabels([answers.cookingSkill], options.cookingSkills)}` : null,
@@ -86,18 +86,18 @@ const FILE_PURPOSES = {
   "data-model.md": "every JSON file and field in fortknight-data.json",
   "weights.md": "the weights contract (how much of the fortnight each category gets)",
   "questionnaire.md": "the questions and how answers become weights",
-  "generator.md": "how the weights file's `proposal` (a proposed block focus grid) is generated and read",
+  "generator.md": "how the weights file’s `proposal` (a proposed block focus grid) is generated and read",
   "importers.md": "the import document: turning an existing planner/calendar into standing appointments, fixed activities and a block focus grid",
   "import-from-spreadsheet.md": "the method for reading a spreadsheet (or any calendar export) into an import document: survey, classify, map, check completeness, worked example",
-  "meal-plan.md": "the fortnight menu: the meal-plan document (dishes per meal and the days they are eaten, leftovers rules) the ForkKnife assistant page's prompt asks for and applies",
+  "meal-plan.md": "the fortnight menu: the meal-plan document (dishes per meal and the days they are eaten, leftovers rules) the ForkKnife assistant page’s prompt asks for and applies",
   "import.schema.json": "JSON schema for an import document",
   "meal-plan.schema.json": "JSON schema for a meal-plan document",
   "weights.schema.json": "JSON schema for a weights file",
   "user-settings.schema.json": "JSON schema for the on-device settings file",
-  [DATA_FILE_NAME]: "the built data bundle (the person-neutral vocabulary: categories, blocks, day keys, seasons — no schedule of anyone's) plus upcomingDates",
-  [SETTINGS_FILE_NAME]: "this person's on-device settings: every saved profile under weightsProfiles (answers live inside each profile's questionnaire.answers) and which one is active",
+  [DATA_FILE_NAME]: "the built data bundle (the person-neutral vocabulary: categories, blocks, day keys, seasons — no schedule of anyone’s) plus upcomingDates",
+  [SETTINGS_FILE_NAME]: "this person’s on-device settings: every saved profile under weightsProfiles (answers live inside each profile’s questionnaire.answers) and which one is active",
 };
-const WEIGHTS_FILE_PURPOSE = "this person's active profile's weights, derived from their questionnaire answers";
+const WEIGHTS_FILE_PURPOSE = "this person’s active profile’s weights, derived from their questionnaire answers";
 
 function jsonText(value) {
   return JSON.stringify(value, null, 2) + "\n";
@@ -123,10 +123,10 @@ function readmeText(fileNames, todayIsoDate, weightsName, llmGuideText) {
   return [
     "# 🏰🛡️ FortKnight assistant workspace",
     "",
-    `Generated ${todayIsoDate} by the FortKnight app for one person's repeating 14-day (fortnight) schedule.`,
-    "Upload every file in this set to your workspace; together they are the assistant's whole context.",
+    `Generated ${todayIsoDate} by the FortKnight app for one person’s repeating 14-day (fortnight) schedule.`,
+    "Upload every file in this set to your workspace; together they are the assistant’s whole context.",
     "Nothing here was sent anywhere by the app — the person chose to upload it.",
-    "The person may also send you one of the app's prompts: the FortKnight assistant page's spreadsheet prompt (with import-from-spreadsheet.md and their spreadsheet) or the ForkKnife assistant page's menu prompt (their meals and preferences; answer with a meal-plan document, meal-plan.md).",
+    "The person may also send you one of the app’s prompts: the FortKnight assistant page’s spreadsheet prompt (with import-from-spreadsheet.md and their spreadsheet) or the ForkKnife assistant page’s menu prompt (their meals and preferences; answer with a meal-plan document, meal-plan.md).",
     "",
     "## Files",
     index,

@@ -57,7 +57,7 @@ export function renderImportReview(container, importDocument, categories, extraP
     sections.push(table(["What", "Why"], rows.skipped.map((row) => [row.title, row.why])));
   }
   if (rows.review.length) {
-    sections.push(element("h3", null, "Your assistant's review"));
+    sections.push(element("h3", null, "Your assistant’s review"));
     sections.push(list(rows.review, "import-review-lines"));
   }
   if (problems.length) {

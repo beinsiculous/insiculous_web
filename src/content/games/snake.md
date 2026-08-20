@@ -13,7 +13,7 @@ pure grid math.
 
 The twist is the **two-player versus mode**: every death has a cause — wall,
 self-bite, the other snake, or a head-on crash — and the game resolves
-winner or draw accordingly. Thirteen achievements, chaos modes included.
+a winner or a draw accordingly. Thirteen achievements, chaos modes included.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

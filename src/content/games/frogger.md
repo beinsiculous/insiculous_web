@@ -11,7 +11,7 @@ order: 6
 
 A 13-row gauntlet: five traffic lanes, a median, five water lanes, five home
 slots. Ride logs and turtles, beat the timer, fill all five homes to clear
-the round — then everything speeds up. In Ridiculous mode the turtles dive
+the round — then everything speeds up. In Ridiculous mode, the turtles dive
 on staggered cycles and a crocodile periodically guards a home slot; enter
 while it's surfaced and you're lunch.
 

@@ -8,7 +8,7 @@ import { withBase } from "./paths.js";
 // `build` is the face's own page for adding things by hand — ForkKnife's Spoon Feed (the fortnight menu) and
 // FortKnight's Build (the menu plus the commitments and tasks); the label differs, the place in the menu does not.
 export const FACES = {
-  fortknight: { id: "fortknight", label: "FortKnight", logo: "🏰🛡️", favicon: "🗡️", theme: "fort-knight", home: "fortknight/", blurb: "the repeating 14-day schedule: your fortnight grid, day pages and time by category", build: { path: "build/", label: "Build", shortLabel: "Build" } },
+  fortknight: { id: "fortknight", label: "FortKnight", logo: "🏰🛡️", favicon: "🗡️", theme: "fort-knight", home: "fortknight/", blurb: "the repeating 14-day schedule: your fortnight grid, day pages, and time by category", build: { path: "build/", label: "Build", shortLabel: "Build" } },
   forkknife: { id: "forkknife", label: "ForkKnife", logo: "🍴", favicon: "🍴", theme: "fork-knife", home: "forkknife/", blurb: "the fortnight menu: your meals, the dishes for each day, and the prep and cooking tasks", build: { path: "spoon-feed/", label: "Spoon Feed", shortLabel: "Spoon" } },
 };
 export const FACE_IDS = Object.keys(FACES);

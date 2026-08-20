@@ -16,14 +16,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section>
     <h2>Architecture</h2>
     <p>
-      The workspace splits into focused crates — <code>ecs</code>,
-      <code>renderer</code>, <code>physics</code>, <code>input</code>,
-      <code>audio</code>, <code>ui</code>, <code>editor</code> — tied
-      together by <code>engine_core</code>. The ECS is hand-written and
-      deliberately simple: per-type storage with generational entity IDs,
-      events, resources, and systems. No archetype indirection — it is built for
-      debuggability and testability over raw throughput, and every game so
-      far has run comfortably on it.
+      The workspace splits into focused crates — <code>ecs</code>, <code>renderer</code>, <code>physics</code>, <code>input</code>, <code>audio</code>, <code>ui</code>, <code>editor</code> — tied together by <code>engine_core</code>.
+      The ECS is hand-written and deliberately simple: per-type storage with generational
+      entity IDs, events, resources, and systems. No archetype indirection — it is built for
+      debuggability and testability over raw throughput, and every game so far has run
+      comfortably on it.
     </p>
     <p>
       A game is one trait: implement <code>update()</code>, opt into the
@@ -31,7 +28,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       for <code>run_game_with_editor()</code> and the same game boots inside
       a dockable scene editor — inspector with undo/redo, gizmos, entity
       picking, play/pause/stop with full world-snapshot restore. Scenes and
-      prefabs are RON files, which is how Breakout's levels are authored.
+      prefabs are RON files, which is how Breakout’s levels are authored.
     </p>
     <a href="/images/pong-in-editor.png" class="shot-link">
       <img
@@ -43,8 +40,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       />
     </a>
     <p class="caption">
-      Insiculous Pong running live inside the scene editor.
-      <span class="caption-hint">Tap to open it full size.</span>
+      Insiculous Pong running live inside the scene editor. <span class="caption-hint">Tap to open it full size.</span>
     </p>
   </section>
 
@@ -70,20 +66,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section>
     <h2>Tech stack</h2>
     <p>
-      Rust throughout: <code>wgpu</code> for graphics, <code>winit</code>
-      windowing, <code>rapier2d</code> physics, <code>rodio</code> audio,
-      <code>gilrs</code> gamepads, <code>glam</code> math, <code>fontdue</code>
-      text, RON + serde for scenes and data. Desktop today — Vulkan, Metal,
-      or DX12.
+      Rust throughout: <code>wgpu</code> for graphics, <code>winit</code> windowing, <code>rapier2d</code> physics, <code>rodio</code> audio, <code>gilrs</code> gamepads, <code>glam</code> math, <code>fontdue</code> text, RON + serde for scenes and data.
+      Desktop and browser today — Vulkan, Metal, DX12, and WebGPU.
     </p>
     <p>
       The design rule from day one: <em>everything must be CLI-testable</em>.
       Over a thousand tests run headless without a GPU, which is also what
-      makes the codebase workable for coding agents. Browser export
-      (WebAssembly) is in progress: the feasibility spike passed in July
-      2026, and the work that remains is a known refactor — which is why the
-      embed slots on this site are still placeholders rather than play
-      buttons.
+      makes the codebase workable for coding agents. Browser export (WebAssembly) landed in
+      August 2026: the feasibility spike passed that July, the refactor it called for is done,
+      and all six games now run on WebGPU — which is why the embed slots on this site are play
+      buttons rather than placeholders.
     </p>
   </section>
 
@@ -99,14 +91,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </p>
     <p>
       The distinctive piece is <strong>adversarial cross-model review</strong>:
-      one model authors a plan or a diff, a different vendor's model attacks
+      one model authors a plan or a diff, a different vendor’s model attacks
       it headlessly, and every numbered finding gets an explicit accept or
       rebut. Findings must name a concrete failure scenario — "this might
-      have issues" doesn't count as a finding.
+      have issues" doesn’t count as a finding.
     </p>
     <p>
-      There's no leaderboard and no pass-rate percentage, deliberately. The
-      evaluation is whether an agent's work survives review, the test suite,
+      There’s no leaderboard and no pass-rate percentage, deliberately. The
+      evaluation is whether an agent’s work survives review, the test suite,
       and actual play — judged by whoever has to maintain the codebase
       afterward. What provenance there is lives in the git history
       rather than in a scoreboard — commit trailers recording which models
