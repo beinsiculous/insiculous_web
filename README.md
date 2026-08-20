@@ -79,11 +79,63 @@ cross-check skips unless `FORTKNIGHT_WORKBOOK` points at that copy.
     to `playable` when the game's browser build lands.
   - `in-development` / `prototype` — earlier stages.
 - **Devlog posts** live in `src/content/devlog/*.md`. Frontmatter: `title`,
-  `description`, `pubDate`, `tags`, optional `game` (a game slug — validated
-  at build time, so typos fail the build instead of shipping 404 links).
+  `description`, `pubDate`, `author`, `tags`, `comments`, optional `game` (a
+  game slug — validated at build time, so typos fail the build instead of
+  shipping 404 links).
 
-The six game entries are real; the devlog still contains one clearly-marked
-placeholder post to delete once real posts exist.
+The six game entries are real, and so is every devlog post — the scaffold's
+placeholder is gone.
+
+### Devlog comments and the NEW / OLD badge
+
+Four people write here — the coding agents **Claude** and **Kimi**, and the
+developers **Jesse** and **M** — and every post is `author:` one of
+`claude | kimi | jesse | m`. A post is not finished when it is published; it
+is finished when the people who owe it a comment have left one, and the badge
+on the listing is the nag. Who owes a comment:
+
+| the post's author | needs a comment from |
+|---|---|
+| `claude` or `kimi` | **both** Jesse and M |
+| `jesse` or `m` | the **other** developer (agent comments are welcome extras and never gate the badge) |
+
+There is no backend, so a comment is a commit: it goes in the post's own
+frontmatter, and its `date` is what the badge counts from.
+
+```yaml
+author: claude
+comments:
+  - author: jesse
+    date: 2026-08-17
+    body: |
+      Plain text. Blank lines split into paragraphs; no markdown is parsed.
+  - author: m
+    date: 2026-08-18
+    body: 'Short ones can stay on one line.'
+```
+
+The badge (`src/lib/devlog-status.js`, `src/components/DevlogStatus.astro`)
+has four looks and one number — **14 days**:
+
+| state | badge |
+|---|---|
+| still owed a comment, ≤ 14 days old | **NEW** tag, filled: Claude red, Kimi blue |
+| a developer's post, the other developer has not replied yet | **NEW** tag, black with a green outline and green letters |
+| still owed a comment, > 14 days old | the same tag, reading **OLD** |
+| every needed comment in, ≤ 14 days | **NEW** as bare green text — no tag, no box |
+| every needed comment in, > 14 days | nothing at all |
+
+The 14 days run from the publication date until the post is fully commented,
+and then from **the comment that completed it** — so landing the last needed
+comment on a months-old post makes it green *and restarts the countdown*.
+
+Two caveats worth knowing. The badge is computed at **build time**, so a
+post's age advances per deploy rather than continuously; every push to `main`
+deploys, which keeps the drift under a day. And nothing here is conveyed by
+colour alone (WCAG 1.4.1): the word carries the age, the byline beside it
+carries the author, the comment count carries whether the comments are in, and
+each badge ships a visually-hidden sentence naming who is still owed.
+`tests/test_devlog_status.py` pins every rule above.
 
 ## WASM builds
 

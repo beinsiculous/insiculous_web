@@ -1,0 +1,85 @@
+---
+// The devlog comment badge. Rules and colours live in src/lib/devlog-status.js — this file only
+// draws what that module decides. Four looks, and the two axes are legible without colour:
+// the word (NEW / OLD) carries the age, the byline beside it carries the author, and the comment
+// count beside it carries whether the comments are in — so nothing here is colour-only (WCAG 1.4.1).
+//
+//   claude    filled red tag   — Claude's post, comments still owed
+//   kimi      filled blue tag  — Kimi's post, comments still owed
+//   developer black tag, green outline, green letters — a dev's post, the other dev has not replied
+//   complete  bare green text, no tag — every needed comment is in and the post is still fresh
+//
+// The badge is computed at build time, so a post's age advances with each deploy rather than
+// continuously. Every push to main deploys (README.md), which keeps the drift under a day.
+import type { CollectionEntry } from 'astro:content';
+import { statusFor } from '../lib/devlog-status.js';
+
+interface Props {
+  post: CollectionEntry<'devlog'>['data'];
+  // The page's clock, passed in so every badge and thread on one page agrees
+  // about what day it is — two `new Date()` calls can straddle UTC midnight
+  // and label the same post from two different days (review-2 F4).
+  now?: Date;
+}
+
+const { post, now = new Date() } = Astro.props;
+const status = statusFor(post, now);
+---
+
+{
+  status.label && (
+    <span class:list={['devlog-status', status.tone]}>
+      {status.label}
+      <span class="visually-hidden"> — {status.description}</span>
+    </span>
+  )
+}
+
+<style>
+  .devlog-status {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  /* The three "someone still owes this post a comment" looks are tags with a box around them. */
+  .claude,
+  .kimi,
+  .developer {
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+  }
+
+  .claude {
+    background: var(--claude);
+    color: var(--bg);
+  }
+
+  .kimi {
+    background: var(--kimi);
+    color: var(--bg);
+  }
+
+  .developer {
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  /* Fully commented: not a tag at all, just the word in green — the one state with no box. */
+  .complete {
+    color: var(--accent);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

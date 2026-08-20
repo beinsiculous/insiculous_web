@@ -19,6 +19,19 @@ MARKER = Path(".kimi-code/skills/adversarial-review/SKILL.md")
 
 BIG_LINES = 120  # threshold in commit-review-hook.sh is 100
 
+# A well-formed signed skip: a reason over ten characters and a name behind it.
+SIGNED_SKIP = (
+    "big\n"
+    "\n"
+    "Adversarial-Review-Skipped: the reviewer is offline and the demo is tonight\n"
+    "Skip-Signed-Off-By: M"
+)
+
+
+def commit_with(message):
+    """A commit whose message really does span lines, as a trailer must."""
+    return f"git commit -m '{message}'"
+
 
 def run_git(repository, *args):
     subprocess.run(["git", *args], cwd=repository, check=True,
@@ -87,6 +100,7 @@ class CommitReviewHookTest(unittest.TestCase):
         self.assertIn("--reviewer=kimi", decision["permissionDecisionReason"])
 
     def test_adv_reviewed_bypass_passes(self):
+        """ADV_REVIEWED=1 asserts the review HAPPENED — it is no longer a way to skip one."""
         stage_changes(self.repository, BIG_LINES)
         result = run_hook(COMMIT_HOOK, "kimi", "ADV_REVIEWED=1 git commit -m 'big'", self.repository)
         self.assertEqual(result.returncode, 0)
@@ -95,6 +109,175 @@ class CommitReviewHookTest(unittest.TestCase):
         stage_changes(self.repository, BIG_LINES)
         result = run_hook(COMMIT_HOOK, "kimi", "git commit -m 'ADV_REVIEWED=1 was set'", self.repository)
         self.assertEqual(result.returncode, 2)
+
+    # ---- the signed skip: the only way past the gate without a review -------
+
+    def test_signed_skip_passes(self):
+        stage_changes(self.repository, BIG_LINES)
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(SIGNED_SKIP), self.repository)
+        self.assertEqual(result.returncode, 0)
+
+    def test_any_reason_over_ten_characters_is_accepted(self):
+        """The hook does not judge the reason: 'just because' is twelve characters and fine."""
+        stage_changes(self.repository, BIG_LINES)
+        message = "big\n\nAdversarial-Review-Skipped: just because\nSkip-Signed-Off-By: M"
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 0)
+
+    def test_reason_of_exactly_ten_characters_is_rejected(self):
+        stage_changes(self.repository, BIG_LINES)
+        message = "big\n\nAdversarial-Review-Skipped: 1234567890\nSkip-Signed-Off-By: M"
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("10 characters", result.stderr)
+
+    def test_reason_without_a_signature_is_rejected(self):
+        stage_changes(self.repository, BIG_LINES)
+        message = "big\n\nAdversarial-Review-Skipped: shipping this before the demo"
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("nobody signed it", result.stderr)
+
+    def test_signature_without_a_reason_is_rejected(self):
+        stage_changes(self.repository, BIG_LINES)
+        message = "big\n\nSkip-Signed-Off-By: M"
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("sign a reason", result.stderr)
+
+    def test_skip_trailers_are_read_from_a_message_file(self):
+        """-F <file>: the trailers live on disk, not in the command string."""
+        stage_changes(self.repository, BIG_LINES)
+        (self.repository / "msg.txt").write_text(SIGNED_SKIP + "\n")
+        result = run_hook(COMMIT_HOOK, "kimi", "git commit -F msg.txt", self.repository)
+        self.assertEqual(result.returncode, 0)
+
+    def test_plain_big_commit_is_told_how_to_skip(self):
+        stage_changes(self.repository, BIG_LINES)
+        result = run_hook(COMMIT_HOOK, "kimi", "git commit -m 'big'", self.repository)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("Adversarial-Review-Skipped", result.stderr)
+        self.assertIn("Skip-Signed-Off-By", result.stderr)
+
+    def test_denial_says_how_to_recover_an_editor_message(self):
+        """review-1 F4: trailers typed in $EDITOR are invisible here; say where they landed."""
+        stage_changes(self.repository, BIG_LINES)
+        result = run_hook(COMMIT_HOOK, "kimi", "git commit -m 'big'", self.repository)
+        self.assertIn("COMMIT_EDITMSG", result.stderr)
+
+    def test_documentation_quoting_the_trailers_is_not_a_skip(self):
+        """review-1 F2: this fired for real on the command that wrote the skip docs.
+
+        A commit whose *body* quotes the trailer format — as this repo's own
+        documentation does — must still be gated. Only the last lines count.
+        """
+        stage_changes(self.repository, BIG_LINES)
+        message = (
+            "document the skip convention\n"
+            "\n"
+            "Adversarial-Review-Skipped: <reason, more than 10 characters>\n"
+            "Skip-Signed-Off-By: <the developer name>\n"
+            "\n"
+            "...and that is how the trailers work. More prose follows, so the quoted\n"
+            "format sits well outside the tail the hook actually reads.\n"
+            "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven\ntwelve"
+        )
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 2)
+
+    def test_message_file_is_found_in_every_spelling(self):
+        """review-1 F3: -F path, -Fpath, --file=path, --file path, and quoted paths."""
+        stage_changes(self.repository, BIG_LINES)
+        (self.repository / "msg.txt").write_text(SIGNED_SKIP + "\n")
+        (self.repository / "my message.txt").write_text(SIGNED_SKIP + "\n")
+        for command in (
+            "git commit -F msg.txt",
+            "git commit -Fmsg.txt",
+            "git commit --file=msg.txt",
+            "git commit --file msg.txt",
+            "git commit -F 'my message.txt'",
+        ):
+            with self.subTest(command=command):
+                result = run_hook(COMMIT_HOOK, "kimi", command, self.repository)
+                self.assertEqual(result.returncode, 0)
+
+    def test_missing_message_file_denies_rather_than_erroring(self):
+        stage_changes(self.repository, BIG_LINES)
+        result = run_hook(COMMIT_HOOK, "kimi", "git commit -F nowhere.txt", self.repository)
+        self.assertEqual(result.returncode, 2)
+
+    def test_quoted_template_in_the_final_lines_is_not_a_skip(self):
+        """review-2 F1: the tail window alone wasn't enough — the template is not a reason.
+
+        A commit that documents this convention naturally *ends* with the
+        example, putting both placeholders inside the tail. The reason
+        '<reason, more than 10 characters>' is 33 characters and would sail
+        through the length check, signing a skip in a placeholder's name.
+        """
+        stage_changes(self.repository, BIG_LINES)
+        message = (
+            "document the skip convention\n"
+            "\n"
+            "The trailers go at the end of the message, like this:\n"
+            "\n"
+            "Adversarial-Review-Skipped: <reason, more than 10 characters>\n"
+            "Skip-Signed-Off-By: <the developer name>"
+        )
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("template", result.stderr)
+
+    def test_the_last_trailer_wins_over_a_quoted_one(self):
+        """review-2 F1: quote the format, then sign for real — the signature is what counts."""
+        stage_changes(self.repository, BIG_LINES)
+        message = (
+            "document the convention and skip the review\n"
+            "\n"
+            "The format is 'Adversarial-Review-Skipped: <reason>', and here is mine:\n"
+            "\n"
+            "Adversarial-Review-Skipped: the reviewer is offline and the demo is tonight\n"
+            "Skip-Signed-Off-By: M"
+        )
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 0)
+
+    def test_a_signer_may_carry_an_email_in_angle_brackets(self):
+        """Only a value that OPENS with '<' is the template; a signed name with an address is not."""
+        stage_changes(self.repository, BIG_LINES)
+        message = (
+            "big\n"
+            "\n"
+            "Adversarial-Review-Skipped: the reviewer is offline and the demo is tonight\n"
+            "Skip-Signed-Off-By: M <m@example.com>"
+        )
+        result = run_hook(COMMIT_HOOK, "kimi", commit_with(message), self.repository)
+        self.assertEqual(result.returncode, 0)
+
+    def test_message_quoting_the_editor_recovery_hint_does_not_read_that_file(self):
+        """review-2 F2: COMMIT_EDITMSG holds the PREVIOUS attempt, trailers and all.
+
+        The denial hands out the string '-F .git/COMMIT_EDITMSG'. A commit that
+        quotes that advice inside its own -m message must not cause the stale
+        file to be read as this commit's message.
+        """
+        stage_changes(self.repository, BIG_LINES)
+        (self.repository / ".git" / "COMMIT_EDITMSG").write_text(SIGNED_SKIP + "\n")
+        command = "git commit -m 'hook: explain the -F .git/COMMIT_EDITMSG retry path'"
+        result = run_hook(COMMIT_HOOK, "kimi", command, self.repository)
+        self.assertEqual(result.returncode, 2)
+
+    def test_an_explicit_editor_message_file_is_still_honoured(self):
+        """The F4 recovery path itself keeps working: -F before any -m, so it is the message."""
+        stage_changes(self.repository, BIG_LINES)
+        (self.repository / ".git" / "COMMIT_EDITMSG").write_text(SIGNED_SKIP + "\n")
+        result = run_hook(COMMIT_HOOK, "kimi", "git commit -F .git/COMMIT_EDITMSG", self.repository)
+        self.assertEqual(result.returncode, 0)
+
+    def test_denial_names_the_directory_message_files_are_read_from(self):
+        """review-2 F3: `git -C elsewhere` fails closed, so say where we looked."""
+        stage_changes(self.repository, BIG_LINES)
+        result = run_hook(COMMIT_HOOK, "kimi", "git commit -m 'big'", self.repository)
+        self.assertIn("message files are read from", result.stderr)
 
     def test_unmarked_repo_passes(self):
         shutil.rmtree(self.repository / ".kimi-code")

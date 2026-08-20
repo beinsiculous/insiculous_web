@@ -103,7 +103,14 @@ see `.claude/skills/adversarial-review/SKILL.md` (Claude side) and
 `.kimi-code/skills/adversarial-review/SKILL.md` (kimi side; same workflow, reviewer roles
 swapped). Two hooks make it the default in both harnesses — approved plans are routed through
 plan mode, and `git commit` with ≥100 changed lines is denied until code mode has run (retry
-with the `ADV_REVIEWED=1` prefix once adjudicated or explicitly skipped). Claude's hooks are
+with the `ADV_REVIEWED=1` prefix, which asserts the review *happened* — it is not a way to skip
+one). **Skipping is the developer's call**, made in the last lines of the commit message where
+the world can read it: `Adversarial-Review-Skipped: <reason over 10 characters>` plus
+`Skip-Signed-Off-By: <name>`. Any reason qualifies — "just because" is a reason. That buys
+friction and a paper trail, **not** proof of authorship: the hook cannot tell who typed the
+trailers, so an agent writing them forges a person's name onto a review that never happened.
+An agent never writes them — it asks.
+Claude's hooks are
 registered in `.claude/settings.json`; kimi's live in the global `~/.kimi-code/config.toml`
 and both hook scripts (`scripts/plan-review-hook.sh`, `scripts/commit-review-hook.sh`) take a
 `--harness=claude|kimi` flag and stay silent in repos that don't carry the skill marker.
@@ -127,6 +134,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | how an assistant reads a spreadsheet into an import document | `docs/import-from-spreadsheet.md` |
 | on-device app, questionnaire page, settings, overrides | `docs/app.md` |
 | the studio site, games/devlog content, WASM drop-in convention, deploy | `README.md` |
+| devlog authorship (`author:`), comments in frontmatter, the NEW/OLD comment badge | `README.md`, `src/lib/devlog-status.js` |
 | accessibility target, the three gates, the manual pass | `README.md`, `scripts/a11y-check.mjs`, `scripts/postbuild-check.mjs` |
 | the face registry (labels, skins, nav, favicons) | `src/lib/faces.js`, `src/layouts/FaceLayout.astro` |
 | how an assistant should propose changes | `docs/llm-guide.md` |
