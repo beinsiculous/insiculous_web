@@ -1,7 +1,13 @@
-# The one path to production. Every push to main is validated, tested, type-checked and built
-# before anything is uploaded, so a broken build can never reach beinsiculous.com — the deploy step
-# only runs if the data gates, `check` and `build` (which includes scripts/postbuild-check.mjs) all
-# pass. `npm run verify` runs the same steps locally, so the two cannot drift.
+# The one path to production — and to staging. Every push to main or dev is validated, tested,
+# type-checked and built before anything is uploaded, so a broken build can never reach
+# beinsiculous.com — the deploy step only runs if the data gates, `check` and `build` (which
+# includes scripts/postbuild-check.mjs) all pass. `npm run verify` runs the same steps locally,
+# so the two cannot drift.
+#
+# Branch → destination:
+#   main → the production Worker (insiculous-web, beinsiculous.com)
+#   dev  → the staging Worker (insiculous-web-dev, its workers.dev URL) via `--env dev`
+# Same gates for both; staging earns no shortcuts.
 #
 # Secrets this needs (Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN   — an "Edit Cloudflare Workers" token, scoped to the account and to
@@ -14,12 +20,12 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch: # deploy the current main by hand from the Actions tab
+    branches: [main, dev]
+  workflow_dispatch: # deploy the current branch by hand from the Actions tab
 
-# One deploy at a time; never cancel one mid-upload.
+# One deploy at a time per destination; never cancel one mid-upload.
 concurrency:
-  group: deploy-production
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -72,20 +78,33 @@ jobs:
           npm run a11y
 
       - name: Deploy to Cloudflare
-        run: npx wrangler deploy
+        run: |
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            npx wrangler deploy --env dev | tee deploy.log
+          else
+            npx wrangler deploy | tee deploy.log
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # A deploy that reports success but does not serve is the failure mode this whole file
-      # exists to catch, so ask the live domain before calling it done.
+      # exists to catch, so ask the live site before calling it done. Production has a fixed
+      # domain; staging's workers.dev URL comes from wrangler's own deploy output.
       - name: Check the site is serving
         run: |
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -1)
+            if [ -z "$url" ]; then echo "no workers.dev URL in deploy output"; exit 1; fi
+          else
+            url="https://beinsiculous.com/"
+          fi
+          echo "checking $url"
           for attempt in 1 2 3 4 5; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://beinsiculous.com/ || true)
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true)
             echo "attempt $attempt: HTTP $code"
             [ "$code" = "200" ] && exit 0
             sleep 10
           done
-          echo "beinsiculous.com did not return 200 after the deploy"
+          echo "$url did not return 200 after the deploy"
           exit 1
