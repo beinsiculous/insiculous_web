@@ -14,3 +14,23 @@ routes = [
 [assets]
 directory = "./dist"
 not_found_handling = "404-page"
+
+# --- dev environment -------------------------------------------------------
+# `wrangler deploy --env dev` publishes the same dist/ to a SEPARATE Worker
+# (insiculous-web-dev) that serves only on its workers.dev URL — no custom
+# domain, so staging can never shadow production. Deployed by pushes to the
+# `dev` branch (see .github/workflows/deploy.yml).
+[env.dev]
+name = "insiculous-web-dev"
+workers_dev = true
+
+# Friendly staging address. The beinsiculous.com zone is live (it serves
+# production), so `wrangler deploy --env dev` creates this DNS record and
+# route itself — same mechanism as the prod domain.
+routes = [
+  { pattern = "dev.beinsiculous.com", custom_domain = true },
+]
+
+[env.dev.assets]
+directory = "./dist"
+not_found_handling = "404-page"
