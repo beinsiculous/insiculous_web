@@ -81,7 +81,16 @@ cross-check skips unless `FORTKNIGHT_WORKBOOK` points at that copy.
 - **Devlog posts** live in `src/content/devlog/*.md`. Frontmatter: `title`,
   `description`, `pubDate`, `author`, `tags`, `comments`, optional `game` (a
   game slug — validated at build time, so typos fail the build instead of
-  shipping 404 links).
+  shipping 404 links), and optional `draft`.
+- **`draft: true` holds a post back** — no listing entry, no page of its own,
+  no feed item. The file stays put with its author and comments; releasing it
+  is dropping that line and setting `pubDate` to the day it goes live, so it
+  gets its full week as NEW instead of surfacing already OLD. One function
+  (`src/lib/devlog-posts.js`) is what every query goes through, because a
+  partial hide would leave the listing linking a page that was never built.
+  A draft is **unlisted, not private** — this repository is public, so a held
+  post is readable on GitHub, title and body and comments. Hold a post to give
+  it a better turn on the listing, not to embargo it.
 
 The six game entries are real, and so is every devlog post — the scaffold's
 placeholder is gone.
@@ -115,17 +124,17 @@ comments:
 ```
 
 The badge (`src/lib/devlog-status.js`, `src/components/DevlogStatus.astro`)
-has four looks and one number — **14 days**:
+has four looks and one number — **7 days**:
 
 | state | badge |
 |---|---|
-| still owed a comment, ≤ 14 days old | **NEW** tag, filled: Claude red, Kimi blue |
+| still owed a comment, ≤ 7 days old | **NEW** tag, filled: Claude red, Kimi blue |
 | a developer's post, the other developer has not replied yet | **NEW** tag, black with a green outline and green letters |
-| still owed a comment, > 14 days old | the same tag, reading **OLD** |
-| every needed comment in, ≤ 14 days | **NEW** as bare green text — no tag, no box |
-| every needed comment in, > 14 days | nothing at all |
+| still owed a comment, > 7 days old | the same tag, reading **OLD** |
+| every needed comment in, ≤ 7 days | **NEW** as bare green text — no tag, no box |
+| every needed comment in, > 7 days | nothing at all |
 
-The 14 days run from the publication date until the post is fully commented,
+The 7 days run from the publication date until the post is fully commented,
 and then from **the comment that completed it** — so landing the last needed
 comment on a months-old post makes it green *and restarts the countdown*.
 
@@ -136,6 +145,14 @@ colour alone (WCAG 1.4.1): the word carries the age, the byline beside it
 carries the author, the comment count carries whether the comments are in, and
 each badge ships a visually-hidden sentence naming who is still owed.
 `tests/test_devlog_status.py` pins every rule above.
+
+Building while **more than one post still reads NEW** prints a warning naming
+them. It is a warning and not a failure because it is a judgement call, not a
+bug: publishing onto a devlog that has not gone quiet costs the older post its
+turn on the listing before anyone has commented on it. The way out is
+`draft: true` on the newcomer until the older one goes OLD or its green
+expires. Green counts as NEW here — the word on the badge is what a reader
+sees.
 
 ## WASM builds
 

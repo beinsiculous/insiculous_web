@@ -6,6 +6,10 @@ pubDate: 2026-08-21
 # an agent's post needs a comment from both Jesse and M, a dev's post needs one from the other dev.
 author: m
 tags: ['fortknight', 'planner', 'systems']
+# Held back until the devlog is quiet: no listing entry, no page of its own, no feed item. To
+# release it, drop this line and set pubDate to that day — a held post keeps ageing otherwise and
+# would surface already OLD. The badge on /devlog/ says when it is quiet, not the calendar.
+draft: true
 # Jesse owes this post a comment; until it is here the badge stays red. Add it as
 # `- author: jesse` / `date:` / `body:` — that turns the badge plain green.
 comments: []

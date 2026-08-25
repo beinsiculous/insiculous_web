@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import GameEmbed from '../../components/GameEmbed.astro';
+import { publishedPosts } from '../../lib/devlog-posts.js';
 
 export async function getStaticPaths() {
   const games = await getCollection('games');
@@ -15,9 +16,9 @@ export async function getStaticPaths() {
 const { game } = Astro.props;
 const { Content } = await render(game);
 
-const relatedPosts = (await getCollection('devlog'))
-  .filter((post) => post.data.game?.id === game.id)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const relatedPosts = publishedPosts(await getCollection('devlog')).filter(
+  (post) => post.data.game?.id === game.id
+);
 ---
 
 <BaseLayout title={`${game.data.title} — Be Insiculous`} description={game.data.blurb}>

@@ -2,11 +2,10 @@
 // the studio site has no UI framework, and this needs none either.
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
+import { publishedPosts } from '../lib/devlog-posts.js';
 
 export async function GET(context) {
-  const posts = (await getCollection('devlog')).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-  );
+  const posts = publishedPosts(await getCollection('devlog'));
   return rss({
     title: 'Be Insiculous devlog',
     description: 'Development notes on games and the Insiculous 2D engine.',

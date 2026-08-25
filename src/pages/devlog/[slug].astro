@@ -5,9 +5,11 @@ import SupportLink from '../../components/SupportLink.astro';
 import DevlogStatus from '../../components/DevlogStatus.astro';
 import DevlogComments from '../../components/DevlogComments.astro';
 import { AUTHOR_LABELS } from '../../lib/devlog-status.js';
+import { publishedPosts } from '../../lib/devlog-posts.js';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('devlog');
+  // A held post gets no page — the listing and the feed drop it in the same breath.
+  const posts = publishedPosts(await getCollection('devlog'));
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },

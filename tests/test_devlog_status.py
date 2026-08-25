@@ -3,8 +3,8 @@ tests/test_workspace_docs.py drives the assistant-workspace contract.
 
 The rule, stated once here so a change to it has to come through this file:
 an agent's post needs a comment from both developers, a developer's post needs one from the other
-developer; still waiting -> "NEW" (<= 14 days) or "OLD" in the author's colour; fully commented ->
-plain green "NEW" for 14 days counted from the comment that completed it, and then nothing at all.
+developer; still waiting -> "NEW" (<= 7 days) or "OLD" in the author's colour; fully commented ->
+plain green "NEW" for 7 days counted from the comment that completed it, and then nothing at all.
 """
 import json
 import shutil
@@ -20,11 +20,21 @@ STATUS_SCRIPT = (
     + "process.stdout.write(JSON.stringify(inputs.posts.map((post) => statusFor(post, inputs.now))));"
 )
 
+STILL_NEW_SCRIPT = (
+    f"import {{ postsStillNew }} from {MODULE_URI};"
+    + STDIN_PRELUDE
+    + "process.stdout.write(JSON.stringify(postsStillNew(inputs.posts, inputs.now).map((post) => post.author)));"
+)
+
 TODAY = "2026-08-19"
 
 
 def status(post, now=TODAY):
     return run_node(STATUS_SCRIPT, {"posts": [post], "now": now})[0]
+
+
+def still_new(posts, now=TODAY):
+    return run_node(STILL_NEW_SCRIPT, {"posts": posts, "now": now})
 
 
 def post(author, pub_date, comments=()):
@@ -46,10 +56,10 @@ class DevlogStatusTests(unittest.TestCase):
         self.assertEqual((result["label"], result["tone"]), ("NEW", "claude"))
         self.assertEqual(result["awaiting"], ["m"])
 
-    def test_fourteen_days_is_still_new_and_fifteen_is_old(self):
-        self.assertEqual(status(post("kimi", "2026-08-05"))["label"], "NEW")  # exactly 14 days
-        self.assertEqual(status(post("kimi", "2026-08-04"))["label"], "OLD")  # 15
-        self.assertEqual(status(post("kimi", "2026-08-04"))["tone"], "kimi")  # the colour survives the word
+    def test_seven_days_is_still_new_and_eight_is_old(self):
+        self.assertEqual(status(post("kimi", "2026-08-12"))["label"], "NEW")  # exactly 7 days
+        self.assertEqual(status(post("kimi", "2026-08-11"))["label"], "OLD")  # 8
+        self.assertEqual(status(post("kimi", "2026-08-11"))["tone"], "kimi")  # the colour survives the word
 
     def test_both_comments_turn_it_green(self):
         result = status(post("claude", "2026-08-15", [("jesse", "2026-08-16"), ("m", "2026-08-17")]))
@@ -64,7 +74,7 @@ class DevlogStatusTests(unittest.TestCase):
         self.assertEqual((result["label"], result["tone"], result["ageDays"]), ("NEW", "complete", 1))
 
     def test_green_expires_into_no_badge(self):
-        result = status(post("kimi", "2026-01-05", [("jesse", "2026-01-06"), ("m", "2026-08-04")]))
+        result = status(post("kimi", "2026-01-05", [("jesse", "2026-01-06"), ("m", "2026-08-11")]))
         self.assertIsNone(result["label"])
         self.assertIsNone(result["tone"])
         self.assertTrue(result["complete"])
@@ -111,6 +121,26 @@ class DevlogStatusTests(unittest.TestCase):
     def test_awaiting_names_are_pre_joined_for_the_pages(self):
         self.assertEqual(status(post("kimi", "2026-08-18"))["awaitingNames"], "Jesse and M")
         self.assertEqual(status(post("kimi", "2026-08-18", [("jesse", "2026-08-18"), ("m", "2026-08-18")]))["awaitingNames"], "")
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class PostsStillNewTests(unittest.TestCase):
+    """What the publish warning on /devlog/ counts. More than one of these and a new post would
+    take the listing from a post nobody has commented on yet."""
+
+    def test_only_the_fresh_ones_come_back(self):
+        self.assertEqual(still_new([post("claude", "2026-08-18"), post("kimi", "2026-08-11")]), ["claude"])
+
+    def test_green_counts_too_because_it_still_reads_new(self):
+        """A post that just went green is having its turn on the listing as much as a red one —
+        the word on the badge is NEW either way, so the warning must see it."""
+        green = post("claude", "2026-08-15", [("jesse", "2026-08-16"), ("m", "2026-08-17")])
+        self.assertEqual(still_new([green]), ["claude"])
+
+    def test_a_quiet_devlog_comes_back_empty(self):
+        """OLD posts and posts whose green has expired are done having their turn."""
+        expired = post("jesse", "2026-01-05", [("m", "2026-01-06")])
+        self.assertEqual(still_new([post("kimi", "2026-08-11"), expired]), [])
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")

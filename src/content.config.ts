@@ -44,8 +44,12 @@ const devlog = defineCollection({
     // Required: an authorless post would silently drop out of the NEW/OLD comment badge.
     author: devlogAuthor,
     tags: z.array(z.string()).default([]),
+    // Held back from the site: no listing entry, no page of its own, no feed item — the rule lives
+    // in src/lib/devlog-posts.js and every query goes through it. The file keeps its author and
+    // comments, so releasing a held post is this line and a fresh pubDate.
+    draft: z.boolean().default(false),
     // Comments live in the post's own frontmatter — the site has no backend, so a comment is a
-    // commit. `date` drives the badge: the last needed comment restarts the 14-day countdown.
+    // commit. `date` drives the badge: the last needed comment restarts the 7-day countdown.
     comments: z
       .array(
         z.object({

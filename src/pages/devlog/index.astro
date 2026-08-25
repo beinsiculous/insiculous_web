@@ -3,14 +3,26 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SupportLink from '../../components/SupportLink.astro';
 import DevlogStatus from '../../components/DevlogStatus.astro';
-import { AUTHOR_LABELS } from '../../lib/devlog-status.js';
+import { AUTHOR_LABELS, postsStillNew } from '../../lib/devlog-status.js';
+import { publishedPosts } from '../../lib/devlog-posts.js';
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../../lib/site-links.js';
 
 // One clock for every badge on the page (review-2 F4).
 const now = new Date();
-const posts = (await getCollection('devlog')).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+const posts = publishedPosts(await getCollection('devlog'));
+
+// A build can only see the state, never the act of publishing — so this reports the state and
+// leaves the consequence conditional (review-1 F2). Warn rather than fail: publishing onto a
+// devlog that has not gone quiet is a judgement call, not a bug.
+const crowded = postsStillNew(posts.map((post) => post.data), now);
+if (crowded.length > 1) {
+  console.warn(
+    `\ndevlog: not quiet — ${crowded.length} posts still read NEW: ` +
+      crowded.map((post) => `“${post.title}”`).join(', ') +
+      '. Anything published now takes the listing from them before they have been commented on; ' +
+      'hold it with `draft: true` until this clears.'
+  );
+}
 ---
 
 <BaseLayout

@@ -9,20 +9,20 @@
  *   developer-written post -> needs a comment from the OTHER developer (agent comments are welcome
  *                             extras and never gate the badge)
  *
- *   still waiting, within 14 days of the anchor date  -> "NEW", in the author's colour
- *   still waiting, more than 14 days                  -> "OLD", in the author's colour
- *   every needed comment in, within 14 days           -> "NEW" as bare green text, no tag
- *   every needed comment in, more than 14 days        -> no badge at all
+ *   still waiting, within 7 days of the anchor date  -> "NEW", in the author's colour
+ *   still waiting, more than 7 days                  -> "OLD", in the author's colour
+ *   every needed comment in, within 7 days           -> "NEW" as bare green text, no tag
+ *   every needed comment in, more than 7 days        -> no badge at all
  *
  * The anchor date is the publication date until the post is fully commented, and then the date of
- * the comment that completed it — so landing the last needed comment restarts the 14-day countdown.
+ * the comment that completed it — so landing the last needed comment restarts the 7-day countdown.
  *
  * Framework-free plain ES module (see CLAUDE.md): no imports, no build step, driven directly by
  * tests/test_devlog_status.py through node and imported by the .astro pages at build time.
  */
 
 /** How long a post counts as fresh, in days, measured from its anchor date. */
-export const FRESH_DAYS = 14;
+export const FRESH_DAYS = 7;
 
 export const DEVELOPERS = ['jesse', 'm'];
 export const AGENTS = ['claude', 'kimi'];
@@ -103,4 +103,23 @@ export function statusFor(post, now) {
     ageDays,
     description: `${AUTHOR_LABELS[author]}’s post, still waiting on a comment from ${names(awaiting)}`,
   };
+}
+
+/**
+ * The posts whose badge still reads NEW on `now` — a devlog that has not gone quiet yet.
+ *
+ * Publishing on top of these is what src/pages/devlog/index.astro warns about: two NEW posts at
+ * once means the older one loses its turn on the listing before anyone has commented on it.
+ * Holding the newcomer with `draft: true` until this comes back with one entry is the way out.
+ *
+ * Generic in the post so the caller keeps its own type — the listing reads `title` off what comes
+ * back to name the crowded posts, and a narrowed type breaks `astro check`.
+ *
+ * @template {{author: string, pubDate: Date|string, comments?: Array<object>}} Post
+ * @param {Post[]} posts
+ * @param {Date|string} now  the day the badges are being rendered on
+ * @returns {Post[]}
+ */
+export function postsStillNew(posts, now) {
+  return posts.filter((post) => statusFor(post, now).label === 'NEW');
 }
