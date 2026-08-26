@@ -55,6 +55,13 @@ cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
 # (deion_assets review-1 F3) nor trigger the staging fallback below
 # (review-1 F2).
 stripped=$(printf '%s' "$cmd" | sed "s/'[^']*'//g; s/\"[^\"]*\"//g")
+# A second view, for deciding whether a path is named (see names_paths). There, deleting a
+# quoted span is exactly wrong: the question is where a message ENDS, and `-m "x" file.txt`
+# stripped down to `-m  file.txt` cannot answer it. Whether the value is consumed or not, one
+# of the two readings is wrong — either a real path is missed, or `-m x` reads as a path and
+# an ordinary commit with a dirty tree is denied. Holding each quoted span open as a single
+# opaque token answers it: `-m @Q@ file.txt` has a message AND a path, and both are visible.
+placeheld=$(printf '%s' "$cmd" | sed "s/'[^']*'/@Q@/g; s/\"[^\"]*\"/@Q@/g")
 # Detect the commit itself on the RAW command so `bash -c "git commit ..."` /
 # `eval "git commit ..."` cannot slip past by hiding it inside quotes
 # (FortKnight review-1 F2). A commit message that merely mentions "git commit"
@@ -209,6 +216,7 @@ redirect_problem=""
 target_dir=""
 commit_segments=0
 walking_dir=""
+commit_segment=""
 while IFS= read -r segment; do
     case "$segment" in *[![:space:]]*) ;; *) continue ;; esac
     segment=" $segment"          # so a segment-leading `cd`/`-C` still matches
@@ -227,7 +235,15 @@ while IFS= read -r segment; do
         esac
         segment_c=$(printf '%s' "$segment" | sed -n 's/.*[[:space:]]-C[[:space:]]*\([^[:space:]]\{1,\}\).*/\1/p')
         if [ -n "$segment_c" ]; then
-            target_dir="$segment_c"
+            # A relative -C is relative to where the walked `cd`s have got to, not to
+            # this hook's own working directory. Resolving it here rather than joining
+            # it was a silent bypass: from the admin repo, `cd nested && git -C . commit`
+            # sized the ADMIN repo (nothing staged), found 0 lines, and waved a commit of
+            # any size through. Reproduced at 9,675 staged lines before this was written.
+            case "$segment_c" in
+                /*) target_dir="$segment_c" ;;
+                *)  target_dir="${walking_dir:+$walking_dir/}$segment_c" ;;
+            esac
         else
             target_dir="$walking_dir"
             case "$segment" in
@@ -246,6 +262,18 @@ while IFS= read -r segment; do
 done <<SEGMENTS
 $(printf '%s' "$stripped" | awk '{gsub(/&&|\|\||;|\|/, "\n"); print}')
 SEGMENTS
+
+# The same segment, as $placeheld sees it — the view names_paths needs. Walked separately
+# rather than threaded through the loop above, because that loop resolves the TARGET and this
+# one reads the ARGUMENTS: one question each, and neither has to know about the other.
+while IFS= read -r segment; do
+    case "$segment" in *[![:space:]]*) ;; *) continue ;; esac
+    if printf '%s' " $segment" | grep -qE "$commit_pattern"; then
+        commit_segment=" $segment"
+    fi
+done <<PLACEHELD_SEGMENTS
+$(printf '%s' "$placeheld" | awk '{gsub(/&&|\|\||;|\|/, "\n"); print}')
+PLACEHELD_SEGMENTS
 
 # A subshell's working directory cannot be followed from out here, and two
 # commits in one command cannot both be sized. Both are denied, not guessed.
@@ -286,6 +314,55 @@ changed_lines() {
     git diff ${1:-} --numstat 2>/dev/null | awk '{a += $1 + $2} END {print a + 0}'
 }
 
+# Does this command name paths? A commit that names paths takes the WORKING TREE version of
+# them, whatever the index holds — so sizing the index finds 0 and lets any amount of unstaged
+# work land. Reproduced at 800 changed lines before this was written, and naming a path is a
+# routine invocation, not an exotic one. `--only`/`-o` is the same story.
+#
+# Tokens are walked rather than pattern-matched, because a flag's VALUE must not be mistaken
+# for a path — `-F msg.txt` names no path, and reading it as one would size the whole working
+# tree and deny an ordinary commit. The walk runs on $placeheld, where a quoted message is one
+# opaque token, so a value can be consumed without swallowing a path that follows it.
+names_paths() {
+    saw_verb=0
+    skip_next=0
+    # Unquoted expansion is what splits the segment into tokens, but it also globs: a `*` in the
+    # command would expand against this hook's own directory and the walk would no longer be
+    # reading the command. Only ever a spurious deny, never a bypass — but the reasoning about
+    # `--` and flag values is worth keeping true.
+    set -f
+    for token in $commit_segment; do
+        if [ "$skip_next" -eq 1 ]; then skip_next=0; continue; fi
+        if [ "$saw_verb" -eq 0 ]; then
+            [ "$token" = "commit" ] && saw_verb=1
+            continue
+        fi
+        case "$token" in
+            --) return 0 ;;                 # everything after is a pathspec, by definition
+            # --pathspec-from-file names paths just as surely as writing them out, in EVERY
+            # spelling: attached (=FILE), separate (FILE), and from stdin (=-). Listing it among
+            # the value-taking flags was worse than leaving it out — it made the separate form
+            # swallow its own filename and report no paths at all. All three forms passed
+            # silently at 400 unstaged lines. It must be answered before --*=* is reached.
+            --pathspec-from-file|--pathspec-from-file=*) return 0 ;;
+            --*=*) ;;                       # value is attached; consumes no later token
+            -m|--message|\
+            -F|--file|-c|--reedit-message|-C|--reuse-message|--author|--date|-t|--template|\
+            --fixup|--squash|--cleanup) skip_next=1 ;;
+            # A cluster of short flags whose LAST one takes a value: -qm, -sm, -vm, -am. Only
+            # the last position can take one, and only a single-dash token can be a cluster —
+            # matching long flags here would arm the skip for `--edit` and swallow the path
+            # after it, which fails open. Without this, `git commit -qm "msg"` on a dirty tree
+            # read the message as a path and denied an ordinary commit.
+            -[!-]*[mFcCt]) skip_next=1 ;;
+            -*) ;;                          # a flag that takes no value
+            *) set +f; return 0 ;;          # a bare token: a path
+        esac
+    done
+    set +f
+    return 1
+}
+
 lines=$(changed_lines --cached)
 # When this command also stages (`commit -a` or a `git add` in the same
 # compound), what lands is the whole working tree vs HEAD — so size exactly
@@ -300,6 +377,15 @@ case "$stripped" in
         [ "${wt:-0}" -gt "${lines:-0}" ] && lines=$wt
         ;;
 esac
+# A named path is sized against the whole working tree, not just that path. Picking the paths
+# out of the command would mean trusting this walker's guess about which bare tokens are paths
+# — and a wrong guess there sizes less than what lands, which is the direction that fails
+# open. Over-counting only ever denies something that could have gone through, and a denial is
+# visible and has two doors.
+if [ -n "$commit_segment" ] && names_paths; then
+    wt=$(changed_lines HEAD)
+    [ "${wt:-0}" -gt "${lines:-0}" ] && lines=$wt
+fi
 [ "${lines:-0}" -eq 0 ] && exit 0
 [ "${lines:-0}" -lt "$THRESHOLD" ] && exit 0
 

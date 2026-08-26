@@ -57,6 +57,18 @@ def stage_changes(repository, line_count):
     run_git(repository, "add", "change.txt")
 
 
+def dirty_without_staging(repository, line_count):
+    """A tracked file with `line_count` changed lines in the WORKING TREE and an empty index.
+
+    This is the shape that named-path commits take content from, and the shape that sizing the
+    index alone reports as zero.
+    """
+    (repository / "change.txt").write_text("original\n")
+    run_git(repository, "add", "change.txt")
+    run_git(repository, "commit", "-qm", "add change.txt")
+    (repository / "change.txt").write_text("line\n" * line_count)
+
+
 def run_hook(script, harness, command, cwd):
     payload = json.dumps({"tool_input": {"command": command}})
     return subprocess.run(
@@ -132,6 +144,22 @@ class NestedWorkingSetTest(unittest.TestCase):
         stage_changes(self.parent, BIG_LINES)
         self.assert_denied("cd nested && cd .. && git commit -m x")
 
+    def test_a_relative_dash_c_is_resolved_against_the_directory_the_cds_reached(self):
+        """The silent bypass: -C is relative to where the walked `cd`s got to, not to the cwd.
+
+        `cd nested && git -C . commit` used to resolve `.` against the ADMIN repo, find nothing
+        staged there, and wave a commit of any size through. Reproduced at 9,675 staged lines.
+        """
+        self.assert_denied("cd nested && git -C . commit -m x")
+
+    def test_a_relative_dash_c_composes_with_the_cd_rather_than_being_taken_alone(self):
+        """`cd nested && git -C ../small` really does mean small, and small is under threshold."""
+        self.assert_allowed("cd nested && git -C ../small commit -m x")
+        self.assert_denied("cd small && git -C ../nested commit -m x")
+
+    def test_an_absolute_dash_c_ignores_the_cds_before_it(self):
+        self.assert_denied(f"cd small && git -C {self.nested} commit -m x")
+
     def test_a_dash_c_belonging_to_another_command_does_not_redirect_the_gate(self):
         """Code review F1: `git -C small status; git commit` sized `small`.
 
@@ -173,6 +201,95 @@ class NestedWorkingSetTest(unittest.TestCase):
         stage_changes(nested, BIG_LINES)
         result = run_hook(COMMIT_HOOK, "claude", "git --git-dir=nested/.git commit -m x", plain)
         self.assertEqual(result.stdout, "")
+
+
+@unittest.skipUnless(shutil.which("git") and shutil.which("jq"), "needs git and jq")
+class NamedPathTest(unittest.TestCase):
+    """Naming a path takes the working tree, whatever the index holds.
+
+    Sizing only the index reported zero for this shape and let any amount of unstaged work land
+    with no review and no trace — reproduced at 800 changed lines. The controls matter as much as
+    the bypasses: a flag's value must never be mistaken for a path, or ordinary commits are denied.
+    """
+
+    def setUp(self):
+        self.temporary_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary_directory.cleanup)
+        self.repository = Path(self.temporary_directory.name) / "repo"
+        self.repository.mkdir()
+        make_repository(self.repository)
+        dirty_without_staging(self.repository, BIG_LINES)
+
+    def assert_denied(self, command):
+        result = run_hook(COMMIT_HOOK, "claude", command, self.repository)
+        self.assertIn('"deny"', result.stdout, f"expected a denial for: {command}")
+
+    def assert_allowed(self, command):
+        result = run_hook(COMMIT_HOOK, "claude", command, self.repository)
+        self.assertNotIn('"deny"', result.stdout, f"expected no denial for: {command}")
+
+    def test_a_named_path_with_an_empty_index_is_sized_and_denied(self):
+        self.assert_denied("git commit change.txt -m x")
+
+    def test_only_and_a_named_path_is_denied(self):
+        self.assert_denied("git commit --only change.txt -m x")
+        self.assert_denied("git commit -o change.txt -m x")
+
+    def test_paths_after_a_double_dash_are_denied(self):
+        self.assert_denied("git commit -m x -- change.txt")
+
+    def test_a_named_path_is_still_denied_when_redirected(self):
+        result = run_hook(COMMIT_HOOK, "claude", "git -C repo commit change.txt -m x",
+                          self.repository.parent)
+        self.assertIn('"deny"', result.stdout)
+
+    def test_paths_taken_from_a_file_are_denied_in_every_spelling(self):
+        """--pathspec-from-file names paths as surely as writing them out.
+
+        All three forms passed silently at 400 unstaged lines. Listing the option among the
+        value-taking flags was worse than omitting it: the separate form then swallowed its own
+        filename and reported no paths at all. Anyone who met the denial once could route around
+        it permanently with a documented flag.
+        """
+        (self.repository / "paths.txt").write_text("change.txt\n")
+        self.assert_denied("git commit --pathspec-from-file=paths.txt -m x")
+        self.assert_denied("git commit --pathspec-from-file paths.txt -m x")
+        self.assert_denied("git commit --pathspec-from-file=- -m x")
+
+    def test_a_flag_value_is_not_mistaken_for_a_path(self):
+        """-F's argument is a message file, not something to commit. Reading it as a path would
+        size the whole working tree and deny an ordinary commit that stages nothing."""
+        (self.repository / "msg.txt").write_text("a message\n")
+        self.assert_allowed("git commit -F msg.txt")
+        self.assert_allowed("git commit --file=msg.txt")
+        self.assert_allowed("git commit --author=Someone --date=2026-01-01 --amend --no-edit")
+        self.assert_allowed("git commit --cleanup=strip --amend --no-edit")
+
+    def test_a_cluster_of_short_flags_does_not_read_its_message_as_a_path(self):
+        """`git commit -qm "msg"` is routine, and it names no path.
+
+        A cluster ends in the flag that takes the value, so -qm/-sm/-vm all carry a message. Read
+        as paths, they sized the whole working tree and denied an ordinary commit on a dirty tree
+        — the exact case the placeheld-token design exists to protect.
+        """
+        for command in ['git commit -qm "msg"', 'git commit -sm "msg"', 'git commit -vm "msg"']:
+            self.assert_allowed(command)
+
+    def test_a_cluster_ending_in_a_value_flag_still_sees_a_path_after_its_value(self):
+        """Consuming the value must not consume the path that follows it."""
+        self.assert_denied('git commit -qm "msg" change.txt')
+
+    def test_naming_no_path_leaves_an_empty_index_sized_at_zero(self):
+        self.assert_allowed("git commit --amend --no-edit")
+        self.assert_allowed("git commit -m x")
+
+    def test_a_small_working_tree_still_passes_when_a_path_is_named(self):
+        small = Path(self.temporary_directory.name) / "small"
+        small.mkdir()
+        make_repository(small)
+        dirty_without_staging(small, 3)
+        result = run_hook(COMMIT_HOOK, "claude", "git commit change.txt -m x", small)
+        self.assertNotIn('"deny"', result.stdout)
 
 
 @unittest.skipUnless(shutil.which("git") and shutil.which("jq"), "needs git and jq")

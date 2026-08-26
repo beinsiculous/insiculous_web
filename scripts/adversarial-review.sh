@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Adversarial review loop between Claude Code and kimi-cli.
+# Adversarial review loop between Claude Code and the kimi CLI.
 #
 #   adversarial-review.sh plan <task-spec.md> --author=claude|kimi
 #   adversarial-review.sh code <changes.diff> --author=claude|kimi
@@ -16,23 +16,18 @@
 # `adversarial-review` skill (.claude/skills/adversarial-review/), which calls
 # scripts/request-review.sh for the review step — as does this driver.
 #
-# Non-interactive invocation (verified against installed CLIs, Jul 2026):
-#   claude: prompt piped on stdin to `claude -p`, response on stdout.
-#   kimi:   prompt piped on stdin to `kimi --quiet` (= --print --output-format
-#           text --final-message-only), final message on stdout. NOTE: kimi's
-#           --print mode auto-approves tool calls, so we pin --work-dir to
-#           review/ to scope any tool use; the prompts also instruct text-only.
+# How each agent is actually invoked lives in scripts/lib/headless-agent.sh, which this and
+# request-review.sh both source. They used to spell it out separately and drifted: this file went
+# on passing --quiet and --work-dir long after request-review.sh had recorded that kimi-code
+# dropped both, so a kimi-authored run died on any machine without a legacy kimi-cli install.
 set -euo pipefail
-
-# FortKnight adaptation: the reviewer binary is kimi-cli, which may be installed
-# as `kimi-cli` (uv) or `kimi`; the `kimi` name can also be the separate kimi-code
-# app, which lacks --quiet/--work-dir. Prefer kimi-cli; override with KIMI_BIN.
-KIMI_BIN="${KIMI_BIN:-$(command -v kimi-cli || command -v kimi || true)}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 REVIEW_DIR="$REPO_ROOT/review"
 REVISED_MARKER='=== REVISED PLAN ==='
+# shellcheck source=lib/headless-agent.sh
+. "$SCRIPT_DIR/lib/headless-agent.sh"
 
 usage() {
     cat >&2 <<USAGE
@@ -63,7 +58,7 @@ done
 if [[ "$AUTHOR" == "claude" ]]; then REVIEWER="kimi"; else REVIEWER="claude"; fi
 
 command -v claude >/dev/null || { echo "error: 'claude' not on PATH" >&2; exit 1; }
-[[ -n "$KIMI_BIN" ]] || { echo "error: kimi-cli not on PATH (set KIMI_BIN)" >&2; exit 1; }
+[[ -n "$(headless_kimi_binary)" ]] || { echo "error: kimi not on PATH (set KIMI_BIN)" >&2; exit 1; }
 mkdir -p "$REVIEW_DIR"
 
 if compgen -G "$REVIEW_DIR/*.md" >/dev/null; then
@@ -74,12 +69,15 @@ rm -f "$REVIEW_DIR"/plan.md "$REVIEW_DIR"/plan-v*.md "$REVIEW_DIR"/review-*.md \
 
 # --- agent invocation --------------------------------------------------------
 
-# invoke <claude|kimi>: prompt on stdin, response text on stdout.
+# invoke <claude|kimi>: prompt on stdin, response text on stdout. The prompt lands in a file on
+# the way through, because past a certain size it can no longer be passed to kimi as an argv
+# argument and the library hands it over on disk instead.
 invoke() {
-    case "$1" in
-        claude) claude -p ;;
-        kimi)   "$KIMI_BIN" --quiet --work-dir "$REVIEW_DIR" ;;
-    esac
+    local prompt_tmp="$REVIEW_DIR/.driver-prompt.$$" status=0
+    cat > "$prompt_tmp"
+    if run_headless_agent "$1" "$prompt_tmp" "$REVIEW_DIR"; then status=0; else status=$?; fi
+    rm -f "$prompt_tmp"
+    return "$status"
 }
 
 step() { echo "==> [$1] $2" >&2; }
@@ -147,10 +145,16 @@ PROMPT
 
 # Split rebuttal from revised plan on the marker (plan mode only; marker absent
 # means the author rebutted everything and there is no v2).
-if [[ "$MODE" == "plan" ]] && grep -qF "$REVISED_MARKER" "$REVIEW_DIR/rebuttal-1.raw"; then
-    awk -v m="$REVISED_MARKER" 'index($0, m) { found=1; next } !found' \
+# The marker must be the WHOLE line, not merely present in one. Substring matching split the
+# file on any line that mentioned the marker — and the rebuttal prompt above quotes it verbatim,
+# so an author who rebutted everything while quoting the instruction back ("you asked for a
+# revised plan after the marker line; I decline because...") had half its rebuttal filed as a
+# revised plan. A marker that does not stand alone now leaves the rebuttal whole, which is the
+# harmless direction: no plan-v2.md rather than a bogus one.
+if [[ "$MODE" == "plan" ]] && grep -qxF "$REVISED_MARKER" "$REVIEW_DIR/rebuttal-1.raw"; then
+    awk -v m="$REVISED_MARKER" '$0 == m { found=1; next } !found' \
         "$REVIEW_DIR/rebuttal-1.raw" > "$REVIEW_DIR/rebuttal-1.md"
-    awk -v m="$REVISED_MARKER" 'found; index($0, m) { found=1 }' \
+    awk -v m="$REVISED_MARKER" 'found; $0 == m { found=1 }' \
         "$REVIEW_DIR/rebuttal-1.raw" > "$REVIEW_DIR/plan-v2.md"
 else
     mv "$REVIEW_DIR/rebuttal-1.raw" "$REVIEW_DIR/rebuttal-1.md"
