@@ -88,7 +88,9 @@ export function updateMealPrepCells(form, row) {
     const range = form.elements[slider];
     range.disabled = !on;
     range.closest("label").hidden = !on;
+    // Assumes the <output> stays range.nextElementSibling — QuestionField.astro's `for` association relies on the same adjacency.
     range.nextElementSibling.textContent = `${range.value} min`;
+    range.setAttribute("aria-valuetext", `${range.value} min`);
   }
 }
 

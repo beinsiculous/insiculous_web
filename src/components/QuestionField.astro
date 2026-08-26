@@ -59,11 +59,14 @@ const mealCounts = Array.from({ length: questionnaire.mealsPerDay.max - question
               </td>
               <td class="meal-prep-cell">
                 <label><input type="checkbox" name={`mealPrepped-${mealIndex}`} aria-label={`meal ${mealIndex + 1} needs prepping`} /> <span class="muted">prep</span></label>
-                <label class="meal-minutes"><input type="range" name={`mealPrepMinutes-${mealIndex}`} min={questionnaire.mealPrep.minutes.min} max={questionnaire.mealPrep.minutes.max} step={questionnaire.mealPrep.minutes.step} value={questionnaire.mealPrep.defaultPrepMinutes} aria-label={`meal ${mealIndex + 1} prep minutes`} /><output>{questionnaire.mealPrep.defaultPrepMinutes} min</output></label>
+                {/* This label wraps the slider only to enlarge its click/tap target — it carries no text of its
+                    own, and aria-label below is the accessible name; do not rely on this label for naming. */}
+                <label class="meal-minutes"><input type="range" id={`mealPrepMinutes-${mealIndex}`} name={`mealPrepMinutes-${mealIndex}`} min={questionnaire.mealPrep.minutes.min} max={questionnaire.mealPrep.minutes.max} step={questionnaire.mealPrep.minutes.step} value={questionnaire.mealPrep.defaultPrepMinutes} aria-label={`meal ${mealIndex + 1} prep minutes`} /><output for={`mealPrepMinutes-${mealIndex}`}>{questionnaire.mealPrep.defaultPrepMinutes} min</output></label>
               </td>
               <td class="meal-prep-cell">
                 <label><input type="checkbox" name={`mealCooked-${mealIndex}`} aria-label={`meal ${mealIndex + 1} needs cooking`} /> <span class="muted">cook</span></label>
-                <label class="meal-minutes"><input type="range" name={`mealCookMinutes-${mealIndex}`} min={questionnaire.mealPrep.minutes.min} max={questionnaire.mealPrep.minutes.max} step={questionnaire.mealPrep.minutes.step} value={questionnaire.mealPrep.defaultCookMinutes} aria-label={`meal ${mealIndex + 1} cook minutes`} /><output>{questionnaire.mealPrep.defaultCookMinutes} min</output></label>
+                {/* Same click-target-only label as prep minutes above. */}
+                <label class="meal-minutes"><input type="range" id={`mealCookMinutes-${mealIndex}`} name={`mealCookMinutes-${mealIndex}`} min={questionnaire.mealPrep.minutes.min} max={questionnaire.mealPrep.minutes.max} step={questionnaire.mealPrep.minutes.step} value={questionnaire.mealPrep.defaultCookMinutes} aria-label={`meal ${mealIndex + 1} cook minutes`} /><output for={`mealCookMinutes-${mealIndex}`}>{questionnaire.mealPrep.defaultCookMinutes} min</output></label>
               </td>
             </tr>
           ))}

@@ -274,7 +274,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
   import { renderImportReview } from "../../lib/shared/import-review.js";
   import { dayLabel } from "../../lib/shared/meal-plan.js";
   import { checkedValues as checkedValuesIn, setChecked as setCheckedIn } from "../../lib/question-fields.js";
-  import { MINUTES_PER_DAY, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
+  import { MINUTE_GRID_MINUTES, MINUTES_PER_DAY, formatClockTime, localTodayIsoDate, minutesToTimeString, timeStringToMinutes } from "../../lib/shared/clock.js";
   import { downloadText } from "../../lib/shared/download.js";
   import { CYCLE_LENGTH_DAYS, WEEKDAY_NAMES, formatIsoDate, startDateForRule } from "../../lib/shared/fortknight-rules.js";
   import { withBase } from "../../lib/paths.js";
@@ -344,11 +344,14 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     const peripheral = row.querySelector('[data-role="peripheral"]').checked;
     row.classList.toggle("peripheral", peripheral);
     row.querySelector('[data-role="range-label"]').textContent = `${formatMinutes(Number(minInput.value))} – ${formatMinutes(Number(maxInput.value))}`;
+    minInput.setAttribute("aria-valuetext", formatMinutes(Number(minInput.value)));
+    maxInput.setAttribute("aria-valuetext", formatMinutes(Number(maxInput.value)));
     const goalRow = goalRowFor(row);
     const currentInput = goalRow.querySelector('[data-role="current"]');
     goalRow.hidden = !row.querySelector('[data-role="goal"]').checked;
     currentInput.max = ceiling;
     goalRow.querySelector('[data-role="current-label"]').textContent = `${formatMinutes(Number(currentInput.value))} today`;
+    currentInput.setAttribute("aria-valuetext", formatMinutes(Number(currentInput.value)));
     updateCadenceRows(row, peripheral);
   }
 
@@ -492,6 +495,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     block.querySelector('[data-role="category-range-label"]').textContent = active.length
       ? `${formatMinutes(Number(minInput.value))} – ${formatMinutes(Number(maxInput.value))}`
       : "not often";
+    minInput.setAttribute("aria-valuetext", active.length ? formatMinutes(Number(minInput.value)) : "not often");
+    maxInput.setAttribute("aria-valuetext", active.length ? formatMinutes(Number(maxInput.value)) : "not often");
     setTriState(block.querySelector('[data-role="category-peripheral"]'), rows, "peripheral");
     setTriState(block.querySelector('[data-role="category-more"]'), rows, "more");
     block.classList.toggle("peripheral", active.length === 0);
@@ -581,6 +586,8 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
     paintDualRange(startInput, endInput, movedInput);
     const nextDay = wakingTrackStart + end >= MINUTES_PER_DAY && Math.floor((wakingTrackStart + end) / MINUTES_PER_DAY) > Math.floor((wakingTrackStart + start) / MINUTES_PER_DAY);
     form.querySelector('[data-role="waking-label"]').textContent = `${formatClockTime(wakingClock(start))} – ${formatClockTime(wakingClock(end))}${nextDay ? " next day" : ""} · ${formatMinutes(end - start)} awake`;
+    startInput.setAttribute("aria-valuetext", formatClockTime(wakingClock(start)));
+    endInput.setAttribute("aria-valuetext", formatClockTime(wakingClock(end)));
   }
   /** Track positions for a saved answer: the start on day 0 of the track, the end after it (always fits a 42 h track). */
   function showWakingWindow(wakingWindow) {
