@@ -4,9 +4,9 @@ Everything behind [beinsiculous.com](https://beinsiculous.com), in one repositor
 [Astro](https://astro.build), deployed to Cloudflare as a static-assets Worker. Three surfaces that
 deliberately read as three different websites:
 
-- **The studio** (`/`, `/games/`, `/devlog/`, `/engine/`) — the game studio, wired to embed
-  WebAssembly builds from the Insiculous 2D engine (Rust) as they land. The games are desktop-only
-  until the engine's web export ships. The games listed on this site are free and use AI art; the
+- **The studio** (`/`, `/games/`, `/devlog/`, `/engine/`) — the game studio. All six games are
+  playable in the browser through embedded WebAssembly builds from the Insiculous 2D engine
+  (Rust); desktop builds run the same code natively. The games listed on this site are free and use AI art; the
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
   iOS rather than here (`docs/thesis.md` is the source of that policy's wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,

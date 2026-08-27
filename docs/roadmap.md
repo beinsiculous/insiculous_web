@@ -66,8 +66,14 @@ Next, roughly in order:
 
 ## The game studio (tracked in its own repositories)
 
-- **Web export.** WebAssembly builds embedded on `/games/`; the embed slots on this site stay
-  placeholders until the engine ships it.
+- **Web export.** Shipped — all six games are playable in the browser (WebGPU) through the embeds
+  on `/games/`. What remains is engine-side and tracked over there: browser persistence for
+  achievements and high scores (the `/profile/` board reads the agreed localStorage keys and
+  stays empty until the games start writing them), and gesture-gated audio.
+- **The browser editor.** The milestone behind web export: the engine's editor compiled to
+  WebAssembly and served as a playground — open a tab, build a scene, press play, export the
+  project. Tracked in the engine repository; when it lands, this site needs a route and an embed
+  shape for it (the convention in `README.md` covers a game, not an editor).
 - **The two tracks and the art policy** (`docs/thesis.md` is the source of the wording). The games
   listed on this site are free and use AI art. The games we **sell** are not on this site at all —
   each has its own repository and ships on Steam and/or Android and iOS — and they carry no AI art.

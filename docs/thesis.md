@@ -67,6 +67,11 @@ itself.
   be exercisable from the CLI, headless, without a GPU. The payoff was unplanned and turned out to
   be the studio's edge: a codebase that can be verified without a human watching is a codebase an
   agent can safely work in.
+- **The tools belong where the games run.** The games play in a browser tab, and the editor is
+  headed to the same place: open it, build a scene, press play, and take the project away with
+  you — building with the engine, not just playing what it built, with no toolchain installed.
+  An engine whose front door is a URL is the version of "small enough to hold in your head" that
+  a stranger can actually try.
 - **The bar is survival, not a score.** No leaderboard, no pass-rate. Work is judged on whether it
   survives review, the test suite and actual play, adjudicated by the person who has to live with
   the codebase afterwards. A finding must name a concrete failure scenario; "this might have issues"

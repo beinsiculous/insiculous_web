@@ -49,9 +49,15 @@ import "../styles/app-widgets.css";
   <section class="panel">
     <h2>Achievements</h2>
     <p class="muted">
-      The games keep their scores on the machine you played them on. Collecting them onto a board here is
-      not built yet — this is where it will be.
+      What the games unlock stays on the device you played them on; this board shows what this
+      browser has recorded, and nothing is uploaded. The browser builds don’t record achievements
+      yet — the board fills in as that engine work ships.
     </p>
+    <div id="achievementsBoard"></div>
+    <p class="muted" id="achievementsStatus"></p>
+    <div class="button-row" id="achievementsActions" hidden>
+      <button type="button" id="deleteAchievementsButton">Delete recorded achievements from this device</button>
+    </div>
   </section>
 
 </BaseLayout>
@@ -62,6 +68,7 @@ import "../styles/app-widgets.css";
   import { askProfileName } from "../lib/profile-name-dialog.js";
   import { activeWeights } from "../lib/shared/weights-rules.js";
   import { clearMyFortSeed, describeMyFortSeed } from "../lib/myfort-store.js";
+  import { achievementTitleFromId, clearGameAchievements, loadGameAchievements } from "../lib/games-achievements.js";
 
   const elements = {
     seedStatus: document.getElementById("seedStatus"),
@@ -76,6 +83,10 @@ import "../styles/app-widgets.css";
     regenerateNameButton: document.getElementById("regenerateNameButton"),
     duplicateProfileButton: document.getElementById("duplicateProfileButton"),
     deleteProfileButton: document.getElementById("deleteProfileButton"),
+    achievementsBoard: document.getElementById("achievementsBoard"),
+    achievementsStatus: document.getElementById("achievementsStatus"),
+    achievementsActions: document.getElementById("achievementsActions"),
+    deleteAchievementsButton: document.getElementById("deleteAchievementsButton"),
   };
 
   function renderProfile() {
@@ -169,6 +180,34 @@ import "../styles/app-widgets.css";
     renderSeed();
   });
 
+  /** One heading + list per game this browser has unlocks for; the save file has ids only, so titles are prettified ids. */
+  function renderAchievements() {
+    const boards = loadGameAchievements();
+    elements.achievementsBoard.textContent = "";
+    elements.achievementsActions.hidden = boards.length === 0;
+    elements.achievementsStatus.textContent = boards.length === 0 ? "No achievements recorded in this browser yet." : "";
+    for (const { title, unlocks } of boards) {
+      const heading = document.createElement("h3");
+      heading.textContent = `${title} — ${unlocks.length} unlocked`;
+      const list = document.createElement("ul");
+      for (const unlock of unlocks) {
+        const item = document.createElement("li");
+        item.textContent = unlock.unlockedAt
+          ? `${achievementTitleFromId(unlock.id)} — ${unlock.unlockedAt.toLocaleDateString()}`
+          : achievementTitleFromId(unlock.id);
+        list.append(item);
+      }
+      elements.achievementsBoard.append(heading, list);
+    }
+  }
+
+  elements.deleteAchievementsButton.addEventListener("click", () => {
+    if (!confirm("Delete every game's recorded achievements from this device? Unlock them again to bring them back.")) return;
+    clearGameAchievements();
+    renderAchievements();
+  });
+
   renderProfile();
   renderSeed();
+  renderAchievements();
 </script>
