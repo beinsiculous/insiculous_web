@@ -63,7 +63,7 @@ build → axe-core over every page → `wrangler deploy` → a request to the li
 ## Invariants (validate.py enforces most of these)
 - Exactly 14 day keys in canonical order: `sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`.
 - The neutral five-block day: `too-early, early, midday, late, too-late`; only early/midday/late carry a focus and activities. Questionnaire profiles carry their own 2–5 blocks (`weights.*.json` → `blocks`; rule in `docs/questionnaire.md`; a one-focus-block day's block is keyed `flexible` and shown without a header).
-- The site has two faces sharing one profile (`docs/app.md`): FortKnight (`/fortknight/`) and ForkKnife (`/forkknife/`, the meal plan — `docs/meal-plan.md`), each with **Overview · its building page · Questionnaire · Assistant** — the building page being where things are added by hand, FortKnight's **Build** (`/fortknight/build/`: commitments, tasks, and the fortnight menu) and ForkKnife's **Spoon Feed** (`/forkknife/spoon-feed/`: the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. FortKnight's Overview (`/fortknight/`: the fortnight grid + time by category) and day pages render from the person's active profile (the prerendered content is only the no-JS fallback and, on the neutral data, carries no schedule); a schedule enters a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks). Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
+- The site has two faces sharing one profile (`docs/app.md`): FortKnight (`/fortknight/`) and ForkKnife (`/forkknife/`, the meal plan — `docs/meal-plan.md`), each with **Overview · its building page · Questionnaire · Assistant** — the building page being where things are added by hand, FortKnight's **Build** (`/fortknight/build/`: commitments, tasks, and the fortnight menu) and ForkKnife's **Spoon Feed** (`/forkknife/spoon-feed/`: the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. (This is the contract the face branches are built to; on `main` these pages are `FaceInDevelopment` placeholders — see "The site" below.) FortKnight's Overview (`/fortknight/`: the fortnight grid + time by category) and day pages render from the person's active profile (the prerendered content is only the no-JS fallback and, on the neutral data, carries no schedule); a schedule enters a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks). Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
 - Seven categories: `meals, cleaning, working, spirituality-development, friends-family, health, operations` (+ `flexible` pseudo-focus).
 - In every menu file present, every day has exactly one brunch, snack, and dinner; every meal-prep `mealRef` resolves to a menu meal (the neutral `data/` has no menu files).
 - Season starts are computed by rule (`fk_core/dates.py` `start_date_for_rule`, one structured rule shape for the workbook seasons and a person's year-split sections), never typed in — the only typed dates are `manual` sections' `knownStarts`; each season restarts the fortnight on its `startDayKey`.
@@ -99,6 +99,16 @@ word and an inline tag on the next source line, so keep the tag on the word's li
 phone and at 125% text). Target is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
 codebase. After changing a layout or an interactive component, also do the manual pass the PR template
 lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
+
+**The face apps are not on production yet.** `main` is production and only receives merges — `dev`
+integrates, and a `dev → main` pull request is the deploy. The faces are built on their own
+branches, `fortknightdev` and `forknifedev`, and on `main` their routes
+(`/fortknight/questionnaire|build|assistant|days/<dayKey>/`,
+`/forkknife/questionnaire|spoon-feed|assistant/`) are
+`src/components/FaceInDevelopment.astro` placeholders — kept as files rather than deleted so a
+face branch's edits merge as ordinary content merges instead of one modify/delete conflict per
+route; the component's header comment is the canonical statement. What is live on `main`: the
+studio pages, the two face index pages (thesis front doors), and `/profile/`.
 
 ## Writing a devlog entry
 Read `src/content/devlog/six-games-one-day.md` first — every rule here describes that entry. The

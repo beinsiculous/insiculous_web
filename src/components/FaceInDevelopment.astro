@@ -1,0 +1,25 @@
+---
+// A face page that is not on production yet.
+//
+// These exist as FILES rather than as deletions on purpose. The real pages live on `fortknightdev` and
+// `forknifedev` and are still being worked on; deleting them here would make every edit on those branches
+// come back as a modify/delete conflict, one per route. A placeholder keeps the path occupied so the merge
+// is an ordinary content merge — take the branch's version — and keeps the URL from 404ing in the meantime.
+//
+// When a face is ready, its branch merges and these go with it.
+import FaceLayout from "../layouts/FaceLayout.astro";
+import { facePath } from "../lib/faces.js";
+
+const { title, face } = Astro.props;
+const home = facePath(face);
+---
+<FaceLayout title={title} face={face}>
+  <section class="panel">
+    <h1>{title}</h1>
+    <p>
+      This page is still being built. It works in development and is not on the live site yet —
+      what is here now is the part that is finished.
+    </p>
+    <p><a href={home}>Back to the overview</a></p>
+  </section>
+</FaceLayout>

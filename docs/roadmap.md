@@ -10,6 +10,11 @@ Done (this pass): workbook → canonical JSON, schemas, validator, builder, allo
 weights, date resolver, the web app, questionnaire-as-settings, assistant workspace (files for the
 person's own AI workspace + apply-back), docs, tests.
 
+**Shipping status.** The face apps are built on the `fortknightdev` and `forknifedev` branches and
+ship when each merges into `main`; until then the face routes on the live site are
+`FaceInDevelopment` placeholders (see `docs/app.md`, "Deployment status"). "The web app" above is
+done as code on those branches, not yet on production.
+
 Next, roughly in order:
 1. **Questionnaire** → `weights.<id>.json` — done for the draft questions (`docs/questionnaire.md`,
    `/fortknight/questionnaire/` in the Astro app, `scripts/questionnaire_to_weights.py`). Open: naming

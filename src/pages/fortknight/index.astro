@@ -1,316 +1,49 @@
 ---
+// FortKnight's front door on production, while the app itself is still being built on `fortknightdev`.
+//
+// The claims below are condensed from docs/thesis.md — this page says what the face argues, so the URL is
+// worth visiting before the tool behind it is finished. The real Overview lives on the face branch and
+// replaces this file when it merges.
 import FaceLayout from "../../layouts/FaceLayout.astro";
-import DayCard from "../../components/DayCard.astro";
-import AllocationBars from "../../components/AllocationBars.astro";
-import bundle from "../../../build/fortknight.bundle.json";
-import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
-
-// The Overview: the fortnight grid (date resolver, the person's grid / the generator's proposal, adopt) and,
-// below it, time by category — all rendered from the active profile; the prerendered cards and bars are the
-// no-JS fallback (the neutral data carries no schedule).
 ---
-<FaceLayout title="Overview" face="fortknight">
+<FaceLayout title="FortKnight" face="fortknight">
   <section class="panel">
-    <h1>Overview</h1>
-    <div class="date-resolver">
-      <label>Date <input type="date" id="dateInput" /></label>
-      <span id="dateResolution" class="muted">—</span>
-      <a id="goToDay" class="button" href="#" hidden>Go to day →</a>
-    </div>
-    <p id="cardsStatus" class="muted" hidden></p>
-    <div class="grid-views" id="gridViews" hidden>
-      <div class="button-row">
-        <button type="button" data-view="current" class="active">Your grid</button>
-        <button type="button" data-view="proposed">Proposed grid</button>
-        <button type="button" id="adoptProposal" hidden>Use this grid</button>
-        <button type="button" id="dropOwnGrid" hidden>Drop your grid</button>
-      </div>
-      <p id="proposalSummary" class="muted"></p>
-      <details id="proposalDetails" hidden>
-        <summary>Why each cell</summary>
-        <ul id="proposalReasons" class="proposal-reasons"></ul>
-      </details>
-    </div>
-    <noscript><p class="muted">This page needs JavaScript to show your fortnight grid.</p></noscript>
-  </section>
-  <section class="panel">
-    <div class="fortnight-grid">
-      {DAY_KEY_ORDER.map((dayKey, index) => (
-        <>
-          {(index === 0 || index === 7) && <div class="week-divider">Week {index === 0 ? 1 : 2}</div>}
-          <DayCard dayKey={dayKey} day={bundle.days.days[dayKey]} />
-        </>
-      ))}
-    </div>
-  </section>
-  <section class="panel">
-    <h2>Time by category (per fortnight)</h2>
-    <p class="muted" id="allocationsStatus">Your answers set the weights. The focus grid is your layout. The proposed grid is the generator’s suggestion.</p>
-    <div id="allocationBars">
-      <noscript><p class="muted">These bars need JavaScript to show your data.</p></noscript>
-      <AllocationBars allocations={bundle.derived.allocations} />
-    </div>
+    <h1>FortKnight</h1>
+    <p class="lede">
+      A week is the wrong unit of life, and a calendar is the wrong shape for a plan.
+      Decide the proportions; let the schedule be derived.
+    </p>
+
+    <h2>What it argues</h2>
+    <ul>
+      <li>
+        <strong>Fourteen days, not seven.</strong> The variant letter alternates every day, so week two is
+        the mirror of week one. That is the smallest cycle that can hold both “every day” and “every other
+        day” things without one of them lying.
+      </li>
+      <li>
+        <strong>Allocation precedes schedule.</strong> A calendar can answer “what is at 3pm Thursday”. It
+        cannot answer “am I spending my life the way I said I would”.
+      </li>
+      <li>
+        <strong>Open time is declared, not left over.</strong> Naming the unclaimed part of the fortnight is
+        what stops it being quietly eaten.
+      </li>
+      <li>
+        <strong>The year moves, so the rules move with it.</strong> Season starts are computed — equinox,
+        nth weekday, Easter — never typed in. A plan that cannot be recomputed for next year has an expiry
+        date.
+      </li>
+      <li>
+        <strong>Your schedule is the most sensitive file you own.</strong> No backend, no accounts, no
+        server holding it. This site holds nobody’s schedule.
+      </li>
+    </ul>
+
+    <h2>What is here now</h2>
+    <p>
+      The planner is still being built and is not on the live site yet. What is finished ships here as it
+      lands.
+    </p>
   </section>
 </FaceLayout>
-
-<script>
-  import { FLEXIBLE_FOCUS, dayKeyOrderStartingOn, parseIsoDate, resolveDate } from "../../lib/shared/fortknight-rules.js";
-  import { loadSettings, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
-  import { FLEXIBLE_BLOCK_KEY, activeWeights, currentSeasonForAnswers, defaultAnswers, formatClockRange, personCalendarFromSettings, userWeightsFromAnswers } from "../../lib/shared/weights-rules.js";
-  import { generateBlockFocusGrid, proposalFromWeights } from "../../lib/shared/generator-rules.js";
-  import { allocationsFromWeights } from "../../lib/shared/allocations-rules.js";
-  import { renderAllocationBars } from "../../lib/shared/allocation-bars.js";
-  import { localTodayIsoDate } from "../../lib/shared/clock.js";
-  import { withBase } from "../../lib/paths.js";
-  import { facePath } from "../../lib/faces.js";
-
-  const dateInput = document.getElementById("dateInput");
-  const dateResolution = document.getElementById("dateResolution");
-  const cardsStatus = document.getElementById("cardsStatus");
-  const gridViews = document.getElementById("gridViews");
-  const proposalSummary = document.getElementById("proposalSummary");
-  const proposalDetails = document.getElementById("proposalDetails");
-  const proposalReasons = document.getElementById("proposalReasons");
-  const adoptButton = document.getElementById("adoptProposal");
-  const dropOwnGridButton = document.getElementById("dropOwnGrid");
-  const allocationsStatus = document.getElementById("allocationsStatus");
-  const allocationBars = document.getElementById("allocationBars");
-
-  function currentEpochOverride(settings) {
-    return settings.epochOverride && settings.epochOverride.date ? settings.epochOverride : null;
-  }
-
-  const settings = loadSettings();
-  const goToDay = document.getElementById("goToDay");
-
-  dateInput.value = localTodayIsoDate();
-
-  // Wire the UI before any network work; a failed bundle load must not leave
-  // the resolver dead and silent (the old viewer showed an explicit error).
-  let bundle = null;
-  try {
-    const response = await fetch(withBase("bundle.json"));
-    if (!response.ok) throw new Error(`${response.status}`);
-    bundle = await response.json();
-  } catch {
-    dateResolution.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
-  }
-
-  // The person's calendar: their week start (grid order) and their own seasons (date resolution).
-  const personCalendar = personCalendarFromSettings(settings, bundle);
-
-  /** The weights the cards render from: the active profile's saved ones (when they carry a block focus grid and a
-   *  proposal with activities, i.e. were saved by this version), else derived on device from its saved answers or the
-   *  typical-person defaults. */
-  function weightsForCards() {
-    if (!bundle) return null;
-    const saved = activeWeights(settings);
-    if (saved?.blockFocusGrid && saved?.proposal?.activities) return saved;
-    const answers = saved?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories);
-    return userWeightsFromAnswers(answers, bundle, { weightsId: settings.activeWeightsId, epochOverride: currentEpochOverride(settings) });
-  }
-
-  function focusLabel(focusKey) {
-    if (focusKey === FLEXIBLE_FOCUS) return "Flexible";
-    return bundle.categories.categories[focusKey]?.label ?? focusKey;
-  }
-
-  /** The answers behind the weights on screen (the saved profile's, else the typical-person defaults). */
-  function answersForCards() {
-    return activeWeights(settings)?.questionnaire?.answers ?? defaultAnswers(bundle.questionnaire, bundle.categories);
-  }
-
-  /** The generator's proposal for the weights on screen, made for the season of the date in the resolver
-   *  (recomputed here rather than read from the saved profile so it never lags behind the calendar). */
-  function proposalFor(weights) {
-    const season = currentSeasonForAnswers(answersForCards(), bundle, dateInput.value || localTodayIsoDate(), currentEpochOverride(settings));
-    const generated = generateBlockFocusGrid(weights, bundle.questionnaire, { seasonFocus: season?.focus ?? null, categoryOrder: bundle.categories.order });
-    return { ...generated, seasonName: season?.name ?? null };
-  }
-
-  /** The bars below the grid: weights, the person's grid, and the proposal for the resolver's date. */
-  function renderAllocations(weights) {
-    const season = currentSeasonForAnswers(answersForCards(), bundle, dateInput.value || localTodayIsoDate(), currentEpochOverride(settings));
-    const withProposal = { ...weights, proposal: proposalFromWeights(weights, bundle.questionnaire, { seasonFocus: season?.focus ?? null, seasonId: season?.id ?? null, categories: bundle.categories }) };
-    const views = allocationsFromWeights(withProposal, bundle.categories.order, bundle.days.order);
-    renderAllocationBars(allocationBars, views, focusLabel);
-    const saved = Boolean(activeWeights(settings));
-    const shownViews = ["your weights", ...(views.byBlockFocus ? ["your focus grid"] : []), ...(views.byProposal ? [`the generator’s proposal${season ? ` for ${season.name}` : ""}`] : [])];
-    const shown = shownViews.length === 1 ? shownViews[0] : `${shownViews.slice(0, -1).join(", ")} and ${shownViews[shownViews.length - 1]}`;
-    allocationsStatus.textContent = `Profile ${weights.id}${saved ? "" : " (not saved yet — default answers)"}. Showing ${shown}.${views.byBlockFocus ? "" : " No focus grid yet."}`;
-  }
-
-  /** Fill every card from the person's weights: their focus blocks, the block focus grid (their own / imported —
-   *  or the generator's proposal, with a `data-changed` mark and the reason as title where it differs),
-   *  standing appointments (•) and the appointment weekdays/blocks. */
-  function renderCards(weights, proposal = null) {
-    const focusBlocks = weights.blocks.filter((block) => block.carriesFocus);
-    const standingByDay = {};
-    for (const anchor of weights.blockSplit.anchors) {
-      if (anchor.source !== "standing-appointment" || !anchor.dayKey || !anchor.block) continue;
-      (standingByDay[anchor.dayKey] ??= new Set()).add(anchor.block);
-    }
-    for (const card of document.querySelectorAll(".day-card")) {
-      const dayKey = card.dataset.dayKey;
-      const currentGrid = weights.blockFocusGrid?.[dayKey] ?? {};
-      const dayGrid = proposal ? proposal.blockFocusGrid[dayKey] : currentGrid;
-      const tags = card.querySelector(".day-tags");
-      tags.replaceChildren();
-      if ((weights.appointmentWeekdays || []).includes(card.dataset.weekday)) {
-        const tag = document.createElement("span");
-        tag.className = "appointment-tag";
-        tag.textContent = "appointments";
-        tags.appendChild(tag);
-      }
-      const focusCounts = {};
-      const chips = card.querySelector(".block-chips");
-      chips.replaceChildren();
-      for (const block of focusBlocks) {
-        const focus = dayGrid[block.key] ?? null;
-        if (focus) focusCounts[focus] = (focusCounts[focus] || 0) + 1;
-        const chip = document.createElement("span");
-        chip.className = `block-chip ${focus ?? "empty"}`;
-        if (focus) chip.style.background = `var(--${focus})`;
-        chip.title = `${block.key} ${formatClockRange(block.start, block.end)}`;
-        if (proposal && currentGrid[block.key] !== focus) {
-          chip.dataset.changed = "";
-          chip.title += ` — proposed (was ${currentGrid[block.key] ? focusLabel(currentGrid[block.key]) : "empty"}): ${proposal.reasons[dayKey][block.key]}`;
-        } else if (proposal) {
-          chip.title += ` — ${proposal.reasons[dayKey][block.key]}`;
-        }
-        const marker = standingByDay[dayKey]?.has(block.key) || weights.appointmentBlocks?.[dayKey] === block.key ? " •" : "";
-        chip.textContent = `${block.key === FLEXIBLE_BLOCK_KEY ? "" : `${block.key}: `}${focus ? focusLabel(focus) : "—"}${marker}`;
-        chips.appendChild(chip);
-      }
-      // The day's focus line: the focus that leads the day's blocks outright (ties say nothing).
-      const ranked = Object.entries(focusCounts).sort((left, right) => right[1] - left[1]);
-      const mainFocus = ranked.length && (ranked.length === 1 || ranked[0][1] > ranked[1][1]) ? ranked[0][0] : null;
-      card.querySelector(".day-focus").textContent = mainFocus ? focusLabel(mainFocus) : "";
-    }
-  }
-
-  let currentView = "current";
-  let currentWeights = null;
-  let currentProposal = null;
-
-  /** Draw the chosen view (the person's grid or the proposal), the summary line and the reasons list. */
-  function showView(view) {
-    currentView = view;
-    for (const button of gridViews.querySelectorAll("[data-view]")) button.classList.toggle("active", button.dataset.view === view);
-    if (view === "proposed" && !currentProposal) currentProposal = proposalFor(currentWeights);
-    renderCards(currentWeights, view === "proposed" ? currentProposal : null);
-    renderAllocations(currentWeights);
-    adoptButton.hidden = view !== "proposed";
-    proposalDetails.hidden = view !== "proposed";
-    const own = Boolean(activeWeights(settings)?.questionnaire?.answers?.blockFocusGrid && Object.keys(activeWeights(settings).questionnaire.answers.blockFocusGrid).length);
-    dropOwnGridButton.hidden = view === "proposed" || !own;
-    if (view !== "proposed") {
-      const hasGrid = Object.values(currentWeights.blockFocusGrid || {}).some((cells) => Object.keys(cells).length);
-      proposalSummary.textContent = hasGrid ? (own ? "Your grid: the proposal you adopted. Drop it to return to the imported grid." : "Your grid: what your import gave each block.") : "No grid yet — see the proposed grid.";
-      return;
-    }
-    const cellCount = currentWeights.blocks.filter((block) => block.carriesFocus).length * 14;
-    const differing = Object.entries(currentProposal.blockFocusGrid).reduce((count, [dayKey, cells]) => count + Object.entries(cells).filter(([blockKey, focus]) => currentWeights.blockFocusGrid?.[dayKey]?.[blockKey] !== focus).length, 0);
-    const seasonWords = currentProposal.seasonName ? ` for ${currentProposal.seasonName}` : "";
-    const warningWords = currentProposal.warnings.length ? `; ${currentProposal.warnings.length} warning${currentProposal.warnings.length === 1 ? "" : "s"}` : "";
-    proposalSummary.textContent = `Proposal${seasonWords} from your weights: ${differing} of ${cellCount} blocks differ from your grid${warningWords}. Outlined cells changed — hover for why.`;
-    proposalReasons.replaceChildren();
-    for (const warning of currentProposal.warnings) {
-      const item = document.createElement("li");
-      item.className = "warning";
-      item.textContent = warning;
-      proposalReasons.appendChild(item);
-    }
-    for (const [dayKey, cells] of Object.entries(currentProposal.reasons)) {
-      for (const [blockKey, reason] of Object.entries(cells)) {
-        const item = document.createElement("li");
-        item.textContent = `${bundle.days.days[dayKey].label} · ${blockKey === FLEXIBLE_BLOCK_KEY ? "" : `${blockKey}: `}${focusLabel(currentProposal.blockFocusGrid[dayKey][blockKey])} — ${reason}`;
-        proposalReasons.appendChild(item);
-      }
-    }
-  }
-
-  /** Adopt the proposal: it becomes the person's own grid (answers.blockFocusGrid) and the profile is re-derived and saved. */
-  function adoptProposal() {
-    const answers = answersForCards();
-    answers.blockFocusGrid = JSON.parse(JSON.stringify(currentProposal.blockFocusGrid));
-    setActiveWeights(settings, userWeightsFromAnswers(answers, bundle, { weightsId: settings.activeWeightsId, epochOverride: currentEpochOverride(settings), answeredAt: localTodayIsoDate(), date: dateInput.value || null }));
-    saveSettings(settings);
-    currentWeights = weightsForCards();
-    currentProposal = null;
-    showView("current");
-    cardsStatus.hidden = false;
-    cardsStatus.textContent = `Adopted the proposal into profile ${settings.activeWeightsId} — it is now your grid.`;
-  }
-
-  /** Drop the adopted grid: the import's grid (if any) shows again. */
-  function dropOwnGrid() {
-    const answers = answersForCards();
-    delete answers.blockFocusGrid;
-    setActiveWeights(settings, userWeightsFromAnswers(answers, bundle, { weightsId: settings.activeWeightsId, epochOverride: currentEpochOverride(settings), answeredAt: localTodayIsoDate(), date: dateInput.value || null }));
-    saveSettings(settings);
-    currentWeights = weightsForCards();
-    currentProposal = null;
-    showView("current");
-    cardsStatus.hidden = false;
-    cardsStatus.textContent = `Dropped your grid from profile ${settings.activeWeightsId}.`;
-  }
-
-  // The cards arrive with the bundle's days as no-JS fallback (day keys, no focus on the neutral data); replace them with the person's settings.
-  try {
-    currentWeights = weightsForCards();
-    if (currentWeights) {
-      gridViews.hidden = false;
-      showView("current");
-      for (const button of gridViews.querySelectorAll("[data-view]")) button.addEventListener("click", () => showView(button.dataset.view));
-      adoptButton.addEventListener("click", adoptProposal);
-      dropOwnGridButton.addEventListener("click", dropOwnGrid);
-    }
-  } catch (error) {
-    cardsStatus.hidden = false;
-    cardsStatus.textContent = `Showing the sample days — could not read your saved settings: ${error.message}`;
-  }
-
-  /** Display only: rotate the 14 cards so the grid starts on the person's week-start weekday (canonical order stays). */
-  function rotateGrid(weekStart) {
-    const grid = document.querySelector(".fortnight-grid");
-    if (!grid) return;
-    const cards = Object.fromEntries([...grid.querySelectorAll(".day-card")].map((card) => [card.dataset.dayKey, card]));
-    const dividers = [...grid.querySelectorAll(".week-divider")];
-    const order = dayKeyOrderStartingOn(weekStart);
-    grid.replaceChildren();
-    order.forEach((dayKey, index) => {
-      if (index === 0 || index === 7) grid.appendChild(dividers[index === 0 ? 0 : 1]);
-      grid.appendChild(cards[dayKey]);
-    });
-  }
-  if (personCalendar.weekStart !== "sunday") rotateGrid(personCalendar.weekStart);
-
-  function markDay(dayKey) {
-    document.querySelectorAll(".day-card.today").forEach((card) => card.classList.remove("today"));
-    document.querySelector(`.day-card[data-day-key="${dayKey}"]`)?.classList.add("today");
-  }
-
-  // Resolve in place; navigation is an explicit
-  // action via the "Go to day" link — date inputs fire `change` per keystroke
-  // in Chromium, so auto-navigating strands users mid-edit.
-  function resolveInPlace() {
-    if (!bundle || !dateInput.value) return;
-    const resolution = resolveDate(bundle, parseIsoDate(dateInput.value), currentEpochOverride(settings), personCalendar.seasons);
-    const seasonSource = resolution.seasonSource === "person" ? "your seasons" : "FortKnight seasons";
-    dateResolution.textContent = `${resolution.dayLabel} · ${resolution.season.name} (${seasonSource}, since ${resolution.season.startDate})`;
-    markDay(resolution.dayKey);
-    goToDay.hidden = false;
-    goToDay.href = facePath("fortknight", `days/${resolution.dayKey}/`) + `?date=${dateInput.value}`;
-  }
-
-  resolveInPlace();
-  dateInput.addEventListener("change", () => {
-    resolveInPlace();
-    // The proposal is made for the season of the resolved date; a new date may mean a new season.
-    if (currentWeights) {
-      currentProposal = null;
-      if (currentView === "proposed") showView("proposed");
-    }
-  });
-</script>

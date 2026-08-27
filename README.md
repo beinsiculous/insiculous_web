@@ -10,11 +10,14 @@ deliberately read as three different websites:
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
   iOS rather than here (`docs/thesis.md` is the source of that policy's wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
-  organised by Norse-wheel seasons, five daily blocks and seven life categories.
+  organised by Norse-wheel seasons, five daily blocks and seven life categories. **In
+  development**: the face URLs answer with a "still being built" page while the app is finished
+  on its branch (see Deploying below).
 - **ForkKnife** (`/forkknife/`) — the fortnight menu: meals, the dishes for each day, and the prep
-  and cooking tasks they imply.
+  and cooking tasks they imply. Same in-development status as FortKnight.
 
-The two planners are *faces* of one app: they share the on-device profile at `/profile/`, and they
+The two planners are *faces* of one app: they share the on-device profile at `/profile/` (which
+is live), and they
 are data-first — JSON files are the source of truth, Markdown docs are the assistant's context, and
 light Python scripts stand in for a backend. Users bring their own AI provider; nothing is stored
 server-side. See `CLAUDE.md` for the map and `docs/` for the contracts.
@@ -237,6 +240,14 @@ zoom at 320px. The PR template lists this.
 domain to confirm it serves. The deploy step only runs if every gate passes, so a broken build, a
 broken data rule, or an accessibility regression cannot reach the site. The workflow can also be run by hand from the Actions
 tab (`workflow_dispatch`) to redeploy the current `main`.
+
+The branch model behind that: `main` is production and only ever receives merges — `dev` is the
+integration branch, and a `dev → main` pull request **is** the production deploy. The two face
+apps are built on their own branches, `fortknightdev` and `forknifedev`; on `main` their pages
+exist as `src/components/FaceInDevelopment.astro` placeholders on purpose — deleting the routes
+would turn every edit on a face branch into a modify/delete conflict, one per page, so the
+placeholder keeps the path occupied and the merge an ordinary content merge. When a face is
+ready its branch merges and the placeholders go with it.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

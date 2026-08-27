@@ -412,7 +412,14 @@ main > * { min-width: 0; }
    Mirrors the rule set in app-widgets.css under the same class names (the two files are not shared). */
 .name-dialog {
   padding: 0; border: 1px solid var(--line); border-radius: var(--radius);
-  background: var(--panel); color: var(--ink); box-shadow: var(--shadow);
+  color: var(--ink); box-shadow: var(--shadow);
+  /* --panel is translucent on purpose: panels are frosted glass over the page behind them. A modal is
+     not — it floats over whatever the page happens to be, so a translucent one makes its own text's
+     contrast depend on the content underneath it, which is not a property a dialog may have. axe caught
+     exactly that: identical colours passed over a long page and failed over a short one. So the panel
+     colour is laid over an opaque base of the theme's own background: same appearance, fixed contrast. */
+  background-color: var(--background);
+  background-image: linear-gradient(var(--panel), var(--panel));
   width: min(28rem, calc(100vw - 2rem)); max-width: 100%;
 }
 .name-dialog::backdrop { background: rgba(35, 35, 31, 0.55); }

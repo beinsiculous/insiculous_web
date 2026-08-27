@@ -7,6 +7,13 @@ the canonical JS modules are all in **this** repository (`insiculous_web` — be
 on 2026-08-17, and the FortKnight repository that had stayed canonical for the data was folded in
 here on 2026-08-18 — one project, one repo, no sync step.)
 
+**Deployment status.** This document describes the app as it is being built on the face branches
+`fortknightdev` and `forknifedev`. On production (`main`) the face pages it describes are
+`src/components/FaceInDevelopment.astro` placeholders — kept as files so the face branches merge
+as ordinary content merges — and only `/profile/` and the two face index pages are live. The body
+below stays as-is: it is the contract those branches are being built against, and it becomes plain
+true as each face merges.
+
 ## The site
 beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries three surfaces
 that deliberately look like three different websites:

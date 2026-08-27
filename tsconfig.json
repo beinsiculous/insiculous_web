@@ -25,6 +25,7 @@
     "src/pages/profile.astro",
     "src/layouts/FaceLayout.astro",
     "src/components/AllocationBars.astro",
+    "src/components/FaceInDevelopment.astro",
     "src/components/ApplyFromAssistant.astro",
     "src/components/DayCard.astro",
     "src/components/MenuDayCard.astro",
