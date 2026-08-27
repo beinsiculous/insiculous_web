@@ -42,8 +42,52 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
 
     <h2>What is here now</h2>
     <p>
-      The planner is still being built and is not on the live site yet. What is finished ships here as it
-      lands.
+      The planner is still being built and is not on the live site yet. What works today is the profile
+      both faces share — and My&nbsp;Fort, which reads a fortnight exported from the Keep app.
     </p>
+    <div class="button-row" id="profileActions" hidden>
+      <button type="button" id="createProfileButton">Create a profile</button>
+    </div>
+    <p class="muted" id="profileStatus"></p>
   </section>
 </FaceLayout>
+
+<script>
+  import { loadSettings, newProfileId, profileIds, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
+  import { unusedProfileName } from "../../lib/shared/profile-names.js";
+  import { PROFILE_PATH } from "../../lib/faces.js";
+  import { withBase } from "../../lib/paths.js";
+
+  // Creating a profile lives here while the questionnaires are placeholders. It writes a real, saved
+  // profile rather than only making one active: `createProfile` sets the active id and leaves the saving
+  // to a questionnaire, and on this branch there is no questionnaire to do it — which is the whole reason
+  // the nav's "New profile…" is not offered (src/components/ProfileSwitcher.astro). The name is rolled for
+  // you; you can change it on the Profile page, which is where this lands.
+  const actions = document.getElementById("profileActions");
+  const status = document.getElementById("profileStatus");
+  const createButton = document.getElementById("createProfileButton");
+
+  function render() {
+    const saved = profileIds(loadSettings());
+    actions.hidden = false;
+    status.textContent = saved.length
+      ? `${saved.length} profile${saved.length === 1 ? "" : "s"} saved on this device.`
+      : "No profile on this device yet.";
+  }
+
+  createButton.addEventListener("click", () => {
+    const settings = loadSettings(); // re-read: another tab may have saved since this page loaded
+    try {
+      const id = newProfileId(settings, unusedProfileName([...profileIds(settings), settings.activeWeightsId]));
+      setActiveWeights(settings, { id, questionnaire: { answers: {} } });
+      saveSettings(settings);
+      // withBase, not the bare PROFILE_PATH: it is site-root relative, and from /fortknight/ the bare
+      // form would resolve to /fortknight/profile/. FaceLayout builds the nav's link the same way.
+      location.href = withBase(PROFILE_PATH);
+    } catch (error) {
+      status.textContent = error.message;
+    }
+  });
+
+  render();
+</script>
