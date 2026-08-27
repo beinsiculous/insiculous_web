@@ -1,0 +1,139 @@
+"""The guard that keeps a person's schedule out of a public repository.
+
+Two halves, and the second is the one that matters day to day: it must refuse a seed, and it must NOT
+refuse the six committed files a naive marker would have caught. A guard that blocks every build gets
+deleted, and then nothing is guarding anything.
+"""
+import json
+import unittest
+from pathlib import Path
+
+# helpers puts scripts/ on sys.path; without it this module imports fk_core only when discovery happens to
+# load an alphabetically earlier test first, which made the whole suite depend on file names.
+from helpers import REPOSITORY_ROOT as CHECKOUT_ROOT
+from fk_core.no_schedules import (
+    ALLOWED_FIXTURES,
+    REPOSITORY_ROOT,
+    describe_schedule_document,
+    find_schedule_documents,
+)
+
+MYFORT_SEED = {"meta": {"format": "myfort", "version": 1, "exportedAt": "2026-08-27T18:00:00+00:00"},
+               "days": [], "season": None, "year": None}
+
+KEEP_SEED = {"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": [],
+             "appointments": [], "meals": []}
+
+
+class DescribeScheduleDocumentTests(unittest.TestCase):
+    def test_it_names_a_my_fort_seed(self):
+        self.assertIn("My Fort seed", describe_schedule_document(MYFORT_SEED))
+
+    def test_it_names_a_keep_seed(self):
+        self.assertIn("Keep seed", describe_schedule_document(KEEP_SEED))
+
+    def test_a_bare_tasks_or_days_key_is_not_a_schedule(self):
+        """The subtlety the guard exists around: data/questionnaire.json carries `tasks`, days.json carries
+        `days`, and the built bundle carries `days` and `meta`. Marking on any one of those would refuse
+        six committed files and block every build."""
+        for harmless in ({"tasks": []}, {"days": []}, {"meta": {}, "days": []},
+                         {"meta": {}, "days": [], "tasks": []},          # three of the four is not enough
+                         {"calendar": [], "days": [], "tasks": []}):     # nor is a different three
+            with self.subTest(document=sorted(harmless)):
+                self.assertIsNone(describe_schedule_document(harmless))
+
+    def test_it_ignores_what_is_not_an_object(self):
+        for value in ([], "a string", 7, None):
+            self.assertIsNone(describe_schedule_document(value))
+
+
+class FindScheduleDocumentsTests(unittest.TestCase):
+    def test_this_repository_holds_nobody_s_schedule(self):
+        """The claim CLAUDE.md, README.md and docs/thesis.md all make, checked rather than asserted."""
+        self.assertEqual(find_schedule_documents(), [])
+
+    def test_it_finds_a_seed_wherever_it_is_dropped(self):
+        import tempfile
+
+        for relative in ("public/myfort.json", "data/whatever.json", "stray.json",
+                         "src/pages/fortknight/seed.json"):
+            with self.subTest(path=relative), tempfile.TemporaryDirectory() as directory:
+                planted = Path(directory) / relative
+                planted.parent.mkdir(parents=True, exist_ok=True)
+                planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+                found = find_schedule_documents(directory)
+                self.assertEqual([path for path, _ in found], [relative])
+
+    def test_it_does_not_walk_generated_or_vendored_trees(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            for relative in ("dist/myfort.json", "node_modules/pkg/myfort.json", "source/myfort.json"):
+                planted = Path(directory) / relative
+                planted.parent.mkdir(parents=True, exist_ok=True)
+                planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+            self.assertEqual(find_schedule_documents(directory), [])
+
+    def test_nothing_is_exempt(self):
+        """An exemption for a fixture that does not exist yet is a pre-approved hole at exactly the path a
+        real export would be dropped. It comes back only alongside the fixture that needs it."""
+        self.assertEqual(ALLOWED_FIXTURES, set())
+
+    def test_a_seed_under_tests_is_still_a_seed(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            planted = Path(directory) / "tests/fixtures/myfort.sample.json"
+            planted.parent.mkdir(parents=True, exist_ok=True)
+            planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+            self.assertEqual([path for path, _ in find_schedule_documents(directory)],
+                             ["tests/fixtures/myfort.sample.json"])
+
+    def test_a_seed_it_cannot_read_is_reported_rather_than_skipped(self):
+        """The guard's only job is never to be quietly wrong. A UTF-16 or malformed file cannot be shown
+        NOT to be a schedule, so it is named instead of passed over."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "broken.json").write_text("{not json", encoding="utf-8")
+            (Path(directory) / "utf16.json").write_bytes(json.dumps(MYFORT_SEED).encode("utf-16"))
+            found = dict(find_schedule_documents(directory))
+            self.assertEqual(sorted(found), ["broken.json", "utf16.json"])
+            for reason in found.values():
+                self.assertIn("unreadable JSON", reason)
+
+    def test_a_jsonc_config_is_not_reported_as_unreadable(self):
+        """tsconfig.json is JSON with comments and has never parsed as JSON. Reporting it would have made
+        this guard fail every build on the day it landed — which is how guards get deleted."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "tsconfig.json").write_text('{\n  // a comment\n  "extends": "x"\n}',
+                                                           encoding="utf-8")
+            self.assertEqual(find_schedule_documents(directory), [])
+
+    def test_the_real_tsconfig_is_the_reason_that_exemption_exists(self):
+        """Pinned against the checkout rather than a fixture: if tsconfig ever becomes plain JSON the
+        exemption is dead weight, and if another JSONC config appears this test is where it surfaces."""
+        self.assertIn("tsconfig.json", {path.name for path in CHECKOUT_ROOT.glob("*.json")})
+
+    def test_a_seed_with_a_byte_order_mark_is_still_caught(self):
+        """Notepad writes one by default, and json.loads refuses a BOM outright — so reading as plain
+        utf-8 would have skipped a real export in silence."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "seed.json").write_text(json.dumps(MYFORT_SEED), encoding="utf-8-sig")
+            self.assertEqual([reason for _, reason in find_schedule_documents(directory)],
+                             ["a My Fort seed (meta.format is \"myfort\")"])
+
+    def test_it_does_not_depend_on_the_file_being_named_tidily(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "SEED.JSON").write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+            self.assertEqual([path for path, _ in find_schedule_documents(directory)], ["SEED.JSON"])
+
+    def test_the_repository_root_it_defaults_to_is_the_checkout(self):
+        self.assertEqual(REPOSITORY_ROOT, CHECKOUT_ROOT)
+        self.assertTrue((REPOSITORY_ROOT / "package.json").is_file())
