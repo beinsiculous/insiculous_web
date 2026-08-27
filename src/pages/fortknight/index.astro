@@ -5,6 +5,9 @@
 // worth visiting before the tool behind it is finished. The real Overview lives on the face branch and
 // replaces this file when it merges.
 import FaceLayout from "../../layouts/FaceLayout.astro";
+import { facePath } from "../../lib/faces.js";
+
+const myFort = facePath("fortknight", "myfort/");
 ---
 <FaceLayout title="FortKnight" face="fortknight">
   <section class="panel">
@@ -43,7 +46,8 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
     <h2>What is here now</h2>
     <p>
       The planner is still being built and is not on the live site yet. What works today is the profile
-      both faces share — and My&nbsp;Fort, which reads a fortnight exported from the Keep app.
+      both faces share — and <a href={myFort}>My Fort</a>, which shows a fortnight exported from the
+      Keep app: what is being eaten, what is booked, and the shape of each day.
     </p>
     <div class="button-row" id="profileActions" hidden>
       <button type="button" id="createProfileButton">Create a profile</button>

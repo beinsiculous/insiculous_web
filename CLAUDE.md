@@ -44,7 +44,8 @@ python3 scripts/xlsx_to_json.py --dry-run         # workbook -> examples/workboo
 python3 -m unittest discover tests                # test suite (also `npm run test:data`)
 npm run data                                      # validate.py then build.py, the data edit loop in one
 npm run dev                                       # the site: / (studio) + /fortknight/ + /forkknife/ + /profile/
-npm run verify                                    # what CI gates the deploy on: tests + check + build + a11y
+npm run validate                                  # validate.py alone: the data gates + the schedule sweep
+npm run verify                                    # what CI gates the deploy on: validate + tests + check + build + a11y
 ```
 The edit loop is: change `data/` → `npm run data` → tests. **Commit `build/` too** — the site imports
 the bundle, so a data change that skips `build.py` ships a bundle that disagrees with the data beside it.
@@ -109,6 +110,25 @@ branches, `fortknightdev` and `forknifedev`, and on `main` their routes
 face branch's edits merge as ordinary content merges instead of one modify/delete conflict per
 route; the component's header comment is the canonical statement. What is live on `main`: the
 studio pages, the two face index pages (thesis front doors), and `/profile/`.
+
+**`/fortknight/myfort` is live, and is the exception to all of the above.** It renders a fortnight from a
+**My Fort seed** — a small file the private Keep app exports (`keep/src/lib/myfort-seed.js`): the fourteen
+day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The
+visitor loads their own file; it is kept in `localStorage` under `beinsiculous.myfort-seed`
+(`src/lib/myfort-store.js`), deletable from `/profile/`, and never uploaded.
+
+The page **resolves nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Keep
+anchors every season on `sun-a` and has transition weeks, while `fk_core/dates.py` and
+`src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b` starts for Ostara and
+Fimbulsumar, so **running this repository's date evaluator over a My Fort seed would be wrong for half the
+year.** Nothing here has to: `src/lib/myfort.js` validates and the page draws.
+
+**A My Fort seed is somebody's real schedule, so it must never be committed here.**
+`scripts/fk_core/no_schedules.py` enforces that — it refuses any JSON whose `meta.format` is `"myfort"`,
+or which carries `meta`, `calendar`, `days` and `tasks` together, and it reports files it cannot read
+rather than skipping them. `validate.py` runs it, and `npm run verify` runs `validate.py`. One fixture is
+exempt by exact path, `tests/fixtures/myfort.sample.json`, because `a11y-check.mjs` loads it so axe audits
+a page with fourteen real panels instead of an empty file picker; it is invented, and tests assert both.
 
 ## Writing a devlog entry
 Read `src/content/devlog/six-games-one-day.md` first — every rule here describes that entry. The

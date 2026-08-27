@@ -1,0 +1,953 @@
+{
+  "meta": {
+    "format": "myfort",
+    "version": 1,
+    "exportedAt": "2026-08-27T18:00:00+00:00"
+  },
+  "days": [
+    {
+      "dayKey": "sun-a",
+      "label": "Sunday A",
+      "week": 1,
+      "mainFocus": "cleaning",
+      "mainFocusLabel": "CLEANING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Meal Prep",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Learning",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Garden soup"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Teaching",
+          "meal": {
+            "name": "Snack",
+            "dish": "Flatbreads"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Baked apples"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Bean stew",
+        "snack": "OUT",
+        "dinner": "Roast squash"
+      }
+    },
+    {
+      "dayKey": "mon-b",
+      "label": "Monday B",
+      "week": 1,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Learning",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Teaching",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Flatbreads"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Cleaning",
+          "meal": {
+            "name": "Snack",
+            "dish": "Baked apples"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Rice and greens"
+          }
+        }
+      ],
+      "appointments": [
+        {
+          "id": "mon-b-example-lesson",
+          "title": "Example Lesson",
+          "category": "friends-family",
+          "timing": {
+            "estimatedStart": "14:00",
+            "travelPrepComplete": "15:30",
+            "timeStart": "16:00",
+            "timeFinished": "17:00",
+            "estimatedEnd": "17:30"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Garden soup",
+        "snack": "Lentil pie",
+        "dinner": "Noodle bowl"
+      }
+    },
+    {
+      "dayKey": "tue-a",
+      "label": "Tuesday A",
+      "week": 1,
+      "mainFocus": "meals",
+      "mainFocusLabel": "MEALS",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Teaching",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Cleaning",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Baked apples"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Working",
+          "meal": {
+            "name": "Snack",
+            "dish": "Rice and greens"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "OUT"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Flatbreads",
+        "snack": "FLEXIBLE",
+        "dinner": "Herb omelette"
+      }
+    },
+    {
+      "dayKey": "wed-b",
+      "label": "Wednesday B",
+      "week": 1,
+      "mainFocus": "flexible",
+      "mainFocusLabel": "FLEXIBLE",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Cleaning",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Working",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Rice and greens"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Flexible",
+          "meal": {
+            "name": "Snack",
+            "dish": "OUT"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Lentil pie"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Baked apples",
+        "snack": "Oat pancakes",
+        "dinner": "Barley salad"
+      }
+    },
+    {
+      "dayKey": "thu-a",
+      "label": "Thursday A",
+      "week": 1,
+      "mainFocus": "cleaning",
+      "mainFocusLabel": "CLEANING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Working",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Flexible",
+          "meal": {
+            "name": "Brunch",
+            "dish": "OUT"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Meal Prep",
+          "meal": {
+            "name": "Snack",
+            "dish": "Lentil pie"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "FLEXIBLE"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Rice and greens",
+        "snack": "Roast squash",
+        "dinner": "Pear crumble"
+      }
+    },
+    {
+      "dayKey": "fri-b",
+      "label": "Friday B",
+      "week": 1,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Flexible",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Meal Prep",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Lentil pie"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Learning",
+          "meal": {
+            "name": "Snack",
+            "dish": "FLEXIBLE"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Oat pancakes"
+          }
+        }
+      ],
+      "appointments": [
+        {
+          "id": "fri-b-example-lesson",
+          "title": "Example Lesson",
+          "category": "friends-family",
+          "timing": {
+            "estimatedStart": "14:00",
+            "travelPrepComplete": "15:30",
+            "timeStart": "16:00",
+            "timeFinished": "17:00",
+            "estimatedEnd": "17:30"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "OUT",
+        "snack": "Noodle bowl",
+        "dinner": "Bean stew"
+      }
+    },
+    {
+      "dayKey": "sat-a",
+      "label": "Saturday A",
+      "week": 1,
+      "mainFocus": "meals",
+      "mainFocusLabel": "MEALS",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Meal Prep",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Learning",
+          "meal": {
+            "name": "Brunch",
+            "dish": "FLEXIBLE"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Teaching",
+          "meal": {
+            "name": "Snack",
+            "dish": "Oat pancakes"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Roast squash"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Lentil pie",
+        "snack": "Herb omelette",
+        "dinner": "Garden soup"
+      }
+    },
+    {
+      "dayKey": "sun-b",
+      "label": "Sunday B",
+      "week": 2,
+      "mainFocus": "flexible",
+      "mainFocusLabel": "FLEXIBLE",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Learning",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Teaching",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Oat pancakes"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Cleaning",
+          "meal": {
+            "name": "Snack",
+            "dish": "Roast squash"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Noodle bowl"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "FLEXIBLE",
+        "snack": "Barley salad",
+        "dinner": "Flatbreads"
+      }
+    },
+    {
+      "dayKey": "mon-a",
+      "label": "Monday A",
+      "week": 2,
+      "mainFocus": "cleaning",
+      "mainFocusLabel": "CLEANING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Teaching",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Cleaning",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Roast squash"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Working",
+          "meal": {
+            "name": "Snack",
+            "dish": "Noodle bowl"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Herb omelette"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Oat pancakes",
+        "snack": "Pear crumble",
+        "dinner": "Baked apples"
+      }
+    },
+    {
+      "dayKey": "tue-b",
+      "label": "Tuesday B",
+      "week": 2,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Cleaning",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Working",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Noodle bowl"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Flexible",
+          "meal": {
+            "name": "Snack",
+            "dish": "Herb omelette"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Barley salad"
+          }
+        }
+      ],
+      "appointments": [
+        {
+          "id": "tue-b-example-lesson",
+          "title": "Example Lesson",
+          "category": "friends-family",
+          "timing": {
+            "estimatedStart": "14:00",
+            "travelPrepComplete": "15:30",
+            "timeStart": "16:00",
+            "timeFinished": "17:00",
+            "estimatedEnd": "17:30"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Roast squash",
+        "snack": "Bean stew",
+        "dinner": "Rice and greens"
+      }
+    },
+    {
+      "dayKey": "wed-a",
+      "label": "Wednesday A",
+      "week": 2,
+      "mainFocus": "meals",
+      "mainFocusLabel": "MEALS",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Working",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Flexible",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Herb omelette"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Meal Prep",
+          "meal": {
+            "name": "Snack",
+            "dish": "Barley salad"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Pear crumble"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Noodle bowl",
+        "snack": "Garden soup",
+        "dinner": "OUT"
+      }
+    },
+    {
+      "dayKey": "thu-b",
+      "label": "Thursday B",
+      "week": 2,
+      "mainFocus": "flexible",
+      "mainFocusLabel": "FLEXIBLE",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Flexible",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Meal Prep",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Barley salad"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Learning",
+          "meal": {
+            "name": "Snack",
+            "dish": "Pear crumble"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Bean stew"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Herb omelette",
+        "snack": "Flatbreads",
+        "dinner": "Lentil pie"
+      }
+    },
+    {
+      "dayKey": "fri-a",
+      "label": "Friday A",
+      "week": 2,
+      "mainFocus": "cleaning",
+      "mainFocusLabel": "CLEANING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Meal Prep",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Learning",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Pear crumble"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Teaching",
+          "meal": {
+            "name": "Snack",
+            "dish": "Bean stew"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Garden soup"
+          }
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Barley salad",
+        "snack": "Baked apples",
+        "dinner": "FLEXIBLE"
+      }
+    },
+    {
+      "dayKey": "sat-b",
+      "label": "Saturday B",
+      "week": 2,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Learning",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Teaching",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Bean stew"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Cleaning",
+          "meal": {
+            "name": "Snack",
+            "dish": "Garden soup"
+          }
+        },
+        {
+          "key": "too-dark",
+          "label": "Too Dark",
+          "start": "18:00",
+          "end": "08:00",
+          "focus": null,
+          "meal": {
+            "name": "Dinner",
+            "dish": "Flatbreads"
+          }
+        }
+      ],
+      "appointments": [
+        {
+          "id": "sat-b-example-lesson",
+          "title": "Example Lesson",
+          "category": "friends-family",
+          "timing": {
+            "estimatedStart": "14:00",
+            "travelPrepComplete": "15:30",
+            "timeStart": "16:00",
+            "timeFinished": "17:00",
+            "estimatedEnd": "17:30"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Pear crumble",
+        "snack": "Rice and greens",
+        "dinner": "Oat pancakes"
+      }
+    }
+  ],
+  "season": {
+    "key": "spooky",
+    "name": "Spooky",
+    "isCurrent": true,
+    "gregorianRange": "September \u2013 November",
+    "startDescription": "Before Labor Day",
+    "safeOutsidePercent": 66.67,
+    "focus": [
+      {
+        "key": "meals",
+        "label": "Meals"
+      },
+      {
+        "key": "cleaning",
+        "label": "Cleaning"
+      },
+      {
+        "key": "working",
+        "label": "Working"
+      },
+      {
+        "key": "health",
+        "label": "Health"
+      }
+    ],
+    "produce": [
+      {
+        "group": "vegetables",
+        "label": "Vegetables",
+        "items": [
+          {
+            "rank": "hero",
+            "name": "Example Squash"
+          },
+          {
+            "rank": "secondary",
+            "name": "Example Kale"
+          }
+        ]
+      },
+      {
+        "group": "fruit",
+        "label": "Fruit",
+        "items": [
+          {
+            "rank": "hero",
+            "name": "Example Pear"
+          }
+        ]
+      }
+    ]
+  },
+  "year": {
+    "status": "year",
+    "year": "2026",
+    "daysInYear": 365,
+    "daysCovered": 365,
+    "coversWholeYear": true,
+    "firstDate": "2026-01-01",
+    "lastDate": "2026-12-31",
+    "slices": [
+      {
+        "key": "ostara",
+        "name": "Ostara",
+        "days": 28,
+        "percent": 8,
+        "startDegree": 0,
+        "sweepDegree": 28,
+        "isCurrent": false
+      },
+      {
+        "key": "fimbulsumar",
+        "name": "Fimbulsumar",
+        "days": 154,
+        "percent": 42,
+        "startDegree": 28,
+        "sweepDegree": 152,
+        "isCurrent": false
+      },
+      {
+        "key": "spooky",
+        "name": "Spooky",
+        "days": 56,
+        "percent": 15,
+        "startDegree": 180,
+        "sweepDegree": 55,
+        "isCurrent": true
+      },
+      {
+        "key": "christmas",
+        "name": "Christmas",
+        "days": 56,
+        "percent": 15,
+        "startDegree": 235,
+        "sweepDegree": 55,
+        "isCurrent": false
+      },
+      {
+        "key": "hogmanay",
+        "name": "Hogmanay",
+        "days": 71,
+        "percent": 20,
+        "startDegree": 290,
+        "sweepDegree": 70,
+        "isCurrent": false
+      }
+    ]
+  }
+}

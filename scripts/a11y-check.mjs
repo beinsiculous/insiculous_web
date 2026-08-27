@@ -104,9 +104,14 @@ try {
   const page = await context.newPage();
   // The faces only render their full UI once a profile exists locally — same seeding the
   // screenshot harness uses, so axe sees what a returning user sees.
-  await page.addInitScript(() => {
-    localStorage.setItem("fortknight.user-settings", JSON.stringify({ schemaVersion: 2 }));
-  });
+  // My Fort renders entirely from a seed in localStorage. Without this the page audited is a file picker
+  // on an otherwise empty page, and the one hard requirement it has — being readable across a room — is
+  // checked by a gate that never sees it. The fixture is invented, not anybody's fortnight.
+  const myFortSeed = readFileSync(new URL("../tests/fixtures/myfort.sample.json", import.meta.url), "utf8");
+  await page.addInitScript(([settings, seed]) => {
+    localStorage.setItem("fortknight.user-settings", settings);
+    localStorage.setItem("beinsiculous.myfort-seed", seed);
+  }, [JSON.stringify({ schemaVersion: 2 }), myFortSeed]);
   for (const route of chosen) {
     await page.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page })

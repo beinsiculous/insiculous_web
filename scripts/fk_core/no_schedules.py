@@ -34,12 +34,15 @@ SKIPPED_DIRECTORIES = {".git", ".astro", "node_modules", "dist", "__pycache__", 
 #: This is a statement about tooling formats, not a permission for anything to hide in them.
 JSONC_CONFIG_NAMES = {"tsconfig.json", "jsconfig.json"}
 
-#: Nothing is exempt. An earlier version pre-approved `tests/fixtures/myfort.sample.json` for an
-#: accessibility fixture that did not exist yet — and that is exactly the path and name a real export would
-#: be given by someone trying the import flow, so the hole sat at the likeliest drop point for the very
-#: file this guard refuses. When the fixture is real and something consumes it, the exemption comes back
-#: WITH it, in the same change, with a test asserting it is the only one.
-ALLOWED_FIXTURES = set()
+#: The one fabricated fixture allowed to look like a seed: scripts/a11y-check.mjs loads it into the browser
+#: so axe audits a My Fort page with fourteen real panels rather than an empty file picker — the page's one
+#: hard requirement is being legible, and a gate that only ever sees the empty state checks nothing.
+#:
+#: An earlier version listed this path BEFORE the fixture existed, which was a pre-approved hole at exactly
+#: the path and name a real export would be given by someone trying the import flow. It is here now because
+#: the file is here and something reads it, and tests assert both: that it is the only exemption, and that
+#: the file it names is invented rather than anybody's.
+ALLOWED_FIXTURES = {"tests/fixtures/myfort.sample.json"}
 
 
 def describe_schedule_document(parsed):

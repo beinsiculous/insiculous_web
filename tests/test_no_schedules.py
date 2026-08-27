@@ -74,20 +74,38 @@ class FindScheduleDocumentsTests(unittest.TestCase):
                 planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
             self.assertEqual(find_schedule_documents(directory), [])
 
-    def test_nothing_is_exempt(self):
-        """An exemption for a fixture that does not exist yet is a pre-approved hole at exactly the path a
-        real export would be dropped. It comes back only alongside the fixture that needs it."""
-        self.assertEqual(ALLOWED_FIXTURES, set())
+    def test_exactly_one_fixture_is_exempt_and_it_exists(self):
+        """An exemption for a file that does not exist is a pre-approved hole at exactly the path a real
+        export would be dropped. So the list is one entry, and the entry is on disk."""
+        self.assertEqual(len(ALLOWED_FIXTURES), 1)
+        for relative in ALLOWED_FIXTURES:
+            self.assertTrue((CHECKOUT_ROOT / relative).is_file(), f"{relative} is exempt but missing")
 
-    def test_a_seed_under_tests_is_still_a_seed(self):
+    def test_the_exempt_fixture_is_read_by_the_gate_that_justifies_it(self):
+        """The exemption's whole warrant is that the accessibility gate renders the page from it. If
+        nothing reads it, the exemption is a hole with a story attached."""
+        harness = (CHECKOUT_ROOT / "scripts" / "a11y-check.mjs").read_text(encoding="utf-8")
+        for relative in ALLOWED_FIXTURES:
+            self.assertIn(Path(relative).name, harness)
+
+    def test_the_exempt_fixture_is_invented_rather_than_anybody_s(self):
+        """It is a My Fort seed by shape — that is the point — so what makes it safe is that its contents
+        are made up. Pinned on the marker names, which no real export would carry."""
+        for relative in ALLOWED_FIXTURES:
+            fixture = json.loads((CHECKOUT_ROOT / relative).read_text(encoding="utf-8"))
+            self.assertIsNotNone(describe_schedule_document(fixture))
+            text = json.dumps(fixture)
+            self.assertIn("Example", text, "the fixture should be obviously invented")
+
+    def test_any_other_seed_under_tests_is_still_a_seed(self):
         import tempfile
 
         with tempfile.TemporaryDirectory() as directory:
-            planted = Path(directory) / "tests/fixtures/myfort.sample.json"
+            planted = Path(directory) / "tests/fixtures/somebody-elses.json"
             planted.parent.mkdir(parents=True, exist_ok=True)
             planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
             self.assertEqual([path for path, _ in find_schedule_documents(directory)],
-                             ["tests/fixtures/myfort.sample.json"])
+                             ["tests/fixtures/somebody-elses.json"])
 
     def test_a_seed_it_cannot_read_is_reported_rather_than_skipped(self):
         """The guard's only job is never to be quietly wrong. A UTF-16 or malformed file cannot be shown
