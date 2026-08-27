@@ -1,14 +1,14 @@
 ---
-// My Fort: a fortnight of the Keep app's household screen, on a screen you can read across a kitchen.
+// My Fort: a fortnight of the Focus Key app's household screen, on a screen you can read across a kitchen.
 //
-// Keep shows one day on a phone. This shows all fourteen, from a file the Keep app exports and the person
+// Focus Key shows one day on a phone. This shows all fourteen, from a file the Focus Key app exports and the person
 // who owns it loads here. Nothing is uploaded, nothing is held server-side, and this repository contains no
 // seed — scripts/fk_core/no_schedules.py makes that a check rather than a promise.
 //
 // The server renders an empty shell on purpose. Everything real comes from the visitor's own file, so a
 // crawler, a build artefact and a stranger all see the same thing: a page asking for a file.
 //
-// It resolves nothing. The seed arrives pre-joined by day key — Keep did the joining, where its parity
+// It resolves nothing. The seed arrives pre-joined by day key — Focus Key did the joining, where its parity
 // suite covers it — so this page looks things up and draws them. That is not a shortcut: the site's own
 // FortKnight evaluator resolves Ostara and Fimbulsumar on sun-b and has no transition weeks, so a page that
 // resolved this data itself would be wrong for half the year.
@@ -18,7 +18,7 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
   <section class="panel">
     <h1>My Fort</h1>
     <p class="muted" id="myFortIntro">
-      A fortnight from the Keep app: what is being eaten, what is booked, and the shape of each day.
+      A fortnight from the Focus Key app: what is being eaten, what is booked, and the shape of each day.
       Load the seed the app exported — it stays on this device and is never uploaded.
     </p>
     <div class="button-row">
@@ -65,7 +65,7 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
   import { MYFORT_SEED_KEY, clearMyFortSeed } from "../../lib/myfort-store.js";
   import { localTodayIsoDate } from "../../lib/shared/clock.js";
 
-  // The five seasons' colours. Keep has its own copy in its theme; this is the site's, because the site's
+  // The five seasons' colours. Focus Key has its own copy in its theme; this is the site's, because the site's
   // accessibility gate is what these have to satisfy.
   const SEASON_COLOURS = {
     ostara: "#4d7c0f", fimbulsumar: "#c2410c", spooky: "#6d28d9",
@@ -171,7 +171,7 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
     panel.appendChild(element("h2", null, `${year.year}`));
 
     const row = element("div", "myfort-wheel-row");
-    // conic-gradient IS the wheel here. Keep draws it from nested rotated Views because React Native has
+    // conic-gradient IS the wheel here. Focus Key draws it from nested rotated Views because React Native has
     // no such thing; a browser does, and the seed already carries the degrees, so there is nothing to
     // compute. Decorative: the same numbers are in the list beside it, which is what a reader gets.
     const stops = slices

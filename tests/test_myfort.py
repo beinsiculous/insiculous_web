@@ -4,7 +4,7 @@
 no rule that exists twice. It is driven through node the same way the twins are, which is what keeps it
 tested at all: tsconfig.json excludes `src/lib` from `astro check`, so these tests are its only safety net.
 
-The two that matter most are the tolerance pair. Keep and this website ship on different cadences, and the
+The two that matter most are the tolerance pair. Focus Key and this website ship on different cadences, and the
 person holding the phone cannot redeploy the site — so an unknown field must not be refused, and a seed
 from a newer format must be refused with a message that names the real remedy.
 """
@@ -36,7 +36,7 @@ class ValidateMyFortSeedTests(unittest.TestCase):
         self.assertEqual(self.validate([FIXTURE]), [{"ok": True}])
 
     def test_it_accepts_an_additive_version_carrying_fields_it_does_not_know(self):
-        """The tolerance the two release cadences depend on: Keep can add a field and the deployed page
+        """The tolerance the two release cadences depend on: Focus Key can add a field and the deployed page
         keeps working, because a bump is reserved for a breaking change."""
         newer = json.loads(json.dumps(FIXTURE))
         newer["meta"]["somethingNew"] = "added later"
@@ -59,7 +59,7 @@ class ValidateMyFortSeedTests(unittest.TestCase):
         """The likeliest wrong file: the app's full seed rather than the small one it exports for the web."""
         [result] = self.validate([{"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": []}])
         self.assertFalse(result["ok"])
-        self.assertIn("Keep's own seed", result["reason"])
+        self.assertIn("Focus Key's own seed", result["reason"])
 
     def test_a_fortknight_profile_is_refused(self):
         [result] = self.validate([{"schemaVersion": 2, "activeWeightsId": "x", "weightsProfiles": {}}])

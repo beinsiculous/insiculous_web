@@ -7,7 +7,7 @@ Either one deploys a household's fortnight to a public website, and git history 
 
 The shapes it knows, and why they are that specific:
 
-  * `meta.format == "myfort"` — a My Fort seed, exported by the Keep app. It says what it is.
+  * `meta.format == "myfort"` — a My Fort seed, exported by the Focus Key app. It says what it is.
   * `meta`, `calendar`, `days` and `tasks` ALL present — a `keep_seed.json`.
 
 A bare `tasks` or `days` key is NOT the test, and that is the whole subtlety. `data/questionnaire.json`
@@ -53,7 +53,7 @@ def describe_schedule_document(parsed):
     if isinstance(meta, dict) and meta.get("format") == "myfort":
         return "a My Fort seed (meta.format is \"myfort\")"
     if {"meta", "calendar", "days", "tasks"} <= set(parsed):
-        return "a Keep seed (meta, calendar, days and tasks together)"
+        return "a Focus Key seed (meta, calendar, days and tasks together)"
     return None
 
 

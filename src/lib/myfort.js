@@ -1,13 +1,13 @@
 // Is this a My Fort seed this page can render?
 //
-// The file is exported by the Keep app and picked by the person who owns it. It is the only document this
+// The file is exported by the Focus Key app and picked by the person who owns it. It is the only document this
 // site reads that carries somebody's real schedule, so the rules here are about being useful rather than
 // being strict: what a page can draw, it draws.
 //
 // TOLERANT WITHIN A MAJOR VERSION, on purpose. The two halves of this feature ship on different cadences —
-// Keep at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
+// Focus Key at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
 // the website. So an unknown field is ignored rather than refused, and `version` is refused only when it is
-// higher than this page understands. Keep's side of that bargain is in src/lib/myfort-seed.js: the version
+// higher than this page understands. Focus Key's side of that bargain is in src/lib/myfort-seed.js: the version
 // bumps only for a breaking change.
 //
 // Reasons are written for a person standing at a television, not for a log.
@@ -31,7 +31,7 @@ export function validateMyFortSeed(candidate) {
   if (!meta || typeof meta !== "object" || meta.format !== "myfort") {
     // The likeliest wrong file by far is a whole keep_seed.json, which is the app's own data and far bigger.
     const hint = candidate.calendar && candidate.tasks
-      ? " That looks like Keep's own seed — My Fort needs the smaller file the app exports for the web."
+      ? " That looks like Focus Key's own seed — My Fort needs the smaller file the app exports for the web."
       : "";
     return { ok: false, reason: `That file is not a My Fort seed.${hint}` };
   }

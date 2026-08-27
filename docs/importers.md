@@ -143,7 +143,7 @@ JavaScript normalizers on the same fixture and asserts identical output.
   weekdays; nothing imported → the blocks show `—`.
 - The generator (`docs/generator.md`) proposes a grid from weights on `/fortknight/` (adopting it writes the person's own `answers.blockFocusGrid`, the import stays as it was); later: proposed activities, `meals`, exporters that push plans back out.
 
-## The Import page (roadmap 4 — not built yet)
+## The Import page (not built yet; on the back burner — `insiculous/docs/roadmap-fortnight-apps.md`)
 Planned flow, all on-device:
 1. The person pastes text or drops a file (photo, `.xlsx`, `.ics`); Google Calendar read-only OAuth later.
 2. For free text and photos the person hands the material to the assistant in their workspace,

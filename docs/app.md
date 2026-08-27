@@ -14,6 +14,35 @@ as ordinary content merges — and only `/profile/` and the two face index pages
 below stays as-is: it is the contract those branches are being built against, and it becomes plain
 true as each face merges.
 
+## My Fort (`/fortknight/myfort/`) — live, and the exception to everything above
+
+The one face route that is neither a placeholder nor built from a profile. It renders a **My Fort
+seed**: a small file the private **Focus Key** phone app exports
+(`focuskey/src/lib/myfort-seed.js`), carrying fourteen day keys with their meals, appointments and
+block shapes, plus a season card and a year wheel.
+
+- **The visitor loads their own file.** It is kept in `localStorage` under
+  `beinsiculous.myfort-seed` (`src/lib/myfort-store.js`), deleted from `/profile/`, and **never
+  uploaded**. It is stored under its own key, separate from the profile, so neither document can
+  migrate into the other.
+- **The page resolves nothing.** The seed arrives pre-joined by day key. This is deliberate rather
+  than lazy: Focus Key anchors every season on `sun-a` and has transition weeks, while
+  `fk_core/dates.py` and `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b`
+  starts for Ostara and Fimbulsumar — so **running this repository's date evaluator over a My Fort
+  seed would be wrong for half the year.** `src/lib/myfort.js` validates and the page draws.
+- **Validation is tolerant within a major version.** Unknown fields are ignored and only a *higher*
+  `meta.version` is refused, because the two halves ship on different cadences and the person holding
+  the phone cannot redeploy the website. Focus Key's side of that bargain: the version bumps only for
+  a breaking change, so adding a field is not a bump.
+- **A My Fort seed is somebody's real schedule and must never be committed here.**
+  `scripts/fk_core/no_schedules.py` enforces it, `validate.py` runs it, and the single exact-path
+  exemption is `tests/fixtures/myfort.sample.json` — invented, and loaded by `a11y-check.mjs` so axe
+  audits a page with fourteen real panels instead of an empty file picker.
+
+Two known gaps, tracked in `insiculous/docs/roadmap-fortnight-apps.md`: the page is **not in the face
+nav** (`src/lib/faces.js`), and the face branches do not have it — `myfort.astro` and its modules
+exist only on `main`, so **absorb `main` before building anything seed-fed on a face branch.**
+
 ## The site
 beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries three surfaces
 that deliberately look like three different websites:

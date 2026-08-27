@@ -1,6 +1,6 @@
 // Where a My Fort seed lives in the browser, and the only place that name is written down.
 //
-// A My Fort seed is exported from the Keep app and loaded here by the person who owns it. It is a
+// A My Fort seed is exported from the Focus Key app and loaded here by the person who owns it. It is a
 // household's schedule, so it never leaves this device: no upload, no server, no copy in this repository.
 //
 // Its own key, deliberately separate from `fortknight.user-settings`. The two are different documents from

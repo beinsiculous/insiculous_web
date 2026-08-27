@@ -30,7 +30,7 @@ class DescribeScheduleDocumentTests(unittest.TestCase):
         self.assertIn("My Fort seed", describe_schedule_document(MYFORT_SEED))
 
     def test_it_names_a_keep_seed(self):
-        self.assertIn("Keep seed", describe_schedule_document(KEEP_SEED))
+        self.assertIn("Focus Key seed", describe_schedule_document(KEEP_SEED))
 
     def test_a_bare_tasks_or_days_key_is_not_a_schedule(self):
         """The subtlety the guard exists around: data/questionnaire.json carries `tasks`, days.json carries

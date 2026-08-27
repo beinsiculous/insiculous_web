@@ -37,7 +37,7 @@ import "../styles/app-widgets.css";
   <section class="panel">
     <h2>My Fort seed</h2>
     <p class="muted">
-      The fortnight exported from the Keep app and loaded into My&nbsp;Fort. It is kept on this device only —
+      The fortnight exported from the Focus Key app and loaded into My&nbsp;Fort. It is kept on this device only —
       it was never uploaded and this site holds no copy of it.
     </p>
     <p class="muted" id="seedStatus">Checking…</p>
@@ -171,7 +171,7 @@ import "../styles/app-widgets.css";
     elements.seedActions.hidden = !present;
     elements.seedStatus.textContent = present
       ? `A seed is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
-      : "No seed on this device yet. Export one from Keep and load it on My Fort.";
+      : "No seed on this device yet. Export one from Focus Key and load it on My Fort.";
   }
 
   elements.deleteSeedButton.addEventListener("click", () => {

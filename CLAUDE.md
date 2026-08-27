@@ -112,12 +112,12 @@ route; the component's header comment is the canonical statement. What is live o
 studio pages, the two face index pages (thesis front doors), and `/profile/`.
 
 **`/fortknight/myfort` is live, and is the exception to all of the above.** It renders a fortnight from a
-**My Fort seed** — a small file the private Keep app exports (`keep/src/lib/myfort-seed.js`): the fourteen
+**My Fort seed** — a small file the private Focus Key app exports (`focuskey/src/lib/myfort-seed.js`): the fourteen
 day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The
 visitor loads their own file; it is kept in `localStorage` under `beinsiculous.myfort-seed`
 (`src/lib/myfort-store.js`), deletable from `/profile/`, and never uploaded.
 
-The page **resolves nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Keep
+The page **resolves nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Focus Key
 anchors every season on `sun-a` and has transition weeks, while `fk_core/dates.py` and
 `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b` starts for Ostara and
 Fimbulsumar, so **running this repository's date evaluator over a My Fort seed would be wrong for half the
@@ -214,7 +214,8 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | the face registry (labels, skins, nav, favicons) | `src/lib/faces.js`, `src/layouts/FaceLayout.astro` |
 | how an assistant should propose changes | `docs/llm-guide.md` |
 | assistant workspace (file set, reply contract) | `docs/assistant-workspace.md` |
-| what comes next | `docs/roadmap.md` |
+| what comes next for Fortnight Apps (Focus Key, FortKnight, ForkKnife) | `insiculous/docs/roadmap-fortnight-apps.md` in the working set |
+| what comes next that is web-specific, and the studio | `docs/roadmap.md` |
 | ForkKnife's full chain: questions → the agent interviewing back → menu, recipes, prep, cooking, shopping (design, not built) | `docs/forkknife-chain.md` |
 | forts, the four roles, boards, a real login — the household/community direction (design, not built) | `docs/fortress.md` |
 | adversarial review workflow | `.claude/skills/adversarial-review/SKILL.md`, `.kimi-code/skills/adversarial-review/SKILL.md`, `scripts/request-review.sh`, `prompts/` |
