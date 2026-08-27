@@ -108,10 +108,17 @@ try {
   // on an otherwise empty page, and the one hard requirement it has — being readable across a room — is
   // checked by a gate that never sees it. The fixture is invented, not anybody's fortnight.
   const myFortSeed = readFileSync(new URL("../tests/fixtures/myfort.sample.json", import.meta.url), "utf8");
-  await page.addInitScript(([settings, seed]) => {
+  // The /profile/ achievements board renders its headings, lists and delete button only when a game
+  // has recorded unlocks — seed one invented save so axe audits the populated board, not just the
+  // empty state (the value is the engine's save-file shape, games-achievements.js).
+  const pongAchievements = JSON.stringify({
+    unlocks: { win_normal: { unlocked_at: 1756252800 }, beat_cpu_easy: { unlocked_at: 1756339200 } },
+  });
+  await page.addInitScript(([settings, seed, achievements]) => {
     localStorage.setItem("fortknight.user-settings", settings);
     localStorage.setItem("beinsiculous.myfort-seed", seed);
-  }, [JSON.stringify({ schemaVersion: 2 }), myFortSeed]);
+    localStorage.setItem("beinsiculous.games.pong.achievements", achievements);
+  }, [JSON.stringify({ schemaVersion: 2 }), myFortSeed, pongAchievements]);
   for (const route of chosen) {
     await page.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page })
