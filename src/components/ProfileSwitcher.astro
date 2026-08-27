@@ -35,7 +35,11 @@ const { questionnaireHref } = Astro.props;
     const activeId = settings.activeWeightsId;
     const options = savedIds.map((id) => ({ value: id, label: id }));
     if (activeId && !savedIds.includes(activeId)) options.push({ value: activeId, label: `${activeId} (not saved yet)` });
-    options.push({ value: NEW_PROFILE_VALUE, label: "New profile…" });
+    // "New profile…" is not offered while the faces are placeholders (src/components/FaceInDevelopment.astro).
+    // Creating one redirects to that face's questionnaire to be filled in and saved, and on this branch the
+    // questionnaire is a placeholder — so the profile would be created active-but-unsaved with nowhere to
+    // finish it. The option comes back when a face branch merges and brings its questionnaire with it.
+    // Duplicating an existing profile is untouched: it completes in place on /profile/ and reloads.
     for (const { value, label } of options) {
       const option = document.createElement("option");
       option.value = value;

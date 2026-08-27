@@ -90,13 +90,10 @@ const DIALOG_ROUTES = [
     button.click();
     return true;
   }],
-  ["/fortknight/questionnaire/", () => {
-    const select = document.getElementById("navProfileSelect");
-    if (!select || ![...select.options].some((option) => option.value === "__new__")) return false;
-    select.value = "__new__";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    return true;
-  }],
+  // The face-side entry lived here and opened the dialog through the nav's "New profile…" option. That
+  // option is not offered while the faces are placeholders, so the dialog cannot be reached on a face page
+  // on this branch and there is nothing here to audit. faces.css's copy of the dialog rules is still
+  // exercised on the face branches, where the questionnaire is real; this entry returns with them.
 ];
 
 const failures = [];

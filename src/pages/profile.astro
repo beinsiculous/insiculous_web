@@ -31,33 +31,42 @@ import "../styles/app-widgets.css";
       <button type="button" id="duplicateProfileButton">Duplicate as…</button>
       <button type="button" id="deleteProfileButton">Delete</button>
     </div>
-    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched, and new ones started, from the dropdown above. Both apps share this profile: FortKnight’s answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife’s <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
+    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown above. Both apps share this profile: FortKnight’s answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife’s <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
   </section>
 
   <section class="panel">
-    <h2>Assistant workspace</h2>
-    <p class="muted">Neither app has an AI of its own. Download these files and upload them into <em>your</em> AI workspace — a Claude Project, or a ChatGPT, Kimi or NotebookLM workspace. The assistant there gets everything it needs to help with your schedule and your menu. This app sends nothing anywhere; you choose what to upload. What the assistant hands back goes in on either Assistant page (<a href={facePath("fortknight", "assistant/")}>FortKnight</a>, <a href={facePath("forkknife", "assistant/")}>ForkKnife</a>).</p>
-    <p class="muted" id="workspaceStatus"></p>
-    <div class="button-row">
-      <button type="button" id="downloadAllButton" disabled>Download all</button>
+    <h2>My Fort seed</h2>
+    <p class="muted">
+      The fortnight exported from the Keep app and loaded into My&nbsp;Fort. It is kept on this device only —
+      it was never uploaded and this site holds no copy of it.
+    </p>
+    <p class="muted" id="seedStatus">Checking…</p>
+    <div class="button-row" id="seedActions" hidden>
+      <button type="button" id="deleteSeedButton">Delete the seed from this device</button>
     </div>
-    <div class="file-list" id="fileList"></div>
   </section>
+
+  <section class="panel">
+    <h2>Achievements</h2>
+    <p class="muted">
+      The games keep their scores on the machine you played them on. Collecting them onto a board here is
+      not built yet — this is where it will be.
+    </p>
+  </section>
+
 </BaseLayout>
 
 <script>
-  import { buildWorkspaceDocuments } from "../lib/shared/workspace-docs.js";
   import { deleteProfile, duplicateProfile, loadSettings, profileIds, renameProfile, saveSettings } from "../lib/shared/user-settings.js";
   import { unusedProfileName } from "../lib/shared/profile-names.js";
   import { askProfileName } from "../lib/profile-name-dialog.js";
   import { activeWeights } from "../lib/shared/weights-rules.js";
-  import { downloadAll, renderFileRow } from "../lib/shared/workspace-files.js";
-  import { localTodayIsoDate } from "../lib/shared/clock.js";
-  import { staticTexts } from "../lib/workspace-static-texts.js";
-  import { withBase } from "../lib/paths.js";
-  import { facePath } from "../lib/faces.js";
+  import { clearMyFortSeed, describeMyFortSeed } from "../lib/myfort-store.js";
 
   const elements = {
+    seedStatus: document.getElementById("seedStatus"),
+    seedActions: document.getElementById("seedActions"),
+    deleteSeedButton: document.getElementById("deleteSeedButton"),
     profileHeading: document.getElementById("profileHeading"),
     profileNameForm: document.getElementById("profileNameForm"),
     profileNameInput: document.getElementById("profileNameInput"),
@@ -67,12 +76,7 @@ import "../styles/app-widgets.css";
     regenerateNameButton: document.getElementById("regenerateNameButton"),
     duplicateProfileButton: document.getElementById("duplicateProfileButton"),
     deleteProfileButton: document.getElementById("deleteProfileButton"),
-    workspaceStatus: document.getElementById("workspaceStatus"),
-    downloadAllButton: document.getElementById("downloadAllButton"),
-    fileList: document.getElementById("fileList"),
   };
-  let bundle = null;
-  let documents = [];
 
   function renderProfile() {
     const settings = loadSettings();
@@ -90,15 +94,6 @@ import "../styles/app-widgets.css";
     } else {
       elements.profileStatus.textContent = "No profile saved yet — answer the Questionnaire and Save; the Overview shows default answers until then.";
     }
-  }
-
-  function renderFiles() {
-    const settings = loadSettings();
-    documents = buildWorkspaceDocuments({ bundle, settings, staticTexts, todayIsoDate: localTodayIsoDate() });
-    const active = activeWeights(settings);
-    elements.workspaceStatus.textContent = `${documents.length} files generated today${active ? ` for profile ${active.id}` : ""}.${active ? "" : ` Profile ${settings.activeWeightsId} is not saved yet, so there is no weights file.`}`;
-    elements.fileList.replaceChildren(...documents.map(renderFileRow));
-    elements.downloadAllButton.disabled = false;
   }
 
   /** Re-read the device's settings (another tab may have saved), run the operation, save; errors go to the status line. */
@@ -154,22 +149,26 @@ import "../styles/app-widgets.css";
     if (!confirm(`Delete profile ${current.activeWeightsId} from this device? Its saved answers are removed.`)) return;
     if (withProfiles((settings) => deleteProfile(settings, settings.activeWeightsId))) {
       const remaining = loadSettings();
-      if (activeWeights(remaining)) location.reload(); else location.href = facePath("fortknight", "questionnaire/");
+      // Reload either way while the faces are placeholders: with no profile left there is nowhere to send
+      // someone to make one, and this page's own empty state is the honest answer.
+      location.reload();
     }
   });
-  elements.downloadAllButton.addEventListener("click", () => {
-    downloadAll(documents);
-    elements.workspaceStatus.textContent = `Downloading ${documents.length} files. Your browser may ask once to allow multiple downloads. Safari may take only the first — use the per-file buttons or Copy.`;
+  /** What is on this device, never what is in it: whether a seed is here and when it was exported. */
+  function renderSeed() {
+    const { present, exportedAt } = describeMyFortSeed();
+    elements.seedActions.hidden = !present;
+    elements.seedStatus.textContent = present
+      ? `A seed is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
+      : "No seed on this device yet. Export one from Keep and load it on My Fort.";
+  }
+
+  elements.deleteSeedButton.addEventListener("click", () => {
+    if (!confirm("Delete the My Fort seed from this device? Load it again to bring it back.")) return;
+    clearMyFortSeed();
+    renderSeed();
   });
 
   renderProfile();
-  try {
-    const response = await fetch(withBase("bundle.json"));
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    bundle = await response.json();
-    renderFiles();
-  } catch (error) {
-    elements.workspaceStatus.textContent = "Could not load the app’s data — run python3 scripts/build.py, then restart the app (npm run dev).";
-    console.error(error);
-  }
+  renderSeed();
 </script>
