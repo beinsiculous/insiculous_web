@@ -11,10 +11,12 @@ Done (this pass): workbook → canonical JSON, schemas, validator, builder, allo
 weights, date resolver, the web app, questionnaire-as-settings, assistant workspace (files for the
 person's own AI workspace + apply-back), docs, tests.
 
-**Shipping status.** The face apps are built on the `fortknightdev` and `forknifedev` branches and
-ship when each merges into `main`; until then the face routes on the live site are
-`FaceInDevelopment` placeholders (see `docs/app.md`, "Deployment status"). "The web app" above is
-done as code on those branches, not yet on production.
+**Shipping status.** `main` is production. The face pages built on `fortknightdev` and
+`forknifedev` belong to the back-burnered creation chain, and those branches are its playgrounds —
+they no longer ship by merging (re-ruled 2026-08-28; the folded roadmap in the working set carries
+the ruling). The face routes on the live site are `FaceInDevelopment` placeholders, except
+`/fortknight/myfort` (see `docs/app.md`, "Deployment status"); seed-fed replacements are built
+fresh in the `main` lineage.
 
 **Fortnight Apps is planned in the working set, not here.** The two faces, the phone app **Focus
 Key** (formerly Keep), and the seed that joins all three are one part with one plan:
@@ -46,9 +48,11 @@ What that means for the items this file used to number 1–9:
   a My Fort seed the visitor loads from their own device, resolving nothing, and never uploading it.
   It is **not in the face nav** (`src/lib/faces.js`), which is the remaining gap and is named as a
   next step in the folded roadmap. It is documented in `docs/app.md`.
-- **The face branches must absorb `main` before any seed-fed work.** `myfort.astro`, `src/lib/myfort.js`,
-  `src/lib/myfort-store.js` and `tests/fixtures/myfort.sample.json` exist only on `main`;
-  `fortknightdev` and `forknifedev` forked before them, so a naïve merge deletes the live page.
+- **The face branches are playgrounds (re-ruled 2026-08-28).** They belong to the back-burnered
+  creation chain and are not absorbed or merged; seed-fed pages are built fresh in the `main`
+  lineage. The earlier rule here — absorb `main` before seed-fed work — guarded a merge that no
+  longer happens. `myfort.astro`, `src/lib/myfort.js`, `src/lib/myfort-store.js` and
+  `tests/fixtures/myfort.sample.json` exist only on `main` and stay the live copies.
 - **The `sun-b` starts for `ostara` and `fimbulsumar`** in `data/seasons.json` disagree with Focus
   Key's `sun-a` ruling. Porting it touches `seasons.json`, `docs/domain.md` and the test
   expectations here — which is why it is deferred and why every seed-fed page looks up rather than

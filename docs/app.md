@@ -39,9 +39,11 @@ block shapes, plus a season card and a year wheel.
   exemption is `tests/fixtures/myfort.sample.json` — invented, and loaded by `a11y-check.mjs` so axe
   audits a page with fourteen real panels instead of an empty file picker.
 
-Two known gaps, tracked in `insiculous/docs/roadmap-fortnight-apps.md`: the page is **not in the face
-nav** (`src/lib/faces.js`), and the face branches do not have it — `myfort.astro` and its modules
-exist only on `main`, so **absorb `main` before building anything seed-fed on a face branch.**
+One known gap, tracked in `insiculous/docs/roadmap-fortnight-apps.md`: the page is **not in the face
+nav** (`src/lib/faces.js`). The face branches do not have it — `myfort.astro` and its modules exist
+only on `main` — and that no longer matters: `fortknightdev` and `forknifedev` were re-ruled the
+creation chain's playgrounds on 2026-08-28, never absorbed or merged, and **seed-fed pages are built
+fresh in the `main` lineage** (see `docs/roadmap.md`).
 
 ## The site
 beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries three surfaces
