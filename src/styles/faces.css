@@ -312,10 +312,29 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 /* ---------- theme layout (Astro app only) ---------- */
 /* themes.css owns the skin (palette/fonts/textures); geometry lives here. This file loads after themes.css. */
 
-/* ==== fort knight: content centered between the treehouse and the campfire ==== */
-[data-theme="fort-knight"] main { max-width: 60rem; }
+/* ==== both faces: one content column, centered ====
+   ForkKnife's column used to sit right of centre, on the blank kraft paper between the garlic bulb and
+   the cleaver in its photograph (themes.css body::before). That placement was deliberate and was
+   deliberately dropped: the faces share one column now, and its fortnight grid keeps seven day-columns
+   on a wide screen like FortKnight's rather than collapsing to four.
+   62rem, not a rounder 60, is load-bearing: .fortnight-grid asks for 7 × 120px + 6 × 8px = 888px, and a
+   60rem column leaves only 876-878px inside the panel's padding and border, so the grid overflowed it by
+   12px on BOTH faces — FortKnight included, which had been doing it unnoticed. 62rem leaves 908-910px. */
+[data-theme="fort-knight"] main,
+[data-theme="fork-knife"] main { max-width: 62rem; }
 
-/* ==== fork knife: a wider column, and the browser's own cursors ====
+/* Centred, the column lands squarely on the cleaver and the carving fork — they sit 58-80% across the
+   frame, which is exactly where the centred column falls on a desktop, and the phone crop (themes.css
+   shifts to 68% 40% there) is almost nothing but those two objects. The photo used to be kept clear by
+   moving the column sideways; it is kept clear by starting it lower instead, at every width rather than
+   on phones alone. 30vh so a short phone does not push the heading off the fold, capped at 16rem so a
+   tall portrait tablet does not open on a screenful of chopping board.
+   Not in high contrast: that mode drops the photograph entirely (the [data-contrast="high"] body::before
+   rule below), so the gap would be holding space for nothing and pushing the heading down for a reader
+   who is likeliest to be magnifying the page as well. */
+:root[data-theme="fork-knife"]:not([data-contrast="high"]) main { padding-top: min(30vh, 16rem); }
+
+/* ==== fork knife: the browser's own cursors ====
    ForkKnife opts out of the custom mouse — a serious, near-monochrome page wants the native arrow,
    hand and not-allowed. Only the three variables change; everything below that reads them
    (html/body, the clickable list, :disabled) follows. FortKnight keeps its set above. */
@@ -324,67 +343,13 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
   --cursor-pointer: pointer;
   --cursor-forbidden: not-allowed;
 }
-[data-theme="fork-knife"] main { max-width: 62rem; }
-/* Wide screens: the column sits on the kraft paper in the photograph (themes.css body::before,
-   covering the viewport) — between the whole garlic bulb on the left (~18% across the frame) and the
-   cleaver on the right (~58%) — so the content is where the photographer left the blank space.
-   Those are frame percentages, so the column is placed by viewport width, capped so it never
-   grows past the paper. */
-@media (min-width: 75rem) {
-  [data-theme="fork-knife"] main {
-    max-width: min(62rem, 41vw);
-    margin-left: 19vw;
-    margin-right: auto;
-  }
-  /* The paper is too narrow for seven day-columns (7 × 120px minimum would burst the panel and run
-     over the cleaver), so the fortnight reads four days to a row here — the same collapse the grid
-     already makes on small screens, one step earlier. */
-  [data-theme="fork-knife"] .fortnight-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-/* ForkKnife's menu bar lives at the BOTTOM of the screen at every width — thumb-reach on a phone, and
-   on a desktop it keeps the top of the page for the photograph. It is the same header markup as
-   FortKnight's, reordered by CSS order: the ForkKnife brand leftmost, the four pages, then the two
-   buttons out to the other sites (💧 the studio, 🏰🛡️ FortKnight) in the far-right corner. */
-[data-theme="fork-knife"] .site-nav {
-  position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-  border-bottom: 0;
-  border-top: 1px solid var(--line);
-  flex-wrap: nowrap;
-  padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
-}
-[data-theme="fork-knife"] .site-nav .brand { order: 1; margin-right: 0.5rem; white-space: nowrap; }
-[data-theme="fork-knife"] .site-nav .nav-links { order: 2; flex: 1; justify-content: center; flex-wrap: nowrap; min-width: 0; }
-[data-theme="fork-knife"] .site-nav .nav-link { white-space: nowrap; }
-[data-theme="fork-knife"] .site-nav .face-switch { order: 4; margin-left: 0.5rem; }
-[data-theme="fork-knife"] .site-nav .nav-profile { order: 3; margin-left: auto; width: auto; }
-/* Room at the bottom so the last panel clears the fixed bar. */
-[data-theme="fork-knife"] main { padding-bottom: 5.5rem; }
-/* Phones: six items and a wordmark do not fit 390px, so the brand shows only its 🍴 (the name stays
-   for screen readers), the four pills tighten and wear their short labels (Menu · Spoon · Quiz · AI —
-   each link keeps its full aria-label), and the profile dropdown hides — it stays reachable on the
-   Profile page. The first panel drops down so the cleaver and fork stand clear at the top. */
-@media (max-width: 900px) {
-  [data-theme="fork-knife"] .site-nav .brand { margin-right: 0; font-size: 0; }
-  [data-theme="fork-knife"] .site-nav .brand .logo { font-size: 1.25rem; }
-  [data-theme="fork-knife"] .site-nav .nav-links { gap: 0.1rem; }
-  [data-theme="fork-knife"] .site-nav .nav-link { font-size: 0.78rem; padding: 0.3rem 0.5rem; }
-  [data-theme="fork-knife"] .site-nav .nav-full { display: none; }   /* ForkKnife squeezes one step early, at 900px */
-  [data-theme="fork-knife"] .site-nav .nav-short { display: inline; }
-  [data-theme="fork-knife"] .site-nav .face-switch { margin-left: auto; gap: 0; }
-  [data-theme="fork-knife"] .site-nav .face-link { padding: 0.15rem 0.25rem; }
-  [data-theme="fork-knife"] .site-nav .nav-profile { display: none; }
-  /* Enough of the photograph to clear the cleaver and the fork, but 38vh keeps growing with the viewport: a
-     portrait tablet at 1180px tall would open on 448px of blank paper. Cap it. */
-  [data-theme="fork-knife"] main { padding-top: min(38vh, 20rem); }
-}
-/* The footer sits after <main>, so main's padding-bottom does not clear the fixed bar for it — with the safe-area
-   inset that bar is ~70px tall, and "Times shown in …" was landing behind it at the end of the scroll. */
-[data-theme="fork-knife"] .site-footer {
-  /* The same clearance main takes above, so the gap does not depend on the bar's exact height: at 4rem the footer
-     text cleared the bar by 1px on a phone, which is not a margin. The bar is fixed at every width, so this is
-     deliberately not inside a media query. */
-  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
-}
+
+/* ForkKnife's menu bar IS FortKnight's: the same markup in the same source order, sticky at the top,
+   taking the base .site-nav rules above unchanged. It used to be pinned to the bottom of the viewport
+   and reordered by CSS `order` — thumb-reach on a phone, and the top of the page left for the
+   photograph. That is gone, and with it every rule that existed only to clear a fixed bottom bar: the
+   content and footer bottom padding, the two-row wrap at 24rem, the phone breakpoint at 900px, and the
+   Aa panel opening upward. What tells the two faces apart now is the skin (themes.css), not geometry. */
 
 /* `main` is a grid, so every panel is a grid item and its default `min-width: auto` resolves to
    min-content — the column, and with it the page, can then be wider than the viewport. These two
@@ -648,8 +613,6 @@ main > * { min-width: 0; }
     display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
   }
   .face-link { min-width: 44px; }
-  /* ForkKnife's phone bar sets gap: 0 on the switcher, which leaves 💧 and 🏰🛡️ flush against each other. */
-  [data-theme="fork-knife"] .site-nav .face-switch { gap: 0.25rem; }
   /* The small in-row controls: row reordering, and the various remove buttons — all around 22px, some of them
      barely 2px apart. */
   .sections-table .row-actions button,
@@ -684,18 +647,3 @@ main > * { min-width: 0; }
 [data-contrast="high"] body::before { background-image: none !important; filter: none !important; }
 [data-contrast="high"] .panel,
 [data-contrast="high"] .day-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
-
-/* ForkKnife's bar is one nowrap row tuned at the default font size; past ~110% root font it no
-   longer fits a phone. Wrap to two rows instead of scrolling sideways, and grow the content's
-   bottom clearance to match. The 24rem breakpoint tracks the reader's font size like the 40rem
-   block above: ≈390px at 125% root, where the tuned row gives out. */
-@media (max-width: 24rem) {
-  [data-theme="fork-knife"] .site-nav { flex-wrap: wrap; row-gap: 0.1rem; }
-  [data-theme="fork-knife"] main { padding-bottom: 8rem; }
-  [data-theme="fork-knife"] .site-footer { padding-bottom: calc(8rem + env(safe-area-inset-bottom)); }
-}
-
-/* The Aa panel drops DOWN from the trigger by default; ForkKnife's bar is pinned to the bottom of
-   the screen, so its panel opens upward instead of falling off the viewport. The extra class
-   out-specifies the component's scoped .a11y-panel rule, which bundles after this file. */
-[data-theme="fork-knife"] .a11y-controls .a11y-panel { top: auto; bottom: calc(100% + 0.5rem); }
