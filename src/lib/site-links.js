@@ -1,7 +1,8 @@
-// Where the site's "buy me a coffee" links point. One constant, three consumers across the two
+// Where the site's "buy me a coffee" links point. One constant, four consumers across the two
 // layouts: src/components/SupportLink.astro (the devlog's end-of-post block),
-// src/pages/devlog/index.astro (the ☕ beside the listing's h1) and src/layouts/FaceLayout.astro
-// (the ☕ in the face switcher). Change the handle here and every entry point follows.
+// src/pages/devlog/index.astro (the ☕ beside the listing's h1), src/layouts/FaceLayout.astro
+// (the ☕ in the face switcher) and src/layouts/BaseLayout.astro (the ☕ at the end of the studio
+// menu). Change the handle here and every entry point follows.
 //
 // Ko-fi rather than Buy Me a Coffee: the same one-off "coffee" gesture, givers need no account,
 // and it takes 0% of a donation against BMC's 5%. A plain link, never their <script> widget —

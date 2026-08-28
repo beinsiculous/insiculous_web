@@ -4,6 +4,7 @@ import '@fontsource-variable/space-grotesk';
 import '../styles/global.css';
 import AccessibilityBootScript from '../components/AccessibilityBootScript.astro';
 import AccessibilityControls from '../components/AccessibilityControls.astro';
+import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../lib/site-links.js';
 
 interface Props {
   title: string;
@@ -71,6 +72,18 @@ const isActive = (href: string) =>
                 </li>
               ))
             }
+            {/* The tip jar rides in the menu list so it folds into the ☰ panel with everything else,
+                the way the ☕ does in the faces' switcher. It is not in the `nav` array above: that
+                array is internal hrefs the aria-current test runs over, and this one leaves the site. */}
+            <li>
+              <a
+                class="coffee-link"
+                href={KOFI_URL}
+                title={KOFI_TITLE}
+                aria-label={KOFI_LABEL}
+                target="_blank"
+                rel="noopener noreferrer">☕</a>
+            </li>
           </ul>
           </details>
         </div>
@@ -183,6 +196,25 @@ const isActive = (href: string) =>
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  /* global.css sets no emoji stack the way faces.css does for .face-link, so the cup needs its own
+     or it renders in the mono face. src/pages/devlog/index.astro styles a .coffee-link beside the
+     listing's h1 the same way; both are Astro-scoped, so they cannot reach each other — if this
+     one changes, look at that one.
+     `ul a.coffee-link` and not a bare `.coffee-link`, which lost to `ul a` above: Astro scopes every
+     compound in a selector, so that rule ships as `ul[data-astro-cid-…] a[data-astro-cid-…]` and
+     carries two attributes plus two elements, out-specifying one class plus one attribute. Scoped
+     selectors are not as weak as they read in this file. */
+  ul a.coffee-link {
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+    font-size: 1.2rem;
+    line-height: 1;
+    opacity: 0.8;
+  }
+
+  ul a.coffee-link:hover {
+    opacity: 1;
   }
 
   /* A closed <details> hides its content, and browsers do it in two different ways: an older UA rule on the
