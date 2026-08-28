@@ -147,9 +147,12 @@ const isActive = (href: string) =>
     }
   }
 
-  /* The menu is a native disclosure, so it needs no JavaScript: the ☰ opens it, Escape closes it, the keyboard
-     reaches it, and every navigation resets it because each page is a fresh document. The button only exists on a
-     phone; above that breakpoint the list is the plain row it has always been. */
+  /* The menu is a native disclosure, so it needs no JavaScript: the ☰ toggles it, Enter and Space toggle it from
+     the keyboard, and every navigation resets it because each page is a fresh document. It does NOT close on
+     Escape — this comment used to claim it did, and a test in Chrome says otherwise with focus on the summary, on
+     a panel link and on the body. A disclosure is not a modal and does not owe you one; closing it needs the ☰
+     again. The button only exists on a phone; above that breakpoint the list is the plain row it has always been.
+     FaceLayout.astro carries the twin of this menu, with its rules in src/styles/faces.css. */
   .menu {
     /* min-width: 0 lets the row shrink; without it the six links set an unshrinkable min-content floor and the
        whole page scrolls sideways. */
@@ -185,7 +188,7 @@ const isActive = (href: string) =>
   /* A closed <details> hides its content, and browsers do it in two different ways: an older UA rule on the
      children, and newer Chrome’s content-visibility on the generated ::details-content box. Override both, so the
      bar reads as an ordinary row here whether the element happens to be open or not. */
-  @media (min-width: 40.0625rem) {
+  @media (min-width: 40rem) {
     /* Wrap: six links do not fit the moment the phone panel stops, only once the viewport is wide
        enough for all of them in a row. Without this the header overflowed from 641px upwards. */
     .menu > ul {

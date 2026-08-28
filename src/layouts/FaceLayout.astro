@@ -49,30 +49,51 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
-    {/* "Site links" rather than "Switch app": the row carries the tip jar as well as the two faces
-        now. The ☕ sits inside this nav rather than beside it because ForkKnife’s theme moves the
-        whole switcher (order/gap, faces.css) — a sibling would detach from the row on that face. */}
-    <nav class="face-switch" aria-label="Site links">
-      <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
-      {otherFaces.map((other) => (
-        <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
-      ))}
-      <a class="face-link" href={KOFI_URL} title={KOFI_TITLE} aria-label={KOFI_LABEL} target="_blank" rel="noopener noreferrer">☕</a>
-    </nav>
+    {/* Below 40rem the bar does not fit: four pills, a profile dropdown and three site links push it
+        to three rows and about a sixth of a phone screen. They fold behind a ☰ instead, leaving the
+        brand and the Aa control as a single row. The disclosure is native, like the studio's in
+        BaseLayout.astro — no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard,
+        and every navigation resets it because each page is a fresh document. Escape does NOT close a
+        plain <details>, measured in Chrome with focus on the summary, on a panel link and on the body
+        — that would need script, and a disclosure is not a modal, so it does not owe you one.
+        Above 40rem the wrapper is display: contents and the bar is one flat row again. The source
+        order below IS the painted order at both widths, and no CSS `order` reorders any of it. A
+        folded set has to be contiguous in the markup, and the first version of this kept the old bar
+        with `order` instead — which left the tab sequence running switch, nav, profile, brand, Aa
+        while the eye read switch, brand, nav, Aa, profile. axe cannot see that, because it checks no
+        order at all; it is WCAG 2.4.3, and it is why the bar reads brand-first now. Aa sits before the
+        disclosure for the same reason, and the same way BaseLayout does it: the panel drops BELOW the
+        bar, so a button after the <details> in the markup would be painted in the bar but tabbed after
+        everything in the panel.
+        "Site links" rather than "Switch app": the row carries the tip jar as well as the two faces. */}
     <a class="brand" href={facePath(face)}>
       <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
     </a>
-    <nav class="nav-links">
-      {navItems.map((item) => (
-        <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
-          <span class="nav-full">{item.label}</span>{item.shortLabel && <span class="nav-short">{item.shortLabel}</span>}
-        </a>
-      ))}
-    </nav>
     <AccessibilityControls />
-    <ProfileSwitcher questionnaireHref={facePath(face, "questionnaire/")}>
-      <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
-    </ProfileSwitcher>
+    <details class="menu">
+      <summary>
+        <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
+      </summary>
+      <div class="menu-panel">
+        <nav class="nav-links">
+          {navItems.map((item) => (
+            <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
+              <span class="nav-full">{item.label}</span>{item.shortLabel && <span class="nav-short">{item.shortLabel}</span>}
+            </a>
+          ))}
+        </nav>
+        <ProfileSwitcher questionnaireHref={facePath(face, "questionnaire/")}>
+          <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
+        </ProfileSwitcher>
+        <nav class="face-switch" aria-label="Site links">
+          <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
+          {otherFaces.map((other) => (
+            <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
+          ))}
+          <a class="face-link" href={KOFI_URL} title={KOFI_TITLE} aria-label={KOFI_LABEL} target="_blank" rel="noopener noreferrer">☕</a>
+        </nav>
+      </div>
+    </details>
   </header>
   <main id="main" tabindex="-1">
     <slot />
