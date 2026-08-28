@@ -55,7 +55,7 @@ export function defaultAnswers(questionnaire, categories) {
     restDays: [...(preset.restDays || [])],
     energyPeak: preset.energyPeak || DEFAULT_ENERGY_PEAK,
     context: preset.context ?? "",
-    // ForkKnife's questionnaire (docs/meal-plan.md): the assistant prompt embeds these; nothing here moves shares.
+    // The meal answers (docs/meal-plan.md): the assistant prompt embeds these; nothing here moves shares.
     eaters: preset.eaters ?? 1,
     dietaryRules: [...(preset.dietaryRules || [])],
     allergiesAndDislikes: preset.allergiesAndDislikes ?? "",
@@ -68,8 +68,8 @@ export function defaultAnswers(questionnaire, categories) {
   };
 }
 
-/** The ForkKnife questionnaire's answer keys: which option list each select answer must come from (null = free text /
- *  number). A missing key means the default (profiles saved before ForkKnife had a questionnaire). */
+/** The meal preference answer keys: which option list each select answer must come from (null = free text /
+ *  number). A missing key means the default (profiles saved before the questionnaire asked about meals). */
 export const MEAL_PREFERENCE_ANSWERS = {
   eaters: null,
   dietaryRules: "dietaryRules",
@@ -82,10 +82,9 @@ export const MEAL_PREFERENCE_ANSWERS = {
   shoppingCadence: "shoppingCadences",
 };
 
-/** The answer keys ForkKnife's questionnaire owns (its meals question, the menu, the preferences above). The two
- *  questionnaire pages write the same profile: each saves its own keys over the answers *stored at save time* and
- *  carries the other face's keys through untouched (docs/app.md). */
-export const FORKKNIFE_ANSWER_KEYS = ["meals", "mealPlan", ...Object.keys(MEAL_PREFERENCE_ANSWERS)];
+/** The meal answer keys (the meals question, the menu, the preferences above). Pages that write the same profile
+ *  each save their own keys over the answers *stored at save time* and carry the rest through untouched (docs/app.md). */
+export const MEAL_ANSWER_KEYS = ["meals", "mealPlan", ...Object.keys(MEAL_PREFERENCE_ANSWERS)];
 
 /** The subset of `answers` under `keys` (keys absent from answers stay absent). */
 export function pickAnswers(answers, keys) {
@@ -728,7 +727,7 @@ export function applyImportDocument(answers, importDocument, categoryKeys, weekd
   const merged = mergeImportedAppointments(answers.standingAppointments || [], importDocument, categoryKeys, weekdayIds, categories, answers.tasks || []);
   answers.standingAppointments = merged.appointments;
   answers.tasks = merged.tasks;
-  // The ForkKnife tasks document carries the menu too: merged into the profile's meal plan (docs/meal-plan.md).
+  // The meal-plan import document carries the menu too: merged into the profile's meal plan (docs/meal-plan.md).
   merged.mealPlanApplied = 0;
   merged.mealPlanProblems = [];
   if (importDocument.mealPlan && questionnaire) {
@@ -865,7 +864,7 @@ export function answersProblem(answers, questionnaire, categories) {
   const mealsProblem = mealNamesProblem(filledMeals);
   if (mealsProblem) return mealsProblem;
   const planProblem = mealPlanProblem(answers.mealPlan, filledMeals);
-  if (planProblem) return `Meal plan: ${planProblem} — fix it on ForkKnife’s Spoon Feed page.`;
+  if (planProblem) return `Meal plan: ${planProblem} — fix it on the Build page.`;
   return null;
 }
 

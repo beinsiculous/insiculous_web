@@ -7,49 +7,69 @@ the canonical JS modules are all in **this** repository (`insiculous_web` — be
 on 2026-08-17, and the FortKnight repository that had stayed canonical for the data was folded in
 here on 2026-08-18 — one project, one repo, no sync step.)
 
-**Deployment status.** This document describes the app as it is being built on the face branches
-`fortknightdev` and `forknifedev`. On production (`main`) the face pages it describes are
-`src/components/FaceInDevelopment.astro` placeholders — kept as files so the face branches merge
-as ordinary content merges — and only `/profile/` and the two face index pages are live. The body
-below stays as-is: it is the contract those branches are being built against, and it becomes plain
-true as each face merges.
+**Deployment status.** On production (`main`), FortKnight's seed-fed pages are live: the Overview
+(`/fortknight/`), **My Fort** (`/fortknight/myfort/`) and the fourteen day pages
+(`/fortknight/days/<dayKey>/`), all reading a My Fort seed the visitor loads from their own device
+(next section), plus **Achievements** (`/fortknight/achievements/`), which reads the site's
+achievement store instead of the seed and shows the active profile's unlocked fortnight
+achievements. The studio side gains `/achievements/`, the every-achievement board (below).
+`/fortknight/build/`, `/fortknight/questionnaire/` and `/fortknight/assistant/`
+remain `src/components/FaceInDevelopment.astro` placeholders, and ForkKnife's routes
+(`/forkknife/*`) were removed from the site on 2026-08-28 — its menu rendering will land under
+`/fortknight/` when the seed carries menu rows. The face branches `fortknightdev` and
+`forknifedev` were re-ruled the back-burnered creation chain's playgrounds on 2026-08-28 — never
+absorbed, never merged; seed-fed pages are built fresh in the `main` lineage (`docs/roadmap.md`).
+The profile-driven body below stays as-is: it is the contract that chain was built against, and it
+applies again if the chain returns from the back burner.
 
-## My Fort (`/fortknight/myfort/`) — live, and the exception to everything above
+## The seed-fed pages: Overview, My Fort and the day pages
 
-The one face route that is neither a placeholder nor built from a profile. It renders a **My Fort
+The live face routes are neither placeholders nor built from a profile. They render a **My Fort
 seed**: a small file the private **Focus Key** phone app exports
 (`focuskey/src/lib/myfort-seed.js`), carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
+
+- **Three pages, one seed.** `/fortknight/myfort/` draws the whole fortnight — fourteen day panels,
+  the season card and the year wheel — and sits in the face nav (`src/lib/faces.js`). With no seed
+  stored, `/fortknight/` keeps its thesis front-door content and its primary action is **Load your
+  seed** (to `/fortknight/myfort/`); with a seed stored it renders a compact fortnight grid linking
+  to the day pages. Each `/fortknight/days/<dayKey>/` page renders that day key's blocks, meals and
+  appointments, falling back to the load-your-seed message. The rendering is factored into
+  `src/lib/myfort-view.js` — season colours come from a **positional palette** (position pinned to
+  first appearance in `year.slices`), never keyed to a household's season ids — and the stored-seed
+  boot logic is shared by all three pages.
 
 - **The visitor loads their own file.** It is kept in `localStorage` under
   `beinsiculous.myfort-seed` (`src/lib/myfort-store.js`), deleted from `/profile/`, and **never
   uploaded**. It is stored under its own key, separate from the profile, so neither document can
   migrate into the other.
-- **The page resolves nothing.** The seed arrives pre-joined by day key. This is deliberate rather
+- **The pages resolve nothing.** The seed arrives pre-joined by day key. This is deliberate rather
   than lazy: Focus Key anchors every season on `sun-a` and has transition weeks, while
   `fk_core/dates.py` and `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b`
   starts for Ostara and Fimbulsumar — so **running this repository's date evaluator over a My Fort
-  seed would be wrong for half the year.** `src/lib/myfort.js` validates and the page draws.
+  seed would be wrong for half the year.** `src/lib/myfort.js` validates and the pages draw.
 - **Validation is tolerant within a major version.** Unknown fields are ignored and only a *higher*
   `meta.version` is refused, because the two halves ship on different cadences and the person holding
   the phone cannot redeploy the website. Focus Key's side of that bargain: the version bumps only for
   a breaking change, so adding a field is not a bump.
 - **A My Fort seed is somebody's real schedule and must never be committed here.**
-  `scripts/fk_core/no_schedules.py` enforces it, `validate.py` runs it, and the single exact-path
-  exemption is `tests/fixtures/myfort.sample.json` — invented, and loaded by `a11y-check.mjs` so axe
-  audits a page with fourteen real panels instead of an empty file picker.
+  `scripts/fk_core/no_schedules.py` enforces it, `validate.py` runs it, and the exact-path
+  exemptions are `tests/fixtures/myfort.sample.json` — invented, and loaded by `a11y-check.mjs` so axe
+  audits a page with fourteen real panels instead of an empty file picker — and
+  `tests/fixtures/myfort.other-household.json`, a second invented household the rendering tests use for
+  the year wheel's positional colours.
 
-One known gap, tracked in `insiculous/docs/roadmap-fortnight-apps.md`: the page is **not in the face
-nav** (`src/lib/faces.js`). The face branches do not have it — `myfort.astro` and its modules exist
-only on `main` — and that no longer matters: `fortknightdev` and `forknifedev` were re-ruled the
-creation chain's playgrounds on 2026-08-28, never absorbed or merged, and **seed-fed pages are built
-fresh in the `main` lineage** (see `docs/roadmap.md`).
+The earlier gaps are closed: My Fort is in the face nav, the season colours are positional rather
+than keyed to Jesse's season ids, and the face branches no longer matter to these pages —
+`fortknightdev` and `forknifedev` were re-ruled the creation chain's playgrounds on 2026-08-28,
+never absorbed or merged, and **seed-fed pages are built fresh in the `main` lineage** (see
+`docs/roadmap.md`).
 
 ## The site
-beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries three surfaces
-that deliberately look like three different websites:
-the **Be Insiculous studio** (`/`, `/games/`, `/devlog/`, `/engine/` — its own `BaseLayout.astro`),
-and the two planner faces under `FaceLayout.astro`, each with its own skin.
+beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries two surfaces
+that deliberately look like two different websites:
+the **Be Insiculous studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/engine/` — its own `BaseLayout.astro`),
+and the FortKnight planner face under `FaceLayout.astro`, with its own skin.
 
 Multi-page, no UI framework. `npm install` once, then:
 - `npm run dev` / `npm run build` / `npm run preview`; `npm run data` (= `validate.py` then `build.py`)
@@ -61,20 +81,25 @@ Multi-page, no UI framework. `npm install` once, then:
   `src/lib/shared/workspace-docs.js`) are imported straight from `docs/` and `data/schema/` by
   `src/lib/workspace-static-texts.js`. The canonical JS modules live in `src/lib/shared/` — the same
   files `tests/helpers.py` drives through node to check them against their Python twins.
-- **Two faces, one profile** (`src/lib/faces.js`, `FaceLayout.astro`): **FortKnight** under `/fortknight/`
-  (🏰🛡️: the fortnight schedule) and **ForkKnife** under `/forkknife/` (🍴: the fortnight menu), each with the same
+- **One face live, one profile** (`src/lib/faces.js`, `FaceLayout.astro`): **FortKnight** under `/fortknight/`
+  (🏰🛡️: the fortnight schedule) is the live face, with the six-page menu **Overview · My Fort ·
+  Achievements · Build · Questionnaire · Assistant** — Achievements boarding the active profile's
+  unlocked fortnight achievements. **ForkKnife** under `/forkknife/` (🍴: the fortnight menu) had its routes removed on
+  2026-08-28, and everything about it in this bullet — and the profile-driven FortKnight pages in the next two —
+  is the parked creation chain's design, kept here as its contract. That design gave each face the same
   four-page menu **Overview · <its building page> · Questionnaire · Assistant**, where the building page is the one
   that adds things by hand and is named for its face — ForkKnife's **Spoon Feed** (`/forkknife/spoon-feed/`) and
   FortKnight's **Build** (`/fortknight/build/`), both declared as `FACES[face].build` in `src/lib/faces.js` and
   assembled by `faceNav()`; the shared **Profile** page at `/profile/`. `/` is the
   Be Insiculous studio home, not a face. The header's switcher sits left of the brand: the **studio button** (💧,
-  `STUDIO.logo` in `src/lib/faces.js`) back out to the studio site first, then the *other* face's logo. Every page takes a
+  `STUDIO.logo` in `src/lib/faces.js`) back out to the studio site. Every page takes a
   `face` prop (`fortknight` | `forkknife` | null on Profile), and the face decides the page's skin and tab icon
-  (`FACES[face].theme` / `.favicon`) — so the two faces and the studio read as three different websites. Profile
-  belongs to none of them, so it takes the studio's: `DEFAULT_THEME` is a third theme id, `studio`, whose skin lives
-  in the site's own `src/styles/studio-skin.css` (`themes.css` is mirrored from this repo and knows only the two
-  faces), and its chrome is the studio's too — the `be_insiculous` wordmark, a `STUDIO_NAV` of Games · FortKnight ·
-  ForkKnife, the studio `beinsiculous.jpg` tab icon, and no emoji switcher, those three links already going everywhere it went. Both faces read and write the same on-device profile (one localStorage, one `settings.weightsProfiles`) —
+  (`FACES[face].theme` / `.favicon`) — so the face and the studio read as two different websites. Profile
+  belongs to neither, so it takes the studio's: `DEFAULT_THEME` is a third theme id, `studio`, whose skin lives
+  in the site's own `src/styles/studio-skin.css` (`themes.css` is mirrored from this repo and knows only the one
+  face), and its chrome is the studio's too — the `be_insiculous` wordmark, a `STUDIO_NAV` of Games ·
+  Achievements · FortKnight,
+  the studio `beinsiculous.jpg` tab icon, and no emoji switcher, those two links already going everywhere it went. Both faces read and write the same on-device profile (one localStorage, one `settings.weightsProfiles`) —
   each face's questionnaire is its settings, and each of the four writing pages saves only its own answer keys over
   the profile *as stored at save time* (`pickAnswers` in `weights-rules.js` over the key sets named in the site's
   `src/lib/answer-keys.js`: Spoon Feed owns `mealPlan`, Build owns `mealPlan` + `standingAppointments` + `tasks`,
@@ -84,9 +109,9 @@ Multi-page, no UI framework. `npm install` once, then:
   page, *New profile…* prompts for a name and opens the current face's Questionnaire — `data-questionnaire-href`;
   `FaceLayout.astro` re-renders it on the `fortknight:settings-saved` event that Save and Apply dispatch, and a page with
   unsaved edits can veto a switch by cancelling `fortknight:profile-switch`) and a **⚙ Profile** link. Old URLs keep
-  working through meta-refresh stubs: `/fortknight/settings/` → `/profile/`, `/fortknight/forkknife/` → `/forkknife/`,
+  working through meta-refresh stubs: `/fortknight/settings/` → `/profile/`,
   `/fortknight/allocations/` and `/fortknight/fortnight/` → `/fortknight/`, `/fortknight/ask/` → `/fortknight/assistant/`.
-- FortKnight pages: `/fortknight/` **Overview** — the fortnight grid + date resolver (navigates to the resolved day) and, below it,
+- FortKnight pages (the parked design — the live Overview and day pages are the seed-fed ones of the previous section): `/fortknight/` **Overview** — the fortnight grid + date resolver (navigates to the resolved day) and, below it,
   time by category (bars rendered from the active profile by `src/lib/shared/allocations-rules.js` — the "Weights"
   view always, the "Focus grid" view once the profile has a grid, "Proposed grid" for the generator's proposal
   recomputed for the resolver's date) — **rendered from the
@@ -124,12 +149,13 @@ Multi-page, no UI framework. `npm install` once, then:
   answers; `/fortknight/assistant/` — *Apply from assistant* in two steps — 1: get the JSON from your assistant (the
   spreadsheet guide + a copyable prompt), 2: `components/ApplyFromAssistant.astro` (shared with ForkKnife's assistant
   page: paste it and Apply — an import document, a meal-plan document, a weights or a settings file — then read the
-  review; the component fetches the bundle itself, `data-face` picks its links); `/fortknight/build/` — **Build**, the
+  review; the component fetches the bundle itself, `data-face` picks its links) — the component is deleted on `main`
+  with the rest of the chain and now lives only on the parked `fortknightdev`/`forknifedev` playground branches; `/fortknight/build/` — **Build**, the
   page that puts things into a profile by hand: the commitments that anchor the day's blocks and the tasks that land
   on the day pages (one entry row each, *Add* commits it into a compact read-only list, *Edit* only reveals remove),
   and the same fortnight-menu editor Spoon Feed carries. Save writes `standingAppointments`, `tasks` and `mealPlan`
   over the stored profile and re-derives, which is what turns the commitments back into `blockSplit.anchors`.
-- ForkKnife pages (`docs/meal-plan.md`): `/forkknife/` **Overview** — the fortnight menu as the 14-day grid
+- ForkKnife pages (the parked design — these routes are removed from the live site) (`docs/meal-plan.md`): `/forkknife/` **Overview** — the fortnight menu as the 14-day grid
   (`components/MenuDayCard.astro`: one line per meal per day from `menuForDay`, leftovers marked, rotated to the
   person's week start; each card links to the FortKnight day page), the coverage per meal, and **the meal-prep and
   cooking tasks** the menu implies as an import document (Copy / Download; every other week from the next date of each day)
@@ -138,7 +164,9 @@ Multi-page, no UI framework. `npm install` once, then:
   day, at most three later, the fortnight wraps; leftovers of an afternoon/evening meal may become an earlier meal —
   the leftovers dropdown offers "as Breakfast"; one dish per meal per day — servings already in the plan leave the
   dropdowns; coverage per meal). One implementation, the site's `src/lib/meal-plan-editor.js` +
-  `components/MealPlanEditor.astro`, which FortKnight's Build page renders too; Save writes only `mealPlan`.
+  `components/MealPlanEditor.astro`, which FortKnight's Build page renders too — both deleted on
+  `main` with the rest of the chain and now living only on the parked `fortknightdev`/`forknifedev`
+  playground branches; Save writes only `mealPlan`.
   `/forkknife/questionnaire/` — **ForkKnife's questionnaire is its settings**:
   the `face: "forkknife"` section of `bundle.questionnaire` (the meals question — names, when each is eaten (1–2 times
   of day), prepping/cooking + minutes — and the meal preferences: eaters, dietary rules, allergies and dislikes,
@@ -151,21 +179,18 @@ Multi-page, no UI framework. `npm install` once, then:
   (`mealPlanPrompt` in `workspace-docs.js`: the person's meals with slots and minutes plus every answered preference —
   option labels, free text quoted with fences stripped — asking for a meal-plan document), the `meal-plan.md` contract
   row and the **template** (the document shape with the person's meals filled in); step 2: the shared Apply.
-- Static hosting: the two faces are paths under `beinsiculous.com/`, sharing the origin with the Be Insiculous
+- Static hosting: the face is a path under `beinsiculous.com/`, sharing the origin with the Be Insiculous
   studio pages; one `dist/` tree carries all of it and is deployed as a static-assets Cloudflare Worker
   (`wrangler.toml`) by the site repo's GitHub Actions workflow on every push to its `main` — type-check and build
   first, so a broken build cannot ship; `npm run deploy` there is the gated manual equivalent. Profiles survive every such move because localStorage is origin-scoped. `withBase()`
   (`src/lib/paths.js`) still routes every in-app URL through Astro's `BASE_URL`, so a sub-path build stays possible.
-- Settings live in one localStorage file (`fortknight.user-settings`). One skin per face: **fort-knight** — the
+- Settings live in one localStorage file (`fortknight.user-settings`). The face's skin: **fort-knight** — the
   treehouse on the left, the knight by the campfire on the right, a generated composite of two Unsplash photographs
-  in `public/app/images/`, dark; **fork-knife** — the butcher's block: a dark, warm flat-lay (`public/app/images/fork-knife.jpg`,
-  cleaver, carving fork, garlic and herbs around a board, Sergey Kotenev on Unsplash) covering the viewport, with the
-  content column placed on the sheet of kraft paper at its centre — between the whole garlic bulb and the cleaver —
-  as frosted dark glass (translucent charcoal, backdrop blur, warm off-white type, Inter/system sans, no italics, the
-  fortnight grid four days to a row so it fits the paper). Credits in `public/app/images/README.md`. FortKnight also
-  swaps the three mouse cursors (wooden arrow / sword / shield); ForkKnife deliberately uses the browser's own.
+  in `public/app/images/`, dark. (The **fork-knife** skin — the butcher's-block flat-lay — went with the routes.)
+  Credits in `public/app/images/README.md`. FortKnight also
+  swaps the three mouse cursors (wooden arrow / sword / shield).
 - Theme identities (fonts, textures, palettes) live in one `public/app/shared/themes.css`, linked by
-  `FaceLayout.astro`; both skins use system font stacks, so nothing is vendored under `public/app/fonts/`
+  `FaceLayout.astro`; the skin uses a system font stack, so nothing is vendored under `public/app/fonts/`
   today, but a theme can vendor a webfont by dropping it there and referencing it as `url(../fonts/…)`.
   The cursor `url()`s live in `src/styles/faces.css` instead, because they resolve relative to
   `src/styles/`.

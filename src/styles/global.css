@@ -159,6 +159,87 @@ td a {
   font-weight: 500;
 }
 
+/* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
+/* Built in JS and appended to <body>, so it inherits nothing from the page — and this file styles
+   no bare buttons or inputs, so the block scopes everything the dialog emits (form, field, input,
+   button row, both button looks, error line), not just the frame. The face pages carry their own
+   independent copy under the same class names in src/styles/faces.css: the two files are
+   deliberately not shared, because faces.css's bare element rules would fight this file. The a11y
+   gate (scripts/a11y-check.mjs) opens the dialog on a page of each world and audits both. This
+   copy used to live in app-widgets.css, reachable only from /profile/ — the first-achievement
+   prompt (src/lib/achievements.js) opens the dialog on any studio page, which is why it moved here. */
+.name-dialog {
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text-bright);
+  width: min(28rem, calc(100vw - 2rem));
+  max-width: 100%;
+}
+.name-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+.name-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.1rem;
+}
+.name-dialog h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.name-dialog .inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.name-dialog input {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-bright);
+}
+.name-dialog .button-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.name-dialog button {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+.name-dialog button[type="button"] {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  font-weight: 500;
+}
+.name-dialog button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.name-dialog-error:empty {
+  display: none;
+}
+.name-dialog-error {
+  color: var(--text-bright);
+  margin: 0;
+}
+
 /* Keyboard focus must be obvious everywhere. The browser default outline was the only indicator
    before, and it vanished against this palette. */
 :focus-visible {

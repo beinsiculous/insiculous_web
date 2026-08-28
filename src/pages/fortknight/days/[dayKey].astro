@@ -1,10 +1,100 @@
 ---
-import FaceInDevelopment from "../../../components/FaceInDevelopment.astro";
+// A day of the fortnight, drawn from the visitor's own My Fort seed.
+//
+// Fourteen static shells are prerendered — one per day key — and every one of them renders the same
+// no-seed panel, on purpose: the day itself lives only in the visitor's localStorage, so a crawler, a
+// build artefact and a stranger all see the page asking for a seed. The client script looks the day up
+// in the stored seed and draws it.
+//
+// It resolves nothing. The shell's dayKey comes from the URL, not from a date: the seed arrives pre-joined
+// by day key, and running this repository's date evaluator over it would be wrong for half the year
+// (myfort.astro's header carries the whole argument). Even the previous/next links only walk
+// DAY_KEY_ORDER — an ordering, not a calendar.
+import FaceLayout from "../../../layouts/FaceLayout.astro";
+import MyFortStyles from "../../../components/MyFortStyles.astro";
 import { DAY_KEY_ORDER } from "../../../lib/shared/fortknight-rules.js";
+import { facePath } from "../../../lib/faces.js";
 
-// Still emits all 14 paths: the route has to keep existing for the same reason the file does.
 export function getStaticPaths() {
   return DAY_KEY_ORDER.map((dayKey) => ({ params: { dayKey } }));
 }
+
+const { dayKey } = Astro.params;
+const myFort = facePath("fortknight", "myfort/");
 ---
-<FaceInDevelopment title="A day" face="fortknight" />
+<FaceLayout title={`Day ${dayKey}`} face="fortknight">
+  <MyFortStyles />
+  <section class="panel" id="dayLoadPrompt">
+    <h1>A day of the fortnight</h1>
+    <p class="muted" id="dayStatus" role="status" aria-live="polite">
+      This page shows one day from your My Fort seed — the file the Focus Key app exports.
+    </p>
+    <div class="button-row">
+      <a class="button" href={myFort}>Load your seed on My Fort</a>
+    </div>
+    <noscript><p class="muted">This page needs JavaScript to read your seed.</p></noscript>
+  </section>
+
+  <div id="dayBody" data-day-key={dayKey} hidden></div>
+</FaceLayout>
+
+<script>
+  import { readStoredMyFortSeed } from "../../../lib/myfort-seed-access.js";
+  import { element, renderDayPanel } from "../../../lib/myfort-view.js";
+  import { DAY_KEY_ORDER } from "../../../lib/shared/fortknight-rules.js";
+  import { facePath } from "../../../lib/faces.js";
+
+  // Boot is readStoredMyFortSeed()'s decision, like every seed-fed page. The prerendered panel already
+  // says what this page is and where a seed comes from, so "none" only leaves it standing; "cleared" and
+  // "kept" both only report in its status line — one says the wreckage was forgotten, the other that an
+  // intact but undrawable seed was NOT deleted. A seed without this day says so rather than drawing nothing.
+  const prompt = document.getElementById("dayLoadPrompt");
+  const status = document.getElementById("dayStatus");
+  const body = document.getElementById("dayBody");
+  // The day key arrives on a data attribute, not through define:vars: a define:vars script is inline and
+  // can have no imports, and this page's whole point is sharing the seed-fed modules.
+  const dayKey = body.dataset.dayKey;
+
+  function showLoadPrompt(message) {
+    body.hidden = true;
+    body.replaceChildren();
+    prompt.hidden = false;
+    if (message) status.textContent = message;
+  }
+
+  const stored = readStoredMyFortSeed();
+  if (stored.status === "cleared" || stored.status === "kept") {
+    showLoadPrompt(stored.reason);
+  } else if (stored.status !== "seed") {
+    showLoadPrompt();
+  } else {
+    const days = Array.isArray(stored.seed.days) ? stored.seed.days : [];
+    const day = days.find((candidate) => candidate?.dayKey === dayKey);
+    if (!day) {
+      showLoadPrompt(`The stored seed has no ${dayKey} day in it.`);
+    } else {
+      prompt.hidden = true;
+      body.hidden = false;
+      body.replaceChildren();
+      body.appendChild(element("h1", null, day.label ?? day.dayKey));
+      body.appendChild(renderDayPanel(day));
+
+      // Previous and next walk DAY_KEY_ORDER and wrap: the fortnight is a cycle, so Saturday B's next is
+      // Sunday A. Labels come from the seed where it has them, because the seed's words are what the
+      // person reading the page knows.
+      const labelFor = (key) => days.find((candidate) => candidate?.dayKey === key)?.label ?? key;
+      const position = DAY_KEY_ORDER.indexOf(dayKey);
+      const previousKey = DAY_KEY_ORDER[(position + DAY_KEY_ORDER.length - 1) % DAY_KEY_ORDER.length];
+      const nextKey = DAY_KEY_ORDER[(position + 1) % DAY_KEY_ORDER.length];
+      const navigation = element("nav", "myfort-day-nav");
+      navigation.setAttribute("aria-label", "Previous and next days");
+      const previous = element("a", null, `← ${labelFor(previousKey)}`);
+      previous.href = facePath("fortknight", `days/${previousKey}/`);
+      const next = element("a", null, `${labelFor(nextKey)} →`);
+      next.href = facePath("fortknight", `days/${nextKey}/`);
+      navigation.appendChild(previous);
+      navigation.appendChild(next);
+      body.appendChild(navigation);
+    }
+  }
+</script>

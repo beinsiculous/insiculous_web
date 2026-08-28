@@ -1,0 +1,49 @@
+---
+// Fortnight achievements: this device's unlocked FortKnight-type achievements, nothing else — the
+// full board of all three kinds (locked entries included) lives on the studio's /achievements/
+// page, and this one links to it. Everything shown is recorded on this device only (localStorage);
+// nothing is uploaded. A no-JS browser gets this shell: what the page is and where Moved In comes
+// from.
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import { facePath } from "../../lib/faces.js";
+import { withBase } from "../../lib/paths.js";
+
+const myFort = facePath("fortknight", "myfort/");
+const studioAchievements = withBase("achievements/");
+---
+<FaceLayout title="Achievements" face="fortknight">
+  <section class="panel">
+    <h1>Achievements</h1>
+    <p class="muted">
+      What you have earned in FortKnight, recorded on this device only — nothing is uploaded.
+      The studio’s <a href={studioAchievements}>achievements page</a> shows every kind, locked
+      entries included.
+    </p>
+    <h2 id="fortknightAchievementsHeading">Fortnight achievements</h2>
+    <div id="achievementsBoard"></div>
+    <p class="muted" id="achievementsStatus" role="status">
+      Nothing yet — loading a seed on <a href={myFort}>My Fort</a> earns Moved In.
+    </p>
+  </section>
+</FaceLayout>
+
+<script>
+  import { maybePromptForProfile, renderAchievementsBoard } from "../../lib/achievements.js";
+  import { loadSettings, profileIds } from "../../lib/shared/user-settings.js";
+
+  const board = document.getElementById("achievementsBoard");
+  const heading = document.getElementById("fortknightAchievementsHeading");
+  const status = document.getElementById("achievementsStatus");
+
+  // FortKnight-type unlocks only — locked entries are the studio page's business, not this one's.
+  // The board belongs to the person, so the heading names the active profile once one is saved; the
+  // prerendered heading stays generic because a no-JS browser has no profile to name.
+  const settings = loadSettings();
+  if (profileIds(settings).length) heading.textContent = `${settings.activeWeightsId}’s fortnight achievements`;
+  // The empty-state line is prerendered — it carries a link, which the renderer's createElement-only
+  // board cannot — so a rendered board hides it rather than replacing it.
+  status.hidden = renderAchievementsBoard(board, { types: ["fortknight"] });
+  // An achievements page is a natural place for the once-ever create-profile prompt to land:
+  // anyone reading a board with unlocks on it has earned them.
+  maybePromptForProfile();
+</script>

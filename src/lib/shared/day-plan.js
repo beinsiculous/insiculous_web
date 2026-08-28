@@ -145,7 +145,7 @@ export function dayPlan({ weights, answers, dayKey, days, resolveDayKey = null, 
     hasImport: Boolean(importDocument),
     blocks, unplaced: unplaced.sort(activityOrder),
     meals: mealsForDay(importDocument, dayKey),
-    // The fortnight menu (ForkKnife / meal-plan document): one entry per named meal, dish null when unplanned.
+    // The fortnight menu (the meal-plan document): one entry per named meal, dish null when unplanned.
     menu: menuForDay(answers?.mealPlan, weights?.meals?.meals, dayKey),
   };
 }

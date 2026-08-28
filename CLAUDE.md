@@ -1,8 +1,11 @@
 # beinsiculous.com — agent guide
 
-One repository, three surfaces of one site (`docs/app.md`): the **Be Insiculous** studio (`/`,
-`/games/`, `/devlog/`, `/engine/`) and the two planner faces, **FortKnight** (`/fortknight/`) and
-**ForkKnife** (`/forkknife/`), sharing one profile at `/profile/`.
+One repository, two surfaces of one site (`docs/app.md`): the **Be Insiculous** studio (`/`,
+`/games/`, `/achievements/`, `/devlog/`, `/engine/`) and the planner face **FortKnight** (`/fortknight/`), with the
+shared profile at `/profile/`. The second face, **ForkKnife** (`/forkknife/`), was removed from the
+live site on 2026-08-28; its chain stays as design documents (`docs/meal-plan.md`,
+`docs/forkknife-chain.md`), and its menu views will land under `/fortknight/` when the seed carries
+menu rows.
 
 The planner is *data first*: a set of JSON files (edited by humans and assistants) plus companion
 Markdown docs that are the assistant's context. An Astro build renders it with no backend; light
@@ -43,7 +46,7 @@ python3 scripts/generate_grid.py examples/workbook/weights.baseline.json --overl
 python3 scripts/xlsx_to_json.py --dry-run         # workbook -> examples/workbook shape, kept for reference (refuses data/)
 python3 -m unittest discover tests                # test suite (also `npm run test:data`)
 npm run data                                      # validate.py then build.py, the data edit loop in one
-npm run dev                                       # the site: / (studio) + /fortknight/ + /forkknife/ + /profile/
+npm run dev                                       # the site: / (studio) + /fortknight/ + /profile/
 npm run validate                                  # validate.py alone: the data gates + the schedule sweep
 npm run verify                                    # what CI gates the deploy on: validate + tests + check + build + a11y
 ```
@@ -64,7 +67,7 @@ build → axe-core over every page → `wrangler deploy` → a request to the li
 ## Invariants (validate.py enforces most of these)
 - Exactly 14 day keys in canonical order: `sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`.
 - The neutral five-block day: `too-early, early, midday, late, too-late`; only early/midday/late carry a focus and activities. Questionnaire profiles carry their own 2–5 blocks (`weights.*.json` → `blocks`; rule in `docs/questionnaire.md`; a one-focus-block day's block is keyed `flexible` and shown without a header).
-- The site has two faces sharing one profile (`docs/app.md`): FortKnight (`/fortknight/`) and ForkKnife (`/forkknife/`, the meal plan — `docs/meal-plan.md`), each with **Overview · its building page · Questionnaire · Assistant** — the building page being where things are added by hand, FortKnight's **Build** (`/fortknight/build/`: commitments, tasks, and the fortnight menu) and ForkKnife's **Spoon Feed** (`/forkknife/spoon-feed/`: the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. (This is the contract the face branches are built to; on `main` these pages are `FaceInDevelopment` placeholders — see "The site" below.) FortKnight's Overview (`/fortknight/`: the fortnight grid + time by category) and day pages render from the person's active profile (the prerendered content is only the no-JS fallback and, on the neutral data, carries no schedule); a schedule enters a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks). Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
+- The site has one face (`docs/app.md`): FortKnight (`/fortknight/`), with **Overview · My Fort · Achievements · Build · Questionnaire · Assistant** — Build being where things would be added by hand (`/fortknight/build/`: commitments, tasks, and the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. What is live on `main` is the seed-fed half: the Overview keeps its thesis front-door content while no seed is loaded, with **Load your seed** (to `/fortknight/myfort/`) as its primary action, and renders a compact fortnight grid linking to the day pages once a seed is stored; `/fortknight/myfort/` and the fourteen `/fortknight/days/<dayKey>/` pages render the loaded seed's blocks, meals and appointments by day key — lookup only, no date resolution — falling back to a load-your-seed message. `/fortknight/build|questionnaire|assistant/` remain `FaceInDevelopment` placeholders (see "The site" below). The creation chain the placeholders stand for is the back-burnered design the playground branches were built to, documented in `docs/app.md`: a schedule entering a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks), the Overview and day pages rendering from the person's active profile, and ForkKnife's pages under `/forkknife/` (the meal plan — `docs/meal-plan.md`) with its **Spoon Feed** building page (`/forkknife/spoon-feed/`) — routes now removed from the live site. Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
 - Seven categories: `meals, cleaning, working, spirituality-development, friends-family, health, operations` (+ `flexible` pseudo-focus).
 - In every menu file present, every day has exactly one brunch, snack, and dinner; every meal-prep `mealRef` resolves to a menu meal (the neutral `data/` has no menu files).
 - Season starts are computed by rule (`fk_core/dates.py` `start_date_for_rule`, one structured rule shape for the workbook seasons and a person's year-split sections), never typed in — the only typed dates are `manual` sections' `knownStarts`; each season restarts the fortnight on its `startDayKey`.
@@ -83,7 +86,7 @@ The app never calls an LLM and holds no credentials. Instead `/profile/` generat
 (README + docs + schemas + data + the person's settings/weights) that the person uploads into their
 *own* AI workspace, and accepts back what the assistant produces (weights file / import document /
 settings file — weights are always re-derived from answers on device). The file list and classifier
-live in `src/lib/shared/workspace-docs.js` (with the two prompts the assistant pages hand out: `SPREADSHEET_PROMPT`, `mealPlanPrompt`); contract in `docs/assistant-workspace.md`. Each face's questionnaire IS
+live in `src/lib/shared/workspace-docs.js` (with the two prompts the assistant pages hand out: `SPREADSHEET_PROMPT`, `mealPlanPrompt`); contract in `docs/assistant-workspace.md`. In the parked creation chain's design, each face's questionnaire IS
 its settings (`/fortknight/questionnaire/`, `/forkknife/questionnaire/`), and the two building pages hold the content (`/fortknight/build/`, `/forkknife/spoon-feed/`) — all four write the same profile, each only its own answer keys; `/profile/` holds the profile actions + workspace downloads; named profiles per device at `settings.weightsProfiles`, one active — switched from the nav dropdown;
 `activeWeightsId`). Python scripts never
 call an LLM either.
@@ -91,44 +94,86 @@ call an LLM either.
 ## The site (Astro 7, Node 24)
 Static build, deployed to Cloudflare as a static-assets Worker. No UI framework; the face pages are
 plain untyped JavaScript, so `tsconfig.json` excludes them from `astro check` and the Python parity
-tests are what keep them honest. Three gates run on every build and block the deploy:
+tests are what keep them honest. **Accessibility is a top priority at Be Insiculous**, and three
+gates hold it on every build and block the deploy:
 `scripts/postbuild-check.mjs` (structure + static a11y + prose: `scripts/lib/prose-check.mjs`
 gates a word glued to an inline tag and a straight apostrophe — Astro drops the newline between a
 word and an inline tag on the next source line, so keep the tag on the word's line),
 `scripts/a11y-check.mjs` (axe-core over
 **every** built page, WCAG 2.2 AA), and `scripts/screenshot-pages.mjs` (no page scrolls sideways, on a
-phone and at 125% text). Target is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
+phone and at 125% text). The target they hold is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
 codebase. After changing a layout or an interactive component, also do the manual pass the PR template
 lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
 
-**The face apps are not on production yet.** `main` is production and only receives merges — `dev`
-integrates, and a `dev → main` pull request is the deploy. The faces are built on their own
-branches, `fortknightdev` and `forknifedev`, and on `main` their routes
-(`/fortknight/questionnaire|build|assistant|days/<dayKey>/`,
-`/forkknife/questionnaire|spoon-feed|assistant/`) are
-`src/components/FaceInDevelopment.astro` placeholders — kept as files rather than deleted so a
-face branch's edits merge as ordinary content merges instead of one modify/delete conflict per
-route; the component's header comment is the canonical statement. What is live on `main`: the
-studio pages, the two face index pages (thesis front doors), and `/profile/`.
+**The seed-fed pages are live; the creation chain is parked.** `main` is production and only
+receives merges — `dev` integrates, and a `dev → main` pull request is the deploy. Re-ruled
+2026-08-28: the face branches `fortknightdev` and `forknifedev` are the back-burnered creation
+chain's playgrounds and never merge; seed-fed pages are built fresh in the `main` lineage
+(`docs/roadmap.md`). On `main`, FortKnight's `/fortknight/` Overview, `/fortknight/myfort/` and the
+fourteen `/fortknight/days/<dayKey>/` pages are live and read a visitor-loaded My Fort seed;
+`/fortknight/questionnaire|build|assistant/` remain `src/components/FaceInDevelopment.astro`
+placeholders — kept as files rather than deleted so a parked branch's edits could still merge as
+ordinary content merges instead of one modify/delete conflict per route; the component's header
+comment is the canonical statement. ForkKnife's routes (`/forkknife/*`) are removed from the live
+site; its menu rendering will land under `/fortknight/` when the seed carries menu rows. Also live
+on `main`: the studio pages (including `/achievements/`), `/fortknight/achievements/` and
+`/profile/`.
 
-**`/fortknight/myfort` is live, and is the exception to all of the above.** It renders a fortnight from a
-**My Fort seed** — a small file the private Focus Key app exports (`focuskey/src/lib/myfort-seed.js`): the fourteen
-day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The
+**The My Fort seed** is a small file the private Focus Key app exports (`focuskey/src/lib/myfort-seed.js`): the fourteen
+day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The day keys are the
+format's skeleton: this is a fourteen-day system, so a conforming seed uses exactly the canonical fourteen
+(`sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`, the order the
+Invariants above pin). The
 visitor loads their own file; it is kept in `localStorage` under `beinsiculous.myfort-seed`
-(`src/lib/myfort-store.js`), deletable from `/profile/`, and never uploaded.
+(`src/lib/myfort-store.js`), deletable from `/profile/`, and never uploaded. The rendering is
+shared across the three seed-fed pages: `src/lib/myfort-view.js` draws the panels, with season
+colours from a **positional palette** — position pinned to first appearance in `year.slices`, never
+keyed to a household's season ids — and one stored-seed boot path serves the Overview, My Fort and
+the day pages.
 
-The page **resolves nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Focus Key
+The seed-fed pages **resolve nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Focus Key
 anchors every season on `sun-a` and has transition weeks, while `fk_core/dates.py` and
 `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b` starts for Ostara and
 Fimbulsumar, so **running this repository's date evaluator over a My Fort seed would be wrong for half the
-year.** Nothing here has to: `src/lib/myfort.js` validates and the page draws.
+year.** Nothing here has to: `src/lib/myfort.js` validates and the pages draw.
 
 **A My Fort seed is somebody's real schedule, so it must never be committed here.**
 `scripts/fk_core/no_schedules.py` enforces that — it refuses any JSON whose `meta.format` is `"myfort"`,
 or which carries `meta`, `calendar`, `days` and `tasks` together, and it reports files it cannot read
-rather than skipping them. `validate.py` runs it, and `npm run verify` runs `validate.py`. One fixture is
-exempt by exact path, `tests/fixtures/myfort.sample.json`, because `a11y-check.mjs` loads it so axe audits
-a page with fourteen real panels instead of an empty file picker; it is invented, and tests assert both.
+rather than skipping them. `validate.py` runs it, and `npm run verify` runs `validate.py`. Two fixtures are
+exempt by exact path: `tests/fixtures/myfort.sample.json`, which `a11y-check.mjs` loads so axe audits
+a page with fourteen real panels instead of an empty file picker, and `tests/fixtures/myfort.other-household.json`,
+a second invented household the rendering tests and the a11y gate's second seeded pass use to prove the year wheel's
+colours are positional rather than keyed to one household's season ids — that pass is what certifies the palette's
+contrast on a seed that is not the original household's. Both are invented, and tests assert all of that.
+
+## Achievements
+
+Three types, two stores. **Game** achievements are written by the games' browser builds — one
+localStorage key per game, `beinsiculous.games.<slug>.achievements`, holding the engine's native
+save file byte for byte; `src/lib/games-achievements.js` reads them. **Insiculous** (site-wide) and
+**FortKnight** achievements are written by the site itself into one store,
+`beinsiculous.achievements`, with the same `{"unlocks": {"<id>": {"unlocked_at": <unix seconds>}}}`
+shape; the registry of ids, titles, descriptions and types lives in `src/lib/achievements.js`. Two stores because
+the writers are different programs: a wasm build persists exactly what its engine writes on desktop,
+and sharing a key with the site's own unlocks would let one migrate into the other (the
+`myfort-store.js` argument). Initial achievements: `player` (insiculous — opened `/games/`) and
+`moved-in` (fortknight — loaded a My Fort seed).
+
+`/achievements/` is the every-achievement board — a studio page (BaseLayout, a nav entry after
+Games). The insiculous and fortknight registry entries render locked **and** unlocked, with their
+descriptions, unlocked sorting above locked within each group; game achievements render per game as
+unlocked-only, because the games own their full lists in-game and the site does not duplicate
+engine data. `/fortknight/achievements/` narrows to the active profile's unlocked fortnight
+achievements, and sits in the face nav (six pills: Overview · My Fort · Achievements · Build ·
+Questionnaire · Assistant). `/games/` caps its grid at 75vh with scroll at multi-column widths
+(≥40rem) and carries a game-achievements board under it; `/profile/`'s achievements panel shows all
+three types in a scroll box. Both scroll regions — the `/profile/` box and the `/games/` grid — are
+keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
+achievements happen: `/` and `/fortknight/` carry Create-a-profile buttons, and the first time an
+achievement exists with no profile saved, the naming dialog (`askProfileName` in
+`src/lib/profile-name-dialog.js`) opens — once ever, the settled flag riding beside the store under
+`beinsiculous.achievements.profile-prompt`.
 
 ## Writing a devlog entry
 Read `src/content/devlog/six-games-one-day.md` first — every rule here describes that entry. The
@@ -212,6 +257,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | how to write a devlog entry — voice, length, signature, and why an agent never publishes one | "Writing a devlog entry" above, `src/content/devlog/six-games-one-day.md` |
 | accessibility target, the three gates, the manual pass | `README.md`, `scripts/a11y-check.mjs`, `scripts/postbuild-check.mjs` |
 | the face registry (labels, skins, nav, favicons) | `src/lib/faces.js`, `src/layouts/FaceLayout.astro` |
+| achievements — the three types, the two stores, the registry | `src/lib/achievements.js`, `src/lib/games-achievements.js` |
 | how an assistant should propose changes | `docs/llm-guide.md` |
 | assistant workspace (file set, reply contract) | `docs/assistant-workspace.md` |
 | what comes next for Fortnight Apps (Focus Key, FortKnight, ForkKnife) | `insiculous/docs/roadmap-fortnight-apps.md` in the working set |

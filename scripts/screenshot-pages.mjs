@@ -1,8 +1,8 @@
-// Dev utility: screenshot every surface of the site so the three identities can be compared, and fail loudly on
+// Dev utility: screenshot every surface of the site so the identities can be compared, and fail loudly on
 // any page that scrolls sideways.
 //
-// The studio pages wear BaseLayout's dark mono look (the Profile page among them); FortKnight and ForkKnife each
-// bring their own skin from public/app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
+// The studio pages wear BaseLayout's dark mono look (the Profile page among them); FortKnight brings
+// its own skin from public/app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
 //
 // Every page is shot at the two shot widths, and EVERY pass measures the document's horizontal overflow: a viewport that
 // scrolls sideways is a layout bug at any size, not a preference, so a non-zero reading is reported per page and
@@ -24,6 +24,7 @@ const pages = {
   // the studio
   "studio-home": "",
   "studio-games": "games/",
+  "studio-achievements": "achievements/",
   "studio-game": "games/pong/",
   "studio-devlog": "devlog/",
   // A post page too: the comment thread and its badge only exist here.
@@ -36,11 +37,7 @@ const pages = {
   "fortknight-build": "fortknight/build/",
   "fortknight-questionnaire": "fortknight/questionnaire/",
   "fortknight-assistant": "fortknight/assistant/",
-  // ForkKnife
-  "forkknife-overview": "forkknife/",
-  "forkknife-spoon-feed": "forkknife/spoon-feed/",
-  "forkknife-questionnaire": "forkknife/questionnaire/",
-  "forkknife-assistant": "forkknife/assistant/",
+  "fortknight-achievements": "fortknight/achievements/",
 };
 
 // "" is the desktop suffix so the existing shot names keep working; -mobile is the phone.

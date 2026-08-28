@@ -75,6 +75,44 @@ const relatedPosts = publishedPosts(await getCollection('devlog')).filter(
   </section>
 </BaseLayout>
 
+{
+  /* Only a playable game can award an achievement: the watch below polls for the WASM's writes,
+     and a game without a wasm build writes nothing. */
+  game.data.wasm && (
+    <script>
+      import { maybePromptForProfile, totalAchievementCount } from "../../lib/achievements.js";
+
+      // First-achievement watch. The WASM writes unlocks to localStorage mid-play, and this page is
+      // the only place an achievement can arrive during a session — every other page reads the
+      // stores once, at load. So while this page is open with none recorded, poll every 5s (and on
+      // visibilitychange, because a backgrounded tab's timers are throttled exactly when the person
+      // alt-tabs back to check) until the count moves off zero, then offer the once-ever
+      // create-profile prompt and stop. The interval is cleared on pagehide so a bfcached page does
+      // not keep polling a store it can no longer prompt about.
+      let watch: ReturnType<typeof setInterval> | null = null;
+      const stopWatching = () => {
+        if (watch !== null) {
+          clearInterval(watch);
+          watch = null;
+        }
+      };
+      const checkForFirstAchievement = () => {
+        if (totalAchievementCount() > 0) {
+          stopWatching();
+          maybePromptForProfile();
+        }
+      };
+      if (totalAchievementCount() === 0) {
+        watch = setInterval(checkForFirstAchievement, 5000);
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) checkForFirstAchievement();
+        });
+        window.addEventListener("pagehide", stopWatching);
+      }
+    </script>
+  )
+}
+
 <style>
   .game-header {
     display: flex;

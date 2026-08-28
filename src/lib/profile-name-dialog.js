@@ -4,8 +4,9 @@
 // nothing. This is the repo's only <dialog>; showModal() brings the focus trap, Escape and focus restore,
 // so there is no focus management to get wrong (the rule AccessibilityControls.astro:8-9 states).
 //
-// Styles live in BOTH src/styles/app-widgets.css (the studio's /profile/) and src/styles/faces.css (the
-// face pages) under the same class names — those two files are deliberately not shared.
+// Styles live in BOTH src/styles/global.css (the studio pages — any of them can open this via the
+// first-achievement prompt in src/lib/achievements.js) and src/styles/faces.css (the face pages),
+// under the same class names — those two files are deliberately not shared.
 import { unusedProfileName } from "./shared/profile-names.js";
 
 let dialog = null; // built once, on first use
@@ -42,7 +43,20 @@ function buildDialog() {
  *  never be written back (another tab may have saved meanwhile).
  *
  *  `takenIds` is what Regenerate avoids — every id the commit would reject, the active one included.
- *  `canCancel` false = the thing being named already exists, so there is nothing to cancel. */
+ *  `canCancel` false = the thing being named already exists, so there is nothing to cancel.
+ *
+ *  The typed lines below are what the TypeScript-checked callers (the studio pages) compile
+ *  against: without them `takenIds`' `= []` default infers never[] and `commit`'s argument is
+ *  implicit any. (Do not write the tag name with its @ in prose here — a mid-comment tag token
+ *  makes the parser drop the whole block.)
+ *  @param {object} options
+ *  @param {string} options.title
+ *  @param {string} [options.name]
+ *  @param {string[]} [options.takenIds]
+ *  @param {string} [options.confirmLabel]
+ *  @param {boolean} [options.canCancel]
+ *  @param {(typedName: string) => (string | null | undefined)} options.commit
+ */
 export function askProfileName({ title, name, takenIds = [], confirmLabel = "Save name", canCancel = false, commit }) {
   if (pending) return pending; // a second ask while one is open joins it rather than throwing InvalidStateError
   dialog = dialog || buildDialog();

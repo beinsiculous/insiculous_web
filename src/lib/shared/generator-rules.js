@@ -325,7 +325,7 @@ export function generateActivities(weights, grid, questionnaire, { categories, d
     for (const practiceId of practices) {
       emit("practice", practiceId, `Practice: ${practiceLabels[practiceId] ?? practiceId}`, dayKey, practiceBlock, 2, [SPIRITUALITY_CATEGORY], settings.practiceMinutes, "daily practice");
     }
-    const menu = menuForDay(mealPlan, meals, dayKey); // the ForkKnife menu names each meal’s dish (its prep/cook tasks arrive as tasks)
+    const menu = menuForDay(mealPlan, meals, dayKey); // the fortnight menu names each meal’s dish (its prep/cook tasks arrive as tasks)
     meals.forEach((meal, mealIndex) => {
       const slots = [...(meal.slots || [])];
       let chosen = null;

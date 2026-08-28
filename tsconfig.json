@@ -14,19 +14,17 @@
     "scripts",
     "source",
     "tests",
-    // FortKnight's and ForkKnife's pages are plain untyped JavaScript with a Python twin in
+    // FortKnight's pages are plain untyped JavaScript with a Python twin in
     // scripts/fk_core/ — the parity tests, not the type checker, are what keep them honest.
     // `astro check` stays pointed at the studio's own TypeScript rather than reporting thousands of
     // strict-mode errors on code written to a different contract. `astro build` type-checks nothing,
     // so this does not weaken the build.
     "src/pages/fortknight",
-    "src/pages/forkknife",
     "src/pages/bundle.json.js",
     "src/pages/profile.astro",
     "src/layouts/FaceLayout.astro",
     "src/components/AllocationBars.astro",
     "src/components/FaceInDevelopment.astro",
-    "src/components/ApplyFromAssistant.astro",
     "src/components/DayCard.astro",
     "src/components/MenuDayCard.astro",
     "src/components/ProfileSwitcher.astro",

@@ -195,7 +195,7 @@ def slugs_to_names(meals):
 
 
 def tasks_from_meal_plan(plan, meals, dates_by_day_key):
-    """The menu's prep and cook tasks as import-document (version 2) tasks — what ForkKnife creates for the
+    """The menu's prep and cook tasks as import-document (version 2) tasks — what the menu editor creates for the
     person to paste into Apply from assistant. Per item: the meal needs cooking -> "Cook <dish> (<Meal>)" on the
     first serving at the meal's slot; needs prepping -> "Prep <dish> (<Meal>)" the day before, in the evening —
     unless the dish itself opted out (`needsCooked` / `needsPrepped` False on the item, the editor's "no cooking /
@@ -223,8 +223,8 @@ def tasks_from_meal_plan(plan, meals, dates_by_day_key):
     return tasks, review
 
 
-def forkknife_import_document(plan, meals, dates_by_day_key, description="Meal prep and cooking tasks from the ForkKnife menu"):
-    """The whole import document (version 2) ForkKnife creates: the tasks, a readable review, and the menu itself."""
+def forkknife_import_document(plan, meals, dates_by_day_key, description="Meal prep and cooking tasks from the fortnight menu"):
+    """The whole import document (version 2) the menu editor creates: the tasks, a readable review, and the menu itself."""
     tasks, review = tasks_from_meal_plan(plan, meals, dates_by_day_key)
     return {
         "schemaVersion": 2,

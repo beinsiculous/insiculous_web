@@ -1,26 +1,30 @@
 # Be Insiculous
 
 Everything behind [beinsiculous.com](https://beinsiculous.com), in one repository. Built with
-[Astro](https://astro.build), deployed to Cloudflare as a static-assets Worker. Three surfaces that
-deliberately read as three different websites:
+[Astro](https://astro.build), deployed to Cloudflare as a static-assets Worker. Two surfaces that
+deliberately read as two different websites:
 
-- **The studio** (`/`, `/games/`, `/devlog/`, `/engine/`) — the game studio. All six games are
+- **The studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/engine/`) — the game studio. All six games are
   playable in the browser through embedded WebAssembly builds from the Insiculous 2D engine
-  (Rust); desktop builds run the same code natively. The games listed on this site are free and use AI art; the
+  (Rust); desktop builds run the same code natively. `/achievements/` boards every achievement the
+  site knows — the site's own registry entries locked and unlocked, and each game's recorded
+  unlocks. The games listed on this site are free and use AI art; the
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
   iOS rather than here (`docs/thesis.md` is the source of that policy's wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
-  organised by Norse-wheel seasons, five daily blocks and seven life categories. **In
-  development**: the face URLs answer with a "still being built" page while the app is finished
-  on its branch (see Deploying below).
-- **ForkKnife** (`/forkknife/`) — the fortnight menu: meals, the dishes for each day, and the prep
-  and cooking tasks they imply. Same in-development status as FortKnight.
+  organised by Norse-wheel seasons, five daily blocks and seven life categories. Its seed-fed pages
+  are live: the Overview (`/fortknight/`), **My Fort** (`/fortknight/myfort/`) and the fourteen day
+  pages (`/fortknight/days/<dayKey>/`) all read a **My Fort seed** the visitor loads from their own
+  device, and **Achievements** (`/fortknight/achievements/`) shows the active profile's unlocked
+  fortnight achievements (the studio's `/achievements/` is the every-achievement board). Build,
+  Questionnaire and Assistant still answer with a "still being built" page (see Deploying below).
 
-The two planners are *faces* of one app: they share the on-device profile at `/profile/` (which
-is live), and they
-are data-first — JSON files are the source of truth, Markdown docs are the assistant's context, and
-light Python scripts stand in for a backend. Users bring their own AI provider; nothing is stored
-server-side. See `CLAUDE.md` for the map and `docs/` for the contracts.
+The planner is data-first — JSON files are the source of truth, Markdown docs are the assistant's
+context, and light Python scripts stand in for a backend. The on-device profile at `/profile/` is
+live. Users bring their own AI provider; nothing is stored server-side. **ForkKnife**, the second
+face (the fortnight menu), was removed from the live site on 2026-08-28; its chain stays as design
+documents under `docs/`, and its menu views will land under `/fortknight/` when the seed carries
+menu rows. See `CLAUDE.md` for the map and `docs/` for the contracts.
 
 ## Setup
 
@@ -242,12 +246,18 @@ broken data rule, or an accessibility regression cannot reach the site. The work
 tab (`workflow_dispatch`) to redeploy the current `main`.
 
 The branch model behind that: `main` is production and only ever receives merges — `dev` is the
-integration branch, and a `dev → main` pull request **is** the production deploy. The two face
-apps are built on their own branches, `fortknightdev` and `forknifedev`; on `main` their pages
-exist as `src/components/FaceInDevelopment.astro` placeholders on purpose — deleting the routes
-would turn every edit on a face branch into a modify/delete conflict, one per page, so the
-placeholder keeps the path occupied and the merge an ordinary content merge. When a face is
-ready its branch merges and the placeholders go with it.
+integration branch, and a `dev → main` pull request **is** the production deploy. The creation
+chain the face apps were built around (questionnaire → weights → generator → import) was re-ruled
+on 2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge,
+and seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). On
+`main`, FortKnight's seed-fed pages are live — the Overview, My Fort and the fourteen day pages —
+alongside the achievements boards (the studio's `/achievements/` and the face's
+`/fortknight/achievements/`), while
+`/fortknight/build|questionnaire|assistant/` remain
+`src/components/FaceInDevelopment.astro` placeholders, kept as files so the parked branches' edits
+could still merge as ordinary content merges rather than one modify/delete conflict per route.
+ForkKnife's routes (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu
+rendering will land under `/fortknight/` when the My Fort seed carries menu rows.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

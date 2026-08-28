@@ -74,28 +74,39 @@ class FindScheduleDocumentsTests(unittest.TestCase):
                 planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
             self.assertEqual(find_schedule_documents(directory), [])
 
-    def test_exactly_one_fixture_is_exempt_and_it_exists(self):
+    def test_exactly_the_two_invented_fixtures_are_exempt_and_they_exist(self):
         """An exemption for a file that does not exist is a pre-approved hole at exactly the path a real
-        export would be dropped. So the list is one entry, and the entry is on disk."""
-        self.assertEqual(len(ALLOWED_FIXTURES), 1)
+        export would be dropped. So the list is named outright, and every entry is on disk."""
+        self.assertEqual(ALLOWED_FIXTURES, {"tests/fixtures/myfort.sample.json",
+                                            "tests/fixtures/myfort.other-household.json"})
         for relative in ALLOWED_FIXTURES:
             self.assertTrue((CHECKOUT_ROOT / relative).is_file(), f"{relative} is exempt but missing")
 
-    def test_the_exempt_fixture_is_read_by_the_gate_that_justifies_it(self):
-        """The exemption's whole warrant is that the accessibility gate renders the page from it. If
-        nothing reads it, the exemption is a hole with a story attached."""
+    def test_both_fixtures_are_read_by_the_gate_that_justifies_them(self):
+        """The exemptions' whole warrant is that the accessibility gate renders the seed-fed pages
+        from each fixture — the sample pass sees fourteen real panels instead of an empty file
+        picker, and the other-household pass certifies the positional palette's contrast on a seed
+        that is not the original household's. If nothing reads one, its exemption is a hole with a
+        story attached."""
         harness = (CHECKOUT_ROOT / "scripts" / "a11y-check.mjs").read_text(encoding="utf-8")
-        for relative in ALLOWED_FIXTURES:
-            self.assertIn(Path(relative).name, harness)
+        self.assertIn("myfort.sample.json", harness)
+        self.assertIn("myfort.other-household.json", harness)
 
-    def test_the_exempt_fixture_is_invented_rather_than_anybody_s(self):
-        """It is a My Fort seed by shape — that is the point — so what makes it safe is that its contents
+    def test_the_other_household_fixture_is_read_by_the_tests_that_justify_it(self):
+        """The second fixture also earns its exemption in the rendering tests, which need a seed
+        whose season ids are not the ones the original colour map was keyed to. Same rule — an
+        exemption nothing reads is a hole with a story attached."""
+        rendering_tests = (CHECKOUT_ROOT / "tests" / "test_myfort.py").read_text(encoding="utf-8")
+        self.assertIn("myfort.other-household.json", rendering_tests)
+
+    def test_the_exempt_fixtures_are_invented_rather_than_anybody_s(self):
+        """Each is a My Fort seed by shape — that is the point — so what makes it safe is that its contents
         are made up. Pinned on the marker names, which no real export would carry."""
         for relative in ALLOWED_FIXTURES:
             fixture = json.loads((CHECKOUT_ROOT / relative).read_text(encoding="utf-8"))
             self.assertIsNotNone(describe_schedule_document(fixture))
             text = json.dumps(fixture)
-            self.assertIn("Example", text, "the fixture should be obviously invented")
+            self.assertIn("Example", text, f"{relative} should be obviously invented")
 
     def test_any_other_seed_under_tests_is_still_a_seed(self):
         import tempfile

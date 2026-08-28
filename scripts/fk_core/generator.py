@@ -335,7 +335,7 @@ def generate_activities(weights, grid, questionnaire, categories, fallback_block
         practice_block = next((key for key in focus_block_keys if focus_of(day_key, key) == SPIRITUALITY_CATEGORY), focus_block_keys[0])
         for practice_id in practices:
             emit("practice", practice_id, f"Practice: {practice_labels.get(practice_id, practice_id)}", day_key, practice_block, 2, [SPIRITUALITY_CATEGORY], settings["practiceMinutes"], "daily practice")
-        menu = menu_for_day(meal_plan, meals, day_key)  # the ForkKnife menu names each meal's dish (its prep/cook tasks arrive as tasks)
+        menu = menu_for_day(meal_plan, meals, day_key)  # the fortnight menu names each meal's dish (its prep/cook tasks arrive as tasks)
         for meal_index, meal in enumerate(meals):
             slots = list(meal.get("slots", []))
             chosen = None

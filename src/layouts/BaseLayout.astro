@@ -16,15 +16,15 @@ const {
   description = 'Be Insiculous — an Artificial Intelligence Development Studio: a Rust game engine and the games that run on it, and planning software driven by your own AI assistant.',
 } = Astro.props;
 
-// FortKnight and ForkKnife are the two planner faces that live on this domain under their own
-// layout and their own skin (src/layouts/FaceLayout.astro); their pages link back here.
+// FortKnight is the planner face that lives on this domain under its own
+// layout and its own skin (src/layouts/FaceLayout.astro); its pages link back here.
 const nav = [
   { href: '/', label: 'Home' },
   { href: '/games/', label: 'Games' },
+  { href: '/achievements/', label: 'Achievements' },
   { href: '/devlog/', label: 'Devlog' },
   { href: '/engine/', label: 'Engine' },
   { href: '/fortknight/', label: 'FortKnight' },
-  { href: '/forkknife/', label: 'ForkKnife' },
 ];
 
 const currentPath = Astro.url.pathname;

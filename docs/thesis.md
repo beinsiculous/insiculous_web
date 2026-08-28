@@ -35,7 +35,8 @@ become more professional *literally*, by looking legitimate to people who might 
 manifesto voice.
 
 The **four projects each keep their own bubble of quirk**, and the quirk should be specific to each
-rather than one house style: FortKnight (`/fortknight/`), ForkKnife (`/forkknife/`), the games
+rather than one house style: FortKnight (`/fortknight/`), ForkKnife (its pages are folded into
+FortKnight's for now — see its section below), the games
 (`/games/`) and the devlog (`/devlog/`). Everything else — `/`, `/engine/`, `/404`, `/accessibility/`,
 `/profile/`, and the shared header, footer and meta copy — is the studio speaking and takes the
 professional register. When it is unclear which layer a page belongs to, ask that question first.
@@ -172,8 +173,13 @@ the eating.**
   specific days. So the menu does not stay in the food app: its tasks land in the same profile
   FortKnight plans from, where `meals` is one of the seven categories and competes for the fortnight
   like everything else.
-- **That is why it is a face, not a product.** Two faces, one on-device profile. A standalone
-  meal-planning app would have to lie about what dinner costs the rest of your week.
+- **That is why it is not a product of its own.** A standalone meal-planning app would have to lie
+  about what dinner costs the rest of your week. Two faces was the shape while both were being
+  built; with the creation chain on the back burner, the `/forkknife/` routes came down
+  (2026-08-28), and this section's argument moves with them: the by-dish and by-day menu views land
+  where the seed already lives, on FortKnight's seed-fed pages, once the My Fort seed carries menu
+  rows. Leftovers stay load-bearing there — eight dishes covering fourteen days is exactly what a
+  real household's seed shows.
 
 ### Simple, and therefore difficult
 

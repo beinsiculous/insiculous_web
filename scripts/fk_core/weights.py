@@ -82,7 +82,7 @@ def default_answers(questionnaire, categories):
         "restDays": list(preset.get("restDays", [])),
         "energyPeak": preset.get("energyPeak", DEFAULT_ENERGY_PEAK),
         "context": preset.get("context", ""),
-        # ForkKnife's questionnaire (docs/meal-plan.md): the assistant prompt embeds these; nothing here moves shares.
+        # The meal answers (docs/meal-plan.md): the assistant prompt embeds these; nothing here moves shares.
         "eaters": preset.get("eaters", 1),
         "dietaryRules": list(preset.get("dietaryRules", [])),
         "allergiesAndDislikes": preset.get("allergiesAndDislikes", ""),

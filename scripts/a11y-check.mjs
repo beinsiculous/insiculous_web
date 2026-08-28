@@ -1,6 +1,8 @@
 // Accessibility gate: serve dist/ locally, run axe-core (WCAG 2.0/2.2 A+AA) on every page, and
 // fail the build on any violation. Runs as part of `npm run verify`, so a regression blocks a
-// deploy exactly like a type error does.
+// deploy exactly like a type error does. The seed-fed pages are audited twice, once per invented
+// My Fort fixture: the second household's pass is what certifies the positional season palette's
+// contrast on a seed that is not the original household's.
 //
 // axe finds roughly half of real-world issues — the rest is the manual checklist in README
 // (keyboard pass, screen-reader pass, zoom/reflow). Zero violations here is necessary, not
@@ -81,19 +83,40 @@ const SEEDED_PROFILE = {
   activeWeightsId: "lucky-garden-poet", hidden: [], overrides: {}, added: [], dayNotes: {},
 };
 
-// [route, function run in the page that opens the dialog and returns whether it managed to]
-// /profile/ carries the studio's rule set (app-widgets.css); a face page carries faces.css.
+// One invented site unlock is enough for the prompt entry below: shouldPromptForProfile
+// (src/lib/achievements.js) gates on any achievement, no saved profile, flag unset.
+const SEEDED_SITE_ACHIEVEMENTS = JSON.stringify({ unlocks: { player: { unlocked_at: 1756425600 } } });
+
+// [route, localStorage records to seed, function run in the page that opens the dialog (or waits
+// for the one the page itself opens) and returns whether it managed to]
+// /profile/ carries the studio's rule set (global.css, like every BaseLayout page); a face page
+// carries faces.css. The two entries want OPPOSITE states: /profile/'s Duplicate control is hidden
+// until a profile is saved, while the face entry audits the dialog the way a face page really opens
+// it on this branch — the first-achievement prompt (maybePromptForProfile) fires at
+// /fortknight/achievements/ boot only when achievements exist and NO profile is saved.
 const DIALOG_ROUTES = [
-  ["/profile/", () => {
-    const button = document.getElementById("duplicateProfileButton");
-    if (!button || button.hidden) return false;
-    button.click();
-    return true;
-  }],
-  // The face-side entry lived here and opened the dialog through the nav's "New profile…" option. That
-  // option is not offered while the faces are placeholders, so the dialog cannot be reached on a face page
-  // on this branch and there is nothing here to audit. faces.css's copy of the dialog rules is still
-  // exercised on the face branches, where the questionnaire is real; this entry returns with them.
+  {
+    route: "/profile/",
+    seed: { "fortknight.user-settings": JSON.stringify(SEEDED_PROFILE) },
+    open: () => {
+      const button = document.getElementById("duplicateProfileButton");
+      if (!button || button.hidden) return false;
+      button.click();
+      return true;
+    },
+  },
+  {
+    route: "/fortknight/achievements/",
+    seed: { "beinsiculous.achievements": SEEDED_SITE_ACHIEVEMENTS },
+    // The page itself opens the prompt at boot; there is nothing to click, so wait for the dialog.
+    open: async () => {
+      for (let attempt = 0; attempt < 50; attempt += 1) {
+        if (document.querySelector("dialog.name-dialog[open]")) return true;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return false;
+    },
+  },
 ];
 
 const failures = [];
@@ -109,16 +132,42 @@ try {
   // checked by a gate that never sees it. The fixture is invented, not anybody's fortnight.
   const myFortSeed = readFileSync(new URL("../tests/fixtures/myfort.sample.json", import.meta.url), "utf8");
   // The /profile/ achievements board renders its headings, lists and delete button only when a game
-  // has recorded unlocks — seed one invented save so axe audits the populated board, not just the
-  // empty state (the value is the engine's save-file shape, games-achievements.js).
+  // has recorded unlocks — seed invented saves so axe audits the populated board, not just the
+  // empty state (the value is the engine's save-file shape, games-achievements.js). There are this
+  // MANY on purpose: enough rows that the board's 75vh scroll box genuinely overflows, so axe's
+  // scrollable-region-focusable rule has a real scrollable region to test rather than passing as
+  // inapplicable.
   const pongAchievements = JSON.stringify({
-    unlocks: { win_normal: { unlocked_at: 1756252800 }, beat_cpu_easy: { unlocked_at: 1756339200 } },
+    unlocks: {
+      win_normal: { unlocked_at: 1756252800 }, beat_cpu_easy: { unlocked_at: 1756339200 },
+      marathon_win: { unlocked_at: 1756512000 }, chaos_survivor: { unlocked_at: 1756598400 },
+      perfect_round: { unlocked_at: 1756684800 }, comebacks: { unlocked_at: 1756771200 },
+      untouchable: { unlocked_at: 1756857600 }, hat_trick: { unlocked_at: 1756944000 },
+    },
   });
-  await page.addInitScript(([settings, seed, achievements]) => {
+  // The /fortknight/achievements/ page and the /profile/ panel group every achievement by type, and
+  // the site's own two types (insiculous and fortknight, registry in src/lib/achievements.js) render
+  // populated only when their one store has unlocks — seed the two initial achievements invented,
+  // in the same save-file shape the games write (games-achievements.js). The ids past those two are
+  // invented and deliberately NOT in the registry: unknown ids still render, prettified, in the
+  // insiculous group (loadSiteAchievements), and they are what makes the /profile/ and /achievements/
+  // boards long enough to overflow their 75vh boxes for the rule named above.
+  const siteAchievements = JSON.stringify({
+    unlocks: {
+      player: { unlocked_at: 1756425600 }, "moved-in": { unlocked_at: 1757030400 },
+      night_owl: { unlocked_at: 1757116800 }, early_bird: { unlocked_at: 1757203200 },
+      completionist: { unlocked_at: 1757289600 }, explorer: { unlocked_at: 1757376000 },
+      tinkerer: { unlocked_at: 1757462400 }, regular: { unlocked_at: 1757548800 },
+      champion_run: { unlocked_at: 1757635200 }, pixel_pusher: { unlocked_at: 1757721600 },
+      speedrun_spirit: { unlocked_at: 1757808000 }, hidden_gem: { unlocked_at: 1757894400 },
+    },
+  });
+  await page.addInitScript(([settings, seed, gameUnlocks, siteUnlocks]) => {
     localStorage.setItem("fortknight.user-settings", settings);
     localStorage.setItem("beinsiculous.myfort-seed", seed);
-    localStorage.setItem("beinsiculous.games.pong.achievements", achievements);
-  }, [JSON.stringify({ schemaVersion: 2 }), myFortSeed, pongAchievements]);
+    localStorage.setItem("beinsiculous.games.pong.achievements", gameUnlocks);
+    localStorage.setItem("beinsiculous.achievements", siteUnlocks);
+  }, [JSON.stringify({ schemaVersion: 2 }), myFortSeed, pongAchievements, siteAchievements]);
   for (const route of chosen) {
     await page.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page })
@@ -131,37 +180,65 @@ try {
     }
   }
 
-  // The profile-name dialog (src/lib/profile-name-dialog.js) is built in JavaScript and only exists once
-  // something opens it, so the page sweep above can never see it — and postbuild-check, which reads
-  // static HTML, cannot either. It is the site's only <dialog>, and its CSS is written twice (once in
-  // app-widgets.css for the studio's /profile/, once in faces.css for the faces), so both rule sets are
-  // checked here: open it on one page of each and run the same rules against it.
-  // Both controls that open it are hidden until a profile is actually saved, so this pass needs a
-  // richer seed than the sweep above: one saved profile, which is also the state a real person is in
-  // when they meet the dialog.
-  const dialogContext = await browser.newContext();
-  await dialogContext.addInitScript((settings) => {
+  // The pages that render from the stored seed — the Overview, My Fort and the fourteen day pages —
+  // are the only output that changes with the seed, so only they get a second pass, seeded with the
+  // other invented household. Its season ids and names are not the ones the original palette was
+  // keyed to, which is exactly what certifies the positional palette's contrast on a seed that is
+  // not the original household's; re-auditing the rest of the site would audit identical output.
+  const seedFed = chosen.filter((route) =>
+    route === "/fortknight/" || route === "/fortknight/myfort/" || route.startsWith("/fortknight/days/"));
+  const otherHouseholdSeed = readFileSync(new URL("../tests/fixtures/myfort.other-household.json", import.meta.url), "utf8");
+  const otherHouseholdContext = await browser.newContext();
+  await otherHouseholdContext.addInitScript(([settings, seed]) => {
     localStorage.setItem("fortknight.user-settings", settings);
-  }, JSON.stringify(SEEDED_PROFILE));
-  const dialogPage = await dialogContext.newPage();
-  for (const [route, open] of DIALOG_ROUTES) {
-    await dialogPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
-    const opened = await dialogPage.evaluate(open);
-    if (!opened) {
-      failures.push(`${route}  [dialog] could not open the profile-name dialog — the a11y pass over it did not run`);
-      continue;
-    }
-    await dialogPage.waitForSelector("dialog.name-dialog[open]", { timeout: 5000 });
-    const results = await new AxeBuilder({ page: dialogPage })
+    localStorage.setItem("beinsiculous.myfort-seed", seed);
+  }, [JSON.stringify({ schemaVersion: 2 }), otherHouseholdSeed]);
+  const otherHouseholdPage = await otherHouseholdContext.newPage();
+  for (const route of seedFed) {
+    await otherHouseholdPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
+    const results = await new AxeBuilder({ page: otherHouseholdPage })
       .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
       .analyze();
     analyzed++;
     for (const violation of results.violations) {
       const targets = violation.nodes.map((node) => node.target.join(" ")).join("; ");
-      failures.push(`${route} (dialog open)  [${violation.id}] ${violation.help}\n    ${targets}`);
+      failures.push(`${route} (seed: other-household)  [${violation.id}] ${violation.help}\n    ${targets}`);
     }
   }
-  await dialogContext.close();
+  await otherHouseholdContext.close();
+
+  // The profile-name dialog (src/lib/profile-name-dialog.js) is built in JavaScript and only exists once
+  // something opens it, so the page sweep above can never see it — and postbuild-check, which reads
+  // static HTML, cannot either. It is the site's only <dialog>, and its CSS is written twice (once in
+  // global.css for the studio pages, once in faces.css for the faces), so both rule sets are
+  // checked here: open it on one page of each and run the same rules against it. Each entry carries
+  // its own seed because the two open paths want opposite states (the DIALOG_ROUTES comment says which).
+  for (const { route, seed, open } of DIALOG_ROUTES) {
+    const dialogContext = await browser.newContext();
+    await dialogContext.addInitScript((records) => {
+      for (const [key, value] of Object.entries(records)) localStorage.setItem(key, value);
+    }, seed);
+    const dialogPage = await dialogContext.newPage();
+    try {
+      await dialogPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
+      const opened = await dialogPage.evaluate(open);
+      if (!opened) {
+        failures.push(`${route}  [dialog] could not open the profile-name dialog — the a11y pass over it did not run`);
+        continue;
+      }
+      await dialogPage.waitForSelector("dialog.name-dialog[open]", { timeout: 5000 });
+      const results = await new AxeBuilder({ page: dialogPage })
+        .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
+        .analyze();
+      analyzed++;
+      for (const violation of results.violations) {
+        const targets = violation.nodes.map((node) => node.target.join(" ")).join("; ");
+        failures.push(`${route} (dialog open)  [${violation.id}] ${violation.help}\n    ${targets}`);
+      }
+    } finally {
+      await dialogContext.close();
+    }
+  }
 } finally {
   await browser.close();
   server.close();

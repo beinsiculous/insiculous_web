@@ -12,7 +12,7 @@
   --radius: 10px;
   --shadow: 0 1px 2px rgba(35, 35, 31, 0.06), 0 4px 14px rgba(35, 35, 31, 0.06);
   /* The mouse, Fort Knight's: a large wooden arrow; a sword where a pointer would show; a shield where the
-     "no" symbol would. Fork Knife resets these three to the browser's own at the bottom of this file. */
+     "no" symbol would. */
   --cursor-default: url("./cursors/wooden-arrow.svg") 3 3, auto;
   --cursor-pointer: url("./cursors/sword.svg") 2 2, pointer;
   --cursor-forbidden: url("./cursors/shield.svg") 24 24, not-allowed;
@@ -27,7 +27,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif; background: var(--background); color: var(--ink); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
 /* 100vh is the viewport with the mobile URL bar expanded, so it overshoots while the bar is collapsed — visible
-   here because both faces paint a fixed, full-viewport photograph behind the panels. The line above stays as the
+   here because the face paints a fixed, full-viewport photograph behind the panels. The line above stays as the
    fallback for anything without dvh. */
 body { min-height: 100dvh; }
 h1, h2 { font-weight: 600; margin: 0 0 0.5rem; }
@@ -77,11 +77,11 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 }
 .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
 .nav-link.active { color: var(--on-accent); background: var(--accent); }
-/* Each pill carries its full label and a short one; the short one only comes out where four pills share a narrow
-   no-wrap row (ForkKnife's phone bar, below). The link's aria-label is always the full one. */
+/* Each pill carries its full label and a short one; the short one only comes out where the pills share a narrow
+   no-wrap row. The link's aria-label is always the full one. */
 .nav-short { display: none; }
 
-/* ---------- the ☰ menu (both faces) ---------- */
+/* ---------- the ☰ menu ---------- */
 /* Twin of the studio's disclosure in src/layouts/BaseLayout.astro: same native <details>, same ☰, same
    full-width panel under the bar, same 40rem breakpoint. The rules are written twice because the two
    live in different token vocabularies — this file's --panel/--ink/--line against global.css's
@@ -136,14 +136,14 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
   .menu-panel .nav-link { display: flex; align-items: center; min-height: 44px; border-radius: 8px; }
   /* The panel reads top to bottom as "here", "you", "elsewhere" — this face's pages, the profile, then
      the way out to the other sites. That is the markup's order, so nothing here reorders anything. The
-     site links stay a row of three rather than a column: they are icons, and three emoji stacked read
+     site links stay a row of two rather than a column: they are icons, and two emoji stacked read
      as a list of nothing. The rule separates them from this face's own pages. */
   .menu-panel .nav-profile { margin-left: 0; width: 100%; flex-wrap: wrap; }
   .menu-panel .face-switch { justify-content: flex-start; gap: 0.5rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
-  /* Two of these three go somewhere in the site — the studio, the other face — and the third asks for
-     money. In the bar they are one small trio, but the panel has a whole row, so here the two that
-     navigate are big enough to hit without looking, and the tip jar is pushed to the far end where it
-     reads as an aside rather than a third destination. An auto margin does this without touching source
+  /* One of these two goes somewhere in the site — the studio — and the other asks for
+     money. In the bar they are one small pair, but the panel has a whole row, so here the one that
+     navigates is big enough to hit without looking, and the tip jar is pushed to the far end where it
+     reads as an aside rather than a second destination. An auto margin does this without touching source
      order, so the tab sequence still matches the paint. */
   .menu-panel .face-link:not(.face-kofi) { font-size: 1.75rem; padding: 0.15rem 0.5rem; }
   .menu-panel .face-kofi { margin-left: auto; }
@@ -155,10 +155,8 @@ main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 
 
 /* ---------- fortnight grid ---------- */
 .fortnight-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 0.5rem; }
-/* The two 900px queries in this file stay in px on purpose: they have to fire at exactly the same width as
-   public/app/shared/themes.css's own `max-width: 900px` (the ForkKnife photo re-crop) and as ForkKnife's nav
-   squeeze below. Everything else here is in rem — see the note at the phone block — but these three cannot
-   drift from each other, so changing one means changing all three. */
+/* The fortnight grid collapses from seven day-columns to two below 900px. The value is in px while everything
+   else here is in rem (see the note at the phone block) — kept as-is rather than re-tuned in rem. */
 @media (max-width: 900px) { .fortnight-grid { grid-template-columns: repeat(2, 1fr); } }
 .day-card {
   display: block; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem;
@@ -380,44 +378,11 @@ button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-dis
 /* ---------- theme layout (Astro app only) ---------- */
 /* themes.css owns the skin (palette/fonts/textures); geometry lives here. This file loads after themes.css. */
 
-/* ==== both faces: one content column, centered ====
-   ForkKnife's column used to sit right of centre, on the blank kraft paper between the garlic bulb and
-   the cleaver in its photograph (themes.css body::before). That placement was deliberate and was
-   deliberately dropped: the faces share one column now, and its fortnight grid keeps seven day-columns
-   on a wide screen like FortKnight's rather than collapsing to four.
+/* ==== one content column, centered ====
    62rem, not a rounder 60, is load-bearing: .fortnight-grid asks for 7 × 120px + 6 × 8px = 888px, and a
    60rem column leaves only 876-878px inside the panel's padding and border, so the grid overflowed it by
-   12px on BOTH faces — FortKnight included, which had been doing it unnoticed. 62rem leaves 908-910px. */
-[data-theme="fort-knight"] main,
-[data-theme="fork-knife"] main { max-width: 62rem; }
-
-/* Centred, the column lands squarely on the cleaver and the carving fork — they sit 58-80% across the
-   frame, which is exactly where the centred column falls on a desktop, and the phone crop (themes.css
-   shifts to 68% 40% there) is almost nothing but those two objects. The photo used to be kept clear by
-   moving the column sideways; it is kept clear by starting it lower instead, at every width rather than
-   on phones alone. 30vh so a short phone does not push the heading off the fold, capped at 16rem so a
-   tall portrait tablet does not open on a screenful of chopping board.
-   Not in high contrast: that mode drops the photograph entirely (the [data-contrast="high"] body::before
-   rule below), so the gap would be holding space for nothing and pushing the heading down for a reader
-   who is likeliest to be magnifying the page as well. */
-:root[data-theme="fork-knife"]:not([data-contrast="high"]) main { padding-top: min(30vh, 16rem); }
-
-/* ==== fork knife: the browser's own cursors ====
-   ForkKnife opts out of the custom mouse — a serious, near-monochrome page wants the native arrow,
-   hand and not-allowed. Only the three variables change; everything below that reads them
-   (html/body, the clickable list, :disabled) follows. FortKnight keeps its set above. */
-:root[data-theme="fork-knife"] {
-  --cursor-default: auto;
-  --cursor-pointer: pointer;
-  --cursor-forbidden: not-allowed;
-}
-
-/* ForkKnife's menu bar IS FortKnight's: the same markup in the same source order, sticky at the top,
-   taking the base .site-nav rules above unchanged. It used to be pinned to the bottom of the viewport
-   and reordered by CSS `order` — thumb-reach on a phone, and the top of the page left for the
-   photograph. That is gone, and with it every rule that existed only to clear a fixed bottom bar: the
-   content and footer bottom padding, the two-row wrap at 24rem, the phone breakpoint at 900px, and the
-   Aa panel opening upward. What tells the two faces apart now is the skin (themes.css), not geometry. */
+   12px. 62rem leaves 908-910px. */
+[data-theme="fort-knight"] main { max-width: 62rem; }
 
 /* `main` is a grid, so every panel is a grid item and its default `min-width: auto` resolves to
    min-content — the column, and with it the page, can then be wider than the viewport. These two
@@ -442,7 +407,8 @@ main > * { min-width: 0; }
 
 /* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
 /* Built in JS and appended to <body>: the face skin's tokens still reach it, but no page rule does.
-   Mirrors the rule set in app-widgets.css under the same class names (the two files are not shared). */
+   Mirrors the rule set in global.css under the same class names (the two files are not shared —
+   global.css covers the studio pages, this file the face pages). */
 .name-dialog {
   padding: 0; border: 1px solid var(--line); border-radius: var(--radius);
   color: var(--ink); box-shadow: var(--shadow);
@@ -474,7 +440,7 @@ main > * { min-width: 0; }
    root gets bigger text in the same column and needs these rules to come in sooner, which a px value would ignore. */
 @media (max-width: 40rem) {
   h1 { font-size: 1.3rem; }
-  /* No short-label swap here any more. Both faces ship a short label per pill (faces.js faceNav) and the
+  /* No short-label swap here any more. The face ships a short label per pill (faces.js faceNav) and the
      markup still renders both spans, but at this width the pills are inside the ☰ panel, which is full
      width and has room for "Questionnaire" — the swap existed to stop them wrapping the bar onto four
      rows, and the bar no longer carries them. .nav-short stays display: none from the base rule. */
@@ -642,7 +608,7 @@ main > * { min-width: 0; }
   .import-review-table td:empty { display: none; }
 }
 
-/* ForkKnife: one section per meal, an entry row under its list */
+/* The fortnight menu editor: one section per meal, an entry row under its list */
 .meal-plan-section { margin: 0.75rem 0; padding-top: 0.5rem; border-top: 1px solid var(--line); }
 .meal-plan-section .editor-heading { margin: 0 0 0.25rem; font-size: 1rem; }
 .meal-plan-section .editor-heading span { font-weight: normal; font-size: 0.85rem; }
@@ -705,11 +671,6 @@ main > * { min-width: 0; }
   --background: #000000; --panel: #000000; --panel-soft: #161310; --plank: #000000; --card: #000000;
   --ink: #ffffff; --muted: #e8e1d1; --nav-ink: #ffffff; --line: #a08a68;
   --accent: #ffbe6b; --on-accent: #000000; --flexible: rgba(255, 255, 255, 0.16);
-}
-:root[data-theme="fork-knife"][data-contrast="high"] {
-  --background: #000000; --panel: #000000; --panel-soft: #131109;
-  --ink: #ffffff; --muted: #ddd5c6; --line: #a39a8b;
-  --accent: #ffffff; --on-accent: #000000; --flexible: rgba(255, 255, 255, 0.16);
 }
 [data-contrast="high"] body::before { background-image: none !important; filter: none !important; }
 [data-contrast="high"] .panel,

@@ -29,7 +29,7 @@ export const README_FILE_NAME = "README.md";
 export const SPREADSHEET_GUIDE_FILE_NAME = "import-from-spreadsheet.md";
 /** What the person tells their assistant along with the guide and their spreadsheet. */
 export const SPREADSHEET_PROMPT = "Read import-from-spreadsheet.md, then turn the attached spreadsheet into a FortKnight import document (schemaVersion 2). Follow its steps: survey every sheet, decide commitment / task / skipped for each row, list what you skipped and why, and end with exactly one JSON code block.";
-/** The meal-plan contract; the ForkKnife assistant page shows its row next to the prompt below. */
+/** The meal-plan contract; the Assistant page shows its row next to the prompt below. */
 export const MEAL_PLAN_GUIDE_FILE_NAME = "meal-plan.md";
 
 const PROMPT_FREE_TEXT_LIMIT = 600;
@@ -49,7 +49,7 @@ function mealDescription(meal, questionnaire) {
   return `${meal.name} (${slots}; ${cooking.length ? cooking.join(", ") : "no prep or cooking"})`;
 }
 /** What the person tells their assistant to draft the fortnight menu: the meals (with defaults filled — pass
- *  mealsWithDefaults(...).meals) and every answered ForkKnife preference; blank answers are left out. */
+ *  mealsWithDefaults(...).meals) and every answered meal preference; blank answers are left out. */
 export function mealPlanPrompt({ meals, answers, questionnaire }) {
   const options = questionnaire.options;
   const preferences = [
@@ -89,7 +89,7 @@ const FILE_PURPOSES = {
   "generator.md": "how the weights file’s `proposal` (a proposed block focus grid) is generated and read",
   "importers.md": "the import document: turning an existing planner/calendar into standing appointments, fixed activities and a block focus grid",
   "import-from-spreadsheet.md": "the method for reading a spreadsheet (or any calendar export) into an import document: survey, classify, map, check completeness, worked example",
-  "meal-plan.md": "the fortnight menu: the meal-plan document (dishes per meal and the days they are eaten, leftovers rules) the ForkKnife assistant page’s prompt asks for and applies",
+  "meal-plan.md": "the fortnight menu: the meal-plan document (dishes per meal and the days they are eaten, leftovers rules) the Assistant page’s menu prompt asks for and applies",
   "import.schema.json": "JSON schema for an import document",
   "meal-plan.schema.json": "JSON schema for a meal-plan document",
   "weights.schema.json": "JSON schema for a weights file",
@@ -126,7 +126,7 @@ function readmeText(fileNames, todayIsoDate, weightsName, llmGuideText) {
     `Generated ${todayIsoDate} by the FortKnight app for one person’s repeating 14-day (fortnight) schedule.`,
     "Upload every file in this set to your workspace; together they are the assistant’s whole context.",
     "Nothing here was sent anywhere by the app — the person chose to upload it.",
-    "The person may also send you one of the app’s prompts: the FortKnight assistant page’s spreadsheet prompt (with import-from-spreadsheet.md and their spreadsheet) or the ForkKnife assistant page’s menu prompt (their meals and preferences; answer with a meal-plan document, meal-plan.md).",
+    "The person may also send you one of the app’s prompts: the Assistant page’s spreadsheet prompt (with import-from-spreadsheet.md and their spreadsheet) or its menu prompt (their meals and preferences; answer with a meal-plan document, meal-plan.md).",
     "",
     "## Files",
     index,

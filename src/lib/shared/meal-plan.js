@@ -191,7 +191,8 @@ export function weekdayOf(dayKey) {
   return WEEKDAY_NAMES.find((name) => name.startsWith(short));
 }
 
-/** The menu's prep and cook tasks as import-document (version 2) tasks — what ForkKnife creates for the person to
+/** The menu's prep and cook tasks as import-document (version 2) tasks — what the menu editor creates for the
+ *  person to
  *  paste into Apply from assistant. Per item: the meal needs cooking -> "Cook <dish> (<Meal>)" on the first serving
  *  at the meal's slot; needs prepping -> "Prep <dish> (<Meal>)" the day before, in the evening — unless the dish
  *  itself opted out (`needsCooked` / `needsPrepped` false on the item, the editor's "no cooking / no prep needed"),
@@ -227,8 +228,8 @@ export function tasksFromMealPlan(plan, meals, datesByDayKey) {
   return { tasks, review };
 }
 
-/** The whole import document (version 2) ForkKnife creates: the tasks, a readable review, and the menu itself. */
-export function forkknifeImportDocument(plan, meals, datesByDayKey, description = "Meal prep and cooking tasks from the ForkKnife menu") {
+/** The whole import document (version 2) the menu editor creates: the tasks, a readable review, and the menu itself. */
+export function forkknifeImportDocument(plan, meals, datesByDayKey, description = "Meal prep and cooking tasks from the fortnight menu") {
   const { tasks, review } = tasksFromMealPlan(plan, meals, datesByDayKey);
   return {
     schemaVersion: 2,

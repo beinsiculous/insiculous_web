@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Achievements — Be Insiculous"
+  description="Every achievement this site can award — unlocked and locked — and what this browser has recorded in the games."
+>
+  <p class="section-label">achievements</p>
+  <h1>Achievements</h1>
+  <p class="intro">
+    Three kinds live here: the studio’s (insiculous), the games’, and FortKnight’s. The site’s own
+    list shows the whole registry, locked entries included; the games’ boards show what this browser
+    has unlocked, and each game keeps its own full list. Everything is recorded on this device only —
+    nothing is uploaded, and no server holds a copy.
+  </p>
+
+  <div id="achievementsBoard"></div>
+  <p class="muted" id="achievementsStatus" role="status"></p>
+</BaseLayout>
+
+<script>
+  import { renderAchievementsBoard, totalAchievementCount } from "../lib/achievements.js";
+
+  const board = document.getElementById("achievementsBoard");
+  const status = document.getElementById("achievementsStatus");
+
+  // The full board: every type, with the registry spine (locked entries included) for the site's
+  // own two. The null guard is the checker's idiom (GameEmbed.astro): both elements are prerendered
+  // above, so a null would mean this script drifted from its own markup.
+  if (board) renderAchievementsBoard(board, { includeLocked: true });
+  if (status) {
+    const total = totalAchievementCount();
+    status.textContent = total === 0
+      ? "Nothing unlocked on this device yet."
+      : `${total} achievement${total === 1 ? "" : "s"} unlocked on this device.`;
+  }
+</script>
+
+<style>
+  .intro {
+    max-width: 42em;
+    margin-bottom: 2rem;
+  }
+
+  /* global.css has no .muted (that class is app-widgets.css's); this page styles its own. */
+  .muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  /* The board's DOM is built in script (src/lib/achievements.js), so a scoped selector cannot reach
+     it — these two are :global on purpose. */
+  :global(.achievement-locked) {
+    color: var(--text-dim);
+  }
+
+  :global(.achievement-note) {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+  }
+</style>

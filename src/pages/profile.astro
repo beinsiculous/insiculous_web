@@ -2,19 +2,18 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import { facePath } from "../lib/faces.js";
-// This page belongs to beinsiculous.com rather than to either app, so it is a studio page like any other: BaseLayout,
-// global.css, the six-link header and the studio footer. Only the widgets it shares with the two faces come from
+// This page belongs to beinsiculous.com rather than to the app, so it is a studio page like any other: BaseLayout,
+// global.css, the six-link header and the studio footer. Only the widgets it shares with the face come from
 // elsewhere (src/styles/app-widgets.css) — the panels, the buttons and the workspace file rows.
 import "../styles/app-widgets.css";
 
-// Profile (shared by FortKnight and ForkKnife): the active profile (switch, name, Duplicate, Delete) and the
-// assistant-workspace downloads. The answers themselves are edited on each face's Questionnaire page (docs/app.md).
-// The switcher lives here rather than in the header: BaseLayout has no chrome for it, and ForkKnife hides its own
-// header copy on a phone (faces.css) on the promise that this page carries one.
+// Profile (FortKnight's, held by the studio): the active profile (switch, name, Duplicate, Delete) and the
+// assistant-workspace downloads. The answers themselves are edited on the face's Questionnaire page (docs/app.md).
+// The switcher lives here rather than in the header: BaseLayout has no chrome for it.
 ---
 <BaseLayout
   title="Profile — Be Insiculous"
-  description="Your FortKnight and ForkKnife profile: switch or rename it, and download the file set for your own AI workspace."
+  description="Your FortKnight profile: switch or rename it, and download the file set for your own AI workspace."
 >
   <section class="panel">
     <h1>Profile</h1>
@@ -31,7 +30,7 @@ import "../styles/app-widgets.css";
       <button type="button" id="duplicateProfileButton">Duplicate as…</button>
       <button type="button" id="deleteProfileButton">Delete</button>
     </div>
-    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown above. Both apps share this profile: FortKnight’s answers live on its <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; your meals and menu on ForkKnife’s <a href={facePath("forkknife", "questionnaire/")}>Questionnaire</a> and <a href={facePath("forkknife")}>Overview</a>.</p>
+    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown above. Your answers live on FortKnight’s <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; the menu is edited on its <a href={facePath("fortknight", "build/")}>Build page</a>.</p>
   </section>
 
   <section class="panel">
@@ -47,13 +46,15 @@ import "../styles/app-widgets.css";
   </section>
 
   <section class="panel">
-    <h2>Achievements</h2>
+    <h2 id="achievementsHeading">Achievements</h2>
     <p class="muted">
-      What the games unlock stays on the device you played them on; this board shows what this
-      browser has recorded, and nothing is uploaded. The browser builds don’t record achievements
-      yet — the board fills in as that engine work ships.
+      Everything this browser has unlocked — the site’s and the games’ — stays on the device you
+      earned it on; this board shows what this browser has recorded, and nothing is uploaded.
     </p>
-    <div id="achievementsBoard"></div>
+    <!-- tabindex + role/aria-labelledby: the 75vh cap (app-widgets.css .achievements-scroll) makes
+         this a scrollable region once it fills, and a scrollable region must be keyboard-reachable
+         and named — axe's scrollable-region-focusable rules on exactly this. -->
+    <div id="achievementsBoard" class="achievements-scroll" tabindex="0" role="group" aria-labelledby="achievementsHeading"></div>
     <p class="muted" id="achievementsStatus"></p>
     <div class="button-row" id="achievementsActions" hidden>
       <button type="button" id="deleteAchievementsButton">Delete recorded achievements from this device</button>
@@ -68,7 +69,8 @@ import "../styles/app-widgets.css";
   import { askProfileName } from "../lib/profile-name-dialog.js";
   import { activeWeights } from "../lib/shared/weights-rules.js";
   import { clearMyFortSeed, describeMyFortSeed } from "../lib/myfort-store.js";
-  import { achievementTitleFromId, clearGameAchievements, loadGameAchievements } from "../lib/games-achievements.js";
+  import { clearGameAchievements } from "../lib/games-achievements.js";
+  import { clearSiteAchievements, renderAchievementsBoard } from "../lib/achievements.js";
 
   const elements = {
     seedStatus: document.getElementById("seedStatus"),
@@ -180,29 +182,16 @@ import "../styles/app-widgets.css";
     renderSeed();
   });
 
-  /** One heading + list per game this browser has unlocks for; the save file has ids only, so titles are prettified ids. */
+  /** All three achievement types on one board; the shared renderer owns the groups (src/lib/achievements.js). */
   function renderAchievements() {
-    const boards = loadGameAchievements();
-    elements.achievementsBoard.textContent = "";
-    elements.achievementsActions.hidden = boards.length === 0;
-    elements.achievementsStatus.textContent = boards.length === 0 ? "No achievements recorded in this browser yet." : "";
-    for (const { title, unlocks } of boards) {
-      const heading = document.createElement("h3");
-      heading.textContent = `${title} — ${unlocks.length} unlocked`;
-      const list = document.createElement("ul");
-      for (const unlock of unlocks) {
-        const item = document.createElement("li");
-        item.textContent = unlock.unlockedAt
-          ? `${achievementTitleFromId(unlock.id)} — ${unlock.unlockedAt.toLocaleDateString()}`
-          : achievementTitleFromId(unlock.id);
-        list.append(item);
-      }
-      elements.achievementsBoard.append(heading, list);
-    }
+    const rendered = renderAchievementsBoard(elements.achievementsBoard);
+    elements.achievementsActions.hidden = !rendered;
+    elements.achievementsStatus.textContent = rendered ? "" : "No achievements recorded in this browser yet.";
   }
 
   elements.deleteAchievementsButton.addEventListener("click", () => {
-    if (!confirm("Delete every game's recorded achievements from this device? Unlock them again to bring them back.")) return;
+    if (!confirm("Delete every recorded achievement from this device, the site’s and the games’? Unlock them again to bring them back.")) return;
+    clearSiteAchievements();
     clearGameAchievements();
     renderAchievements();
   });

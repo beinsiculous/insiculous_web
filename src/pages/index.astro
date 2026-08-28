@@ -49,16 +49,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section>
     <h2>The planner</h2>
     <p>
-      <a href="/fortknight/">FortKnight</a> and <a href="/forkknife/">ForkKnife</a> are two
-      views of one planner. FortKnight is the schedule: a repeating fourteen-day cycle, a
-      page per day, and where your time actually goes by category. ForkKnife is the menu:
-      the meals, the dish for each day, and the prep and cooking tasks that come with them.
+      <a href="/fortknight/">FortKnight</a> is the planner: a repeating fourteen-day
+      cycle with a page per day, and where your time actually goes by category. The
+      menu is part of that same schedule — the meals, the dish for each day, and the
+      prep and cooking tasks that come with them.
     </p>
     <p>
       It runs in your browser with no account and no server — your profile
       stays on your device. There is no AI in the app either: if you want help
       from an assistant, you download your files and take them to your own.
     </p>
+    <div class="button-row">
+      <button type="button" class="button secondary" id="createProfileButton" hidden>Create a profile</button>
+    </div>
+    <p class="muted" id="createProfileStatus" role="status"></p>
   </section>
 
   <section class="cta">
@@ -67,6 +71,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <a class="button secondary" href="/devlog/">read the devlog →</a>
   </section>
 </BaseLayout>
+
+<script>
+  import { askProfileName } from "../lib/profile-name-dialog.js";
+  import { PROFILE_PATH } from "../lib/faces.js";
+  import { withBase } from "../lib/paths.js";
+  import { unusedProfileName } from "../lib/shared/profile-names.js";
+  import { createProfile, loadSettings, profileIds, saveSettings } from "../lib/shared/user-settings.js";
+
+  // The button starts hidden and is revealed here: it does nothing without JavaScript, and a dead
+  // button is worse than no button (the FortKnight overview's create-profile button sets the rule).
+  // The null guards are the checker's idiom (GameEmbed.astro), not real armour — both elements are
+  // prerendered above, so a null would mean this script drifted from its own markup.
+  const createButton = document.getElementById("createProfileButton");
+  const status = document.getElementById("createProfileStatus");
+  if (createButton) createButton.hidden = false;
+
+  createButton?.addEventListener("click", async () => {
+    const current = loadSettings();
+    /** @type {string[]} */
+    const takenIds = [...profileIds(current), current.activeWeightsId];
+    const created = await askProfileName({
+      title: "Create a profile",
+      name: unusedProfileName(takenIds),
+      takenIds,
+      confirmLabel: "Create profile",
+      canCancel: true,
+      commit(typedName) {
+        const settings = loadSettings(); // re-read here: the dialog may have been open a while
+        createProfile(settings, typedName);
+        saveSettings(settings);
+        return settings.activeWeightsId;
+      },
+    });
+    if (!created || !status) return; // dismissed — the status line keeps whatever it said
+    status.textContent = `Profile ${created} is now active on this device. `;
+    const link = document.createElement("a");
+    link.href = withBase(PROFILE_PATH);
+    link.textContent = "See it on the Profile page.";
+    status.appendChild(link);
+  });
+</script>
 
 <style>
   .hero {
@@ -90,5 +135,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     flex-wrap: wrap;
   }
 
-  /* .button / .button.secondary now live in src/styles/global.css — the devlog uses them too. */
+  /* .button / .button.secondary now live in src/styles/global.css — the devlog uses them too. They
+     were written for links; on a real <button> the cursor and the dimmed status line are this
+     page's own additions (global.css has no button-element or .muted rules). */
+  button.button {
+    cursor: pointer;
+  }
+
+  .button-row {
+    margin-top: 1rem;
+  }
+
+  .muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
 </style>

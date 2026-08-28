@@ -50,11 +50,16 @@ of one of four kinds (`docs/llm-guide.md` → "Replying from an assistant worksp
 `userWeightsFromAnswers()` in `src/lib/shared/weights-rules.js` do the applying (mirrors of
 `fk_core.validate.check_standing_appointment` and friends).
 
-## The pages (`/profile/`, `/fortknight/assistant/` and `/forkknife/assistant/` in the Astro app)
+## The pages (`/profile/` on the live site; `/fortknight/assistant/` and `/forkknife/assistant/` in the parked creation chain's design)
 - **Workspace files** (Profile page — shared by FortKnight and ForkKnife — once a profile is saved) — one row per file (name, size, Copy, Download) and *Download all* (fires the
   downloads ~300 ms apart; browsers may ask once to allow multiple downloads, Safari may take only
   the first — Copy is the fallback). No zip: workspaces take individual files.
-- **Apply from assistant** (both assistant pages; step 1 differs — FortKnight hands out the spreadsheet prompt + guide, ForkKnife the menu prompt + `meal-plan.md` + template — step 2 is one shared component, `ApplyFromAssistant.astro`, and accepts any of the four kinds on either page) — paste or upload the JSON, *Apply*; the status line says what happened
+- **Apply from assistant** (the parked creation chain's design: both assistant pages answer with a
+  `FaceInDevelopment` placeholder on `main`, and step 2's shared component, `ApplyFromAssistant.astro`,
+  is deleted there — it lives only on the parked `fortknightdev`/`forknifedev` playground branches.
+  In that design step 1 differs — FortKnight hands out the spreadsheet prompt + guide, ForkKnife the
+  menu prompt + `meal-plan.md` + template — and step 2 is one shared component accepting any of the
+  four kinds on either page) — paste or upload the JSON, *Apply*; the status line says what happened
   (including skipped appointments and why). A weights file goes to the profile of its `id` (updated,
   or created and made active); an import document to the active profile; when an apply creates a profile (a new id, or the first save of an unsaved one) the page prompts for its name; a settings file's
   profiles are merged in (added or updated, each re-derived from its answers; the device's other

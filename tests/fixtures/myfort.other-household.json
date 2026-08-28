@@ -1,0 +1,749 @@
+{
+  "meta": {
+    "format": "myfort",
+    "version": 1,
+    "exportedAt": "2026-08-20T09:30:00+00:00"
+  },
+  "days": [
+    {
+      "dayKey": "sun-a",
+      "label": "Sunday A",
+      "week": 1,
+      "mainFocus": "meals",
+      "mainFocusLabel": "MEALS",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Baking",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Family Lunch",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Corn chowder"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Rest",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Corn chowder",
+        "snack": "Oat bars",
+        "dinner": "Stuffed peppers"
+      }
+    },
+    {
+      "dayKey": "mon-b",
+      "label": "Monday B",
+      "week": 1,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Deep Work",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Deep Work",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Tomato dal"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Admin",
+          "meal": null
+        }
+      ],
+      "appointments": [
+        {
+          "id": "mon-b-example-swim",
+          "title": "Example Swim",
+          "category": "health",
+          "timing": {
+            "estimatedStart": "17:30",
+            "travelPrepComplete": "17:45",
+            "timeStart": "18:00",
+            "timeFinished": "19:00",
+            "estimatedEnd": "19:15"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Tomato dal",
+        "snack": "Beet fritters",
+        "dinner": "Spinach pasta"
+      }
+    },
+    {
+      "dayKey": "tue-a",
+      "label": "Tuesday A",
+      "week": 1,
+      "mainFocus": "cleaning",
+      "mainFocusLabel": "CLEANING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Kitchen Reset",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Laundry",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Carrot soup"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Reading",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Carrot soup",
+        "snack": "Oat bars",
+        "dinner": "Mushroom pie"
+      }
+    },
+    {
+      "dayKey": "wed-b",
+      "label": "Wednesday B",
+      "week": 1,
+      "mainFocus": "health",
+      "mainFocusLabel": "HEALTH",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Walk",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Gardening",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Couscous salad"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Stretching",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Couscous salad",
+        "snack": "Beet fritters",
+        "dinner": "Pumpkin curry"
+      }
+    },
+    {
+      "dayKey": "thu-a",
+      "label": "Thursday A",
+      "week": 1,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Deep Work",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Meetings",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Mushroom pie"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Admin",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Mushroom pie",
+        "snack": "Oat bars",
+        "dinner": "Chickpea tagine"
+      }
+    },
+    {
+      "dayKey": "fri-b",
+      "label": "Friday B",
+      "week": 1,
+      "mainFocus": "friends-family",
+      "mainFocusLabel": "FRIENDS & FAMILY",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Errands",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Visitors",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Pumpkin curry"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Games",
+          "meal": null
+        }
+      ],
+      "appointments": [
+        {
+          "id": "fri-b-example-book-club",
+          "title": "Example Book Club",
+          "category": "friends-family",
+          "timing": {
+            "estimatedStart": "18:30",
+            "travelPrepComplete": "18:45",
+            "timeStart": "19:00",
+            "timeFinished": "20:30",
+            "estimatedEnd": "20:45"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Pumpkin curry",
+        "snack": "Beet fritters",
+        "dinner": "OUT"
+      }
+    },
+    {
+      "dayKey": "sat-a",
+      "label": "Saturday A",
+      "week": 1,
+      "mainFocus": "flexible",
+      "mainFocusLabel": "FLEXIBLE",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Market",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Projects",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Chickpea tagine"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Rest",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Chickpea tagine",
+        "snack": "Oat bars",
+        "dinner": "Spinach pasta"
+      }
+    },
+    {
+      "dayKey": "sun-b",
+      "label": "Sunday B",
+      "week": 2,
+      "mainFocus": "meals",
+      "mainFocusLabel": "MEALS",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Meal Prep",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Family Lunch",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Tomato dal"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Rest",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Tomato dal",
+        "snack": "Beet fritters",
+        "dinner": "Corn chowder"
+      }
+    },
+    {
+      "dayKey": "mon-a",
+      "label": "Monday A",
+      "week": 2,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Deep Work",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Deep Work",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Carrot soup"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Admin",
+          "meal": null
+        }
+      ],
+      "appointments": [
+        {
+          "id": "mon-a-example-swim",
+          "title": "Example Swim",
+          "category": "health",
+          "timing": {
+            "estimatedStart": "17:30",
+            "travelPrepComplete": "17:45",
+            "timeStart": "18:00",
+            "timeFinished": "19:00",
+            "estimatedEnd": "19:15"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Carrot soup",
+        "snack": "Oat bars",
+        "dinner": "Stuffed peppers"
+      }
+    },
+    {
+      "dayKey": "tue-b",
+      "label": "Tuesday B",
+      "week": 2,
+      "mainFocus": "cleaning",
+      "mainFocusLabel": "CLEANING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Bathroom Reset",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Floors",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Couscous salad"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Reading",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Couscous salad",
+        "snack": "Beet fritters",
+        "dinner": "Tomato dal"
+      }
+    },
+    {
+      "dayKey": "wed-a",
+      "label": "Wednesday A",
+      "week": 2,
+      "mainFocus": "spirituality-development",
+      "mainFocusLabel": "SPIRITUALITY & DEVELOPMENT",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Study",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Practice",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Spinach pasta"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Journaling",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Spinach pasta",
+        "snack": "Oat bars",
+        "dinner": "Mushroom pie"
+      }
+    },
+    {
+      "dayKey": "thu-b",
+      "label": "Thursday B",
+      "week": 2,
+      "mainFocus": "working",
+      "mainFocusLabel": "WORKING",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Deep Work",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Meetings",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Stuffed peppers"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Admin",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Stuffed peppers",
+        "snack": "Beet fritters",
+        "dinner": "Carrot soup"
+      }
+    },
+    {
+      "dayKey": "fri-a",
+      "label": "Friday A",
+      "week": 2,
+      "mainFocus": "operations",
+      "mainFocusLabel": "OPERATIONS",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Budget",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Repairs",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Corn chowder"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Planning",
+          "meal": null
+        }
+      ],
+      "appointments": [
+        {
+          "id": "fri-a-example-dentist",
+          "title": "Example Dentist",
+          "category": "health",
+          "timing": {
+            "estimatedStart": "13:30",
+            "travelPrepComplete": "13:45",
+            "timeStart": "14:00",
+            "timeFinished": "14:45",
+            "estimatedEnd": "15:00"
+          }
+        }
+      ],
+      "meals": {
+        "brunch": "Corn chowder",
+        "snack": "Oat bars",
+        "dinner": "Chickpea tagine"
+      }
+    },
+    {
+      "dayKey": "sat-b",
+      "label": "Saturday B",
+      "week": 2,
+      "mainFocus": "flexible",
+      "mainFocusLabel": "FLEXIBLE",
+      "blocks": [
+        {
+          "key": "early",
+          "label": "Early",
+          "start": "08:00",
+          "end": "11:00",
+          "focus": "Market",
+          "meal": null
+        },
+        {
+          "key": "midday",
+          "label": "Midday",
+          "start": "11:00",
+          "end": "15:00",
+          "focus": "Projects",
+          "meal": {
+            "name": "Brunch",
+            "dish": "Pumpkin curry"
+          }
+        },
+        {
+          "key": "late",
+          "label": "Late",
+          "start": "15:00",
+          "end": "18:00",
+          "focus": "Rest",
+          "meal": null
+        }
+      ],
+      "appointments": [],
+      "meals": {
+        "brunch": "Pumpkin curry",
+        "snack": "Beet fritters",
+        "dinner": "Couscous salad"
+      }
+    }
+  ],
+  "season": {
+    "key": "harvesttide",
+    "name": "Harvest Tide",
+    "isCurrent": true,
+    "gregorianRange": "August – October",
+    "startDescription": "First mist on the fields",
+    "safeOutsidePercent": 58.33,
+    "focus": [
+      {
+        "key": "meals",
+        "label": "Meals"
+      },
+      {
+        "key": "working",
+        "label": "Working"
+      }
+    ],
+    "produce": [
+      {
+        "group": "vegetables",
+        "label": "Vegetables",
+        "items": [
+          {
+            "rank": "hero",
+            "name": "Example Pumpkin"
+          },
+          {
+            "rank": "secondary",
+            "name": "Example Beetroot"
+          }
+        ]
+      },
+      {
+        "group": "fruit",
+        "label": "Fruit",
+        "items": [
+          {
+            "rank": "hero",
+            "name": "Example Plum"
+          }
+        ]
+      }
+    ]
+  },
+  "year": {
+    "status": "year",
+    "year": "2026",
+    "daysInYear": 365,
+    "daysCovered": 365,
+    "coversWholeYear": true,
+    "firstDate": "2026-01-01",
+    "lastDate": "2026-12-31",
+    "slices": [
+      {
+        "key": "thaw",
+        "name": "Thaw",
+        "days": 61,
+        "percent": 17,
+        "startDegree": 0,
+        "sweepDegree": 60,
+        "isCurrent": false
+      },
+      {
+        "key": "longlight",
+        "name": "Longlight",
+        "days": 122,
+        "percent": 33,
+        "startDegree": 60,
+        "sweepDegree": 120,
+        "isCurrent": false
+      },
+      {
+        "key": "harvesttide",
+        "name": "Harvest Tide",
+        "days": 61,
+        "percent": 17,
+        "startDegree": 180,
+        "sweepDegree": 60,
+        "isCurrent": true
+      },
+      {
+        "key": "firstfrost",
+        "name": "First Frost",
+        "days": 51,
+        "percent": 14,
+        "startDegree": 240,
+        "sweepDegree": 50,
+        "isCurrent": false
+      },
+      {
+        "key": "deepwinter",
+        "name": "Deep Winter",
+        "days": 70,
+        "percent": 19,
+        "startDegree": 290,
+        "sweepDegree": 70,
+        "isCurrent": false
+      }
+    ]
+  }
+}

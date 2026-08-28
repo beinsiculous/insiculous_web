@@ -3,10 +3,9 @@
 // reloads the page so every page re-renders from it; "New profile…" creates an unsaved profile and opens the
 // questionnaire at `questionnaireHref` to answer and save it. Rename/Duplicate/Delete live on the Profile page.
 //
-// Rendered in exactly one place per page, never two: FaceLayout puts it in the header of the ten face pages, and
-// the Profile page puts it in its own first panel. The Profile page needs its own copy for two reasons — it is on
-// BaseLayout, which has no chrome to hold it, and ForkKnife hides the header copy outright below 900px
-// (src/styles/faces.css) on the promise that the Profile page carries one.
+// Rendered in exactly one place per page, never two: FaceLayout puts it in the header of the face pages, and
+// the Profile page puts it in its own first panel. The Profile page needs its own copy because it is on
+// BaseLayout, which has no chrome to hold one.
 //
 // The slot takes whatever belongs beside the dropdown; FaceLayout passes its ⚙ Profile link, so that link is
 // hidden until a profile is saved too. The Profile page passes nothing — you are already there.

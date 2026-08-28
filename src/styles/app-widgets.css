@@ -1,8 +1,8 @@
 /* The handful of app widgets the studio's own pages need — currently just the shared Profile page
-   (src/pages/profile.astro), which is a beinsiculous.com page that happens to edit FortKnight and ForkKnife's
+   (src/pages/profile.astro), which is a beinsiculous.com page that happens to edit FortKnight's
    on-device profile.
 
-   The same widgets exist for the two faces in src/styles/faces.css, but that file cannot be shared here: it is a
+   The same widgets exist for the face in src/styles/faces.css, but that file cannot be shared here: it is a
    global stylesheet for the face apps, and its bare element rules (`body { font-family: "Trebuchet MS"; display:
    flex }`, `html, body { cursor: … }`, `h1 { font-size: 1.5rem }`) would fight global.css. So these are written
    against the studio's own tokens instead of adapted from the faces' — this file has no coupling to faces.css and
@@ -10,7 +10,9 @@
    carry CSS they never use.
 
    Class names match faces.css because the markup is shared (ProfileSwitcher.astro, and the file rows built by
-   lib/shared/workspace-files.js). */
+   lib/shared/workspace-files.js). The profile-name dialog's styles are NOT here: they live in global.css
+   (every studio page can open the dialog via the first-achievement prompt) and faces.css — that pair
+   names each other. */
 
 [hidden] { display: none !important; }   /* display rules on classes must never beat the hidden attribute */
 
@@ -86,21 +88,11 @@ select {
 /* 20rem shows a whole generated id and its arrow; the min() lets a narrow screen take it back without a
    media query, which this file needs because /profile/ is a studio page and never loads faces.css. */
 
-/* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
-/* Built in JS and appended to <body>, so it inherits nothing from the page. The same class names carry
-   an independent rule set in faces.css — these two files are not shared (see the header). */
-.name-dialog {
-  padding: 0; border: 1px solid var(--border); border-radius: 10px;
-  background: var(--surface-raised); color: var(--text-bright);
-  width: min(28rem, calc(100vw - 2rem)); max-width: 100%;
-}
-.name-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
-.name-dialog-form { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.1rem; }
-.name-dialog h2 { margin: 0; font-size: 1rem; }
-.name-dialog .inline-field { min-width: 0; }
-.name-dialog input { width: 100%; min-width: 0; }
-.name-dialog-error:empty { display: none; }
-.name-dialog-error { color: var(--text-bright); margin: 0; }
+/* ---------- the achievements board ---------- */
+/* The 75% rule, same as the /games/ grid: the achievements board never takes more than 75% of the
+   viewport height — past that it scrolls inside its own box instead of pushing the panels below it
+   (the delete buttons included) out of reach. */
+.achievements-scroll { max-height: 75vh; overflow-y: auto; }
 
 /* ---------- assistant workspace files ---------- */
 .file-list { display: flex; flex-direction: column; gap: 0.35rem; }

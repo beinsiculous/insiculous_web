@@ -12,9 +12,16 @@
 // suite covers it — so this page looks things up and draws them. That is not a shortcut: the site's own
 // FortKnight evaluator resolves Ostara and Fimbulsumar on sun-b and has no transition weeks, so a page that
 // resolved this data itself would be wrong for half the year.
+//
+// The drawing is not here: src/lib/myfort-view.js builds the panels (shared with every seed-fed page),
+// src/components/MyFortStyles.astro carries their styles (is:global, because the DOM is built in script),
+// and src/lib/myfort-seed-access.js decides what the stored seed is. What remains below is this page's own
+// wiring: its file picker, its Forget button, and its status line.
 import FaceLayout from "../../layouts/FaceLayout.astro";
+import MyFortStyles from "../../components/MyFortStyles.astro";
 ---
 <FaceLayout title="My Fort" face="fortknight">
+  <MyFortStyles />
   <section class="panel">
     <h1>My Fort</h1>
     <p class="muted" id="myFortIntro">
@@ -33,44 +40,13 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
   <div id="myFortBody"></div>
 </FaceLayout>
 
-<style is:global>
-  /* Sized to be read from across a room: this is the one page here meant for a television driven by a
-     computer, not for a phone held at arm's length.
-     
-     is:global is load-bearing, not laziness. Astro scopes a plain <style> by stamping every element in the
-     template with a data-astro-cid attribute — but everything below #myFortBody is built by
-     document.createElement in the script, so it never carries the attribute and no scoped rule can match
-     it. Left scoped, the wheel renders 876x0 and every size below falls back to the browser's. Nothing
-     here can collide: every selector is prefixed myfort-. Same problem the profile-name dialog has, which
-     faces.css solves the same way for the same reason. */
-  .myfort-day { margin-bottom: 1.25rem; }
-  .myfort-day h3 { margin: 0; font-size: 1.5rem; }
-  .myfort-focus { font-size: 1.15rem; font-weight: 700; margin: 0.15rem 0 0.75rem; }
-  .myfort-meals { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin: 0 0 0.75rem; padding: 0; list-style: none; }
-  .myfort-meal { min-width: 12rem; }
-  .myfort-meal-name { display: block; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
-  .myfort-meal-dish { font-size: 1.2rem; }
-  .myfort-appointments { margin: 0 0 0.75rem; padding-left: 1.1rem; font-size: 1.1rem; }
-  .myfort-blocks { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
-  .myfort-block { font-size: 1rem; }
-  .myfort-wheel-row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
-  .myfort-wheel { width: 15rem; height: 15rem; border-radius: 50%; flex: none; }
-  .myfort-key { margin: 0; padding: 0; list-style: none; }
-  .myfort-key li { display: flex; align-items: center; gap: 0.6rem; font-size: 1.1rem; padding: 0.15rem 0; }
-  .myfort-swatch { width: 0.9rem; height: 0.9rem; border-radius: 50%; flex: none; }
-</style>
-
 <script>
   import { validateMyFortSeed, readableDays, describeExportAge } from "../../lib/myfort.js";
   import { MYFORT_SEED_KEY, clearMyFortSeed } from "../../lib/myfort-store.js";
+  import { readStoredMyFortSeed } from "../../lib/myfort-seed-access.js";
+  import { renderDayPanel, renderSeasonPanel, renderYearPanel } from "../../lib/myfort-view.js";
   import { localTodayIsoDate } from "../../lib/shared/clock.js";
-
-  // The five seasons' colours. Focus Key has its own copy in its theme; this is the site's, because the site's
-  // accessibility gate is what these have to satisfy.
-  const SEASON_COLOURS = {
-    ostara: "#4d7c0f", fimbulsumar: "#c2410c", spooky: "#6d28d9",
-    christmas: "#9f1239", hogmanay: "#1d4ed8",
-  };
+  import { maybePromptForProfile, unlockAchievement } from "../../lib/achievements.js";
 
   const intro = document.getElementById("myFortIntro");
   const fileInput = document.getElementById("myFortFileInput");
@@ -78,138 +54,12 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
   const status = document.getElementById("myFortStatus");
   const body = document.getElementById("myFortBody");
 
-  function element(tagName, className, text) {
-    const node = document.createElement(tagName);
-    if (className) node.className = className;
-    if (text !== undefined && text !== null) node.textContent = String(text);
-    return node;
-  }
-
-  function renderDay(day) {
-    const panel = element("section", "panel myfort-day");
-    panel.appendChild(element("h3", null, day.label ?? day.dayKey));
-    if (day.mainFocusLabel) panel.appendChild(element("p", "myfort-focus", day.mainFocusLabel));
-
-    const meals = day.meals ?? {};
-    const named = [["Brunch", meals.brunch], ["Snack", meals.snack], ["Dinner", meals.dinner]]
-      .filter(([, dish]) => typeof dish === "string" && dish.length > 0);
-    if (named.length) {
-      const list = element("ul", "myfort-meals");
-      for (const [name, dish] of named) {
-        const item = element("li", "myfort-meal");
-        item.appendChild(element("span", "myfort-meal-name muted", name));
-        item.appendChild(element("span", "myfort-meal-dish", dish));
-        list.appendChild(item);
-      }
-      panel.appendChild(list);
-    }
-
-    const appointments = Array.isArray(day.appointments) ? day.appointments : [];
-    if (appointments.length) {
-      const list = element("ul", "myfort-appointments");
-      for (const appointment of appointments) {
-        const timing = appointment?.timing ?? {};
-        const when = timing.timeStart && timing.timeFinished ? ` · ${timing.timeStart}–${timing.timeFinished}` : "";
-        list.appendChild(element("li", null, `${appointment?.title ?? "Appointment"}${when}`));
-      }
-      panel.appendChild(list);
-    }
-
-    // Named blocks only. "What a page can draw, it draws" cuts both ways: a block with neither a label nor
-    // a key is not a thing to draw, and interpolating it would put the word "undefined" on a television.
-    const blocks = (Array.isArray(day.blocks) ? day.blocks : [])
-      .map((block) => ({ name: block?.label ?? block?.key, focus: block?.focus }))
-      .filter((block) => typeof block.name === "string" && block.name.length > 0);
-    if (blocks.length) {
-      const list = element("ul", "myfort-blocks");
-      for (const block of blocks) {
-        const focus = typeof block.focus === "string" && block.focus ? ` — ${block.focus}` : "";
-        list.appendChild(element("li", "myfort-block muted", `${block.name}${focus}`));
-      }
-      panel.appendChild(list);
-    }
-    return panel;
-  }
-
-  function renderSeason(season) {
-    const panel = element("section", "panel");
-    panel.appendChild(element("h2", null, season.name ?? "This season"));
-    if (season.gregorianRange) panel.appendChild(element("p", "muted", season.gregorianRange));
-    if (typeof season.safeOutsidePercent === "number") {
-      panel.appendChild(element("p", null, `${Math.round(season.safeOutsidePercent)}% of the day is safe outside.`));
-    }
-    const produce = Array.isArray(season.produce) ? season.produce : [];
-    for (const group of produce) {
-      const items = (group?.items ?? []).map((item) => item?.name).filter(Boolean);
-      const label = typeof group?.label === "string" && group.label ? `${group.label}: ` : "";
-      if (items.length) panel.appendChild(element("p", null, `${label}${items.join(", ")}`));
-    }
-    return panel;
-  }
-
-  /** A slice worth drawing: a name, and two degrees that are really numbers. One bad value would otherwise
-   *  put "NaNdeg" in the gradient, and a browser drops an invalid declaration whole — a blank disc beside a
-   *  correct key, which reads as a rendering bug rather than as missing data. */
-  function drawableSlices(year) {
-    return (Array.isArray(year?.slices) ? year.slices : [])
-      .map((slice) => ({
-        key: slice?.key,
-        name: slice?.name ?? slice?.key,
-        percent: Number(slice?.percent),
-        startDegree: Number(slice?.startDegree),
-        sweepDegree: Number(slice?.sweepDegree),
-        isCurrent: Boolean(slice?.isCurrent),
-      }))
-      .filter((slice) => typeof slice.name === "string" && slice.name.length > 0
-        && Number.isFinite(slice.startDegree) && Number.isFinite(slice.sweepDegree));
-  }
-
-  function renderYear(year) {
-    const slices = drawableSlices(year);
-    if (!slices.length) return null;
-    const panel = element("section", "panel");
-    panel.appendChild(element("h2", null, `${year.year}`));
-
-    const row = element("div", "myfort-wheel-row");
-    // conic-gradient IS the wheel here. Focus Key draws it from nested rotated Views because React Native has
-    // no such thing; a browser does, and the seed already carries the degrees, so there is nothing to
-    // compute. Decorative: the same numbers are in the list beside it, which is what a reader gets.
-    const stops = slices
-      .map((slice) => {
-        const colour = SEASON_COLOURS[slice.key] ?? "#78716c";
-        return `${colour} ${slice.startDegree}deg ${slice.startDegree + slice.sweepDegree}deg`;
-      })
-      .join(", ");
-    const wheel = element("div", "myfort-wheel");
-    wheel.style.background = `conic-gradient(${stops})`;
-    wheel.setAttribute("role", "presentation");
-    row.appendChild(wheel);
-
-    const key = element("ul", "myfort-key");
-    for (const slice of slices) {
-      const item = element("li");
-      const swatch = element("span", "myfort-swatch");
-      swatch.style.background = SEASON_COLOURS[slice.key] ?? "#78716c";
-      item.appendChild(swatch);
-      const share = Number.isFinite(slice.percent) ? ` — ${slice.percent}%` : "";
-      item.appendChild(element("span", null, `${slice.name}${share}${slice.isCurrent ? " (now)" : ""}`));
-      key.appendChild(item);
-    }
-    row.appendChild(key);
-    panel.appendChild(row);
-    if (year.coversWholeYear === false) {
-      panel.appendChild(element("p", "muted",
-        `This seed covers ${year.daysCovered} of ${year.year}'s ${year.daysInYear} days.`));
-    }
-    return panel;
-  }
-
   function render(seed) {
     body.replaceChildren();
     const days = readableDays(seed);
-    for (const day of days) body.appendChild(renderDay(day));
-    if (seed.season) body.appendChild(renderSeason(seed.season));
-    const yearPanel = seed.year ? renderYear(seed.year) : null;
+    for (const day of days) body.appendChild(renderDayPanel(day));
+    if (seed.season) body.appendChild(renderSeasonPanel(seed.season));
+    const yearPanel = seed.year ? renderYearPanel(seed.year) : null;
     if (yearPanel) body.appendChild(yearPanel);
 
     forgetButton.hidden = false;
@@ -227,23 +77,22 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
     status.textContent = message ?? "";
   }
 
-  function adopt(candidate, source) {
+  function adopt(candidate) {
     const check = validateMyFortSeed(candidate);
     if (!check.ok) {
-      if (source === "storage") {
-        // A stored document that cannot be drawn must not be able to sit here failing forever: the wall
-        // display reloads into this path, so it is forgotten and the screen asks for a new one.
-        clearMyFortSeed();
-        showLoadPrompt(check.reason);
-      } else {
-        // A refused PICK leaves everything alone. The stored seed is still good and still on screen, so
-        // wiping the fortnight to report a bad file would take away the thing that was working — and the
-        // Forget button with it. Only the status line changes.
-        status.textContent = check.reason;
-      }
+      // A refused PICK leaves everything alone. The stored seed is still good and still on screen, so
+      // wiping the fortnight to report a bad file would take away the thing that was working — and the
+      // Forget button with it. Only the status line changes.
+      status.textContent = check.reason;
       return false;
     }
     render(check.seed);
+    // A seed that drew is a seed loaded: the "Moved In" achievement. Idempotent, so repeat loads
+    // cost nothing; and earning an achievement is what the once-ever create-profile prompt waits
+    // for. The stored-seed boot branch below does the same — it must, because a seed stored before
+    // this feature shipped never passed through here.
+    unlockAchievement("moved-in");
+    maybePromptForProfile();
     return true;
   }
 
@@ -253,7 +102,7 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      if (adopt(parsed, "file")) {
+      if (adopt(parsed)) {
         try {
           localStorage.setItem(MYFORT_SEED_KEY, text);
         } catch (error) {
@@ -273,40 +122,25 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
     showLoadPrompt("Forgotten. Load a seed to show the fortnight again.");
   });
 
-  // Boot goes through the SAME validator as a picked file. Reloading the display is the ordinary path, so
-  // it must not be the one nothing checks: a truncated value in storage would otherwise throw here, on a
-  // screen with no developer tools attached.
-  //
-  // The raw value is read rather than loadMyFortSeed()'s parsed one, because the two failures need
-  // different endings. A value that will not parse is not "no seed": loadMyFortSeed reports null for it,
-  // which would leave the wreckage in storage, invisible to this page AND to /profile/ — whose delete
-  // button hides when it believes there is nothing stored. So unreadable storage is cleared here, and the
-  // display comes back on the next reload instead of failing quietly forever.
-  let storedText = null;
-  try {
-    storedText = localStorage.getItem(MYFORT_SEED_KEY);
-  } catch (error) {
-    storedText = null; // a browser refusing storage has nothing to show
-  }
-  if (storedText === null) {
+  // Boot is readStoredMyFortSeed()'s decision, not this page's: every seed-fed page reloads into the same
+  // endings, and that module's header says why unreadable storage is forgotten but a readable seed the
+  // validator refuses is KEPT — a newer Focus Key export must survive until the website deploys the
+  // update, and the person holding the phone cannot redeploy the site.
+  const stored = readStoredMyFortSeed();
+  if (stored.status === "none") {
     showLoadPrompt("");
+  } else if (stored.status === "cleared") {
+    showLoadPrompt(stored.reason);
+  } else if (stored.status === "kept") {
+    // Reported, not forgotten: the seed stays stored, and the Forget button stays visible because it is
+    // now the only way this page offers to delete a seed it cannot draw.
+    showLoadPrompt(stored.reason);
+    forgetButton.hidden = false;
   } else {
-    let parsed;
-    let readable = true;
-    try {
-      parsed = JSON.parse(storedText);
-    } catch (error) {
-      readable = false;
-    }
-    // A stored literal `null` parses perfectly and is not a seed. Treated as unreadable rather than as
-    // "nothing stored", because "nothing stored" is the one answer that leaves it there for good: this
-    // page would ignore it and /profile/ hides its delete button when it believes there is nothing to
-    // delete.
-    if (!readable || parsed === null || parsed === undefined) {
-      clearMyFortSeed();
-      showLoadPrompt("The stored seed could not be read, so it has been forgotten. Load it again.");
-    } else {
-      adopt(parsed, "storage");
-    }
+    render(stored.seed);
+    // The stored-seed route earns "Moved In" too — it is the only way a seed stored before the
+    // achievements feature shipped can ever earn it. Idempotent, so every later boot is a no-op.
+    unlockAchievement("moved-in");
+    maybePromptForProfile();
   }
 </script>

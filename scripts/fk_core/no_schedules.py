@@ -34,15 +34,19 @@ SKIPPED_DIRECTORIES = {".git", ".astro", "node_modules", "dist", "__pycache__", 
 #: This is a statement about tooling formats, not a permission for anything to hide in them.
 JSONC_CONFIG_NAMES = {"tsconfig.json", "jsconfig.json"}
 
-#: The one fabricated fixture allowed to look like a seed: scripts/a11y-check.mjs loads it into the browser
-#: so axe audits a My Fort page with fourteen real panels rather than an empty file picker — the page's one
-#: hard requirement is being legible, and a gate that only ever sees the empty state checks nothing.
+#: The fabricated fixtures allowed to look like a seed. `myfort.sample.json` is loaded into the browser by
+#: scripts/a11y-check.mjs so axe audits a My Fort page with fourteen real panels rather than an empty file
+#: picker — the page's one hard requirement is being legible, and a gate that only ever sees the empty state
+#: checks nothing. `myfort.other-household.json` is a second invented household, read by the rendering tests
+#: and by that same gate's second pass over the seed-fed pages: the year wheel's colours are assigned
+#: positionally, and proving that takes a seed whose season ids are NOT the ones the original palette was
+#: keyed to — the a11y pass is what certifies the palette's contrast on such a seed.
 #:
-#: An earlier version listed this path BEFORE the fixture existed, which was a pre-approved hole at exactly
-#: the path and name a real export would be given by someone trying the import flow. It is here now because
-#: the file is here and something reads it, and tests assert both: that it is the only exemption, and that
-#: the file it names is invented rather than anybody's.
-ALLOWED_FIXTURES = {"tests/fixtures/myfort.sample.json"}
+#: An earlier version listed the sample's path BEFORE the fixture existed, which was a pre-approved hole at
+#: exactly the path and name a real export would be given by someone trying the import flow. Each entry is
+#: here now because the file is here and something reads it, and tests assert both: that the exemptions are
+#: exactly these paths, and that every file they name is invented rather than anybody's.
+ALLOWED_FIXTURES = {"tests/fixtures/myfort.sample.json", "tests/fixtures/myfort.other-household.json"}
 
 
 def describe_schedule_document(parsed):

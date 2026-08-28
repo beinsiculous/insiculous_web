@@ -13,7 +13,7 @@ const games = (await getCollection('games')).sort(
   description="Games built with the Insiculous 2D engine."
 >
   <p class="section-label">games</p>
-  <h1>Games</h1>
+  <h1 id="gamesHeading">Games</h1>
   <p class="intro">
     Everything below runs on <a href="/engine/">Insiculous 2D</a>. All are in
     alpha — full gameplay loops, polish ongoing. Every one is playable in the browser on
@@ -25,10 +25,42 @@ const games = (await getCollection('games')).sort(
     app stores rather than here.
   </p>
 
-  <div class="grid">
+  <!-- tabindex + role/aria-labelledby: once the grid is capped at 75vh (multi-column widths, see the
+       style block) it is a scrollable region, and a scrollable region must be keyboard-reachable and
+       named — axe's scrollable-region-focusable rules on exactly this. -->
+  <div class="grid" tabindex="0" role="group" aria-labelledby="gamesHeading">
     {games.map((game) => <GameCard game={game} />)}
   </div>
+
+  <section class="achievements">
+    <h2 id="gameAchievementsHeading">Game achievements</h2>
+    <div id="gameAchievementsBoard"></div>
+    <p class="muted" id="gameAchievementsStatus" role="status"></p>
+  </section>
 </BaseLayout>
+
+<script>
+  import { maybePromptForProfile, renderAchievementsBoard, unlockAchievement } from "../../lib/achievements.js";
+  import { loadSettings, profileIds } from "../../lib/shared/user-settings.js";
+
+  const board = document.getElementById("gameAchievementsBoard");
+  const heading = document.getElementById("gameAchievementsHeading");
+  const status = document.getElementById("gameAchievementsStatus");
+
+  // Opening this page is the "Player" achievement; idempotent, so only the first visit counts.
+  // The board belongs to the person, so the heading names the active profile once one is saved —
+  // the prerendered heading stays generic because a no-JS browser has no profile to name.
+  unlockAchievement("player");
+  const settings = loadSettings();
+  // The null guards are the checker's idiom (GameEmbed.astro): all three elements are prerendered
+  // above, so a null would mean this script drifted from its own markup.
+  if (heading && profileIds(settings).length) heading.textContent = `${settings.activeWeightsId}’s game achievements`;
+  const rendered = renderAchievementsBoard(board, { types: ["game"] });
+  if (status) status.textContent = rendered ? "" : "No game achievements on this device yet — they unlock as you play.";
+  // Player is the likeliest first achievement anywhere on the site, so this is where the
+  // once-ever create-profile prompt most naturally lands; the module owns the once-ever logic.
+  maybePromptForProfile();
+</script>
 
 <style>
   .intro {
@@ -48,5 +80,28 @@ const games = (await getCollection('games')).sort(
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
     gap: 1.25rem;
+  }
+
+  /* The 75% rule governs the multi-column case only (more than six games on desktop): the grid never
+     takes more than 75% of the viewport height, then scrolls inside its own box. The arithmetic pins
+     the breakpoint: two 17rem-min columns plus the 1.25rem gap need 35.25rem of content width, and
+     the container keeps a 1.25rem gutter per side at this width (global.css .container) — so at
+     40rem in, 37.5rem of content, the second column appears at exactly the site's existing phone
+     breakpoint. Below it the grid is one column and the page itself scrolls, so no cap. */
+  @media (min-width: 40rem) {
+    .grid {
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+  }
+
+  .achievements {
+    margin-top: 2rem;
+  }
+
+  /* global.css has no .muted (that class is app-widgets.css's); this page styles its own. */
+  .muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
   }
 </style>

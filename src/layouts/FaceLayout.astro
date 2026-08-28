@@ -8,13 +8,14 @@ import { withBase } from "../lib/paths.js";
 import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 
-// The layout of the site's two faces (docs/app.md), and of those two only: every page rendered here belongs to
-// "fortknight" or "forkknife", so `face` is required. Its menu is Overview, the face's own building page (Spoon Feed /
-// Build), Questionnaire, Assistant. Each face brings its own skin (FACES[face].theme), so the two read as different
-// sites. The switcher sits left of the brand: the Be Insiculous logo back out to the studio site first, then the other
-// face's logo. The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
-// The Profile page the two faces share is NOT here — it belongs to beinsiculous.com and is a studio page on
-// BaseLayout (src/pages/profile.astro).
+// The layout of the site's planner face (docs/app.md): every page rendered here belongs to a face in FACES
+// (FortKnight), so `face` is required. Its menu is Overview, My Fort, Achievements, the face's own building
+// page (Build), Questionnaire, Assistant. The face brings its own skin (FACES[face].theme). The switcher sits
+// left of the brand: the Be Insiculous logo back out to the studio site (and any further face's logo, were
+// one added).
+// The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
+// The Profile page the face shares with the studio is NOT here — it belongs to beinsiculous.com and is a
+// studio page on BaseLayout (src/pages/profile.astro).
 const { title, face } = Astro.props;
 const currentFace = FACES[face];
 const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
@@ -49,7 +50,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
-    {/* Below 40rem the bar does not fit: four pills, a profile dropdown and three site links push it
+    {/* Below 40rem the bar does not fit: five pills, a profile dropdown and two site links push it
         to three rows and about a sixth of a phone screen. They fold behind a ☰ instead, leaving the
         brand and the Aa control as a single row. The disclosure is native, like the studio's in
         BaseLayout.astro — no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard,
@@ -65,7 +66,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         disclosure for the same reason, and the same way BaseLayout does it: the panel drops BELOW the
         bar, so a button after the <details> in the markup would be painted in the bar but tabbed after
         everything in the panel.
-        "Site links" rather than "Switch app": the row carries the tip jar as well as the two faces. */}
+        "Site links" rather than "Switch app": the row carries the tip jar as well as the way out. */}
     <a class="brand" href={facePath(face)}>
       <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
     </a>
