@@ -4,5 +4,6 @@
   "fonts/font.ttf",
   "locales/en.ron",
   "locales/pirate.ron",
-  "paddle_16px.png"
+  "paddle_16px.png",
+  "sounds/beep_e.wav"
 ]
