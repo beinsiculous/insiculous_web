@@ -3,7 +3,7 @@ title: 'Insiculous Pong'
 blurb: 'Neon Pong with power-ups, a rippling spring-mass grid, and four escalating chaos modes.'
 status: 'playable'
 wasm: '/games/pong/v2/game.js'
-screenshots: ['/images/pong-in-editor.png']
+screenshots: ['/images/pong-rally-2026-08.png']
 order: 1
 ---
 
