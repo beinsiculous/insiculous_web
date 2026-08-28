@@ -2,7 +2,7 @@
 title: 'Insiculous Invaders'
 blurb: 'Space Invaders with destructible barriers, UFO bonus runs, and true two-cannon co-op.'
 status: 'playable'
-wasm: '/games/invaders/v1/game.js'
+wasm: '/games/invaders/v2/game.js'
 screenshots: []
 order: 3
 ---

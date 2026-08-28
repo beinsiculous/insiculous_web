@@ -2,7 +2,7 @@
 title: 'Insiculous Breakout'
 blurb: 'Brick-breaker with eight hand-authored levels, paddle-edge aiming, and co-op variants.'
 status: 'playable'
-wasm: '/games/breakout/v1/game.js'
+wasm: '/games/breakout/v2/game.js'
 screenshots: []
 order: 2
 ---
