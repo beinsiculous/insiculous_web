@@ -140,6 +140,13 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
      as a list of nothing. The rule separates them from this face's own pages. */
   .menu-panel .nav-profile { margin-left: 0; width: 100%; flex-wrap: wrap; }
   .menu-panel .face-switch { justify-content: flex-start; gap: 0.5rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
+  /* Two of these three go somewhere in the site — the studio, the other face — and the third asks for
+     money. In the bar they are one small trio, but the panel has a whole row, so here the two that
+     navigate are big enough to hit without looking, and the tip jar is pushed to the far end where it
+     reads as an aside rather than a third destination. An auto margin does this without touching source
+     order, so the tab sequence still matches the paint. */
+  .menu-panel .face-link:not(.face-kofi) { font-size: 1.75rem; padding: 0.15rem 0.5rem; }
+  .menu-panel .face-kofi { margin-left: auto; }
 }
 main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 0 auto; width: 100%; flex: 1; align-content: start; }
 .site-footer { padding: 1rem 1.25rem 2rem; text-align: center; }

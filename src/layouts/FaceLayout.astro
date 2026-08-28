@@ -90,7 +90,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
           {otherFaces.map((other) => (
             <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
           ))}
-          <a class="face-link" href={KOFI_URL} title={KOFI_TITLE} aria-label={KOFI_LABEL} target="_blank" rel="noopener noreferrer">☕</a>
+          <a class="face-link face-kofi" href={KOFI_URL} title={KOFI_TITLE} aria-label={KOFI_LABEL} target="_blank" rel="noopener noreferrer">☕</a>
         </nav>
       </div>
     </details>
