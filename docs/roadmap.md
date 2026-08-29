@@ -3,7 +3,7 @@
 Why these choices and what each surface argues: `docs/thesis.md`.
 
 **Scope.** This file tracks only what is specific to *this repository* — FortKnight's web surface
-and the parked ForkKnife chain's documents, and the studio pages. The Fortnight Apps plan itself
+and the parked Fork Knife chain's documents, and the studio pages. The Fort Knight plan itself
 lives in the working set (below).
 Insiculous 2D and the games are separate repositories and are tracked there; the game-studio section
 at the foot records only what touches beinsiculous.com.
@@ -24,20 +24,34 @@ those branches are its playgrounds — they no longer ship by merging (re-ruled 
 folded roadmap in the working set carries the ruling). Seed-fed replacements are built fresh in the
 `main` lineage.
 
-**Fortnight Apps is planned in the working set, not here.** The two planner apps, the phone app **Focus
-Key** (formerly Keep), and the seed that joins all three are one part with one plan:
+**Fort Knight is planned in the working set, not here.** The apps, the phone app **Focus Key**
+(formerly Keep), and the seed that joins them are one system with one plan:
 `insiculous/docs/roadmap-fortnight-apps.md` in the admin repo. That file was folded together on
-2026-08-27 and **re-ordered around the seed** — responding to the schedule that exists comes before
-authoring new ones, and the creation chain below is on an explicit back burner there, with the
-condition that brings each piece back.
+2026-08-27, **re-ordered around the seed** — responding to the schedule that exists comes before
+authoring new ones — and on 2026-08-28 given a project spine.
+
+**Fort Knight is the system, not an app** (ruled 2026-08-28). `/fortknight/` on this site is the
+system's own web face, and through the current phase it is the only agenda surface there is. The work
+runs in gated projects, in order; the two that concern this repository are:
+
+1. **Project Mega Seed — the current phase.** Build seeds to flesh out the receiver app: the My Fort
+   format gets a public spec and machine schema, both canonical *here* because a person hand-making a
+   seed cannot see the private repo. Nothing new consumes the format until it is written down.
+2. **Project Ant Hill.** Reverse-engineer a seed builder from the hand-made seeds. The creation chain
+   below belongs to it. **It is gated**: nothing in it starts before Mega Seed is done, so the
+   per-item conditions that used to say "returns when" are now ordering inside that project.
+
+Later projects exist and are planned in the working set.
 
 What that means for the items this file used to number 1–9:
 
-- **Items 1, 2, 4, 5, 6 and 8** — questionnaire → weights, the generator, season menus, importers and
-  exporters, assistant-workspace follow-ups, and Forts/the Fortress — moved to *Back burner: seed
-  creation* in the folded roadmap. Their contracts (`docs/questionnaire.md`, `docs/generator.md`,
-  `docs/importers.md`, `docs/weights.md`, `docs/assistant-workspace.md`, `docs/fortress.md`) are
-  unchanged and still shipped; nothing is deleted.
+- **Items 1, 2, 4, 5 and 6** — questionnaire → weights, the generator, season menus, importers and
+  exporters, and assistant-workspace follow-ups — are **Project Ant Hill** in the folded roadmap.
+  Their contracts (`docs/questionnaire.md`, `docs/generator.md`, `docs/importers.md`,
+  `docs/weights.md`, `docs/assistant-workspace.md`) are unchanged and still shipped; nothing is deleted.
+- **Item 8, Forts and the Fortress** — no longer part of that queue. It was never seed-creation work,
+  and it is planned separately in the working set. `docs/fortress.md` is unchanged and still says at
+  its head that none of it exists.
 - **Item 3, ForkKnife's full chain** (`docs/forkknife-chain.md`) — **no longer "the next thing being
   built."** Its stage 3 does not exist at all, and it authors a menu from nothing while a real menu
   sits unread in the seed. What comes first is carrying the workbook's menu across in the My Fort
