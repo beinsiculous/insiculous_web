@@ -216,6 +216,27 @@ drawn from the claim rather than the title verbatim, and immutable once publishe
 `scripts/screenshot-pages.mjs` hard-codes `devlog/six-games-one-day/`, so renaming or re-drafting
 that entry breaks the screenshot gate.
 
+## Work tracking
+
+Open work lives on the **Studio Board** (https://github.com/orgs/beinsiculous/projects/1)
+as issues in this repo. **Always pass `-R beinsiculous/insiculous_web`** — a bare `gh` command
+resolves against the session's working directory, which is often the working-set root, so
+it lists and files against the wrong repository.
+
+```sh
+gh issue list -R beinsiculous/insiculous_web
+gh api repos/beinsiculous/insiculous_web/milestones --jq '.[] | "\(.title): \(.description)"'
+```
+
+Issues are grouped into **sprint milestones**; each description records the batch's
+internal order and its gates. Take the next unblocked issue in a sprint, not an arbitrary
+one. Claim by assigning yourself; close with `fixes beinsiculous/insiculous_web#N` in the commit.
+
+**Unfinished work becomes an issue.** Anything you don't finish — work you deferred, debt
+you created, a follow-up you spotted — is filed before you report done. Never buried in a
+doc, never left as a bare `TODO:`, never dropped. The `file-issue` skill carries the shape;
+`sprint-planning` groups issues into shippable batches.
+
 ## Review convention: adversarial review (Claude Code ↔ Kimi Code CLI)
 Plans and large diffs get an adversarial review by the *other* CLI, adjudicated with the user —
 see `.claude/skills/adversarial-review/SKILL.md` (Claude side) and
