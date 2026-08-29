@@ -24,8 +24,8 @@ those branches are its playgrounds — they no longer ship by merging (re-ruled 
 folded roadmap in the working set carries the ruling). Seed-fed replacements are built fresh in the
 `main` lineage.
 
-**Fort Knight is planned in the working set, not here.** The apps, the phone app **Focus Key**
-(formerly Keep), and the seed that joins them are one system with one plan:
+**Fort Knight is planned in the working set, not here.** The apps, the phone app **Fortress Key**
+(Keep until 2026-08-27, then Focus Key), and the seed that joins them are one system with one plan:
 `insiculous/docs/roadmap-fortnight-apps.md` in the admin repo. That file was folded together on
 2026-08-27, **re-ordered around the seed** — responding to the schedule that exists comes before
 authoring new ones — and on 2026-08-28 given a project spine.
@@ -57,7 +57,7 @@ What that means for the items this file used to number 1–9:
   sits unread in the seed. What comes first is carrying the workbook's menu across in the My Fort
   seed and rendering it under `/fortknight/` — the `/forkknife/` routes that design assumed are
   removed.
-- **Item 7, "native clients reading the same bundle"** — **obsolete, not deferred.** Focus Key exists
+- **Item 7, "native clients reading the same bundle"** — **obsolete, not deferred.** The phone app exists
   and does not read `build/fortknight.bundle.json`; it renders the workbook's own seed. The two meet
   at the My Fort seed, not at the bundle.
 - **Item 9**, the "Open for Appointments (Tuesday A, early)" vs week-1-midday question, is a data
