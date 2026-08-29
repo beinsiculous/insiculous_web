@@ -56,7 +56,7 @@ of one of four kinds (`docs/llm-guide.md` → "Replying from an assistant worksp
   the first — Copy is the fallback). No zip: workspaces take individual files.
 - **Apply from assistant** (the parked creation chain's design: both assistant pages answer with a
   `FaceInDevelopment` placeholder on `main`, and step 2's shared component, `ApplyFromAssistant.astro`,
-  is deleted there — it lives only on the parked `fortknightdev`/`forknifedev` playground branches.
+  is deleted there — it lives only on the parked, local-only `fortknightdev`/`forknifedev` playground branches.
   In that design step 1 differs — FortKnight hands out the spreadsheet prompt + guide, Fork Knife the
   menu prompt + `meal-plan.md` + template — and step 2 is one shared component accepting any of the
   four kinds on either page) — paste or upload the JSON, *Apply*; the status line says what happened

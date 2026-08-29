@@ -246,18 +246,20 @@ broken data rule, or an accessibility regression cannot reach the site. The work
 tab (`workflow_dispatch`) to redeploy the current `main`.
 
 The branch model behind that: `main` is production and only ever receives merges — `dev` is the
-integration branch, and a `dev → main` pull request **is** the production deploy. The creation
-chain the face apps were built around (questionnaire → weights → generator → import) was re-ruled
-on 2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge,
-and seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). On
-`main`, FortKnight's seed-fed pages are live — the Overview, Keep and the fourteen day pages —
-alongside the achievements boards (the studio's `/achievements/` and the face's
-`/fortknight/achievements/`), while
-`/fortknight/build|questionnaire|assistant/` remain
-`src/components/FaceInDevelopment.astro` placeholders, kept as files so the parked branches' edits
-could still merge as ordinary content merges rather than one modify/delete conflict per route.
-Fork Knife's routes (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu
-rendering will land under `/fortknight/` when the keep carries menu rows.
+integration branch, and a `dev → main` pull request **is** the production deploy. The creation chain
+the face apps were built around (questionnaire → weights → generator → import) was re-ruled on
+2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge, and
+seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). As of
+2026-08-29 both are local-only: deleted from origin and blocked by a `pre-push` hook, they exist on
+the maintainer's machine alone. Their tips are ancestors of `dev`, so nothing they hold is lost —
+the content is still reachable through `dev`'s history. On `main`, FortKnight's seed-fed pages are
+live — the Overview, Keep and the fourteen day pages — alongside the achievements boards (the
+studio's `/achievements/` and the face's `/fortknight/achievements/`), while
+`/fortknight/build|questionnaire|assistant/` remain `src/components/FaceInDevelopment.astro`
+placeholders, kept as files so the parked branches' edits could still merge as ordinary content
+merges rather than one modify/delete conflict per route. Fork Knife's routes (`/forkknife/*`) were
+removed from the live site on 2026-08-28; its menu rendering will land under `/fortknight/` when the
+keep carries menu rows.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

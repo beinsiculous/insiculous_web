@@ -14,15 +14,17 @@ person's own AI workspace + apply-back), docs, tests.
 
 **Shipping status.** `main` is production. FortKnight's seed-fed pages are live — the Overview
 (`/fortknight/`), Keep (`/fortknight/keep/`) and the fourteen day pages
-(`/fortknight/days/<dayKey>/`), all reading a visitor-loaded keep — as are the achievements
-boards: the studio's `/achievements/`, listing every achievement the site knows, and the face's
+(`/fortknight/days/<dayKey>/`), all reading a visitor-loaded keep — as are the achievements boards:
+the studio's `/achievements/`, listing every achievement the site knows, and the face's
 `/fortknight/achievements/`, the active profile's unlocked fortnight achievements. Meanwhile
 `/fortknight/build/`, `/fortknight/questionnaire/` and `/fortknight/assistant/` remain
 `FaceInDevelopment` placeholders, and the `/forkknife/` routes were removed on 2026-08-28. The face
 pages built on `fortknightdev` and `forknifedev` belong to the back-burnered creation chain, and
-those branches are its playgrounds — they no longer ship by merging (re-ruled 2026-08-28; the
-folded roadmap in the working set carries the ruling). Seed-fed replacements are built fresh in the
-`main` lineage.
+those branches are its playgrounds — they no longer ship by merging (re-ruled 2026-08-28; the folded
+roadmap in the working set carries the ruling). Seed-fed replacements are built fresh in the `main`
+lineage. As of 2026-08-29 both are local-only: deleted from origin and blocked by a `pre-push` hook,
+they exist on the maintainer's machine alone. Their tips are ancestors of `dev`, so nothing they
+hold is lost — the content is still reachable through `dev`'s history.
 
 **Fort Knight is planned in the working set, not here.** The apps, the phone app **Fortress Key**
 (Keep until 2026-08-27, Focus Key until 2026-08-28, now Fortress Key), and the seed that joins

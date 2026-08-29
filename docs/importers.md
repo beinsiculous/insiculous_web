@@ -151,7 +151,7 @@ Planned flow, all on-device:
    document — unknown durations default to 60 minutes, unknown categories to `health` for
    appointments, with a note explaining each guess.
 3. The reply is validated (same rules as `check_import_document`), shown as a review table
-   (done today, read-only: *Apply from assistant* on `/fortknight/assistant/` — built on the parked
+   (done today, read-only: *Apply from assistant* on `/fortknight/assistant/` — built on the parked, local-only
    `fortknightdev` playground branch; Fork Knife's own assistant page went with the `/forkknife/`
    routes — and again under Startup 2 on `/fortknight/questionnaire/`; what landed is listed on `/fortknight/build/`),
    then applied to the saved answers; still open: editing rows in that table before applying.

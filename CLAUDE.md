@@ -109,8 +109,11 @@ lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
 receives merges — `dev` integrates, and a `dev → main` pull request is the deploy. Re-ruled
 2026-08-28: the face branches `fortknightdev` and `forknifedev` are the back-burnered creation
 chain's playgrounds and never merge; seed-fed pages are built fresh in the `main` lineage
-(`docs/roadmap.md`). On `main`, FortKnight's `/fortknight/` Overview, `/fortknight/keep/` and the
-fourteen `/fortknight/days/<dayKey>/` pages are live and read a visitor-loaded keep;
+(`docs/roadmap.md`). As of 2026-08-29 both are local-only: deleted from origin and blocked by a
+`pre-push` hook, they exist on the maintainer's machine alone. Their tips are ancestors of `dev`, so
+nothing they hold is lost — the content is still reachable through `dev`'s history. On `main`,
+FortKnight's `/fortknight/` Overview, `/fortknight/keep/` and the fourteen
+`/fortknight/days/<dayKey>/` pages are live and read a visitor-loaded keep;
 `/fortknight/questionnaire|build|assistant/` remain `src/components/FaceInDevelopment.astro`
 placeholders — kept as files rather than deleted so a parked branch's edits could still merge as
 ordinary content merges instead of one modify/delete conflict per route; the component's header

@@ -2,11 +2,13 @@
 // A face page that is not on production yet.
 //
 // These exist as FILES rather than as deletions on purpose. The real pages live on `fortknightdev` and
-// `forknifedev` and are still being worked on; deleting them here would make every edit on those branches
-// come back as a modify/delete conflict, one per route. A placeholder keeps the path occupied so the merge
-// is an ordinary content merge — take the branch's version — and keeps the URL from 404ing in the meantime.
+// `forknifedev`, which were re-ruled the back-burnered creation chain's playgrounds on 2026-08-28 and made
+// local-only on 2026-08-29 — they are not on origin, and a `pre-push` hook keeps them off it. A placeholder
+// keeps the path occupied so those branches see an ordinary content merge rather than a modify/delete
+// conflict per route if the chain ever returns, and keeps the URL from 404ing in the meantime.
 //
-// When a face is ready, its branch merges and these go with it.
+// These no longer go away by a face branch merging — that route was closed by the 2026-08-28 ruling.
+// A seed-fed replacement built fresh in the `main` lineage is what retires each placeholder.
 import FaceLayout from "../layouts/FaceLayout.astro";
 import { facePath } from "../lib/faces.js";
 
