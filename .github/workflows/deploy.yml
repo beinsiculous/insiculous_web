@@ -77,6 +77,12 @@ jobs:
           npx playwright install --with-deps chromium
           npm run a11y
 
+      # Same gate as local `npm run verify`: every page served from dist/ (the script serves it
+      # itself) answers 200 and scrolls nowhere sideways — desktop, phone, 641px, and 125% text
+      # on a phone (LARGE_TEXT=1). Reuses the chromium the previous step installed.
+      - name: Layout gate (screenshots + overflow)
+        run: LARGE_TEXT=1 npm run shots
+
       - name: Deploy to Cloudflare
         run: |
           if [ "${{ github.ref_name }}" = "dev" ]; then

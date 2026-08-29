@@ -224,8 +224,9 @@ Gates that keep it true (a regression blocks the deploy, like a broken build):
 - `scripts/a11y-check.mjs` (`npm run verify`, and CI between Build and Deploy): serves
   `dist/`, runs axe-core (wcag2a/2aa/22aa) on **every** route, exits 1 on any violation.
   `A11Y_ONLY=<substring>` filters routes while iterating.
-- `scripts/screenshot-pages.mjs` with `LARGE_TEXT=1`: extra pass proving no page scrolls
-  sideways at 125% text on a phone.
+- `scripts/screenshot-pages.mjs` (`npm run verify` as `LARGE_TEXT=1 npm run shots`, and CI between
+  the accessibility audit and Deploy): serves `dist/` itself, proves every page answers 200 and
+  none scrolls sideways — desktop, phone, 641px, and 125% text on a phone.
 
 axe finds about half of real-world issues. For changes to layouts or interactive
 components, also do the manual pass: keyboard-only walkthrough (Tab/Shift-Tab, Enter,
@@ -238,12 +239,14 @@ zoom at 320px. The PR template lists this.
 `beinsiculous.com`; `404-page` handling serves the Astro 404 page, and
 `public/_headers` rules apply to the served assets.
 
-**Production deploys happen in GitHub Actions, on every push to `main`**
+**Deploys happen in GitHub Actions, on every push to `main` (production) or `dev` (staging)**
 (`.github/workflows/deploy.yml`): install → `python3 scripts/validate.py` → the Python suite →
-`npm run check` → `npm run build` → `npm run a11y` → `npx wrangler deploy` → a request to the live
+`npm run check` → `npm run build` → `npm run a11y` → `LARGE_TEXT=1 npm run shots` →
+`npx wrangler deploy` → a request to the live
 domain to confirm it serves. The deploy step only runs if every gate passes, so a broken build, a
-broken data rule, or an accessibility regression cannot reach the site. The workflow can also be run by hand from the Actions
-tab (`workflow_dispatch`) to redeploy the current `main`.
+broken data rule, an accessibility regression, or a page that scrolls sideways cannot reach the
+site. The workflow can also be run by hand from the Actions
+tab (`workflow_dispatch`) to deploy the current branch.
 
 The branch model behind that: `main` is production and only ever receives merges — `dev` is the
 integration branch, and a `dev → main` pull request **is** the production deploy. The creation chain
@@ -278,7 +281,7 @@ places. (It was connected once and stopped firing; Actions replaced it.)
 Deploying by hand, from a machine with wrangler auth (`npx wrangler login`):
 
 ```sh
-npm run deploy   # check + build + postbuild + wrangler deploy
+npm run deploy   # the full verify chain, then wrangler deploy
 ```
 
 Never `wrangler deploy` on its own — that ships whatever happens to be in

@@ -10,8 +10,9 @@
     "build": "astro build && node scripts/postbuild-check.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "verify": "npm run validate && npm run test:data && npm run check && npm run build && npm run a11y",
+    "verify": "npm run validate && npm run test:data && npm run check && npm run build && npm run a11y && LARGE_TEXT=1 npm run shots",
     "a11y": "node scripts/a11y-check.mjs",
+    "shots": "node scripts/screenshot-pages.mjs",
     "test:data": "python3 -m unittest discover tests",
     "deploy": "npm run verify && wrangler deploy"
   },

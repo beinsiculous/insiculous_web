@@ -48,14 +48,15 @@ python3 -m unittest discover tests                # test suite (also `npm run te
 npm run data                                      # validate.py then build.py, the data edit loop in one
 npm run dev                                       # the site: / (studio) + /fortknight/ + /profile/
 npm run validate                                  # validate.py alone: the data gates + the schedule sweep
-npm run verify                                    # what CI gates the deploy on: validate + tests + check + build + a11y
+npm run verify                                    # what CI gates the deploy on: validate + tests + check + build + a11y + the layout gate
 ```
 The edit loop is: change `data/` → `npm run data` → tests. **Commit `build/` too** — the site imports
 the bundle, so a data change that skips `build.py` ships a bundle that disagrees with the data beside it.
 `tests/test_build.py`'s workbook cross-check skips unless `FORTKNIGHT_WORKBOOK` points at the archived
 spreadsheet, which is not in this repository.
-Every push to `main` deploys (`.github/workflows/deploy.yml`): validate → tests → `astro check` →
-build → axe-core over every page → `wrangler deploy` → a request to the live domain.
+Every push to `main` (production) or `dev` (staging) deploys (`.github/workflows/deploy.yml`):
+validate → tests → `astro check` → build → axe-core over every page → the layout gate
+(`LARGE_TEXT=1 npm run shots`) → `wrangler deploy` → a request to the live domain.
 
 ## Coding conventions (apply to Python, JavaScript, and JSON field names)
 - **Human-readable names, no abbreviations.** `estimatedStartTime`, not `estStart`; `dayKey`, not `dk`; `durationMinutes`, not `dur`. Loop variables included (`activity`, not `a`).
@@ -99,13 +100,13 @@ call an LLM either.
 Static build, deployed to Cloudflare as a static-assets Worker. No UI framework; the face pages are
 plain untyped JavaScript, so `tsconfig.json` excludes them from `astro check` and the Python parity
 tests are what keep them honest. **Accessibility is a top priority at Be Insiculous**, and three
-gates hold it on every build and block the deploy:
-`scripts/postbuild-check.mjs` (structure + static a11y + prose: `scripts/lib/prose-check.mjs`
+gates hold it in every `npm run verify` and in CI, so a regression blocks the deploy:
+`scripts/postbuild-check.mjs` (every build — structure + static a11y + prose: `scripts/lib/prose-check.mjs`
 gates a word glued to an inline tag and a straight apostrophe — Astro drops the newline between a
 word and an inline tag on the next source line, so keep the tag on the word's line),
 `scripts/a11y-check.mjs` (axe-core over
-**every** built page, WCAG 2.2 AA), and `scripts/screenshot-pages.mjs` (no page scrolls sideways, on a
-phone and at 125% text). The target they hold is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
+**every** built page, WCAG 2.2 AA), and `scripts/screenshot-pages.mjs` (every page answers 200 and
+none scrolls sideways — desktop, phone, 641px, and 125% text on a phone via `LARGE_TEXT=1`). The target they hold is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
 codebase. After changing a layout or an interactive component, also do the manual pass the PR template
 lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
 
@@ -222,8 +223,9 @@ existing entries carry them and they are part of the convention.
 
 **Slug** is the filename minus `.md`: lowercase kebab-case, no date prefix, three or four words
 drawn from the claim rather than the title verbatim, and immutable once published.
-`scripts/screenshot-pages.mjs` hard-codes `devlog/six-games-one-day/`, so renaming or re-drafting
-that entry breaks the screenshot gate.
+`scripts/screenshot-pages.mjs` walks every built page, so a renamed or re-drafted post needs no
+registration there — but re-drafting **every** entry fails the gate on purpose, because the comment
+thread and its badge would go untested.
 
 ## Work tracking
 
