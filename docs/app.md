@@ -18,12 +18,13 @@ side gains `/achievements/`, the every-achievement board (below). `/fortknight/b
 removed from the site on 2026-08-28 — its menu rendering will land under `/fortknight/` when the
 seed carries menu rows. The face branches `fortknightdev` and `forknifedev` were re-ruled the
 back-burnered creation chain's playgrounds on 2026-08-28 — never absorbed, never merged; seed-fed
-pages are built fresh in the `main` lineage (`docs/roadmap.md`). As of 2026-08-29 both are
-local-only: deleted from origin and blocked by a `pre-push` hook, they exist on the maintainer's
-machine alone. Their tips are ancestors of `dev`, so nothing they hold is lost — the content is
-still reachable through `dev`'s history. The profile-driven body below stays as-is: it is the
-contract that chain was built against, and it applies again if the chain returns from the back
-burner.
+pages are built fresh in the `main` lineage (`docs/roadmap.md`). The branches themselves were
+deleted on 2026-08-29 and replaced by the annotated tag `creation-chain-parked`, which names the
+same commit on origin and survives a fresh clone. Ten files were deleted from `main` with the chain
+— `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the
+`/forkknife/` pages — and each is recoverable with `git show creation-chain-parked:PATH`. The
+profile-driven body below stays as-is: it is the contract that chain was built against, and it
+applies again if the chain returns from the back burner.
 
 ## The seed-fed pages: Overview, Keep and the day pages
 
@@ -69,11 +70,11 @@ live in the spec and are not restated here.
   `tests/fixtures/keep.other-household.json`, a second invented household the rendering tests use for
   the year wheel's positional colours.
 
-The earlier gaps are closed: Keep is in the face nav, the season colours are positional rather
-than keyed to Jesse's season ids, and the face branches no longer matter to these pages —
-`fortknightdev` and `forknifedev` were re-ruled the creation chain's playgrounds on 2026-08-28,
-never absorbed or merged, and **seed-fed pages are built fresh in the `main` lineage** (see
-`docs/roadmap.md`). Both branches are local-only as of 2026-08-29 and are not on origin.
+The earlier gaps are closed: Keep is in the face nav, the season colours are positional rather than
+keyed to Jesse's season ids, and the face branches no longer matter to these pages — `fortknightdev`
+and `forknifedev` were re-ruled the creation chain's playgrounds on 2026-08-28, never absorbed or
+merged, and **seed-fed pages are built fresh in the `main` lineage** (see `docs/roadmap.md`). Both
+branches were deleted on 2026-08-29; the tag `creation-chain-parked` names their commit.
 
 ## The site
 beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries two surfaces
@@ -160,7 +161,7 @@ Multi-page, no UI framework. `npm install` once, then:
   spreadsheet guide + a copyable prompt), 2: `components/ApplyFromAssistant.astro` (shared with Fork Knife's assistant
   page: paste it and Apply — an import document, a meal-plan document, a weights or a settings file — then read the
   review; the component fetches the bundle itself, `data-face` picks its links) — the component is deleted on `main`
-  with the rest of the chain and now lives only on the parked, local-only `fortknightdev`/`forknifedev` playground branches; `/fortknight/build/` — **Build**, the
+  with the rest of the chain and now lives only on the parked chain, at the tag `creation-chain-parked`; `/fortknight/build/` — **Build**, the
   page that puts things into a profile by hand: the commitments that anchor the day's blocks and the tasks that land
   on the day pages (one entry row each, *Add* commits it into a compact read-only list, *Edit* only reveals remove),
   and the same fortnight-menu editor Spoon Feed carries. Save writes `standingAppointments`, `tasks` and `mealPlan`
@@ -175,8 +176,7 @@ Multi-page, no UI framework. `npm install` once, then:
   the leftovers dropdown offers "as Breakfast"; one dish per meal per day — servings already in the plan leave the
   dropdowns; coverage per meal). One implementation, the site's `src/lib/meal-plan-editor.js` +
   `components/MealPlanEditor.astro`, which FortKnight's Build page renders too — both deleted on
-  `main` with the rest of the chain and now living only on the parked, local-only `fortknightdev`/`forknifedev`
-  playground branches; Save writes only `mealPlan`.
+  `main` with the rest of the chain and now living only on the parked chain, at the tag `creation-chain-parked`; Save writes only `mealPlan`.
   `/forkknife/questionnaire/` — **Fork Knife's questionnaire is its settings**:
   the `face: "fork-knife"` section of `bundle.questionnaire` (the meals question — names, when each is eaten (1–2 times
   of day), prepping/cooking + minutes — and the meal preferences: eaters, dietary rules, allergies and dislikes,

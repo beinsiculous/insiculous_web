@@ -1,11 +1,12 @@
 ---
 // A face page that is not on production yet.
 //
-// These exist as FILES rather than as deletions on purpose. The real pages live on `fortknightdev` and
-// `forknifedev`, which were re-ruled the back-burnered creation chain's playgrounds on 2026-08-28 and made
-// local-only on 2026-08-29 — they are not on origin, and a `pre-push` hook keeps them off it. A placeholder
-// keeps the path occupied so those branches see an ordinary content merge rather than a modify/delete
-// conflict per route if the chain ever returns, and keeps the URL from 404ing in the meantime.
+// These exist as FILES rather than as deletions on purpose. The real pages belong to the back-burnered
+// creation chain, parked at the tag `creation-chain-parked` — it replaced the `fortknightdev` and
+// `forknifedev` branches, which were re-ruled playgrounds on 2026-08-28 and deleted on 2026-08-29.
+// Recover any of them with `git show creation-chain-parked:PATH`. A placeholder keeps the path occupied
+// so the chain returning is an ordinary content merge rather than a modify/delete conflict per route,
+// and keeps the URL from 404ing in the meantime.
 //
 // These no longer go away by a face branch merging — that route was closed by the 2026-08-28 ruling.
 // A seed-fed replacement built fresh in the `main` lineage is what retires each placeholder.

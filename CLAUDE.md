@@ -109,18 +109,19 @@ lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
 receives merges — `dev` integrates, and a `dev → main` pull request is the deploy. Re-ruled
 2026-08-28: the face branches `fortknightdev` and `forknifedev` are the back-burnered creation
 chain's playgrounds and never merge; seed-fed pages are built fresh in the `main` lineage
-(`docs/roadmap.md`). As of 2026-08-29 both are local-only: deleted from origin and blocked by a
-`pre-push` hook, they exist on the maintainer's machine alone. Their tips are ancestors of `dev`, so
-nothing they hold is lost — the content is still reachable through `dev`'s history. On `main`,
-FortKnight's `/fortknight/` Overview, `/fortknight/keep/` and the fourteen
-`/fortknight/days/<dayKey>/` pages are live and read a visitor-loaded keep;
-`/fortknight/questionnaire|build|assistant/` remain `src/components/FaceInDevelopment.astro`
-placeholders — kept as files rather than deleted so a parked branch's edits could still merge as
-ordinary content merges instead of one modify/delete conflict per route; the component's header
-comment is the canonical statement. Fork Knife's routes (`/forkknife/*`) are removed from the live
-site; its menu rendering will land under `/fortknight/` when the seed carries menu rows. Also live
-on `main`: the studio pages (including `/achievements/`), `/fortknight/achievements/` and
-`/profile/`.
+(`docs/roadmap.md`). The branches themselves were deleted on 2026-08-29 and replaced by the
+annotated tag `creation-chain-parked`, which names the same commit on origin and survives a fresh
+clone. Ten files were deleted from `main` with the chain — `ApplyFromAssistant.astro`,
+`MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each
+is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's `/fortknight/`
+Overview, `/fortknight/keep/` and the fourteen `/fortknight/days/<dayKey>/` pages are live and read
+a visitor-loaded keep; `/fortknight/questionnaire|build|assistant/` remain
+`src/components/FaceInDevelopment.astro` placeholders — kept as files rather than deleted so the
+parked chain returning would be an ordinary content merge instead of one modify/delete
+conflict per route; the component's header comment is the canonical statement. Fork Knife's routes
+(`/forkknife/*`) are removed from the live site; its menu rendering will land under `/fortknight/`
+when the seed carries menu rows. Also live on `main`: the studio pages (including `/achievements/`),
+`/fortknight/achievements/` and `/profile/`.
 
 **The keep** is a small file the private Fortress Key app exports (`fortresskey/src/lib/keep.js`): the fourteen
 day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The day keys are the
