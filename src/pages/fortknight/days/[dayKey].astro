@@ -1,5 +1,5 @@
 ---
-// A day of the fortnight, drawn from the visitor's own My Fort seed.
+// A day of the fortnight, drawn from the visitor's own keep.
 //
 // Fourteen static shells are prerendered — one per day key — and every one of them renders the same
 // no-seed panel, on purpose: the day itself lives only in the visitor's localStorage, so a crawler, a
@@ -8,10 +8,10 @@
 //
 // It resolves nothing. The shell's dayKey comes from the URL, not from a date: the seed arrives pre-joined
 // by day key, and running this repository's date evaluator over it would be wrong for half the year
-// (myfort.astro's header carries the whole argument). Even the previous/next links only walk
+// (keep.astro's header carries the whole argument). Even the previous/next links only walk
 // DAY_KEY_ORDER — an ordering, not a calendar.
 import FaceLayout from "../../../layouts/FaceLayout.astro";
-import MyFortStyles from "../../../components/MyFortStyles.astro";
+import KeepStyles from "../../../components/KeepStyles.astro";
 import { DAY_KEY_ORDER } from "../../../lib/shared/fortknight-rules.js";
 import { facePath } from "../../../lib/faces.js";
 
@@ -20,17 +20,17 @@ export function getStaticPaths() {
 }
 
 const { dayKey } = Astro.params;
-const myFort = facePath("fortknight", "myfort/");
+const keep = facePath("fortknight", "keep/");
 ---
 <FaceLayout title={`Day ${dayKey}`} face="fortknight">
-  <MyFortStyles />
+  <KeepStyles />
   <section class="panel" id="dayLoadPrompt">
     <h1>A day of the fortnight</h1>
     <p class="muted" id="dayStatus" role="status" aria-live="polite">
-      This page shows one day from your My Fort seed — the file the Focus Key app exports.
+      This page shows one day from your keep — the file the Focus Key app exports.
     </p>
     <div class="button-row">
-      <a class="button" href={myFort}>Load your seed on My Fort</a>
+      <a class="button" href={keep}>Load your seed on Keep</a>
     </div>
     <noscript><p class="muted">This page needs JavaScript to read your seed.</p></noscript>
   </section>
@@ -39,12 +39,12 @@ const myFort = facePath("fortknight", "myfort/");
 </FaceLayout>
 
 <script>
-  import { readStoredMyFortSeed } from "../../../lib/myfort-seed-access.js";
-  import { element, renderDayPanel } from "../../../lib/myfort-view.js";
+  import { readStoredKeep } from "../../../lib/keep-access.js";
+  import { element, renderDayPanel } from "../../../lib/keep-view.js";
   import { DAY_KEY_ORDER } from "../../../lib/shared/fortknight-rules.js";
   import { facePath } from "../../../lib/faces.js";
 
-  // Boot is readStoredMyFortSeed()'s decision, like every seed-fed page. The prerendered panel already
+  // Boot is readStoredKeep()'s decision, like every seed-fed page. The prerendered panel already
   // says what this page is and where a seed comes from, so "none" only leaves it standing; "cleared" and
   // "kept" both only report in its status line — one says the wreckage was forgotten, the other that an
   // intact but undrawable seed was NOT deleted. A seed without this day says so rather than drawing nothing.
@@ -62,7 +62,7 @@ const myFort = facePath("fortknight", "myfort/");
     if (message) status.textContent = message;
   }
 
-  const stored = readStoredMyFortSeed();
+  const stored = readStoredKeep();
   if (stored.status === "cleared" || stored.status === "kept") {
     showLoadPrompt(stored.reason);
   } else if (stored.status !== "seed") {
@@ -86,7 +86,7 @@ const myFort = facePath("fortknight", "myfort/");
       const position = DAY_KEY_ORDER.indexOf(dayKey);
       const previousKey = DAY_KEY_ORDER[(position + DAY_KEY_ORDER.length - 1) % DAY_KEY_ORDER.length];
       const nextKey = DAY_KEY_ORDER[(position + 1) % DAY_KEY_ORDER.length];
-      const navigation = element("nav", "myfort-day-nav");
+      const navigation = element("nav", "keep-day-nav");
       navigation.setAttribute("aria-label", "Previous and next days");
       const previous = element("a", null, `← ${labelFor(previousKey)}`);
       previous.href = facePath("fortknight", `days/${previousKey}/`);

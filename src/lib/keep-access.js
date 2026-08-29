@@ -1,18 +1,18 @@
-// Reading the stored My Fort seed at page boot: what is in storage, made safe to act on.
+// Reading the stored keep at page boot: what is in storage, made safe to act on.
 //
 // This module exists because a seed-fed page's boot sequence is the same everywhere — read the stored
 // value, decide whether it can be drawn, and report honestly when it cannot — while the pages themselves
-// differ. It was myfort.astro's inline boot until a second page needed the same path; the storage helpers
-// stay in myfort-store.js and the validation stays in myfort.js, so this module's one job is the decision
+// differ. It was keep.astro's inline boot until a second page needed the same path; the storage helpers
+// stay in keep-store.js and the validation stays in keep.js, so this module's one job is the decision
 // between them.
 //
 // Boot goes through the SAME validator as a picked file. Reloading the display is the ordinary path, so
 // it must not be the one nothing checks: a truncated value in storage would otherwise throw at boot, on a
 // screen with no developer tools attached.
 //
-// The raw value is read rather than loadMyFortSeed()'s parsed one, because the two READ failures need a
+// The raw value is read rather than loadKeep()'s parsed one, because the two READ failures need a
 // different ending from a VALIDATION refusal. Storage that will not parse is not "no seed":
-// loadMyFortSeed reports null for it, which would leave the wreckage in storage, invisible to the page
+// loadKeep reports null for it, which would leave the wreckage in storage, invisible to the page
 // AND to /profile/ — whose delete button hides when it believes there is nothing stored. So unreadable
 // storage is cleared here, and the display comes back on the next reload instead of failing quietly
 // forever.
@@ -21,12 +21,12 @@
 // document is intact but not drawable — wrong file, newer format, no days — and none of those is
 // wreckage. The sharpest case is a newer Focus Key export: the remedy is a website deploy, which the
 // person holding the phone cannot do, and a seed forgotten at boot would be gone by the time the update
-// shipped. Keeping costs nothing: the seed stays deletable, from My Fort's Forget button or /profile/.
-import { validateMyFortSeed } from "./myfort.js";
-import { MYFORT_SEED_KEY, clearMyFortSeed } from "./myfort-store.js";
+// shipped. Keeping costs nothing: the seed stays deletable, from Keep's Forget button or /profile/.
+import { validateKeep } from "./keep.js";
+import { KEEP_STORE_KEY, clearKeep } from "./keep-store.js";
 
 /** The stored seed, adjudicated. One of:
- *    { status: "seed", seed }  — validated by the same validateMyFortSeed a picked file goes through;
+ *    { status: "seed", seed }  — validated by the same validateKeep a picked file goes through;
  *    { status: "none" }        — nothing stored, or a browser that refuses storage (which has nothing to show);
  *    { status: "cleared", reason }  — storage could not be READ (unparseable, or a literal null), so the
  *                                     wreckage was forgotten and `reason` says so;
@@ -34,10 +34,10 @@ import { MYFORT_SEED_KEY, clearMyFortSeed } from "./myfort-store.js";
  *                                     deleted (the header says why keeping matters), and `reason` says
  *                                     why it cannot be drawn AND that nothing was deleted, because the
  *                                     person cannot see storage to check. */
-export function readStoredMyFortSeed() {
+export function readStoredKeep() {
   let storedText = null;
   try {
-    storedText = localStorage.getItem(MYFORT_SEED_KEY);
+    storedText = localStorage.getItem(KEEP_STORE_KEY);
   } catch (error) {
     storedText = null; // a browser refusing storage has nothing to show
   }
@@ -54,11 +54,11 @@ export function readStoredMyFortSeed() {
   // "nothing stored", because "nothing stored" is the one answer that leaves it there for good: the page
   // would ignore it and /profile/ hides its delete button when it believes there is nothing to delete.
   if (!readable || parsed === null || parsed === undefined) {
-    clearMyFortSeed();
+    clearKeep();
     return { status: "cleared", reason: "The stored seed could not be read, so it has been forgotten. Load it again." };
   }
 
-  const check = validateMyFortSeed(parsed);
+  const check = validateKeep(parsed);
   if (!check.ok) {
     return { status: "kept", reason: `${check.reason} It has been kept, not forgotten — nothing was deleted.` };
   }

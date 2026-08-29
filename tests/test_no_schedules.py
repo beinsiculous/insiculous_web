@@ -18,7 +18,9 @@ from fk_core.no_schedules import (
     find_schedule_documents,
 )
 
-MYFORT_SEED = {"meta": {"format": "myfort", "version": 1, "exportedAt": "2026-08-27T18:00:00+00:00"},
+# A pre-rename export (format "myfort"): the validator no longer reads this string, the guard
+# catches it forever — old exports exist on the household's devices (F1, review 2026-08-28).
+LEGACY_KEEP = {"meta": {"format": "myfort", "version": 1, "exportedAt": "2026-08-27T18:00:00+00:00"},
                "days": [], "season": None, "year": None}
 
 KEEP_SEED = {"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": [],
@@ -27,7 +29,12 @@ KEEP_SEED = {"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": 
 
 class DescribeScheduleDocumentTests(unittest.TestCase):
     def test_it_names_a_my_fort_seed(self):
-        self.assertIn("My Fort seed", describe_schedule_document(MYFORT_SEED))
+        self.assertIn("a keep", describe_schedule_document(LEGACY_KEEP))
+
+    def test_a_current_format_keep_is_recognised(self):
+        current = dict(LEGACY_KEEP, meta={"format": "keep", "version": 1})
+        self.assertIn("a keep", describe_schedule_document(current))
+        self.assertIn('"keep"', describe_schedule_document(current))
 
     def test_it_names_a_keep_seed(self):
         self.assertIn("Focus Key seed", describe_schedule_document(KEEP_SEED))
@@ -60,7 +67,7 @@ class FindScheduleDocumentsTests(unittest.TestCase):
             with self.subTest(path=relative), tempfile.TemporaryDirectory() as directory:
                 planted = Path(directory) / relative
                 planted.parent.mkdir(parents=True, exist_ok=True)
-                planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+                planted.write_text(json.dumps(LEGACY_KEEP), encoding="utf-8")
                 found = find_schedule_documents(directory)
                 self.assertEqual([path for path, _ in found], [relative])
 
@@ -71,14 +78,14 @@ class FindScheduleDocumentsTests(unittest.TestCase):
             for relative in ("dist/myfort.json", "node_modules/pkg/myfort.json", "source/myfort.json"):
                 planted = Path(directory) / relative
                 planted.parent.mkdir(parents=True, exist_ok=True)
-                planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+                planted.write_text(json.dumps(LEGACY_KEEP), encoding="utf-8")
             self.assertEqual(find_schedule_documents(directory), [])
 
     def test_exactly_the_two_invented_fixtures_are_exempt_and_they_exist(self):
         """An exemption for a file that does not exist is a pre-approved hole at exactly the path a real
         export would be dropped. So the list is named outright, and every entry is on disk."""
-        self.assertEqual(ALLOWED_FIXTURES, {"tests/fixtures/myfort.sample.json",
-                                            "tests/fixtures/myfort.other-household.json"})
+        self.assertEqual(ALLOWED_FIXTURES, {"tests/fixtures/keep.sample.json",
+                                            "tests/fixtures/keep.other-household.json"})
         for relative in ALLOWED_FIXTURES:
             self.assertTrue((CHECKOUT_ROOT / relative).is_file(), f"{relative} is exempt but missing")
 
@@ -89,18 +96,18 @@ class FindScheduleDocumentsTests(unittest.TestCase):
         that is not the original household's. If nothing reads one, its exemption is a hole with a
         story attached."""
         harness = (CHECKOUT_ROOT / "scripts" / "a11y-check.mjs").read_text(encoding="utf-8")
-        self.assertIn("myfort.sample.json", harness)
-        self.assertIn("myfort.other-household.json", harness)
+        self.assertIn("keep.sample.json", harness)
+        self.assertIn("keep.other-household.json", harness)
 
     def test_the_other_household_fixture_is_read_by_the_tests_that_justify_it(self):
         """The second fixture also earns its exemption in the rendering tests, which need a seed
         whose season ids are not the ones the original colour map was keyed to. Same rule — an
         exemption nothing reads is a hole with a story attached."""
-        rendering_tests = (CHECKOUT_ROOT / "tests" / "test_myfort.py").read_text(encoding="utf-8")
-        self.assertIn("myfort.other-household.json", rendering_tests)
+        rendering_tests = (CHECKOUT_ROOT / "tests" / "test_keep.py").read_text(encoding="utf-8")
+        self.assertIn("keep.other-household.json", rendering_tests)
 
     def test_the_exempt_fixtures_are_invented_rather_than_anybody_s(self):
-        """Each is a My Fort seed by shape — that is the point — so what makes it safe is that its contents
+        """Each is a keep by shape — that is the point — so what makes it safe is that its contents
         are made up. Pinned on the marker names, which no real export would carry."""
         for relative in ALLOWED_FIXTURES:
             fixture = json.loads((CHECKOUT_ROOT / relative).read_text(encoding="utf-8"))
@@ -114,7 +121,7 @@ class FindScheduleDocumentsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             planted = Path(directory) / "tests/fixtures/somebody-elses.json"
             planted.parent.mkdir(parents=True, exist_ok=True)
-            planted.write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+            planted.write_text(json.dumps(LEGACY_KEEP), encoding="utf-8")
             self.assertEqual([path for path, _ in find_schedule_documents(directory)],
                              ["tests/fixtures/somebody-elses.json"])
 
@@ -125,7 +132,7 @@ class FindScheduleDocumentsTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             (Path(directory) / "broken.json").write_text("{not json", encoding="utf-8")
-            (Path(directory) / "utf16.json").write_bytes(json.dumps(MYFORT_SEED).encode("utf-16"))
+            (Path(directory) / "utf16.json").write_bytes(json.dumps(LEGACY_KEEP).encode("utf-16"))
             found = dict(find_schedule_documents(directory))
             self.assertEqual(sorted(found), ["broken.json", "utf16.json"])
             for reason in found.values():
@@ -152,15 +159,15 @@ class FindScheduleDocumentsTests(unittest.TestCase):
         import tempfile
 
         with tempfile.TemporaryDirectory() as directory:
-            (Path(directory) / "seed.json").write_text(json.dumps(MYFORT_SEED), encoding="utf-8-sig")
+            (Path(directory) / "seed.json").write_text(json.dumps(LEGACY_KEEP), encoding="utf-8-sig")
             self.assertEqual([reason for _, reason in find_schedule_documents(directory)],
-                             ["a My Fort seed (meta.format is \"myfort\")"])
+                             ["a keep (meta.format is \"myfort\")"])
 
     def test_it_does_not_depend_on_the_file_being_named_tidily(self):
         import tempfile
 
         with tempfile.TemporaryDirectory() as directory:
-            (Path(directory) / "SEED.JSON").write_text(json.dumps(MYFORT_SEED), encoding="utf-8")
+            (Path(directory) / "SEED.JSON").write_text(json.dumps(LEGACY_KEEP), encoding="utf-8")
             self.assertEqual([path for path, _ in find_schedule_documents(directory)], ["SEED.JSON"])
 
     def test_the_repository_root_it_defaults_to_is_the_checkout(self):

@@ -1,7 +1,7 @@
 // Accessibility gate: serve dist/ locally, run axe-core (WCAG 2.0/2.2 A+AA) on every page, and
 // fail the build on any violation. Runs as part of `npm run verify`, so a regression blocks a
 // deploy exactly like a type error does. The seed-fed pages are audited twice, once per invented
-// My Fort fixture: the second household's pass is what certifies the positional season palette's
+// Keep fixture: the second household's pass is what certifies the positional season palette's
 // contrast on a seed that is not the original household's.
 //
 // axe finds roughly half of real-world issues — the rest is the manual checklist in README
@@ -127,10 +127,10 @@ try {
   const page = await context.newPage();
   // The faces only render their full UI once a profile exists locally — same seeding the
   // screenshot harness uses, so axe sees what a returning user sees.
-  // My Fort renders entirely from a seed in localStorage. Without this the page audited is a file picker
+  // Keep renders entirely from a seed in localStorage. Without this the page audited is a file picker
   // on an otherwise empty page, and the one hard requirement it has — being readable across a room — is
   // checked by a gate that never sees it. The fixture is invented, not anybody's fortnight.
-  const myFortSeed = readFileSync(new URL("../tests/fixtures/myfort.sample.json", import.meta.url), "utf8");
+  const keepSeed = readFileSync(new URL("../tests/fixtures/keep.sample.json", import.meta.url), "utf8");
   // The /profile/ achievements board renders its headings, lists and delete button only when a game
   // has recorded unlocks — seed invented saves so axe audits the populated board, not just the
   // empty state (the value is the engine's save-file shape, games-achievements.js). There are this
@@ -164,10 +164,10 @@ try {
   });
   await page.addInitScript(([settings, seed, gameUnlocks, siteUnlocks]) => {
     localStorage.setItem("fortknight.user-settings", settings);
-    localStorage.setItem("beinsiculous.myfort-seed", seed);
+    localStorage.setItem("beinsiculous.keep", seed);
     localStorage.setItem("beinsiculous.games.pong.achievements", gameUnlocks);
     localStorage.setItem("beinsiculous.achievements", siteUnlocks);
-  }, [JSON.stringify({ schemaVersion: 2 }), myFortSeed, pongAchievements, siteAchievements]);
+  }, [JSON.stringify({ schemaVersion: 2 }), keepSeed, pongAchievements, siteAchievements]);
   for (const route of chosen) {
     await page.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page })
@@ -180,18 +180,18 @@ try {
     }
   }
 
-  // The pages that render from the stored seed — the Overview, My Fort and the fourteen day pages —
+  // The pages that render from the stored seed — the Overview, Keep and the fourteen day pages —
   // are the only output that changes with the seed, so only they get a second pass, seeded with the
   // other invented household. Its season ids and names are not the ones the original palette was
   // keyed to, which is exactly what certifies the positional palette's contrast on a seed that is
   // not the original household's; re-auditing the rest of the site would audit identical output.
   const seedFed = chosen.filter((route) =>
-    route === "/fortknight/" || route === "/fortknight/myfort/" || route.startsWith("/fortknight/days/"));
-  const otherHouseholdSeed = readFileSync(new URL("../tests/fixtures/myfort.other-household.json", import.meta.url), "utf8");
+    route === "/fortknight/" || route === "/fortknight/keep/" || route.startsWith("/fortknight/days/"));
+  const otherHouseholdSeed = readFileSync(new URL("../tests/fixtures/keep.other-household.json", import.meta.url), "utf8");
   const otherHouseholdContext = await browser.newContext();
   await otherHouseholdContext.addInitScript(([settings, seed]) => {
     localStorage.setItem("fortknight.user-settings", settings);
-    localStorage.setItem("beinsiculous.myfort-seed", seed);
+    localStorage.setItem("beinsiculous.keep", seed);
   }, [JSON.stringify({ schemaVersion: 2 }), otherHouseholdSeed]);
   const otherHouseholdPage = await otherHouseholdContext.newPage();
   for (const route of seedFed) {

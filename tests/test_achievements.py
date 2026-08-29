@@ -131,7 +131,7 @@ class LoadSiteAchievementsTests(unittest.TestCase):
     def test_known_ids_render_from_the_registry(self):
         [result] = self.load([json.dumps({"unlocks": {"moved-in": {"unlocked_at": 1_756_252_800}}})])
         self.assertEqual(result, [{"id": "moved-in", "type": "fortknight", "title": "Moved In",
-                                   "description": "Loaded a My Fort seed.", "unlockedAt": "2025-08-27T00:00:00.000Z"}])
+                                   "description": "Loaded a keep.", "unlockedAt": "2025-08-27T00:00:00.000Z"}])
 
     def test_unknown_ids_still_render_prettified(self):
         [result] = self.load([json.dumps({"unlocks": {"future_feat": {"unlocked_at": 1_756_252_800}}})])

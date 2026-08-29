@@ -2,12 +2,16 @@
 
 This repository is public and holds nobody's schedule (CLAUDE.md, README.md, docs/thesis.md). Until now
 that was a sentence; this makes it a check. What it guards against is one tired commit — dropping a
-`myfort` seed into `public/` to try it on the TV, or a `keep_seed.json` next to the scripts that read it.
+keep into `public/` to try it on the TV, or a `keep_seed.json` next to the scripts that read it.
 Either one deploys a household's fortnight to a public website, and git history makes it painful to undo.
 
 The shapes it knows, and why they are that specific:
 
-  * `meta.format == "myfort"` — a My Fort seed, exported by the Focus Key app. It says what it is.
+  * `meta.format == "keep"` — a keep, exported by the phone app. It says what it is.
+  * `meta.format == "myfort"` — a keep under the format's pre-2026-08-28 name. The validator stopped
+    reading this string when the format was renamed, but this guard never does: old exports exist on
+    the household's devices, and the keep deliberately omits `calendar` and `tasks`, so the shape
+    below cannot catch one. The one place "myfort" stays alive, on purpose.
   * `meta`, `calendar`, `days` and `tasks` ALL present — a `keep_seed.json`.
 
 A bare `tasks` or `days` key is NOT the test, and that is the whole subtlety. `data/questionnaire.json`
@@ -34,10 +38,10 @@ SKIPPED_DIRECTORIES = {".git", ".astro", "node_modules", "dist", "__pycache__", 
 #: This is a statement about tooling formats, not a permission for anything to hide in them.
 JSONC_CONFIG_NAMES = {"tsconfig.json", "jsconfig.json"}
 
-#: The fabricated fixtures allowed to look like a seed. `myfort.sample.json` is loaded into the browser by
-#: scripts/a11y-check.mjs so axe audits a My Fort page with fourteen real panels rather than an empty file
+#: The fabricated fixtures allowed to look like a seed. `keep.sample.json` is loaded into the browser by
+#: scripts/a11y-check.mjs so axe audits the Keep page with fourteen real panels rather than an empty file
 #: picker — the page's one hard requirement is being legible, and a gate that only ever sees the empty state
-#: checks nothing. `myfort.other-household.json` is a second invented household, read by the rendering tests
+#: checks nothing. `keep.other-household.json` is a second invented household, read by the rendering tests
 #: and by that same gate's second pass over the seed-fed pages: the year wheel's colours are assigned
 #: positionally, and proving that takes a seed whose season ids are NOT the ones the original palette was
 #: keyed to — the a11y pass is what certifies the palette's contrast on such a seed.
@@ -46,7 +50,7 @@ JSONC_CONFIG_NAMES = {"tsconfig.json", "jsconfig.json"}
 #: exactly the path and name a real export would be given by someone trying the import flow. Each entry is
 #: here now because the file is here and something reads it, and tests assert both: that the exemptions are
 #: exactly these paths, and that every file they name is invented rather than anybody's.
-ALLOWED_FIXTURES = {"tests/fixtures/myfort.sample.json", "tests/fixtures/myfort.other-household.json"}
+ALLOWED_FIXTURES = {"tests/fixtures/keep.sample.json", "tests/fixtures/keep.other-household.json"}
 
 
 def describe_schedule_document(parsed):
@@ -54,8 +58,8 @@ def describe_schedule_document(parsed):
     if not isinstance(parsed, dict):
         return None
     meta = parsed.get("meta")
-    if isinstance(meta, dict) and meta.get("format") == "myfort":
-        return "a My Fort seed (meta.format is \"myfort\")"
+    if isinstance(meta, dict) and meta.get("format") in ("keep", "myfort"):
+        return f"a keep (meta.format is \"{meta.get('format')}\")"
     if {"meta", "calendar", "days", "tasks"} <= set(parsed):
         return "a Focus Key seed (meta, calendar, days and tasks together)"
     return None

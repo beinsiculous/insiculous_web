@@ -13,8 +13,8 @@ weights, date resolver, the web app, questionnaire-as-settings, assistant worksp
 person's own AI workspace + apply-back), docs, tests.
 
 **Shipping status.** `main` is production. FortKnight's seed-fed pages are live — the Overview
-(`/fortknight/`), My Fort (`/fortknight/myfort/`) and the fourteen day pages
-(`/fortknight/days/<dayKey>/`), all reading a visitor-loaded My Fort seed — as are the achievements
+(`/fortknight/`), Keep (`/fortknight/keep/`) and the fourteen day pages
+(`/fortknight/days/<dayKey>/`), all reading a visitor-loaded keep — as are the achievements
 boards: the studio's `/achievements/`, listing every achievement the site knows, and the face's
 `/fortknight/achievements/`, the active profile's unlocked fortnight achievements. Meanwhile
 `/fortknight/build/`, `/fortknight/questionnaire/` and `/fortknight/assistant/` remain
@@ -34,7 +34,7 @@ authoring new ones — and on 2026-08-28 given a project spine.
 system's own web face, and through the current phase it is the only agenda surface there is. The work
 runs in gated projects, in order; the two that concern this repository are:
 
-1. **Project Mega Seed — the current phase.** Build seeds to flesh out the receiver app: the My Fort
+1. **Project Mega Seed — the current phase.** Build seeds to flesh out the receiver app: the Keep
    format gets a public spec and machine schema, both canonical *here* because a person hand-making a
    seed cannot see the private repo. Nothing new consumes the format until it is written down.
 2. **Project Ant Hill.** Reverse-engineer a seed builder from the hand-made seeds. The creation chain
@@ -54,36 +54,36 @@ What that means for the items this file used to number 1–9:
   its head that none of it exists.
 - **Item 3, ForkKnife's full chain** (`docs/forkknife-chain.md`) — **no longer "the next thing being
   built."** Its stage 3 does not exist at all, and it authors a menu from nothing while a real menu
-  sits unread in the seed. What comes first is carrying the workbook's menu across in the My Fort
+  sits unread in the seed. What comes first is carrying the workbook's menu across in the Keep
   seed and rendering it under `/fortknight/` — the `/forkknife/` routes that design assumed are
   removed.
 - **Item 7, "native clients reading the same bundle"** — **obsolete, not deferred.** The phone app exists
   and does not read `build/fortknight.bundle.json`; it renders the workbook's own seed. The two meet
-  at the My Fort seed, not at the bundle.
+  at the keep, not at the bundle.
 - **Item 9**, the "Open for Appointments (Tuesday A, early)" vs week-1-midday question, is a data
   question for the owner and stays open.
 
 ## What is web-specific, and stays here
 
-- **The seed-fed pages** are live on `main`. `/fortknight/myfort` renders a My Fort seed the
+- **The seed-fed pages** are live on `main`. `/fortknight/keep` renders a keep the
   visitor loads from their own device, resolving nothing and never uploading it; the Overview
   (`/fortknight/`) keeps its thesis front-door content as the no-seed state — its primary action is
   **Load your seed** — and renders a compact fortnight grid once a seed is stored; the fourteen
   `/fortknight/days/<dayKey>/` pages render the seed's blocks, meals and appointments by day key,
-  falling back to the load-your-seed message. My Fort is in the face nav (`src/lib/faces.js`), and
-  the rendering is factored into `src/lib/myfort-view.js` with a positional season palette. All of
+  falling back to the load-your-seed message. Keep is in the face nav (`src/lib/faces.js`), and
+  the rendering is factored into `src/lib/keep-view.js` with a positional season palette. All of
   it is documented in `docs/app.md`.
 - **The face branches are playgrounds (re-ruled 2026-08-28).** They belong to the back-burnered
   creation chain and are not absorbed or merged; seed-fed pages are built fresh in the `main`
   lineage. The earlier rule here — absorb `main` before seed-fed work — guarded a merge that no
-  longer happens. `myfort.astro`, `src/lib/myfort.js`, `src/lib/myfort-store.js`,
-  `src/lib/myfort-view.js` and `tests/fixtures/myfort.sample.json` exist only on `main` and stay
+  longer happens. `keep.astro`, `src/lib/keep.js`, `src/lib/keep-store.js`,
+  `src/lib/keep-view.js` and `tests/fixtures/keep.sample.json` exist only on `main` and stay
   the live copies.
 - **Achievements.** Shipped on this branch: three types, two stores. The games write one key each
   (`beinsiculous.games.<slug>.achievements`, the engine's save file byte for byte); the site writes
   its own insiculous and fortknight unlocks into one store, `beinsiculous.achievements`, with the
   registry in `src/lib/achievements.js` — initial achievements `player` (opened `/games/`) and
-  `moved-in` (loaded a My Fort seed). The studio's `/achievements/` (nav entry after Games) lists
+  `moved-in` (loaded a keep). The studio's `/achievements/` (nav entry after Games) lists
   every achievement the site knows: the registry entries render locked and unlocked with their
   descriptions, unlocked above locked within each group, and game achievements render per game as
   unlocked-only — the games own their full lists in-game, and the site does not duplicate engine

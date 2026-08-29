@@ -34,9 +34,9 @@ import "../styles/app-widgets.css";
   </section>
 
   <section class="panel">
-    <h2>My Fort seed</h2>
+    <h2>Keep</h2>
     <p class="muted">
-      The fortnight exported from the Focus Key app and loaded into My&nbsp;Fort. It is kept on this device only —
+      Your keep — the fortnight exported from the Focus Key app and loaded on the Keep page. It stays on this device only —
       it was never uploaded and this site holds no copy of it.
     </p>
     <p class="muted" id="seedStatus">Checking…</p>
@@ -68,7 +68,7 @@ import "../styles/app-widgets.css";
   import { unusedProfileName } from "../lib/shared/profile-names.js";
   import { askProfileName } from "../lib/profile-name-dialog.js";
   import { activeWeights } from "../lib/shared/weights-rules.js";
-  import { clearMyFortSeed, describeMyFortSeed } from "../lib/myfort-store.js";
+  import { clearKeep, describeKeep } from "../lib/keep-store.js";
   import { clearGameAchievements } from "../lib/games-achievements.js";
   import { clearSiteAchievements, renderAchievementsBoard } from "../lib/achievements.js";
 
@@ -169,16 +169,16 @@ import "../styles/app-widgets.css";
   });
   /** What is on this device, never what is in it: whether a seed is here and when it was exported. */
   function renderSeed() {
-    const { present, exportedAt } = describeMyFortSeed();
+    const { present, exportedAt } = describeKeep();
     elements.seedActions.hidden = !present;
     elements.seedStatus.textContent = present
-      ? `A seed is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
-      : "No seed on this device yet. Export one from Focus Key and load it on My Fort.";
+      ? `A keep is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
+      : "No keep on this device yet. Export one from Focus Key and load it on the Keep page.";
   }
 
   elements.deleteSeedButton.addEventListener("click", () => {
-    if (!confirm("Delete the My Fort seed from this device? Load it again to bring it back.")) return;
-    clearMyFortSeed();
+    if (!confirm("Delete the keep from this device? Load it again to bring it back.")) return;
+    clearKeep();
     renderSeed();
   });
 

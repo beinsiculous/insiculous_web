@@ -8,8 +8,8 @@ on 2026-08-17, and the FortKnight repository that had stayed canonical for the d
 here on 2026-08-18 — one project, one repo, no sync step.)
 
 **Deployment status.** On production (`main`), FortKnight's seed-fed pages are live: the Overview
-(`/fortknight/`), **My Fort** (`/fortknight/myfort/`) and the fourteen day pages
-(`/fortknight/days/<dayKey>/`), all reading a My Fort seed the visitor loads from their own device
+(`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day pages
+(`/fortknight/days/<dayKey>/`), all reading a keep the visitor loads from their own device
 (next section), plus **Achievements** (`/fortknight/achievements/`), which reads the site's
 achievement store instead of the seed and shows the active profile's unlocked fortnight
 achievements. The studio side gains `/achievements/`, the every-achievement board (below).
@@ -22,44 +22,44 @@ absorbed, never merged; seed-fed pages are built fresh in the `main` lineage (`d
 The profile-driven body below stays as-is: it is the contract that chain was built against, and it
 applies again if the chain returns from the back burner.
 
-## The seed-fed pages: Overview, My Fort and the day pages
+## The seed-fed pages: Overview, Keep and the day pages
 
-The live face routes are neither placeholders nor built from a profile. They render a **My Fort
+The live face routes are neither placeholders nor built from a profile. They render a **Keep
 seed**: a small file the private **Focus Key** phone app exports
-(`focuskey/src/lib/myfort-seed.js`), carrying fourteen day keys with their meals, appointments and
+(`focuskey/src/lib/keep-seed.js`), carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
 
-- **Three pages, one seed.** `/fortknight/myfort/` draws the whole fortnight — fourteen day panels,
+- **Three pages, one seed.** `/fortknight/keep/` draws the whole fortnight — fourteen day panels,
   the season card and the year wheel — and sits in the face nav (`src/lib/faces.js`). With no seed
   stored, `/fortknight/` keeps its thesis front-door content and its primary action is **Load your
-  seed** (to `/fortknight/myfort/`); with a seed stored it renders a compact fortnight grid linking
+  seed** (to `/fortknight/keep/`); with a seed stored it renders a compact fortnight grid linking
   to the day pages. Each `/fortknight/days/<dayKey>/` page renders that day key's blocks, meals and
   appointments, falling back to the load-your-seed message. The rendering is factored into
-  `src/lib/myfort-view.js` — season colours come from a **positional palette** (position pinned to
+  `src/lib/keep-view.js` — season colours come from a **positional palette** (position pinned to
   first appearance in `year.slices`), never keyed to a household's season ids — and the stored-seed
   boot logic is shared by all three pages.
 
 - **The visitor loads their own file.** It is kept in `localStorage` under
-  `beinsiculous.myfort-seed` (`src/lib/myfort-store.js`), deleted from `/profile/`, and **never
+  `beinsiculous.keep-seed` (`src/lib/keep-store.js`), deleted from `/profile/`, and **never
   uploaded**. It is stored under its own key, separate from the profile, so neither document can
   migrate into the other.
 - **The pages resolve nothing.** The seed arrives pre-joined by day key. This is deliberate rather
   than lazy: Focus Key anchors every season on `sun-a` and has transition weeks, while
   `fk_core/dates.py` and `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b`
-  starts for Ostara and Fimbulsumar — so **running this repository's date evaluator over a My Fort
-  seed would be wrong for half the year.** `src/lib/myfort.js` validates and the pages draw.
+  starts for Ostara and Fimbulsumar — so **running this repository's date evaluator over a Keep
+  seed would be wrong for half the year.** `src/lib/keep.js` validates and the pages draw.
 - **Validation is tolerant within a major version.** Unknown fields are ignored and only a *higher*
   `meta.version` is refused, because the two halves ship on different cadences and the person holding
   the phone cannot redeploy the website. Focus Key's side of that bargain: the version bumps only for
   a breaking change, so adding a field is not a bump.
-- **A My Fort seed is somebody's real schedule and must never be committed here.**
+- **A keep is somebody's real schedule and must never be committed here.**
   `scripts/fk_core/no_schedules.py` enforces it, `validate.py` runs it, and the exact-path
-  exemptions are `tests/fixtures/myfort.sample.json` — invented, and loaded by `a11y-check.mjs` so axe
+  exemptions are `tests/fixtures/keep.sample.json` — invented, and loaded by `a11y-check.mjs` so axe
   audits a page with fourteen real panels instead of an empty file picker — and
-  `tests/fixtures/myfort.other-household.json`, a second invented household the rendering tests use for
+  `tests/fixtures/keep.other-household.json`, a second invented household the rendering tests use for
   the year wheel's positional colours.
 
-The earlier gaps are closed: My Fort is in the face nav, the season colours are positional rather
+The earlier gaps are closed: Keep is in the face nav, the season colours are positional rather
 than keyed to Jesse's season ids, and the face branches no longer matter to these pages —
 `fortknightdev` and `forknifedev` were re-ruled the creation chain's playgrounds on 2026-08-28,
 never absorbed or merged, and **seed-fed pages are built fresh in the `main` lineage** (see
@@ -82,7 +82,7 @@ Multi-page, no UI framework. `npm install` once, then:
   `src/lib/workspace-static-texts.js`. The canonical JS modules live in `src/lib/shared/` — the same
   files `tests/helpers.py` drives through node to check them against their Python twins.
 - **One face live, one profile** (`src/lib/faces.js`, `FaceLayout.astro`): **FortKnight** under `/fortknight/`
-  (🏰🛡️: the fortnight schedule) is the live face, with the six-page menu **Overview · My Fort ·
+  (🏰🛡️: the fortnight schedule) is the live face, with the six-page menu **Overview · Keep ·
   Achievements · Build · Questionnaire · Assistant** — Achievements boarding the active profile's
   unlocked fortnight achievements. **ForkKnife** under `/forkknife/` (🍴: the fortnight menu) had its routes removed on
   2026-08-28, and everything about it in this bullet — and the profile-driven FortKnight pages in the next two —
