@@ -26,7 +26,7 @@ applies again if the chain returns from the back burner.
 
 The live face routes are neither placeholders nor built from a profile. They render a **Keep
 seed**: a small file the private **Focus Key** phone app exports
-(`focuskey/src/lib/keep-seed.js`), carrying fourteen day keys with their meals, appointments and
+(`focuskey/src/lib/keep.js`), carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
 
 - **Three pages, one seed.** `/fortknight/keep/` draws the whole fortnight — fourteen day panels,
@@ -40,7 +40,7 @@ block shapes, plus a season card and a year wheel.
   boot logic is shared by all three pages.
 
 - **The visitor loads their own file.** It is kept in `localStorage` under
-  `beinsiculous.keep-seed` (`src/lib/keep-store.js`), deleted from `/profile/`, and **never
+  `beinsiculous.keep` (`src/lib/keep-store.js`), deleted from `/profile/`, and **never
   uploaded**. It is stored under its own key, separate from the profile, so neither document can
   migrate into the other.
 - **The pages resolve nothing.** The seed arrives pre-joined by day key. This is deliberate rather
