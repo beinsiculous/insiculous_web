@@ -249,19 +249,20 @@ The branch model behind that: `main` is production and only ever receives merges
 integration branch, and a `dev → main` pull request **is** the production deploy. The creation chain
 the face apps were built around (questionnaire → weights → generator → import) was re-ruled on
 2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge, and
-seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). The
-branches themselves were deleted on 2026-08-29 and replaced by the annotated tag
-`creation-chain-parked`, which names the same commit on origin and survives a fresh clone. Ten files
-were deleted from `main` with the chain — `ApplyFromAssistant.astro`, `MealPlanEditor.astro`,
-`meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each is recoverable with
-`git show creation-chain-parked:PATH`. On `main`, FortKnight's seed-fed pages are live — the
-Overview, Keep and the fourteen day pages — alongside the achievements boards (the studio's
-`/achievements/` and the face's `/fortknight/achievements/`), while
+seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). Both
+branches are local-only as of 2026-08-29: deleted from origin and kept off it by a `pre-push` hook,
+they exist on the maintainer's machine alone. The annotated tag `creation-chain-parked` names the
+same commit on origin, so the parked work survives a fresh clone even though the branches do not.
+Ten files were deleted from `main` with the chain — `ApplyFromAssistant.astro`,
+`MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each
+is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's seed-fed pages
+are live — the Overview, Keep and the fourteen day pages — alongside the achievements boards (the
+studio's `/achievements/` and the face's `/fortknight/achievements/`), while
 `/fortknight/build|questionnaire|assistant/` remain `src/components/FaceInDevelopment.astro`
-placeholders, kept as files so the parked chain's return would be an ordinary content
-merges rather than one modify/delete conflict per route. Fork Knife's routes (`/forkknife/*`) were
-removed from the live site on 2026-08-28; its menu rendering will land under `/fortknight/` when the
-keep carries menu rows.
+placeholders, kept as files so the parked chain's return would be an ordinary content merges rather
+than one modify/delete conflict per route. Fork Knife's routes (`/forkknife/*`) were removed from
+the live site on 2026-08-28; its menu rendering will land under `/fortknight/` when the keep carries
+menu rows.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

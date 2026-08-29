@@ -2,9 +2,10 @@
 // A face page that is not on production yet.
 //
 // These exist as FILES rather than as deletions on purpose. The real pages belong to the back-burnered
-// creation chain, parked at the tag `creation-chain-parked` — it replaced the `fortknightdev` and
-// `forknifedev` branches, which were re-ruled playgrounds on 2026-08-28 and deleted on 2026-08-29.
-// Recover any of them with `git show creation-chain-parked:PATH`. A placeholder keeps the path occupied
+// creation chain, on the `fortknightdev` and `forknifedev` branches — re-ruled playgrounds on
+// 2026-08-28, and local-only since 2026-08-29: not on origin, and a `pre-push` hook keeps them off it.
+// The tag `creation-chain-parked` names the same commit on origin, so anyone with a clone can still
+// recover a file with `git show creation-chain-parked:PATH`. A placeholder keeps the path occupied
 // so the chain returning is an ordinary content merge rather than a modify/delete conflict per route,
 // and keeps the URL from 404ing in the meantime.
 //

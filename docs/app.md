@@ -18,13 +18,14 @@ side gains `/achievements/`, the every-achievement board (below). `/fortknight/b
 removed from the site on 2026-08-28 — its menu rendering will land under `/fortknight/` when the
 seed carries menu rows. The face branches `fortknightdev` and `forknifedev` were re-ruled the
 back-burnered creation chain's playgrounds on 2026-08-28 — never absorbed, never merged; seed-fed
-pages are built fresh in the `main` lineage (`docs/roadmap.md`). The branches themselves were
-deleted on 2026-08-29 and replaced by the annotated tag `creation-chain-parked`, which names the
-same commit on origin and survives a fresh clone. Ten files were deleted from `main` with the chain
-— `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the
-`/forkknife/` pages — and each is recoverable with `git show creation-chain-parked:PATH`. The
-profile-driven body below stays as-is: it is the contract that chain was built against, and it
-applies again if the chain returns from the back burner.
+pages are built fresh in the `main` lineage (`docs/roadmap.md`). Both branches are local-only as of
+2026-08-29: deleted from origin and kept off it by a `pre-push` hook, they exist on the maintainer's
+machine alone. The annotated tag `creation-chain-parked` names the same commit on origin, so the
+parked work survives a fresh clone even though the branches do not. Ten files were deleted from
+`main` with the chain — `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`,
+`forkknife.js` and the `/forkknife/` pages — and each is recoverable with `git show
+creation-chain-parked:PATH`. The profile-driven body below stays as-is: it is the contract that
+chain was built against, and it applies again if the chain returns from the back burner.
 
 ## The seed-fed pages: Overview, Keep and the day pages
 
@@ -74,7 +75,8 @@ The earlier gaps are closed: Keep is in the face nav, the season colours are pos
 keyed to Jesse's season ids, and the face branches no longer matter to these pages — `fortknightdev`
 and `forknifedev` were re-ruled the creation chain's playgrounds on 2026-08-28, never absorbed or
 merged, and **seed-fed pages are built fresh in the `main` lineage** (see `docs/roadmap.md`). Both
-branches were deleted on 2026-08-29; the tag `creation-chain-parked` names their commit.
+branches are local-only as of 2026-08-29 and are not on origin; the tag `creation-chain-parked`
+names their commit there instead.
 
 ## The site
 beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries two surfaces

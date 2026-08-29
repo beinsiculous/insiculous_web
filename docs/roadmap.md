@@ -20,13 +20,14 @@ the studio's `/achievements/`, listing every achievement the site knows, and the
 `/fortknight/build/`, `/fortknight/questionnaire/` and `/fortknight/assistant/` remain
 `FaceInDevelopment` placeholders, and the `/forkknife/` routes were removed on 2026-08-28. The face
 pages built on `fortknightdev` and `forknifedev` belong to the back-burnered creation chain, and
-those branches were its playgrounds — it no longer ships by merging (re-ruled 2026-08-28; the folded
+those branches are its playgrounds — it no longer ships by merging (re-ruled 2026-08-28; the folded
 roadmap in the working set carries the ruling). Seed-fed replacements are built fresh in the `main`
-lineage. The branches themselves were deleted on 2026-08-29 and replaced by the annotated tag
-`creation-chain-parked`, which names the same commit on origin and survives a fresh clone. Ten files
-were deleted from `main` with the chain — `ApplyFromAssistant.astro`, `MealPlanEditor.astro`,
-`meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each is recoverable with
-`git show creation-chain-parked:PATH`.
+lineage. Both branches are local-only as of 2026-08-29: deleted from origin and kept off it by a
+`pre-push` hook, they exist on the maintainer's machine alone. The annotated tag
+`creation-chain-parked` names the same commit on origin, so the parked work survives a fresh clone
+even though the branches do not. Ten files were deleted from `main` with the chain —
+`ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the
+`/forkknife/` pages — and each is recoverable with `git show creation-chain-parked:PATH`.
 
 **Fort Knight is planned in the working set, not here.** The apps, the phone app **Fortress Key**
 (Keep until 2026-08-27, Focus Key until 2026-08-28, now Fortress Key), and the seed that joins
