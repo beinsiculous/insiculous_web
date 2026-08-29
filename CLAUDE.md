@@ -119,12 +119,12 @@ site; its menu rendering will land under `/fortknight/` when the seed carries me
 on `main`: the studio pages (including `/achievements/`), `/fortknight/achievements/` and
 `/profile/`.
 
-**The keep** is a small file the private Focus Key app exports (`focuskey/src/lib/keep-seed.js`): the fourteen
+**The keep** is a small file the private Focus Key app exports (`focuskey/src/lib/keep.js`): the fourteen
 day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The day keys are the
 format's skeleton: this is a fourteen-day system, so a conforming seed uses exactly the canonical fourteen
 (`sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`, the order the
 Invariants above pin). The
-visitor loads their own file; it is kept in `localStorage` under `beinsiculous.keep-seed`
+visitor loads their own file; it is kept in `localStorage` under `beinsiculous.keep`
 (`src/lib/keep-store.js`), deletable from `/profile/`, and never uploaded. The rendering is
 shared across the three seed-fed pages: `src/lib/keep-view.js` draws the panels, with season
 colours from a **positional palette** — position pinned to first appearance in `year.slices`, never
