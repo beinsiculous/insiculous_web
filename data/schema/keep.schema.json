@@ -105,6 +105,49 @@
         }
       }
     },
+    "menu": {
+      "type": "array",
+      "description": "The fortnight menu, grouped by meal slot: which dish is cooked on which day, and which later day eats it as leftovers. ABSENT IS NOT EMPTY: a keep written before 2026-08-29 has no menu section at all, which says the export predates menus; a menu present but empty says the household has none. Tooling that reports on a keep must say which it saw. Meal keys and dish text are the household's own words and are never enumerated or normalised.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slot": { "type": "string", "enum": ["brunch", "snack", "dinner"] },
+          "label": { "type": "string", "description": "The slot's display name, rendered verbatim. Today's writer emits Brunch/Snack/Dinner; a household with its own words for its meals may write its own." },
+          "entries": {
+            "type": "array",
+            "description": "The dishes in this slot across the fortnight. About eight dishes cover fourteen days: most are eaten twice, the second time as leftovers.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "mealKey": { "type": "string", "description": "The household's own id for the dish within its slot. Not enumerated." },
+                "menu": { "type": "string", "description": "The dish, in the household's words." },
+                "cookDay": {
+                  "type": "string",
+                  "description": "The day the dish is cooked.",
+                  "enum": [
+              "sun-a", "mon-b", "tue-a", "wed-b", "thu-a", "fri-b", "sat-a",
+              "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b"
+            ]
+                },
+                "cookDayLabel": { "type": "string" },
+                "leftoversDay": {
+                  "type": ["string", "null"],
+                  "description": "The day it is eaten again, or null when it is eaten once.",
+                  "enum": [
+              "sun-a", "mon-b", "tue-a", "wed-b", "thu-a", "fri-b", "sat-a",
+              "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b",
+              null
+            ]
+                },
+                "leftoversDayLabel": { "type": ["string", "null"] },
+                "cookExtra": { "type": "boolean", "description": "Cook more than the two servings need: the surplus is an ingredient in a later dish." },
+                "cookExtraNote": { "type": ["string", "null"], "description": "Why, in the household's words. Free text, and the only prose the menu sends to a page." }
+              }
+            }
+          }
+        }
+      }
+    },
     "season": {
       "type": ["object", "null"],
       "description": "A snapshot of the season current when the file was exported, or null when no season resolved. Season ids are one household's vocabulary and are never enumerated.",

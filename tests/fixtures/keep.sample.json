@@ -842,6 +842,66 @@
       }
     }
   ],
+  "menu": [
+    {
+      "slot": "brunch",
+      "label": "Brunch",
+      "entries": [
+        {
+          "mealKey": "Brunch1",
+          "menu": "Example eggs on toast",
+          "cookDay": "sun-a",
+          "cookDayLabel": "Sunday A",
+          "leftoversDay": "tue-a",
+          "leftoversDayLabel": "Tuesday A",
+          "cookExtra": false,
+          "cookExtraNote": null
+        },
+        {
+          "mealKey": "Brunch2",
+          "menu": "Example porridge",
+          "cookDay": "mon-b",
+          "cookDayLabel": "Monday B",
+          "leftoversDay": null,
+          "leftoversDayLabel": null,
+          "cookExtra": false,
+          "cookExtraNote": null
+        }
+      ]
+    },
+    {
+      "slot": "snack",
+      "label": "Snack",
+      "entries": [
+        {
+          "mealKey": "Snack1",
+          "menu": "Example oranges",
+          "cookDay": "sun-a",
+          "cookDayLabel": "Sunday A",
+          "leftoversDay": "wed-b",
+          "leftoversDayLabel": "Wednesday B",
+          "cookExtra": false,
+          "cookExtraNote": null
+        }
+      ]
+    },
+    {
+      "slot": "dinner",
+      "label": "Dinner",
+      "entries": [
+        {
+          "mealKey": "Dinner1",
+          "menu": "Example garden soup",
+          "cookDay": "sun-a",
+          "cookDayLabel": "Sunday A",
+          "leftoversDay": "thu-a",
+          "leftoversDayLabel": "Thursday A",
+          "cookExtra": true,
+          "cookExtraNote": "Example: the extra becomes Friday's pie filling"
+        }
+      ]
+    }
+  ],
   "season": {
     "key": "spooky",
     "name": "Spooky",

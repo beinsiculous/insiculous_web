@@ -88,6 +88,26 @@ Two consequences, both of which matter if you are writing or generating a keep:
    with entirely different seasons gets a correctly-coloured, contrast-checked wheel with no change
    to any reader.
 
+## The menu, and why it is grouped by slot
+
+The `menu` is the fortnight's dishes: which one is cooked on which day, and which later day eats it
+again as leftovers. About eight dishes cover fourteen days — most are eaten twice — and that is the
+whole argument the menu is making, so the format keeps the pair rather than flattening it into
+per-day text.
+
+It is grouped by **slot** (`brunch`, `snack`, `dinner`), with a `label` beside it, because every day
+has exactly one of each. Within a slot, `entries` are the dishes. The label is the slot's name for
+display — today's writer emits `Brunch`, `Snack` and `Dinner`, and a household with its own words for
+its meals may write its own. A reader prints the label it is given.
+
+**It is additive, and it arrived after version 1 shipped.** A keep exported before 2026-08-29 has no
+`menu` at all and is still perfectly conforming. That is the additive convention working, and the
+reason the next section makes so much of absent-versus-empty.
+
+**Days are already joined.** Each entry carries `cookDay` *and* `cookDayLabel`. A keep is pre-joined
+so nothing reading it has to resolve anything — the label is the household's word for that day, and
+a page prints it rather than working it out.
+
 ## Versioning, and why adding a field is not a version bump
 
 `meta.version` is the format version. It is **1**.
@@ -105,17 +125,21 @@ There are two constants, in two codebases, and they are two different ideas:
 They are allowed to differ; the whole cadence argument is that they will, briefly, whenever one
 half ships before the other. A file is refused only when the writer’s number exceeds the reader’s.
 
-**Absent is not the same as empty**, and tooling that reports on a keep must say which it saw. A
-keep with no `menu` section at all was written before menus existed; a keep with an empty one says
-the household has no menu. Those are different sentences, and a report that conflates them sends
-someone looking for a bug that is not there. *No reader implements this today* — `validateKeep`
-silently ignores what it does not know, which is the right behaviour for a renderer. The
-requirement is on validators and reports, and it is written here because the tools that will need
-it are not built yet.
+**Absent is not the same as empty**, and tooling that reports on a keep must say which it saw. The
+menu is the worked example, and a real one: a keep exported before **2026-08-29** has no `menu`
+section at all, which says the export predates menus; a keep with an empty menu says the household
+has none. Those are different sentences, and a report that conflates them sends someone to
+re-export a file that was never the problem.
+
+`describeSection(seed, name)` in `src/lib/keep.js` is where that distinction lives — it answers
+*absent*, *empty*, *present* or *wrong-shape*, with a sentence for each. Renderers still collapse
+the two, deliberately: `validateKeep` ignores what it does not know and every panel degrades with
+`?? []`, which is the right behaviour for something drawing a page. The requirement is on tools that
+*report*.
 
 **Room left deliberately:** a future per-member section — one person’s slice of a household’s
-fortnight — is an additive section and would need no version bump. Nothing in version 1 forecloses
-it.
+fortnight — is an additive section and would need no version bump, exactly as the menu did. Nothing
+in version 1 forecloses it.
 
 ## The document
 
@@ -171,6 +195,40 @@ given above.
             "timeFinished": "15:30",
             "estimatedEnd": "15:50"
           }
+        }
+      ]
+    }
+  ],
+  "menu": [
+    {
+      "slot": "brunch",
+      "label": "Brunch",
+      "entries": [
+        {
+          "mealKey": "Brunch1",
+          "menu": "Example eggs on toast",
+          "cookDay": "sun-a",
+          "cookDayLabel": "Sunday A",
+          "leftoversDay": "tue-a",
+          "leftoversDayLabel": "Tuesday A",
+          "cookExtra": false,
+          "cookExtraNote": null
+        }
+      ]
+    },
+    {
+      "slot": "dinner",
+      "label": "Dinner",
+      "entries": [
+        {
+          "mealKey": "Dinner1",
+          "menu": "Example garden soup",
+          "cookDay": "sun-a",
+          "cookDayLabel": "Sunday A",
+          "leftoversDay": "thu-a",
+          "leftoversDayLabel": "Thursday A",
+          "cookExtra": true,
+          "cookExtraNote": "Example: the extra becomes Friday's pie filling"
         }
       ]
     }
@@ -244,6 +302,20 @@ everything else degrades to nothing if you leave it out, which is what makes a d
 - `appointments[]` — the recurring **ideal** week: what is booked in principle. Not a device
   calendar feed. `timing`’s five fields are all `"HH:MM"` and run in the order given: the
   estimate, travel and preparation done, the real start, the real finish, and the estimated end.
+
+**`menu`** — optional, and absent on any keep exported before 2026-08-29. A list of slots, each
+`{slot, label, entries}`.
+
+- `slot` — `brunch`, `snack` or `dinner`. `label` is its display name, rendered verbatim.
+- `entries[].mealKey` — the household's own id for a dish within its slot. Not a fixed vocabulary.
+- `entries[].menu` — the dish, in the household's words. The field really is called `menu`.
+- `entries[].cookDay` / `cookDayLabel` — the day it is cooked, as a canonical day key **and** as the
+  household's label. Both, because the page never resolves anything.
+- `entries[].leftoversDay` / `leftoversDayLabel` — the day it is eaten again, or `null` for a dish
+  eaten once.
+- `entries[].cookExtra` — `true` when more is cooked than the servings need, because the surplus is
+  an ingredient in a later dish. `cookExtraNote` says why, in the household's words, or is `null`.
+  It is the only prose the menu sends to a page — write it knowing that.
 
 **`season`** — the season current when the file was written, or `null`. `key` and `name` are yours.
 `safeOutsidePercent` is a number, not necessarily whole. `focus`, `produce` and `mealIdeas` are the

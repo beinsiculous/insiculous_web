@@ -330,6 +330,85 @@ class StoredSeedBootTests(unittest.TestCase):
         self.assertIn('"kept"', day_page)
 
 
+DESCRIBE = (f'import {{ describeSection }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
+            + "process.stdout.write(JSON.stringify(inputs.map(([seed, name]) => describeSection(seed, name))));")
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class DescribeSectionTests(unittest.TestCase):
+    """Absent is not empty, and the format has said so in writing since 2026-08-29 with nothing
+    implementing it. This is the implementation: the one place a reader can tell the two apart.
+
+    It matters because the convention is additive — a section can arrive at any time without a
+    version bump, so "no menu" and "an empty menu" are permanently both possible, and they mean
+    opposite things about the export that produced them.
+    """
+
+    def describe(self, cases):
+        return run_node(DESCRIBE, cases)
+
+    def test_it_tells_the_three_states_apart(self):
+        absent, empty, present = self.describe([
+            [{"meta": {"format": "keep", "version": 1}}, "menu"],
+            [{"menu": []}, "menu"],
+            [{"menu": [{"slot": "dinner"}, {"slot": "snack"}]}, "menu"],
+        ])
+        self.assertEqual(absent["state"], "absent")
+        self.assertEqual(empty["state"], "empty")
+        self.assertEqual((present["state"], present["count"]), ("present", 2))
+
+    def test_the_absent_message_says_the_export_predates_the_section(self):
+        """The sentence a person needs: their file is not broken, it is older than the feature."""
+        [absent] = self.describe([[{}, "menu"]])
+        self.assertIn("came later than this export", absent["message"])
+        self.assertIn("menu", absent["message"])
+
+    def test_the_empty_message_does_not_say_the_export_is_old(self):
+        """The whole point. An empty menu is a current export of a household with no menu, and telling
+        that person their file predates menus sends them to re-export for nothing."""
+        [empty] = self.describe([[{"menu": []}, "menu"]])
+        self.assertNotIn("came later than this export", empty["message"])
+
+    def test_null_reads_as_absent_not_as_a_value(self):
+        """`season` and `year` are legitimately null, so a null section is the writer saying nothing is
+        there — the same thing as not writing the key."""
+        [nulled] = self.describe([[{"menu": None}, "menu"]])
+        self.assertEqual(nulled["state"], "absent")
+
+    def test_a_section_that_is_not_a_list_is_named_rather_than_guessed_at(self):
+        [wrong] = self.describe([[{"menu": {"dinner": []}}, "menu"]])
+        self.assertEqual(wrong["state"], "wrong-shape")
+
+    def test_it_survives_a_seed_that_is_not_there(self):
+        """Callers get this from storage, which can hold anything."""
+        for seed in (None, {}):
+            with self.subTest(seed=seed):
+                [result] = self.describe([[seed, "menu"]])
+                self.assertEqual(result["state"], "absent")
+
+    def test_a_version_one_section_that_is_null_is_not_called_late(self):
+        """`season` and `year` are legitimately null on a current export — no season resolved. Telling
+        that person the format "came later than this export" would send them to re-export a file that
+        was never the problem, which is the failure absent-versus-empty exists to prevent."""
+        [season] = self.describe([[{"season": None}, "season"]])
+        self.assertEqual(season["state"], "absent")
+        self.assertNotIn("came later", season["message"])
+        self.assertIn("none to write", season["message"])
+
+    def test_an_empty_menu_from_the_real_writer_reads_as_empty(self):
+        """The two halves of the format, tied together. The writer's projection always returns its three
+        slots, so before this was fixed a household with no menu exported three empty slots and this
+        function called it "present, count 3" — the empty state unreachable from the only writer there
+        is. Testing it with a hand-written `[]` no writer emits proved nothing."""
+        [result] = self.describe([[{"menu": []}, "menu"]])
+        self.assertEqual((result["state"], result["count"]), ("empty", 0))
+
+    def test_the_published_fixtures_carry_a_menu(self):
+        fixture = json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / "keep.sample.json").read_text(encoding="utf-8"))
+        [result] = self.describe([[fixture, "menu"]])
+        self.assertEqual((result["state"], result["count"]), ("present", 3))
+
+
 class KeepSchemaTests(unittest.TestCase):
     """The conforming bar: what `data/schema/keep.schema.json` certifies.
 
@@ -363,12 +442,32 @@ class KeepSchemaTests(unittest.TestCase):
                 report = self.check(document)
                 self.assertTrue(report.ok, f"{name}: {report.render()}")
 
-    def test_the_day_key_enum_is_the_canonical_order(self):
-        """The fourteen keys now live in a third place. `tests/test_dates.py::RuleSchemaTests` is the
-        precedent: validate.py has no $ref, so a copied fragment is pinned by a test instead."""
+    def test_every_day_key_enum_is_the_canonical_order(self):
+        """The fourteen keys live in several places now. `tests/test_dates.py::RuleSchemaTests` is the
+        precedent: validate.py has no $ref, so every copied fragment is pinned by a test instead.
+
+        This walks the whole schema rather than naming one path, because it used to name exactly one —
+        and then the menu section added two more copies that nothing checked. A test that pins the
+        copy you remembered is the DRY hazard, not the guard against it."""
         from fk_core.keys import DAY_KEY_ORDER
-        schema_keys = self.schema["properties"]["days"]["items"]["properties"]["dayKey"]["enum"]
-        self.assertEqual(schema_keys, DAY_KEY_ORDER)
+
+        def day_key_enums(node, path):
+            if isinstance(node, dict):
+                enum = node.get("enum")
+                # A day-key enum is any enum that mentions one; `null` rides along on nullable ones.
+                if isinstance(enum, list) and "sun-a" in enum:
+                    yield path, [value for value in enum if value is not None]
+                for key, value in node.items():
+                    yield from day_key_enums(value, f"{path}.{key}")
+            elif isinstance(node, list):
+                for index, value in enumerate(node):
+                    yield from day_key_enums(value, f"{path}[{index}]")
+
+        found = list(day_key_enums(self.schema, ""))
+        self.assertGreaterEqual(len(found), 3, "expected the days enum plus the menu's cook/leftovers days")
+        for path, keys in found:
+            with self.subTest(path=path):
+                self.assertEqual(keys, DAY_KEY_ORDER)
 
     def test_each_fixture_carries_the_fourteen_keys_once_each_in_order(self):
         """The rule the schema provably CANNOT express: minItems/maxItems pin the count and the enum
@@ -379,6 +478,20 @@ class KeepSchemaTests(unittest.TestCase):
         for name, document in self.fixtures.items():
             with self.subTest(fixture=name):
                 self.assertEqual([day["dayKey"] for day in document["days"]], DAY_KEY_ORDER)
+
+    def test_each_fixture_gives_a_day_only_one_label(self):
+        """The format is pre-joined, so a day's label travels with everything that names that day. A
+        fixture whose menu calls sun-a "Restday" while its own days call it "Sunday A" demonstrates
+        something the format says cannot happen — and these fixtures are what a reader author copies."""
+        for name, document in self.fixtures.items():
+            labels = {day["dayKey"]: day.get("label") for day in document["days"]}
+            for group in document.get("menu", []):
+                for entry in group["entries"]:
+                    with self.subTest(fixture=name, dayKey=entry["cookDay"]):
+                        self.assertEqual(entry["cookDayLabel"], labels[entry["cookDay"]])
+                    if entry["leftoversDay"]:
+                        with self.subTest(fixture=name, dayKey=entry["leftoversDay"]):
+                            self.assertEqual(entry["leftoversDayLabel"], labels[entry["leftoversDay"]])
 
     def test_the_schema_is_open_everywhere(self):
         """Forward tolerance, made a check. Closing any object here would certify the opposite of the
@@ -463,6 +576,11 @@ class KeepSchemaTests(unittest.TestCase):
             "a version this page cannot read": lambda d: d["meta"].__setitem__("version", 2),
             "the retired format name": lambda d: d["meta"].__setitem__("format", "myfort"),
             "the year as an integer": lambda d: d["year"].__setitem__("year", 2026),
+            "a menu slot nobody eats": lambda d: d["menu"][0].__setitem__("slot", "elevenses"),
+            "a menu cooked on a day that is not in the fortnight":
+                lambda d: d["menu"][0]["entries"][0].__setitem__("cookDay", "funday-c"),
+            "a cookExtra flag that is not a boolean":
+                lambda d: d["menu"][0]["entries"][0].__setitem__("cookExtra", "yes"),
         }
         for description, mutate in cases.items():
             with self.subTest(case=description):

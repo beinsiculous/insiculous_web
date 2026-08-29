@@ -646,11 +646,61 @@
       }
     }
   ],
+  "menu": [
+    {
+      "slot": "brunch",
+      "label": "First Meal",
+      "entries": [
+        {
+          "mealKey": "First1",
+          "menu": "Example rice bowl",
+          "cookDay": "sun-a",
+          "cookDayLabel": "Sunday A",
+          "leftoversDay": "tue-b",
+          "leftoversDayLabel": "Tuesday B",
+          "cookExtra": false,
+          "cookExtraNote": null
+        }
+      ]
+    },
+    {
+      "slot": "snack",
+      "label": "Nibble",
+      "entries": [
+        {
+          "mealKey": "Nibble1",
+          "menu": "Example seed mix",
+          "cookDay": "mon-a",
+          "cookDayLabel": "Monday A",
+          "leftoversDay": null,
+          "leftoversDayLabel": null,
+          "cookExtra": false,
+          "cookExtraNote": null
+        }
+      ]
+    },
+    {
+      "slot": "dinner",
+      "label": "Last Meal",
+      "entries": [
+        {
+          "mealKey": "Last1",
+          "menu": "Example bean stew",
+          "cookDay": "wed-a",
+          "cookDayLabel": "Wednesday A",
+          "leftoversDay": "sat-b",
+          "leftoversDayLabel": "Saturday B",
+          "cookExtra": true,
+          "cookExtraNote": "Example: doubled so the beans carry into the week"
+        }
+      ]
+    }
+  ],
   "season": {
     "key": "harvesttide",
     "name": "Harvest Tide",
     "isCurrent": true,
-    "gregorianRange": "August – October",
+    "gregorianRange": "August \u2013 October",
     "startDescription": "First mist on the fields",
     "safeOutsidePercent": 58.33,
     "focus": [

@@ -60,6 +60,41 @@ export function readableDays(seed) {
   return (seed?.days ?? []).filter(looksLikeDay);
 }
 
+/** Absent, empty, or present — and a sentence saying which.
+ *
+ *  The format's additive convention makes this distinction load-bearing and nothing else here can
+ *  express it: `validateKeep` ignores what it does not know, and every renderer collapses the two
+ *  with `?? []`. A keep with no `menu` section was written before menus existed; a keep with an
+ *  empty one says the household has none. A report that conflates them sends someone looking for a
+ *  bug that is not there — so tooling that reports on a keep says which it saw.
+ *
+ *  Nothing draws this yet. The teaching validator and the menu views are both written against it.
+ *  Reasons here match the file's register: for a person, not for a log. */
+/** The sections version 1 shipped with. `season` and `year` are legitimately null on a current export
+ *  — no season resolved — so telling that person their file predates the feature would send them to
+ *  re-export a file that was never the problem. Anything not listed here arrived additively. */
+const VERSION_ONE_SECTIONS = new Set(["meta", "days", "season", "year"]);
+
+export function describeSection(seed, name) {
+  const value = seed == null ? undefined : seed[name];
+  if (value === undefined || value === null) {
+    return {
+      state: "absent",
+      count: 0,
+      message: VERSION_ONE_SECTIONS.has(name)
+        ? `This keep has no ${name} — there was none to write when it was exported.`
+        : `This keep has no ${name} section — that part of the format came later than this export.`,
+    };
+  }
+  if (!Array.isArray(value)) {
+    return { state: "wrong-shape", count: 0, message: `This keep's ${name} is not a list, so there is nothing to read.` };
+  }
+  if (value.length === 0) {
+    return { state: "empty", count: 0, message: `This keep carries a ${name}, and it is empty.` };
+  }
+  return { state: "present", count: value.length, message: `This keep carries a ${name}.` };
+}
+
 /** How stale the season and the wheel are. The fourteen days carry no dates and never go off; `season` and
  *  `year` are snapshots of the moment the file was exported, so this is the one thing the page says about
  *  age — and it says it in days, never by resolving a date, because nothing here evaluates a calendar. */
