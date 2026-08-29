@@ -1,0 +1,44 @@
+---
+// The styles for the Keep DOM, as a component so every seed-fed page can carry them.
+//
+// They lived in keep.astro's own <style is:global> while that page was the only place a seed was drawn.
+// The builders moved to src/lib/keep-view.js so more than one page can render a seed, and a plain .js
+// module cannot carry an Astro style block — so the styles became a component, and each consuming page
+// includes this once. Keep the block is:global and keep every selector prefixed keep-; both are
+// asserted in tests/test_keep.py, because no gate can see a zero-area div.
+---
+<style is:global>
+  /* Sized to be read from across a room: this is the one surface here meant for a television driven by a
+     computer, not for a phone held at arm's length.
+
+     is:global is load-bearing, not laziness. Astro scopes a plain <style> by stamping every element in the
+     template with a data-astro-cid attribute — but everything the Keep pages draw below their mount
+     point is built by document.createElement in src/lib/keep-view.js, so it never carries the attribute
+     and no scoped rule can match it. Left scoped, the wheel renders 876x0 and every size below falls back
+     to the browser's. Nothing here can collide: every selector is prefixed keep-. Same problem the
+     profile-name dialog has, which faces.css solves the same way for the same reason. */
+  .keep-day { margin-bottom: 1.25rem; }
+  .keep-day h3 { margin: 0; font-size: 1.5rem; }
+  .keep-focus { font-size: 1.15rem; font-weight: 700; margin: 0.15rem 0 0.75rem; }
+  .keep-meals { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin: 0 0 0.75rem; padding: 0; list-style: none; }
+  .keep-meal { min-width: 12rem; }
+  .keep-meal-name { display: block; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  .keep-meal-dish { font-size: 1.2rem; }
+  .keep-appointments { margin: 0 0 0.75rem; padding-left: 1.1rem; font-size: 1.1rem; }
+  .keep-blocks { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+  .keep-block { font-size: 1rem; }
+  .keep-wheel-row { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+  .keep-wheel { width: 15rem; height: 15rem; border-radius: 50%; flex: none; }
+  .keep-key { margin: 0; padding: 0; list-style: none; }
+  .keep-key li { display: flex; align-items: center; gap: 0.6rem; font-size: 1.1rem; padding: 0.15rem 0; }
+  .keep-swatch { width: 0.9rem; height: 0.9rem; border-radius: 50%; flex: none; }
+  /* The Overview's fortnight grid and the day page's previous/next row: script-built like everything else
+     here, so global for the same reason. Grid cells reuse .panel for their box; what is here is only what
+     a panel does not already say. */
+  .keep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.75rem; margin: 0 0 1.25rem; }
+  .keep-grid-cell { display: block; color: inherit; text-decoration: none; }
+  .keep-grid-day { display: block; font-size: 1.1rem; font-weight: 700; }
+  .keep-grid-focus { display: block; font-size: 0.9rem; letter-spacing: 0.04em; }
+  .keep-grid-meals { margin: 0.25rem 0 0; padding-left: 1.1rem; font-size: 0.95rem; }
+  .keep-day-nav { display: flex; justify-content: space-between; gap: 1rem; font-size: 1.1rem; }
+</style>

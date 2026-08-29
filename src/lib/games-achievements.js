@@ -1,8 +1,8 @@
 // Achievements the games' browser builds record, one localStorage key per game:
 // `beinsiculous.games.<slug>.achievements`. Its own key per game, deliberately separate from
-// `fortknight.user-settings` and the My Fort seed — different documents from different apps, and
+// `fortknight.user-settings` and the keep — different documents from different apps, and
 // sharing a key would let one migrate into the other the first time either changed shape
-// (myfort-store.js makes the argument). The value is the engine's native achievement save file,
+// (keep-store.js makes the argument). The value is the engine's native achievement save file,
 // byte for byte: {"unlocks": {"<achievement id>": {"unlocked_at": <unix seconds>}}} — the
 // `engine_core` achievements module's on-disk JSON — so a wasm build persists exactly what it
 // already writes on desktop. The games write these keys; this module reads them for the

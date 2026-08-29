@@ -3,7 +3,7 @@
 // key, deliberately separate from the games' per-slug saves (`beinsiculous.games.<slug>.achievements`)
 // and from `fortknight.user-settings` — different documents from different writers, and sharing a
 // key would let one migrate into the other the first time either changed shape (games-achievements.js
-// and myfort-store.js make the argument). The value keeps the games' save shape,
+// and keep-store.js make the argument). The value keeps the games' save shape,
 // {"unlocks": {"<achievement id>": {"unlocked_at": <unix seconds>}}}, so one tolerant reader rule
 // serves both stores: this module reuses games-achievements.js's unlocksFromSaveFile rather than
 // re-deciding what counts as a date.
@@ -30,7 +30,7 @@ export const ACHIEVEMENT_TYPES = Object.freeze(["insiculous", "game", "fortknigh
  *  (stored unlock records name them); type is one of ACHIEVEMENT_TYPES minus "game". */
 export const ACHIEVEMENTS = Object.freeze([
   { id: "player", type: "insiculous", title: "Player", description: "Opened the games page." },
-  { id: "moved-in", type: "fortknight", title: "Moved In", description: "Loaded a My Fort seed." },
+  { id: "moved-in", type: "fortknight", title: "Moved In", description: "Loaded a keep." },
 ]);
 
 /** This browser's site unlock records, [{id, unlockedAt: Date|null}] — malformed storage reads as

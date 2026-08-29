@@ -1,6 +1,6 @@
-"""The My Fort seed reader: what this page accepts, and what it says when it does not.
+"""The keep reader: what this page accepts, and what it says when it does not.
 
-`src/lib/myfort.js` is not one of the fk_core twins — it has no Python counterpart, because it implements
+`src/lib/keep.js` is not one of the fk_core twins — it has no Python counterpart, because it implements
 no rule that exists twice. It is driven through node the same way the twins are, which is what keeps it
 tested at all: tsconfig.json excludes `src/lib` from `astro check`, so these tests are its only safety net.
 
@@ -16,13 +16,13 @@ from pathlib import Path
 
 from helpers import REPOSITORY_ROOT, STDIN_PRELUDE, run_node
 
-MYFORT_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "myfort.js").as_uri()
-MYFORT_VIEW_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "myfort-view.js").as_uri()
-MYFORT_SEED_ACCESS_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "myfort-seed-access.js").as_uri()
+KEEP_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep.js").as_uri()
+KEEP_VIEW_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-view.js").as_uri()
+KEEP_ACCESS_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-access.js").as_uri()
 
-VALIDATE = (f'import {{ validateMyFortSeed }} from {json.dumps(MYFORT_MODULE)};' + STDIN_PRELUDE
+VALIDATE = (f'import {{ validateKeep }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
             + "process.stdout.write(JSON.stringify(inputs.map((candidate) => {"
-              "const result = validateMyFortSeed(candidate);"
+              "const result = validateKeep(candidate);"
               "return result.ok ? { ok: true } : { ok: false, reason: result.reason };"
               "})));")
 
@@ -36,18 +36,18 @@ READ_STORED = (STDIN_PRELUDE
                  "  setItem() {},"
                  "  removeItem() { this.cleared = true; },"
                  "};"
-                 f"const {{ readStoredMyFortSeed }} = await import({json.dumps(MYFORT_SEED_ACCESS_MODULE)});"
-                 "const result = readStoredMyFortSeed();"
+                 f"const {{ readStoredKeep }} = await import({json.dumps(KEEP_ACCESS_MODULE)});"
+                 "const result = readStoredKeep();"
                  "process.stdout.write(JSON.stringify({ status: result.status, reason: result.reason ?? null,"
                  "  hasSeed: Boolean(result.seed), cleared: globalThis.localStorage.cleared }));")
 
-FIXTURE = json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / "myfort.sample.json").read_text(encoding="utf-8"))
+FIXTURE = json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / "keep.sample.json").read_text(encoding="utf-8"))
 OTHER_HOUSEHOLD_FIXTURE = json.loads(
-    (REPOSITORY_ROOT / "tests" / "fixtures" / "myfort.other-household.json").read_text(encoding="utf-8"))
+    (REPOSITORY_ROOT / "tests" / "fixtures" / "keep.other-household.json").read_text(encoding="utf-8"))
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
-class ValidateMyFortSeedTests(unittest.TestCase):
+class ValidateKeepTests(unittest.TestCase):
     def validate(self, candidates):
         return run_node(VALIDATE, candidates)
 
@@ -88,22 +88,22 @@ class ValidateMyFortSeedTests(unittest.TestCase):
     def test_a_fortknight_profile_is_refused(self):
         [result] = self.validate([{"schemaVersion": 2, "activeWeightsId": "x", "weightsProfiles": {}}])
         self.assertFalse(result["ok"])
-        self.assertIn("not a My Fort seed", result["reason"])
+        self.assertIn("not a keep", result["reason"])
 
     def test_anything_that_is_not_a_document_is_refused(self):
         for result in self.validate([None, 7, "a string", ["an", "array"]]):
             self.assertFalse(result["ok"])
-            self.assertIn("not a My Fort seed", result["reason"])
+            self.assertIn("not a keep", result["reason"])
 
     def test_a_seed_with_no_version_is_refused_rather_than_guessed_at(self):
-        [result] = self.validate([{"meta": {"format": "myfort"}, "days": [{"dayKey": "sun-a"}]}])
+        [result] = self.validate([{"meta": {"format": "keep"}, "days": [{"dayKey": "sun-a"}]}])
         self.assertFalse(result["ok"])
         self.assertIn("does not say which format", result["reason"])
 
     def test_a_seed_with_no_days_has_no_fortnight_to_show(self):
-        for empty in ({"meta": {"format": "myfort", "version": 1}, "days": []},
-                      {"meta": {"format": "myfort", "version": 1}, "days": [{"label": "no key"}]},
-                      {"meta": {"format": "myfort", "version": 1}}):
+        for empty in ({"meta": {"format": "keep", "version": 1}, "days": []},
+                      {"meta": {"format": "keep", "version": 1}, "days": [{"label": "no key"}]},
+                      {"meta": {"format": "keep", "version": 1}}):
             with self.subTest(document=sorted(empty)):
                 [result] = self.validate([empty])
                 self.assertFalse(result["ok"])
@@ -112,7 +112,7 @@ class ValidateMyFortSeedTests(unittest.TestCase):
     def test_a_sparse_day_is_still_a_day(self):
         """A day needs a key to be a panel. Everything else on it degrades to nothing rather than refusing
         the whole fortnight — the line is what can be drawn, not what is complete."""
-        sparse = {"meta": {"format": "myfort", "version": 1},
+        sparse = {"meta": {"format": "keep", "version": 1},
                   "days": [{"dayKey": "sun-a"}, {"dayKey": "mon-b", "meals": None, "blocks": None}]}
         self.assertEqual(self.validate([sparse]), [{"ok": True}])
 
@@ -120,7 +120,7 @@ class ValidateMyFortSeedTests(unittest.TestCase):
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
 class ExportAgeTests(unittest.TestCase):
     def describe(self, seed, today):
-        script = (f'import {{ describeExportAge }} from {json.dumps(MYFORT_MODULE)};' + STDIN_PRELUDE
+        script = (f'import {{ describeExportAge }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
                   + "process.stdout.write(JSON.stringify(describeExportAge(inputs.seed, inputs.today)));")
         return run_node(script, {"seed": seed, "today": today})
 
@@ -144,19 +144,19 @@ class SliceColourTests(unittest.TestCase):
     """The year wheel's palette: positional, not keyed to one household's season ids.
 
     The map this replaced ({ostara: …, fimbulsumar: …, …}) made every other household's wheel grey, and
-    myfort-view.js is driven through node because tsconfig.json excludes src/lib from astro check — these
+    keep-view.js is driven through node because tsconfig.json excludes src/lib from astro check — these
     tests are its safety net, same as the validator's above.
     """
 
     def colours(self, slices):
-        script = (f'import {{ sliceColours }} from {json.dumps(MYFORT_VIEW_MODULE)};' + STDIN_PRELUDE
+        script = (f'import {{ sliceColours }} from {json.dumps(KEEP_VIEW_MODULE)};' + STDIN_PRELUDE
                   + "process.stdout.write(JSON.stringify(sliceColours(inputs)));")
         return run_node(script, slices)
 
     def test_the_palette_is_the_five_values_the_accessibility_gate_certified(self):
         """These are the old household map's values, kept verbatim: axe certified their contrast on the
         rendered page, so a palette change is an accessibility change."""
-        script = (f'import {{ SEASON_PALETTE, NEUTRAL_SLICE_COLOUR }} from {json.dumps(MYFORT_VIEW_MODULE)};'
+        script = (f'import {{ SEASON_PALETTE, NEUTRAL_SLICE_COLOUR }} from {json.dumps(KEEP_VIEW_MODULE)};'
                   + "process.stdout.write(JSON.stringify({ SEASON_PALETTE, NEUTRAL_SLICE_COLOUR }));")
         result = run_node(script, None)
         self.assertEqual(result["SEASON_PALETTE"],
@@ -184,17 +184,17 @@ class PageStyleScopingTests(unittest.TestCase):
     """The one thing about these pages that no gate can see.
 
     Astro scopes a plain <style> by stamping the template's elements with a data-astro-cid attribute.
-    Everything src/lib/myfort-view.js builds is made with document.createElement, so it never carries that
+    Everything src/lib/keep-view.js builds is made with document.createElement, so it never carries that
     attribute and no scoped rule matches it: the year wheel renders 876x0 — invisible — and every size falls
     back to the browser's, which is the opposite of "readable across a room". The accessibility gate passes
     regardless, because axe checks the contrast of rendered text, not font sizes or zero-area divs. So this
     is asserted at the source, because there is nowhere else to assert it.
 
-    The styles live in src/components/MyFortStyles.astro so every seed-fed page can carry them; the page is
+    The styles live in src/components/KeepStyles.astro so every seed-fed page can carry them; the page is
     pinned to the component so a future edit cannot drop the styles while keeping the builders.
     """
 
-    STYLES = REPOSITORY_ROOT / "src" / "components" / "MyFortStyles.astro"
+    STYLES = REPOSITORY_ROOT / "src" / "components" / "KeepStyles.astro"
 
     def test_the_pages_styles_are_global_because_their_dom_is_built_in_script(self):
         component = self.STYLES.read_text(encoding="utf-8")
@@ -213,11 +213,11 @@ class PageStyleScopingTests(unittest.TestCase):
         for selector in selectors:
             for part in selector.replace(",", " ").split():
                 if part.startswith("."):
-                    self.assertTrue(part.startswith(".myfort-"), f"{part} is global but not namespaced")
+                    self.assertTrue(part.startswith(".keep-"), f"{part} is global but not namespaced")
 
-    def test_the_myfort_page_carries_the_shared_styles(self):
-        page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "myfort.astro").read_text(encoding="utf-8")
-        self.assertIn("MyFortStyles", page)
+    def test_the_keep_page_carries_the_shared_styles(self):
+        page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "keep.astro").read_text(encoding="utf-8")
+        self.assertIn("KeepStyles", page)
 
 
 class SeedFedPageTests(unittest.TestCase):
@@ -226,7 +226,7 @@ class SeedFedPageTests(unittest.TestCase):
     Same warrant as PageStyleScopingTests: axe audits the rendered pages, but nothing rendered shows WHY an
     import must never appear — a date-resolution import would look up fine, build fine and audit fine, and
     still be wrong for half the seed's year (this repository's evaluator resolves Ostara and Fimbulsumar on
-    sun-b; a My Fort seed arrives pre-joined by day key). So the rule "lookup only" is asserted here.
+    sun-b; a keep arrives pre-joined by day key). So the rule "lookup only" is asserted here.
     """
 
     OVERVIEW = REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "index.astro"
@@ -238,8 +238,8 @@ class SeedFedPageTests(unittest.TestCase):
 
     def test_the_overview_boots_from_the_stored_seed(self):
         source = self.OVERVIEW.read_text(encoding="utf-8")
-        self.assertIn("readStoredMyFortSeed", source)
-        self.assertIn("MyFortStyles", source)  # the grid is script-built; scoped styles cannot reach it
+        self.assertIn("readStoredKeep", source)
+        self.assertIn("KeepStyles", source)  # the grid is script-built; scoped styles cannot reach it
 
     def test_the_overview_offers_profile_creation_as_the_secondary_action(self):
         """Loading a seed is the primary action, but creating a profile is the only creation path on
@@ -258,8 +258,8 @@ class SeedFedPageTests(unittest.TestCase):
     def test_the_day_page_draws_with_the_shared_builders(self):
         source = self.DAY_PAGE.read_text(encoding="utf-8")
         self.assertIn("renderDayPanel", source)
-        self.assertIn("readStoredMyFortSeed", source)
-        self.assertIn("MyFortStyles", source)
+        self.assertIn("readStoredKeep", source)
+        self.assertIn("KeepStyles", source)
 
     def test_the_day_page_still_emits_the_fourteen_static_shells(self):
         source = self.DAY_PAGE.read_text(encoding="utf-8")
@@ -279,7 +279,7 @@ class SeedFedPageTests(unittest.TestCase):
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
 class StoredSeedBootTests(unittest.TestCase):
-    """readStoredMyFortSeed(): the two ways a stored seed cannot be drawn, and why only one deletes.
+    """readStoredKeep(): the two ways a stored seed cannot be drawn, and why only one deletes.
 
     Unreadable storage is wreckage and is forgotten, or it sits there failing on every reload of a wall
     display. A readable seed the validator refuses is intact data — the sharpest case being a newer Focus
@@ -311,7 +311,7 @@ class StoredSeedBootTests(unittest.TestCase):
     def test_a_seed_the_validator_refuses_is_kept_not_cleared(self):
         newer = json.loads(json.dumps(FIXTURE))
         newer["meta"]["version"] = 99
-        for stored, fragment in ((json.dumps({"not": "a seed"}), "not a My Fort seed"),
+        for stored, fragment in ((json.dumps({"not": "a seed"}), "not a keep"),
                                  (json.dumps(newer), "the file is fine")):
             with self.subTest(fragment=fragment):
                 outcome = self.boot(stored)
@@ -323,7 +323,7 @@ class StoredSeedBootTests(unittest.TestCase):
     def test_every_seed_fed_page_reports_the_kept_case(self):
         """The split only exists if the pages show it: each consumer must name "kept" alongside "cleared",
         or a kept seed would fall through to whatever the page's default does."""
-        for page in ("index.astro", "myfort.astro"):
+        for page in ("index.astro", "keep.astro"):
             source = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / page).read_text(encoding="utf-8")
             self.assertIn('"kept"', source, page)
         day_page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "days" / "[dayKey].astro").read_text(encoding="utf-8")

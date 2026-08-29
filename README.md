@@ -13,8 +13,8 @@ deliberately read as two different websites:
   iOS rather than here (`docs/thesis.md` is the source of that policy's wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
   organised by Norse-wheel seasons, five daily blocks and seven life categories. Its seed-fed pages
-  are live: the Overview (`/fortknight/`), **My Fort** (`/fortknight/myfort/`) and the fourteen day
-  pages (`/fortknight/days/<dayKey>/`) all read a **My Fort seed** the visitor loads from their own
+  are live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day
+  pages (`/fortknight/days/<dayKey>/`) all read a **keep** the visitor loads from their own
   device, and **Achievements** (`/fortknight/achievements/`) shows the active profile's unlocked
   fortnight achievements (the studio's `/achievements/` is the every-achievement board). Build,
   Questionnaire and Assistant still answer with a "still being built" page (see Deploying below).
@@ -250,14 +250,14 @@ integration branch, and a `dev → main` pull request **is** the production depl
 chain the face apps were built around (questionnaire → weights → generator → import) was re-ruled
 on 2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge,
 and seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). On
-`main`, FortKnight's seed-fed pages are live — the Overview, My Fort and the fourteen day pages —
+`main`, FortKnight's seed-fed pages are live — the Overview, Keep and the fourteen day pages —
 alongside the achievements boards (the studio's `/achievements/` and the face's
 `/fortknight/achievements/`), while
 `/fortknight/build|questionnaire|assistant/` remain
 `src/components/FaceInDevelopment.astro` placeholders, kept as files so the parked branches' edits
 could still merge as ordinary content merges rather than one modify/delete conflict per route.
 ForkKnife's routes (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu
-rendering will land under `/fortknight/` when the My Fort seed carries menu rows.
+rendering will land under `/fortknight/` when the keep carries menu rows.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

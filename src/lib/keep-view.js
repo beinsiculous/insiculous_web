@@ -1,6 +1,6 @@
-// Drawing a My Fort seed: the DOM builders every seed-fed page shares.
+// Drawing a keep: the DOM builders every seed-fed page shares.
 //
-// This module exists because the My Fort rendering outgrew its first page. myfort.astro was the only place
+// This module exists because the Keep rendering outgrew its first page. keep.astro was the only place
 // that drew a seed, so the builders lived in its inline script — but a fortnight, a season card and the year
 // wheel are wanted on more than one page, and an inline <script> cannot be imported. The builders are here,
 // once, and each page wires them to its own shell.
@@ -12,7 +12,7 @@
 //
 // The styles these classes rely on are NOT here: they are global, because this DOM is built with
 // document.createElement and Astro's scoped styles cannot reach it. They live in
-// src/components/MyFortStyles.astro, whose header says why is:global is load-bearing.
+// src/components/KeepStyles.astro, whose header says why is:global is load-bearing.
 
 /** The colours the year wheel paints its seasons, in the order they are handed out. These are the five
  *  values the old household-keyed map held, kept verbatim because the accessibility gate certified their
@@ -47,19 +47,19 @@ export function element(tagName, className, text) {
 
 /** One day of the fortnight: heading, focus, meals, appointments, blocks — whatever the day carries. */
 export function renderDayPanel(day) {
-  const panel = element("section", "panel myfort-day");
+  const panel = element("section", "panel keep-day");
   panel.appendChild(element("h3", null, day.label ?? day.dayKey));
-  if (day.mainFocusLabel) panel.appendChild(element("p", "myfort-focus", day.mainFocusLabel));
+  if (day.mainFocusLabel) panel.appendChild(element("p", "keep-focus", day.mainFocusLabel));
 
   const meals = day.meals ?? {};
   const named = [["Brunch", meals.brunch], ["Snack", meals.snack], ["Dinner", meals.dinner]]
     .filter(([, dish]) => typeof dish === "string" && dish.length > 0);
   if (named.length) {
-    const list = element("ul", "myfort-meals");
+    const list = element("ul", "keep-meals");
     for (const [name, dish] of named) {
-      const item = element("li", "myfort-meal");
-      item.appendChild(element("span", "myfort-meal-name muted", name));
-      item.appendChild(element("span", "myfort-meal-dish", dish));
+      const item = element("li", "keep-meal");
+      item.appendChild(element("span", "keep-meal-name muted", name));
+      item.appendChild(element("span", "keep-meal-dish", dish));
       list.appendChild(item);
     }
     panel.appendChild(list);
@@ -67,7 +67,7 @@ export function renderDayPanel(day) {
 
   const appointments = Array.isArray(day.appointments) ? day.appointments : [];
   if (appointments.length) {
-    const list = element("ul", "myfort-appointments");
+    const list = element("ul", "keep-appointments");
     for (const appointment of appointments) {
       const timing = appointment?.timing ?? {};
       const when = timing.timeStart && timing.timeFinished ? ` · ${timing.timeStart}–${timing.timeFinished}` : "";
@@ -82,10 +82,10 @@ export function renderDayPanel(day) {
     .map((block) => ({ name: block?.label ?? block?.key, focus: block?.focus }))
     .filter((block) => typeof block.name === "string" && block.name.length > 0);
   if (blocks.length) {
-    const list = element("ul", "myfort-blocks");
+    const list = element("ul", "keep-blocks");
     for (const block of blocks) {
       const focus = typeof block.focus === "string" && block.focus ? ` — ${block.focus}` : "";
-      list.appendChild(element("li", "myfort-block muted", `${block.name}${focus}`));
+      list.appendChild(element("li", "keep-block muted", `${block.name}${focus}`));
     }
     panel.appendChild(list);
   }
@@ -135,22 +135,22 @@ export function renderYearPanel(year) {
   const panel = element("section", "panel");
   panel.appendChild(element("h2", null, `${year.year}`));
 
-  const row = element("div", "myfort-wheel-row");
+  const row = element("div", "keep-wheel-row");
   // conic-gradient IS the wheel here. Focus Key draws it from nested rotated Views because React Native has
   // no such thing; a browser does, and the seed already carries the degrees, so there is nothing to
   // compute. Decorative: the same numbers are in the list beside it, which is what a reader gets.
   const stops = slices
     .map((slice, index) => `${colours[index]} ${slice.startDegree}deg ${slice.startDegree + slice.sweepDegree}deg`)
     .join(", ");
-  const wheel = element("div", "myfort-wheel");
+  const wheel = element("div", "keep-wheel");
   wheel.style.background = `conic-gradient(${stops})`;
   wheel.setAttribute("role", "presentation");
   row.appendChild(wheel);
 
-  const key = element("ul", "myfort-key");
+  const key = element("ul", "keep-key");
   for (const [index, slice] of slices.entries()) {
     const item = element("li");
-    const swatch = element("span", "myfort-swatch");
+    const swatch = element("span", "keep-swatch");
     swatch.style.background = colours[index];
     item.appendChild(swatch);
     const share = Number.isFinite(slice.percent) ? ` — ${slice.percent}%` : "";

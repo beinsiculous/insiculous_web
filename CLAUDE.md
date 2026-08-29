@@ -67,7 +67,7 @@ build → axe-core over every page → `wrangler deploy` → a request to the li
 ## Invariants (validate.py enforces most of these)
 - Exactly 14 day keys in canonical order: `sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`.
 - The neutral five-block day: `too-early, early, midday, late, too-late`; only early/midday/late carry a focus and activities. Questionnaire profiles carry their own 2–5 blocks (`weights.*.json` → `blocks`; rule in `docs/questionnaire.md`; a one-focus-block day's block is keyed `flexible` and shown without a header).
-- The site has one face (`docs/app.md`): FortKnight (`/fortknight/`), with **Overview · My Fort · Achievements · Build · Questionnaire · Assistant** — Build being where things would be added by hand (`/fortknight/build/`: commitments, tasks, and the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. What is live on `main` is the seed-fed half: the Overview keeps its thesis front-door content while no seed is loaded, with **Load your seed** (to `/fortknight/myfort/`) as its primary action, and renders a compact fortnight grid linking to the day pages once a seed is stored; `/fortknight/myfort/` and the fourteen `/fortknight/days/<dayKey>/` pages render the loaded seed's blocks, meals and appointments by day key — lookup only, no date resolution — falling back to a load-your-seed message. `/fortknight/build|questionnaire|assistant/` remain `FaceInDevelopment` placeholders (see "The site" below). The creation chain the placeholders stand for is the back-burnered design the playground branches were built to, documented in `docs/app.md`: a schedule entering a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks), the Overview and day pages rendering from the person's active profile, and ForkKnife's pages under `/forkknife/` (the meal plan — `docs/meal-plan.md`) with its **Spoon Feed** building page (`/forkknife/spoon-feed/`) — routes now removed from the live site. Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
+- The site has one face (`docs/app.md`): FortKnight (`/fortknight/`), with **Overview · Keep · Achievements · Build · Questionnaire · Assistant** — Build being where things would be added by hand (`/fortknight/build/`: commitments, tasks, and the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. What is live on `main` is the seed-fed half: the Overview keeps its thesis front-door content while no seed is loaded, with **Load your seed** (to `/fortknight/keep/`) as its primary action, and renders a compact fortnight grid linking to the day pages once a seed is stored; `/fortknight/keep/` and the fourteen `/fortknight/days/<dayKey>/` pages render the loaded seed's blocks, meals and appointments by day key — lookup only, no date resolution — falling back to a load-your-seed message. `/fortknight/build|questionnaire|assistant/` remain `FaceInDevelopment` placeholders (see "The site" below). The creation chain the placeholders stand for is the back-burnered design the playground branches were built to, documented in `docs/app.md`: a schedule entering a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks), the Overview and day pages rendering from the person's active profile, and ForkKnife's pages under `/forkknife/` (the meal plan — `docs/meal-plan.md`) with its **Spoon Feed** building page (`/forkknife/spoon-feed/`) — routes now removed from the live site. Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
 - Seven categories: `meals, cleaning, working, spirituality-development, friends-family, health, operations` (+ `flexible` pseudo-focus).
 - In every menu file present, every day has exactly one brunch, snack, and dinner; every meal-prep `mealRef` resolves to a menu meal (the neutral `data/` has no menu files).
 - Season starts are computed by rule (`fk_core/dates.py` `start_date_for_rule`, one structured rule shape for the workbook seasons and a person's year-split sections), never typed in — the only typed dates are `manual` sections' `knownStarts`; each season restarts the fortnight on its `startDayKey`.
@@ -109,8 +109,8 @@ lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
 receives merges — `dev` integrates, and a `dev → main` pull request is the deploy. Re-ruled
 2026-08-28: the face branches `fortknightdev` and `forknifedev` are the back-burnered creation
 chain's playgrounds and never merge; seed-fed pages are built fresh in the `main` lineage
-(`docs/roadmap.md`). On `main`, FortKnight's `/fortknight/` Overview, `/fortknight/myfort/` and the
-fourteen `/fortknight/days/<dayKey>/` pages are live and read a visitor-loaded My Fort seed;
+(`docs/roadmap.md`). On `main`, FortKnight's `/fortknight/` Overview, `/fortknight/keep/` and the
+fourteen `/fortknight/days/<dayKey>/` pages are live and read a visitor-loaded keep;
 `/fortknight/questionnaire|build|assistant/` remain `src/components/FaceInDevelopment.astro`
 placeholders — kept as files rather than deleted so a parked branch's edits could still merge as
 ordinary content merges instead of one modify/delete conflict per route; the component's header
@@ -119,30 +119,30 @@ site; its menu rendering will land under `/fortknight/` when the seed carries me
 on `main`: the studio pages (including `/achievements/`), `/fortknight/achievements/` and
 `/profile/`.
 
-**The My Fort seed** is a small file the private Focus Key app exports (`focuskey/src/lib/myfort-seed.js`): the fourteen
+**The keep** is a small file the private Focus Key app exports (`focuskey/src/lib/keep-seed.js`): the fourteen
 day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The day keys are the
 format's skeleton: this is a fourteen-day system, so a conforming seed uses exactly the canonical fourteen
 (`sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`, the order the
 Invariants above pin). The
-visitor loads their own file; it is kept in `localStorage` under `beinsiculous.myfort-seed`
-(`src/lib/myfort-store.js`), deletable from `/profile/`, and never uploaded. The rendering is
-shared across the three seed-fed pages: `src/lib/myfort-view.js` draws the panels, with season
+visitor loads their own file; it is kept in `localStorage` under `beinsiculous.keep-seed`
+(`src/lib/keep-store.js`), deletable from `/profile/`, and never uploaded. The rendering is
+shared across the three seed-fed pages: `src/lib/keep-view.js` draws the panels, with season
 colours from a **positional palette** — position pinned to first appearance in `year.slices`, never
-keyed to a household's season ids — and one stored-seed boot path serves the Overview, My Fort and
+keyed to a household's season ids — and one stored-seed boot path serves the Overview, Keep and
 the day pages.
 
 The seed-fed pages **resolve nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Focus Key
 anchors every season on `sun-a` and has transition weeks, while `fk_core/dates.py` and
 `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b` starts for Ostara and
-Fimbulsumar, so **running this repository's date evaluator over a My Fort seed would be wrong for half the
-year.** Nothing here has to: `src/lib/myfort.js` validates and the pages draw.
+Fimbulsumar, so **running this repository's date evaluator over a keep would be wrong for half the
+year.** Nothing here has to: `src/lib/keep.js` validates and the pages draw.
 
-**A My Fort seed is somebody's real schedule, so it must never be committed here.**
-`scripts/fk_core/no_schedules.py` enforces that — it refuses any JSON whose `meta.format` is `"myfort"`,
+**A keep is somebody's real schedule, so it must never be committed here.**
+`scripts/fk_core/no_schedules.py` enforces that — it refuses any JSON whose `meta.format` is `"keep"`,
 or which carries `meta`, `calendar`, `days` and `tasks` together, and it reports files it cannot read
 rather than skipping them. `validate.py` runs it, and `npm run verify` runs `validate.py`. Two fixtures are
-exempt by exact path: `tests/fixtures/myfort.sample.json`, which `a11y-check.mjs` loads so axe audits
-a page with fourteen real panels instead of an empty file picker, and `tests/fixtures/myfort.other-household.json`,
+exempt by exact path: `tests/fixtures/keep.sample.json`, which `a11y-check.mjs` loads so axe audits
+a page with fourteen real panels instead of an empty file picker, and `tests/fixtures/keep.other-household.json`,
 a second invented household the rendering tests and the a11y gate's second seeded pass use to prove the year wheel's
 colours are positional rather than keyed to one household's season ids — that pass is what certifies the palette's
 contrast on a seed that is not the original household's. Both are invented, and tests assert all of that.
@@ -157,15 +157,15 @@ save file byte for byte; `src/lib/games-achievements.js` reads them. **Insiculou
 shape; the registry of ids, titles, descriptions and types lives in `src/lib/achievements.js`. Two stores because
 the writers are different programs: a wasm build persists exactly what its engine writes on desktop,
 and sharing a key with the site's own unlocks would let one migrate into the other (the
-`myfort-store.js` argument). Initial achievements: `player` (insiculous — opened `/games/`) and
-`moved-in` (fortknight — loaded a My Fort seed).
+`keep-store.js` argument). Initial achievements: `player` (insiculous — opened `/games/`) and
+`moved-in` (fortknight — loaded a keep).
 
 `/achievements/` is the every-achievement board — a studio page (BaseLayout, a nav entry after
 Games). The insiculous and fortknight registry entries render locked **and** unlocked, with their
 descriptions, unlocked sorting above locked within each group; game achievements render per game as
 unlocked-only, because the games own their full lists in-game and the site does not duplicate
 engine data. `/fortknight/achievements/` narrows to the active profile's unlocked fortnight
-achievements, and sits in the face nav (six pills: Overview · My Fort · Achievements · Build ·
+achievements, and sits in the face nav (six pills: Overview · Keep · Achievements · Build ·
 Questionnaire · Assistant). `/games/` caps its grid at 75vh with scroll at multi-column widths
 (≥40rem) and carries a game-achievements board under it; `/profile/`'s achievements panel shows all
 three types in a scroll box. Both scroll regions — the `/profile/` box and the `/games/` grid — are

@@ -8,7 +8,7 @@ import FaceLayout from "../../layouts/FaceLayout.astro";
 import { facePath } from "../../lib/faces.js";
 import { withBase } from "../../lib/paths.js";
 
-const myFort = facePath("fortknight", "myfort/");
+const keep = facePath("fortknight", "keep/");
 const studioAchievements = withBase("achievements/");
 ---
 <FaceLayout title="Achievements" face="fortknight">
@@ -22,7 +22,7 @@ const studioAchievements = withBase("achievements/");
     <h2 id="fortknightAchievementsHeading">Fortnight achievements</h2>
     <div id="achievementsBoard"></div>
     <p class="muted" id="achievementsStatus" role="status">
-      Nothing yet — loading a seed on <a href={myFort}>My Fort</a> earns Moved In.
+      Nothing yet — loading a seed on <a href={keep}>Keep</a> earns Moved In.
     </p>
   </section>
 </FaceLayout>

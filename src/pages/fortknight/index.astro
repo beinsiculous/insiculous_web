@@ -3,12 +3,12 @@
 //
 // The claims below are condensed from docs/thesis.md — this page says what the face argues. That argument
 // is also the no-seed state and the no-JS fallback, on purpose: a crawler, a build artefact and a stranger
-// all see the front door, because everything personal comes from the visitor's own My Fort seed in
+// all see the front door, because everything personal comes from the visitor's own keep in
 // localStorage. When a seed is there, the script draws a compact grid of the fourteen days ABOVE the front
 // door — the seed is the overview, the thesis is the footnote.
 //
 // It resolves nothing. The seed arrives pre-joined by day key, so the grid shows the seed's own words in
-// the seed's own order and links each cell to the day page; myfort.astro's header says why running this
+// the seed's own order and links each cell to the day page; keep.astro's header says why running this
 // repository's date evaluator over a seed would be wrong for half the year.
 //
 // Two actions live under "What is here now", and the order is the argument. The primary one is loading a
@@ -18,14 +18,14 @@
 // the nav does not offer "New profile…", src/components/ProfileSwitcher.astro). When the questionnaires
 // are real, profile creation moves into them and the button here goes.
 import FaceLayout from "../../layouts/FaceLayout.astro";
-import MyFortStyles from "../../components/MyFortStyles.astro";
+import KeepStyles from "../../components/KeepStyles.astro";
 import { facePath } from "../../lib/faces.js";
 
-const myFort = facePath("fortknight", "myfort/");
+const keep = facePath("fortknight", "keep/");
 ---
 <FaceLayout title="FortKnight" face="fortknight">
-  <MyFortStyles />
-  <div id="myFortGrid" hidden></div>
+  <KeepStyles />
+  <div id="keepGrid" hidden></div>
   <section class="panel">
     <h1>FortKnight</h1>
     <p class="lede">
@@ -61,54 +61,54 @@ const myFort = facePath("fortknight", "myfort/");
 
     <h2>What is here now</h2>
     <p>
-      <a href={myFort}>My Fort</a> shows a fortnight exported from the Focus Key app: what is being eaten,
+      <a href={keep}>Keep</a> shows a fortnight exported from the Focus Key app: what is being eaten,
       what is booked, and the shape of each day. The seed stays on this device and is never uploaded.
       The planner itself runs on a profile kept on this device; the questionnaires that will build one are
       still being built, so one can be created empty here.
     </p>
     <div class="button-row">
-      <a class="button" href={myFort}>Load your seed</a>
+      <a class="button" href={keep}>Load your seed</a>
       <button type="button" id="createProfileButton" hidden>Create a profile</button>
     </div>
     <p class="muted" id="profileStatus"></p>
-    <p class="muted" id="myFortOverviewStatus" role="status" aria-live="polite"></p>
+    <p class="muted" id="keepOverviewStatus" role="status" aria-live="polite"></p>
   </section>
 </FaceLayout>
 
 <script>
-  import { readStoredMyFortSeed } from "../../lib/myfort-seed-access.js";
-  import { readableDays } from "../../lib/myfort.js";
-  import { element } from "../../lib/myfort-view.js";
+  import { readStoredKeep } from "../../lib/keep-access.js";
+  import { readableDays } from "../../lib/keep.js";
+  import { element } from "../../lib/keep-view.js";
   import { facePath } from "../../lib/faces.js";
 
-  // Boot is readStoredMyFortSeed()'s decision, like every seed-fed page. "none" renders nothing extra —
+  // Boot is readStoredKeep()'s decision, like every seed-fed page. "none" renders nothing extra —
   // the front door below is already the right thing to show. "cleared" and "kept" both only report, in
   // the same spot beside the load link: one says the wreckage was forgotten, the other that an intact but
   // undrawable seed was NOT deleted. Only "seed" draws.
-  const container = document.getElementById("myFortGrid");
-  const status = document.getElementById("myFortOverviewStatus");
+  const container = document.getElementById("keepGrid");
+  const status = document.getElementById("keepOverviewStatus");
 
-  const stored = readStoredMyFortSeed();
+  const stored = readStoredKeep();
   if (stored.status === "cleared" || stored.status === "kept") {
     status.textContent = stored.reason;
   } else if (stored.status === "seed") {
-    // Compact by design: the full panels live on My Fort and on the day pages; here a cell is a label, a
-    // focus and the meals, and the whole cell is the link. The classes are myfort-grid-* and global for
-    // the same reason as the rest of MyFortStyles.astro — this DOM is built here, not stamped by Astro.
+    // Compact by design: the full panels live on Keep and on the day pages; here a cell is a label, a
+    // focus and the meals, and the whole cell is the link. The classes are keep-grid-* and global for
+    // the same reason as the rest of KeepStyles.astro — this DOM is built here, not stamped by Astro.
     // The heading is an h2: the prerendered <h1>FortKnight</h1> below is the document's one h1 in every
     // state, seeded or not.
     container.appendChild(element("h2", null, "Your fortnight"));
-    const grid = element("div", "myfort-grid");
+    const grid = element("div", "keep-grid");
     for (const day of readableDays(stored.seed)) {
-      const cell = element("a", "panel myfort-grid-cell");
+      const cell = element("a", "panel keep-grid-cell");
       cell.href = facePath("fortknight", `days/${day.dayKey}/`);
-      cell.appendChild(element("span", "myfort-grid-day", day.label ?? day.dayKey));
-      if (day.mainFocusLabel) cell.appendChild(element("span", "myfort-grid-focus muted", day.mainFocusLabel));
+      cell.appendChild(element("span", "keep-grid-day", day.label ?? day.dayKey));
+      if (day.mainFocusLabel) cell.appendChild(element("span", "keep-grid-focus muted", day.mainFocusLabel));
       const meals = day.meals ?? {};
       const named = [["Brunch", meals.brunch], ["Snack", meals.snack], ["Dinner", meals.dinner]]
         .filter(([, dish]) => typeof dish === "string" && dish.length > 0);
       if (named.length) {
-        const list = element("ul", "myfort-grid-meals");
+        const list = element("ul", "keep-grid-meals");
         for (const [name, dish] of named) list.appendChild(element("li", null, `${name}: ${dish}`));
         cell.appendChild(list);
       }

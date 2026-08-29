@@ -11,14 +11,14 @@ export const FACES = {
   fortknight: { id: "fortknight", label: "FortKnight", logo: "🏰🛡️", favicon: "🗡️", theme: "fort-knight", home: "fortknight/", blurb: "the repeating 14-day schedule: your fortnight grid, day pages, and time by category", build: { path: "build/", label: "Build", shortLabel: "Build" } },
 };
 export const FACE_IDS = Object.keys(FACES);
-/** The face's menu: Overview, My Fort, Achievements, its own building page, Questionnaire,
+/** The face's menu: Overview, Keep, Achievements, its own building page, Questionnaire,
  *  Assistant. `shortLabel` is kept per entry but currently shown nowhere: the phone-width swap to
  *  the short label is dead CSS on this branch — at that width the pills live inside the ☰ panel,
  *  which is full width and has room for the full label (faces.css's mobile block explains). */
 export function faceNav(faceId) {
   return [
     { path: "", label: "Overview", shortLabel: "Menu", exact: true },
-    { path: "myfort/", label: "My Fort", shortLabel: "Fort", exact: false },
+    { path: "keep/", label: "Keep", shortLabel: "Keep", exact: false },
     { path: "achievements/", label: "Achievements", shortLabel: "Won", exact: false },
     { ...FACES[faceId].build, exact: false },
     { path: "questionnaire/", label: "Questionnaire", shortLabel: "Quiz", exact: false },

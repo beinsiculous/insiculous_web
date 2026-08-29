@@ -177,7 +177,7 @@ the eating.**
   about what dinner costs the rest of your week. Two faces was the shape while both were being
   built; with the creation chain on the back burner, the `/forkknife/` routes came down
   (2026-08-28), and this section's argument moves with them: the by-dish and by-day menu views land
-  where the seed already lives, on FortKnight's seed-fed pages, once the My Fort seed carries menu
+  where the seed already lives, on FortKnight's seed-fed pages, once the keep carries menu
   rows. Leftovers stay load-bearing there — eight dishes covering fourteen days is exactly what a
   real household's seed shows.
 
