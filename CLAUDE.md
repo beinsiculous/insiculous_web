@@ -250,6 +250,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | questionnaire questions, answers → weights mapping | `docs/questionnaire.md`, `data/questionnaire.json` |
 | import document contract (existing systems → objects) | `docs/importers.md`, `data/schema/import.schema.json` |
 | the meal plan / ForkKnife (menu, prep + cooking tasks) | `docs/meal-plan.md`, `data/schema/meal-plan.schema.json`, `scripts/fk_core/meal_plan.py`, `src/lib/shared/meal-plan.js` |
+| the keep format — the spec a person hand-makes a keep from, and its machine schema | `docs/keep-format.md`, `data/schema/keep.schema.json` |
 | how an assistant reads a spreadsheet into an import document | `docs/import-from-spreadsheet.md` |
 | on-device app, questionnaire page, settings, overrides | `docs/app.md` |
 | the studio site, games/devlog content, WASM drop-in convention, deploy | `README.md` |

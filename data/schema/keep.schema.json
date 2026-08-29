@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/keep.schema.json",
+  "title": "The keep",
+  "description": "The keep is a fourteen-day fortnight a person carries from their planner app to the web: what is eaten and what is booked, keyed by day key and carrying no dates. This is its machine schema. The canonical copy lives with the format's specification (docs/keep-format.md); a byte-identical copy travels with the app that writes keeps. Edit the canonical one - the copies are compared and any difference is reported as drift. TWO BARS, and this schema is the higher one: a CONFORMING keep is complete and well-formed, which is what this file certifies; a READABLE keep is merely one a page can draw something from, which is a lower bar the reader applies. A hand-maker mid-draft sits between the two on purpose. OPEN BY CONSTRUCTION: no object here sets additionalProperties to false, because adding a field is not a version bump - the app and the website ship on different cadences, and the person holding the phone cannot redeploy the website, so a reader must ignore what it does not know and refuse only a HIGHER version. A future per-member section would be additive in exactly this way and would need no bump.",
+  "type": "object",
+  "required": ["meta", "days"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "What the file is, and when it was made.",
+      "required": ["format", "version"],
+      "properties": {
+        "format": {
+          "const": "keep",
+          "description": "Renamed from \"myfort\" on 2026-08-28 as a clean break; the version stayed 1 under the new name."
+        },
+        "version": {
+          "type": "integer",
+          "enum": [1],
+          "description": "Bumped only for a breaking change. A reader refuses a HIGHER version and tolerates unknown fields at the same one."
+        },
+        "exportedAt": {
+          "type": ["string", "null"],
+          "description": "When the file was written. Null is legitimate: the writer takes this as an argument and defaults it to null, so a caller that omits a clock produces null rather than omitting the key. The fourteen days carry no dates and never go stale; only the season and year snapshots age."
+        }
+      }
+    },
+    "days": {
+      "type": "array",
+      "description": "Exactly the canonical fourteen, each once, in canonical order. The fourteen day keys are the format's skeleton, not household vocabulary - the fortnight is the product. NOTE: this schema pins the count and the vocabulary; that each key appears exactly once and in order is a rule of the specification that JSON Schema cannot express, and is enforced by test instead.",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "required": ["dayKey"],
+        "properties": {
+          "dayKey": {
+            "type": "string",
+            "enum": [
+              "sun-a", "mon-b", "tue-a", "wed-b", "thu-a", "fri-b", "sat-a",
+              "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b"
+            ]
+          },
+          "label": { "type": "string", "description": "The day's name as the household writes it. Rendered verbatim." },
+          "week": { "type": "integer", "enum": [1, 2] },
+          "mainFocus": { "type": "string" },
+          "mainFocusLabel": { "type": "string" },
+          "blocks": {
+            "type": "array",
+            "description": "The day's blocks in order. Block keys are household vocabulary, not a fixed set - one household's day runs early/midday/late/too-dark, another's need not - so they are not enumerated here.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": { "type": "string" },
+                "label": { "type": "string" },
+                "start": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                "end": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                "focus": {
+                  "type": ["string", "null"],
+                  "description": "The workbook's display text, not a category key. Null where the block carries none."
+                },
+                "meal": {
+                  "type": ["object", "null"],
+                  "description": "The meal this block carries, or null. An object - not a string.",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "dish": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "meals": {
+            "type": ["object", "null"],
+            "description": "The day's three dishes, or null when the day carries none.",
+            "properties": {
+              "brunch": { "type": ["string", "null"] },
+              "snack": { "type": ["string", "null"] },
+              "dinner": { "type": ["string", "null"] }
+            }
+          },
+          "appointments": {
+            "type": "array",
+            "description": "The recurring ideal week - what is booked in principle, not the device's real calendar.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "category": { "type": "string" },
+                "timing": {
+                  "type": "object",
+                  "properties": {
+                    "estimatedStart": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                    "travelPrepComplete": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                    "timeStart": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                    "timeFinished": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                    "estimatedEnd": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "season": {
+      "type": ["object", "null"],
+      "description": "A snapshot of the season current when the file was exported, or null when no season resolved. Season ids are one household's vocabulary and are never enumerated.",
+      "properties": {
+        "key": { "type": "string" },
+        "name": { "type": "string" },
+        "isCurrent": { "type": "boolean" },
+        "gregorianRange": { "type": "string" },
+        "startDescription": { "type": "string" },
+        "safeOutsidePercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "focus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "produce": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "group": { "type": "string" },
+              "label": { "type": "string" },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "rank": { "type": "string" },
+                    "name": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "mealIdeas": {
+          "type": "array",
+          "description": "Emitted by the writer; absent from both published fixtures, which is why it is documented here rather than inferred from an example.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "text": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "year": {
+      "type": ["object", "null"],
+      "description": "The year wheel, or null. Non-null only when a season resolved and the wheel covers a year.",
+      "properties": {
+        "status": { "type": "string", "enum": ["year"] },
+        "year": { "type": "string", "pattern": "^[0-9]{4}$", "description": "A string, not an integer." },
+        "daysInYear": { "type": "integer" },
+        "daysCovered": { "type": "integer" },
+        "coversWholeYear": { "type": "boolean" },
+        "firstDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "lastDate": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "slices": {
+          "type": "array",
+          "description": "The wheel's slices in the order they are drawn. THE ORDER IS LOAD-BEARING: season colours come from a positional palette pinned to a slice's first appearance here, never to a household's season ids, so re-exporting cannot shift them.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": { "type": "string" },
+              "name": { "type": "string" },
+              "days": { "type": "integer" },
+              "percent": { "type": "number" },
+              "startDegree": { "type": "number" },
+              "sweepDegree": { "type": "number" },
+              "isCurrent": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

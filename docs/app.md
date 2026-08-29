@@ -29,6 +29,13 @@ seed**: a small file the private **Focus Key** phone app exports
 (`focuskey/src/lib/keep.js`), carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
 
+**The format is written down.** `docs/keep-format.md` is its specification, written for a person
+making a keep by hand in a text editor, and `data/schema/keep.schema.json` is the machine schema.
+Both are canonical here rather than in the private app repository, because a hand-maker cannot see
+that one. This section describes what the pages do with a keep; the format's own rules — the
+fourteen canonical day keys, what a keep should omit, why adding a field is not a version bump —
+live in the spec and are not restated here.
+
 - **Three pages, one seed.** `/fortknight/keep/` draws the whole fortnight — fourteen day panels,
   the season card and the year wheel — and sits in the face nav (`src/lib/faces.js`). With no seed
   stored, `/fortknight/` keeps its thesis front-door content and its primary action is **Load your
