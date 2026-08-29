@@ -158,22 +158,6 @@ main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 
 /* The fortnight grid collapses from seven day-columns to two below 900px. The value is in px while everything
    else here is in rem (see the note at the phone block) — kept as-is rather than re-tuned in rem. */
 @media (max-width: 900px) { .fortnight-grid { grid-template-columns: repeat(2, 1fr); } }
-.day-card {
-  display: block; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem;
-  background: var(--panel-soft); color: var(--ink); text-decoration: none;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, outline-color 0.12s ease;
-}
-.day-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); outline: 2px solid var(--accent); }
-.day-card.today { outline: 2px solid var(--accent); }
-.day-card .day-label { font-weight: 600; font-size: 0.85rem; display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
-.day-card .day-label::after { content: "›"; color: var(--muted); }
-.day-card .day-focus { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); }
-.menu-day-card .menu-lines { list-style: none; margin: 0.25rem 0 0; padding: 0; font-size: 0.78rem; display: grid; gap: 0.15rem; }
-.menu-day-card .menu-meal { color: var(--muted); }
-.block-chip { display: block; margin-top: 0.25rem; padding: 0.15rem 0.3rem; border-radius: 4px; font-size: 0.72rem; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55); box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.12); }
-.block-chip.flexible { color: var(--muted); text-shadow: none; box-shadow: none; border: 1px dashed var(--muted); }
-.block-chip.empty { color: var(--muted); text-shadow: none; box-shadow: none; border: 1px dashed var(--line, var(--muted)); }
-.block-chip[data-changed] { outline: 2px solid var(--accent); outline-offset: 1px; }
 .grid-views { margin-top: 0.75rem; }
 .grid-views .button-row button:not(.active):not(#adoptProposal) { background: transparent; color: var(--accent); }
 .proposal-reasons { margin: 0.25rem 0 0; padding-left: 1.2rem; font-size: 0.85rem; max-height: 16rem; overflow-y: auto; }
@@ -191,15 +175,6 @@ main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 
 .appointment-tag { font-size: 0.7rem; background: var(--accent); color: var(--on-accent); border-radius: 3px; padding: 0 0.3rem; margin-left: 0.3rem; }
 .menu-line { font-size: 0.88rem; margin: 0.2rem 0; }
 .back-link { font-size: 0.85rem; }
-
-/* ---------- allocations ---------- */
-.allocation-row { display: grid; grid-template-columns: 11rem 1fr; gap: 0.5rem; align-items: center; font-size: 0.88rem; margin: 0.25rem 0; }
-.allocation-row.zero { opacity: 0.55; }
-.allocation-bar { display: flex; align-items: center; height: 0.9rem; background: var(--flexible); border-radius: 3px; overflow: hidden; }
-.allocation-bar > .fill { display: block; height: 100%; flex: none; }
-.allocation-bar > .fill.flexible { background: var(--muted); }
-.allocation-value { padding-left: 0.35rem; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
-.allocation-legend { font-size: 0.78rem; color: var(--muted); margin: 0.6rem 0 0.2rem; }
 
 /* ---------- settings ---------- */
 .settings-form fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 0.75rem; }
@@ -284,23 +259,8 @@ input:disabled, select:disabled { opacity: 0.55; }
 .dual-range:has(input:disabled) > .range-label { background: var(--muted); }
 .range-label { color: var(--muted); font-size: 0.8rem; min-width: 9rem; }
 tr.peripheral .range-cell { opacity: 0.45; }
-.pick-list { list-style: none; padding: 0; margin: 0.25rem 0 0.5rem; columns: 2; }
-.pick-list li { break-inside: avoid; margin: 0.15rem 0; }
-.pick-list label { font-size: 0.9rem; display: inline; margin: 0; }
-.pick-list input[type=checkbox], .pick-list input[type=radio] { width: auto; margin-right: 0.35rem; }
-.pick-list-inline { columns: auto; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
-.meals-table td { width: auto; }
-.meals-table th[scope=row] { white-space: nowrap; }
-.meals-table .meal-name { width: 7rem; padding: 0.25rem 0.4rem; font: inherit; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
-.meals-table .meal-prep-cell { white-space: nowrap; }
-.meals-table .meal-slots-cell label { display: inline-flex; align-items: center; gap: 0.25rem; margin-right: 0.6rem; font-size: 0.9rem; }
-.meals-table .meal-slots-cell input { width: auto; }
-.meals-table .meal-prep-cell label { display: inline-flex; align-items: center; gap: 0.25rem; }
-.meals-table .meal-minutes input[type=range] { width: 5rem; }
-.meals-table .meal-minutes output { font-size: 0.75rem; color: var(--muted); }
 .year-split .inline-field input[type=text] { width: 12rem; }
 .year-split .scheme-blurb { display: none; margin: 0.1rem 0 0.45rem 1.6rem; font-size: 0.82rem; }
-.year-split .pick-list li:has(input:checked) .scheme-blurb { display: block; }
 .sections-table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.85rem; }
 .sections-table th, .sections-table td { text-align: left; padding: 0.25rem 0.3rem; border-bottom: 1px solid var(--line); font-weight: normal; vertical-align: top; }
 .sections-table thead th { color: var(--muted); font-size: 0.78rem; }
@@ -360,10 +320,7 @@ tr.peripheral .range-cell { opacity: 0.45; }
 .block-segment.unscheduled { background: var(--flexible); color: var(--muted); }
 .block-warnings { margin: 0.25rem 0 0 1rem; padding: 0; }
 
-/* ---------- assistant (workspace files) ---------- */
-.file-list { display: flex; flex-direction: column; gap: 0.35rem; }
-.file-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 0.5rem; align-items: center; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); }
-.file-row code { overflow-wrap: anywhere; }
+/* ---------- assistant ---------- */
 .paste-box textarea { width: 100%; font: inherit; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
 
 /* Cursor: wooden by default; sword on anything clickable; shield on anything disabled. */
@@ -454,10 +411,6 @@ main > * { min-width: 0; }
   .nav-profile select { max-width: 100%; }
   main { padding: 0.75rem; gap: 0.75rem; }
   .panel { padding: 0.9rem; }
-  .pick-list { columns: 1; }
-  .allocation-row { grid-template-columns: 1fr; gap: 0.15rem; }
-  .file-row { display: flex; flex-wrap: wrap; }
-  .file-row code { flex: 1 1 100%; }
   .button-row button, .button-row .file-button { flex: 1 1 auto; text-align: center; }
   .questionnaire .inline-field { margin-right: 0.5rem; flex-wrap: wrap; }
   /* "How many eat?" and friends: a 6rem number box beside its label text no longer shares the row
@@ -467,34 +420,6 @@ main > * { min-width: 0; }
   .waking-ticks span:nth-last-child(2) { display: none; } /* the 36 h tick crowds the track's end on a phone */
   .year-split .inline-field { flex-wrap: wrap; }
   .settings-form.questionnaire .year-split .inline-field input[type=text] { width: 100%; }
-
-  /* Meals → one card per meal, like the three tables below. Four columns of live controls — a name, six slot
-     checkboxes, and two checkbox + slider + output pairs — cannot share 350px: squeezed, the sliders ran 70px past
-     the viewport (the only page left that scrolled sideways), and the name input resolved to 100% of a 51px fixed
-     column, because .settings-form's input rule (0,4,1) outweighs .meals-table .meal-name (0,2,0). The caption each
-     cell loses with the thead is redrawn by ::before.
-     Only .meals-table converts: the two plain .category-table uses on FortKnight's questionnaire are two and three
-     narrow columns and already fit. */
-  .meals-table, .meals-table tbody { display: block; }
-  .meals-table thead { display: none; }
-  .meals-table tr { display: block; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
-  .meals-table th, .meals-table td {
-    display: block; width: auto; padding: 0.15rem 0; border-bottom: 0; text-align: left;
-  }
-  .meals-table th[scope=row] { white-space: normal; }
-  .settings-form .meals-table .meal-name { width: 100%; }
-  .meals-table td::before { display: block; font-size: 0.72rem; color: var(--muted); }
-  .meals-table .meal-slots-cell::before { content: "eaten"; }
-  .meals-table td.meal-prep-cell:nth-child(3)::before { content: "needs prepping"; }
-  .meals-table td.meal-prep-cell:nth-child(4)::before { content: "needs cooking"; }
-  /* nowrap is what kept the slider beside its checkbox on one unbreakable line. */
-  .meals-table .meal-prep-cell {
-    white-space: normal; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem;
-  }
-  .meals-table .meal-prep-cell::before { flex: 1 1 100%; }
-  .meals-table .meal-slots-cell label { margin-right: 0.6rem; }
-  .meals-table .meal-minutes { display: inline-flex; align-items: center; gap: 0.35rem; flex: 1 1 8rem; min-width: 0; }
-  .meals-table .meal-minutes input[type=range] { width: auto; flex: 1 1 4rem; min-width: 0; }
 
   /* Category rows: name + boxes on the first line, the slider on its own full-width line. */
   .category-row.category-header { display: none; }
@@ -673,5 +598,4 @@ main > * { min-width: 0; }
   --accent: #ffbe6b; --on-accent: #000000; --flexible: rgba(255, 255, 255, 0.16);
 }
 [data-contrast="high"] body::before { background-image: none !important; filter: none !important; }
-[data-contrast="high"] .panel,
-[data-contrast="high"] .day-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+[data-contrast="high"] .panel { backdrop-filter: none; -webkit-backdrop-filter: none; }

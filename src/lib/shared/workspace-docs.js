@@ -1,9 +1,9 @@
 // The assistant workspace: the set of files a person uploads into their own AI workspace
 // (a Claude Project, a ChatGPT/Kimi/NotebookLM workspace, ...) so an assistant there can help
 // with their schedule, plus the classifier for what the assistant hands back.
-// Pure: no DOM, no fetch, no storage — the same list drives src/lib/workspace-static-texts.js (which
-// imports each source at build time), the /profile/ page (downloads), the two assistant pages (the guide
-// rows and prompts), tests, and (later) native clients. Contract: docs/assistant-workspace.md.
+// Pure: no DOM, no fetch, no storage — the list drives the tests today; in the parked creation
+// chain's design it also drives the /profile/ downloads, the assistant pages' guide rows and
+// prompts, and (later) native clients. Contract: docs/assistant-workspace.md.
 import { formatIsoDate, parseIsoDate, resolveDate } from "./fortknight-rules.js";
 import { activeWeights, personCalendarFromSettings } from "./weights-rules.js";
 

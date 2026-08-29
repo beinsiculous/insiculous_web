@@ -28,10 +28,9 @@ asking for a meal-plan document, `meal-plan.md`). `tests/test_workspace_docs.py`
 | `weights.<id>.json` | app, only once the active profile was saved | the active profile's weights, derived from its answers (`weightsFileName(id)`) |
 
 `WORKSPACE_STATIC_DOCUMENTS` (file name → repo-relative source) is the single list of copied files.
-Its sources are this repository's own `docs/` and `data/schema/`, imported at build time by
-`src/lib/workspace-static-texts.js` — which lists the same thirteen and fails the build if the two lists
-disagree, so a renamed doc cannot quietly ship as an empty file. `tests/test_workspace_docs.py` checks
-every named source exists. `WORKSPACE_GENERATED_FILES` names the four generated ones.
+Its sources are this repository's own `docs/` and `data/schema/`. `tests/test_workspace_docs.py`
+checks every named source exists, so a renamed doc cannot quietly point at nothing.
+`WORKSPACE_GENERATED_FILES` names the four generated ones.
 
 `upcomingDates` = the next 90 calendar dates from the generation day, each resolved on the device
 (`resolveDate`, honouring the cycle anchor) to `{date, dayKey, week, seasonId, seasonName}` — so the

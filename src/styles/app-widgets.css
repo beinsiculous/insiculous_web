@@ -9,8 +9,8 @@
    needs no keeping in step with it. It is imported by the page, not by BaseLayout, so the marketing pages do not
    carry CSS they never use.
 
-   Class names match faces.css because the markup is shared (ProfileSwitcher.astro, and the file rows built by
-   lib/shared/workspace-files.js). The profile-name dialog's styles are NOT here: they live in global.css
+   Class names match faces.css because the markup is shared (ProfileSwitcher.astro). The
+   profile-name dialog's styles are NOT here: they live in global.css
    (every studio page can open the dialog via the first-achievement prompt) and faces.css — that pair
    names each other. */
 
@@ -94,23 +94,7 @@ select {
    (the delete buttons included) out of reach. */
 .achievements-scroll { max-height: 75vh; overflow-y: auto; }
 
-/* ---------- assistant workspace files ---------- */
-.file-list { display: flex; flex-direction: column; gap: 0.35rem; }
-.file-row {
-  display: grid; grid-template-columns: 1fr auto auto auto; gap: 0.5rem; align-items: center;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border); border-radius: 6px;
-  background: var(--surface-raised);
-}
-.file-row code { overflow-wrap: anywhere; background: none; border: none; padding: 0; }
-.file-row button { font-size: 0.8rem; padding: 0.25rem 0.6rem; }
-
 @media (max-width: 40rem) {
   .panel { padding: 0.9rem; }
-  /* The four-column row cannot hold a filename and three controls at this width: the name takes its own line and
-     the size and the two buttons share the next one. */
-  .file-row { display: flex; flex-wrap: wrap; }
-  .file-row code { flex: 1 1 100%; }
   .button-row button { flex: 1 1 auto; text-align: center; }
-  .file-row button { flex: 0 1 auto; }
 }

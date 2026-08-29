@@ -23,12 +23,8 @@
     "src/pages/bundle.json.js",
     "src/pages/profile.astro",
     "src/layouts/FaceLayout.astro",
-    "src/components/AllocationBars.astro",
     "src/components/FaceInDevelopment.astro",
-    "src/components/DayCard.astro",
-    "src/components/MenuDayCard.astro",
     "src/components/ProfileSwitcher.astro",
-    "src/components/QuestionField.astro",
     "src/lib"
   ]
 }
