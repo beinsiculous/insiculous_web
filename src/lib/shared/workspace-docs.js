@@ -18,10 +18,12 @@ export const WORKSPACE_STATIC_DOCUMENTS = {
   "importers.md": "docs/importers.md",
   "import-from-spreadsheet.md": "docs/import-from-spreadsheet.md",
   "meal-plan.md": "docs/meal-plan.md",
+  "keep-format.md": "docs/keep-format.md",
   "import.schema.json": "data/schema/import.schema.json",
   "meal-plan.schema.json": "data/schema/meal-plan.schema.json",
   "weights.schema.json": "data/schema/weights.schema.json",
   "user-settings.schema.json": "data/schema/user-settings.schema.json",
+  "keep.schema.json": "data/schema/keep.schema.json",
 };
 
 export const README_FILE_NAME = "README.md";

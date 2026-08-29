@@ -41,6 +41,11 @@ class WorkspaceDocumentsTests(unittest.TestCase):
             "docs/llm-guide.md", "docs/domain.md", "docs/data-model.md", "docs/weights.md",
             "docs/questionnaire.md", "docs/generator.md", "docs/importers.md",
             "docs/import-from-spreadsheet.md", "docs/meal-plan.md",
+            # Blessed 2026-08-29: the keep format's specification and its machine schema. They are
+            # published because they are what a person hand-making a keep needs, and a hand-maker
+            # cannot see the private app repository the format is written from — which is the whole
+            # reason both files are canonical on this public side.
+            "docs/keep-format.md", "data/schema/keep.schema.json",
             "data/schema/import.schema.json", "data/schema/meal-plan.schema.json",
             "data/schema/weights.schema.json", "data/schema/user-settings.schema.json",
         }

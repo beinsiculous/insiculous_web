@@ -328,3 +328,178 @@ class StoredSeedBootTests(unittest.TestCase):
             self.assertIn('"kept"', source, page)
         day_page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "days" / "[dayKey].astro").read_text(encoding="utf-8")
         self.assertIn('"kept"', day_page)
+
+
+class KeepSchemaTests(unittest.TestCase):
+    """The conforming bar: what `data/schema/keep.schema.json` certifies.
+
+    Two bars, and they are not the same bar. `validateKeep` above decides whether a page can DRAW a
+    file, and is tolerant on purpose — one day is enough. This class is the higher bar: a complete,
+    well-formed keep. Every conforming keep is readable; a readable keep need not be conforming, and
+    a hand-maker mid-draft sits between the two. `docs/keep-format.md` says so in those words.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import sys
+        sys.path.insert(0, str(REPOSITORY_ROOT / "scripts"))
+        cls.schema = json.loads((REPOSITORY_ROOT / "data" / "schema" / "keep.schema.json")
+                                .read_text(encoding="utf-8"))
+        cls.fixtures = {name: json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / name)
+                                         .read_text(encoding="utf-8"))
+                        for name in ("keep.sample.json", "keep.other-household.json")}
+
+    def check(self, document):
+        from fk_core.validate import ValidationReport, check_schema
+        report = ValidationReport()
+        check_schema(document, self.schema, "keep", report)
+        return report
+
+    def test_both_published_fixtures_conform(self):
+        """The fixtures are what the a11y gate and the rendering tests draw; if the schema and they
+        disagree, one of them is lying about the format."""
+        for name, document in self.fixtures.items():
+            with self.subTest(fixture=name):
+                report = self.check(document)
+                self.assertTrue(report.ok, f"{name}: {report.render()}")
+
+    def test_the_day_key_enum_is_the_canonical_order(self):
+        """The fourteen keys now live in a third place. `tests/test_dates.py::RuleSchemaTests` is the
+        precedent: validate.py has no $ref, so a copied fragment is pinned by a test instead."""
+        from fk_core.keys import DAY_KEY_ORDER
+        schema_keys = self.schema["properties"]["days"]["items"]["properties"]["dayKey"]["enum"]
+        self.assertEqual(schema_keys, DAY_KEY_ORDER)
+
+    def test_each_fixture_carries_the_fourteen_keys_once_each_in_order(self):
+        """The rule the schema provably CANNOT express: minItems/maxItems pin the count and the enum
+        pins the vocabulary, but JSON Schema cannot say "each of these exactly once, in sequence".
+        Fourteen copies of sun-a satisfy the schema. So the rule is enforced here instead, and
+        docs/keep-format.md warns a generator not to rely on the schema for it."""
+        from fk_core.keys import DAY_KEY_ORDER
+        for name, document in self.fixtures.items():
+            with self.subTest(fixture=name):
+                self.assertEqual([day["dayKey"] for day in document["days"]], DAY_KEY_ORDER)
+
+    def test_the_schema_is_open_everywhere(self):
+        """Forward tolerance, made a check. Closing any object here would certify the opposite of the
+        contract the two halves ship on: adding a field is not a version bump, so a reader must
+        ignore what it does not know."""
+        def closed_paths(node, path):
+            if isinstance(node, dict):
+                if node.get("additionalProperties") is False:
+                    yield path
+                for key, value in node.items():
+                    yield from closed_paths(value, f"{path}.{key}")
+            elif isinstance(node, list):
+                for index, value in enumerate(node):
+                    yield from closed_paths(value, f"{path}[{index}]")
+
+        self.assertEqual(list(closed_paths(self.schema, "")), [])
+
+    def test_every_pattern_is_anchored(self):
+        """fk_core/validate.py applies re.search, not re.fullmatch, so an unanchored "HH:MM" pattern
+        certifies "9:00-10:00" and "garbage 12:30 more". Anchoring is the difference between pinning
+        a field's shape and pinning that the shape occurs somewhere inside it."""
+        def patterns(node):
+            if isinstance(node, dict):
+                if isinstance(node.get("pattern"), str):
+                    yield node["pattern"]
+                for value in node.values():
+                    yield from patterns(value)
+            elif isinstance(node, list):
+                for value in node:
+                    yield from patterns(value)
+
+        found = list(patterns(self.schema))
+        self.assertTrue(found, "the schema should carry patterns")
+        for pattern in found:
+            with self.subTest(pattern=pattern):
+                self.assertTrue(pattern.startswith("^") and pattern.endswith("$"), pattern)
+
+    def test_the_version_enum_carries_what_this_page_reads(self):
+        """The schema is a third place a version number is written. Without this, a future bump
+        leaves enum [1] stale while both fixtures still carry version 1 and every suite stays green."""
+        source = (REPOSITORY_ROOT / "src" / "lib" / "keep.js").read_text(encoding="utf-8")
+        readable = int(re.search(r"READABLE_VERSION\s*=\s*(\d+)", source).group(1))
+        self.assertIn(readable, self.schema["properties"]["meta"]["properties"]["version"]["enum"])
+
+    def test_a_keep_carrying_unknown_fields_still_conforms(self):
+        """The schema-level twin of test_it_accepts_an_additive_version_carrying_fields_it_does_not_know."""
+        document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+        document["meta"]["somethingNew"] = "later"
+        document["days"][0]["alsoNew"] = True
+        document["inventedSection"] = {"whole": "section"}
+        self.assertTrue(self.check(document).ok, self.check(document).render())
+
+    def test_a_null_exported_at_conforms(self):
+        """buildKeep takes exportedAt as an argument and defaults it to null, so a keep made without
+        a clock carries the key as null. Typing it "string" would refuse real writer output."""
+        document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+        document["meta"]["exportedAt"] = None
+        self.assertTrue(self.check(document).ok, self.check(document).render())
+
+    def test_it_refuses_what_the_format_forbids(self):
+        """A gate that only ever says yes is decoration. Each case is a mistake a hand-maker or a
+        changed writer could really make; `meal` as a bare string is the one the first draft of the
+        schema got wrong."""
+        def with_change(mutate):
+            document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+            mutate(document)
+            return document
+
+        def string_meal(document):
+            for day in document["days"]:
+                for block in day["blocks"]:
+                    if block["meal"] is not None:
+                        block["meal"] = "Garden soup"
+                        return
+
+        cases = {
+            "a block meal written as a bare string": string_meal,
+            "a time with anything around it": lambda d: d["days"][0]["blocks"][0].__setitem__("start", "9:00-10:00"),
+            "a malformed date": lambda d: d["year"].__setitem__("firstDate", "not-a-date"),
+            "a fifteenth day": lambda d: d["days"].append(d["days"][0]),
+            "a day key nobody uses": lambda d: d["days"][3].__setitem__("dayKey", "funday-c"),
+            "a version this page cannot read": lambda d: d["meta"].__setitem__("version", 2),
+            "the retired format name": lambda d: d["meta"].__setitem__("format", "myfort"),
+            "the year as an integer": lambda d: d["year"].__setitem__("year", 2026),
+        }
+        for description, mutate in cases.items():
+            with self.subTest(case=description):
+                self.assertFalse(self.check(with_change(mutate)).ok, description)
+
+    def test_the_specs_worked_example_is_the_format_it_describes(self):
+        """The example in docs/keep-format.md is what a hand-maker copies first. It shows one day of
+        the fourteen, so it cannot conform as written — but every field shape in it must be right,
+        which is what padding it to the fourteen keys checks."""
+        from fk_core.keys import DAY_KEY_ORDER
+        # Anchored to the worked example's own section rather than to "the first fence in the file",
+        # so that adding a small snippet earlier in the spec cannot fail this test with a
+        # schema-mismatch message that sends the reader hunting for a format bug.
+        spec = (REPOSITORY_ROOT / "docs" / "keep-format.md").read_text(encoding="utf-8")
+        worked_example = spec[spec.index("## The document"):]
+        document = json.loads(re.search(r"```json\n(.*?)\n```", worked_example, re.DOTALL).group(1))
+        shown = [day["dayKey"] for day in document["days"]]
+        self.assertEqual(shown, DAY_KEY_ORDER[:len(shown)],
+                         "the example's days must be a prefix of the canonical order")
+        template = document["days"][0]
+        document["days"] = [{**json.loads(json.dumps(template)), "dayKey": key} for key in DAY_KEY_ORDER]
+        report = self.check(document)
+        self.assertTrue(report.ok, f"the spec's own example does not match the schema: {report.render()}")
+
+
+@unittest.skipUnless((REPOSITORY_ROOT.parent / "focuskey" / "seed" / "keep.schema.json").is_file(),
+                     "focuskey is not cloned beside this repository")
+class SchemaCopyParityTests(unittest.TestCase):
+    """The schema is copied into the private app repo so a standalone clone of it keeps a drift check.
+    Copies that nothing compares drift, and this organisation has already proved it — so the byte
+    comparison runs here, where `npm run verify` executes it, rather than only in a script somebody
+    has to remember. It compares two SCHEMA files: neither is anybody's schedule.
+    """
+
+    def test_the_copy_is_byte_identical(self):
+        canonical = (REPOSITORY_ROOT / "data" / "schema" / "keep.schema.json").read_bytes()
+        copy = (REPOSITORY_ROOT.parent / "focuskey" / "seed" / "keep.schema.json").read_bytes()
+        self.assertEqual(canonical, copy,
+                         "the keep schema and its copy in focuskey have drifted; see "
+                         "scripts/check-keep-format.sh in the working set")
