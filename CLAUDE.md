@@ -82,11 +82,15 @@ examples/workbook` produces the historical baseline version from the workbook sa
 so they read/write those contracts rather than special-casing any data set.
 
 ## Assistant workspace (no AI in the app)
-The app never calls an LLM and holds no credentials. Instead `/profile/` generates a file set
-(README + docs + schemas + data + the person's settings/weights) that the person uploads into their
-*own* AI workspace, and accepts back what the assistant produces (weights file / import document /
-settings file — weights are always re-derived from answers on device). The file list and classifier
-live in `src/lib/shared/workspace-docs.js` (with the two prompts the assistant pages hand out: `SPREADSHEET_PROMPT`, `mealPlanPrompt`); contract in `docs/assistant-workspace.md`. In the parked creation chain's design, each face's questionnaire IS
+The app never calls an LLM and holds no credentials. The design instead has the app generate a
+file set (README + docs + schemas + data + the person's settings/weights) that the person uploads
+into their *own* AI workspace, and accepts back what the assistant produces (weights file / import
+document / settings file — weights are always re-derived from answers on device). The file list and
+classifier live in `src/lib/shared/workspace-docs.js` (with the two prompts the assistant pages
+hand out: `SPREADSHEET_PROMPT`, `mealPlanPrompt`); contract in `docs/assistant-workspace.md`. The
+contract and its tests are live; **the pages that publish it are the parked creation chain's** —
+the live `/profile/` holds the profile actions, the stored keep and the achievements board, with no
+workspace downloads yet. In that parked design, each face's questionnaire IS
 its settings (`/fortknight/questionnaire/`, `/forkknife/questionnaire/`), and the two building pages hold the content (`/fortknight/build/`, `/forkknife/spoon-feed/`) — all four write the same profile, each only its own answer keys; `/profile/` holds the profile actions + workspace downloads; named profiles per device at `settings.weightsProfiles`, one active — switched from the nav dropdown;
 `activeWeightsId`). Python scripts never
 call an LLM either.

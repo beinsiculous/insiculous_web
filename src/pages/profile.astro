@@ -4,16 +4,17 @@ import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import { facePath } from "../lib/faces.js";
 // This page belongs to beinsiculous.com rather than to the app, so it is a studio page like any other: BaseLayout,
 // global.css, the six-link header and the studio footer. Only the widgets it shares with the face come from
-// elsewhere (src/styles/app-widgets.css) — the panels, the buttons and the workspace file rows.
+// elsewhere (src/styles/app-widgets.css) — the panels and the buttons.
 import "../styles/app-widgets.css";
 
-// Profile (FortKnight's, held by the studio): the active profile (switch, name, Duplicate, Delete) and the
-// assistant-workspace downloads. The answers themselves are edited on the face's Questionnaire page (docs/app.md).
+// Profile (FortKnight's, held by the studio): the active profile (switch, name, Duplicate, Delete), the stored
+// keep and the achievements board. The assistant-workspace downloads are the parked creation chain's design
+// (docs/assistant-workspace.md), not on this page yet. Answers are edited on the face's Questionnaire page (docs/app.md).
 // The switcher lives here rather than in the header: BaseLayout has no chrome for it.
 ---
 <BaseLayout
   title="Profile — Be Insiculous"
-  description="Your FortKnight profile: switch or rename it, and download the file set for your own AI workspace."
+  description="Your FortKnight profile: switch, rename or duplicate it, and manage your stored keep and achievements."
 >
   <section class="panel">
     <h1>Profile</h1>

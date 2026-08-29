@@ -1,14 +1,17 @@
 # Assistant workspace (no AI in the app)
 
-FortKnight has no AI of its own and never calls a provider. Instead the app **generates a set of
-files** that the person uploads into *their own* AI workspace — a Claude Project, a ChatGPT / Kimi /
-NotebookLM workspace, anything that takes documents. The assistant there has the whole context; the
-person chats with it there, and pastes what it produces back into the app. Nothing leaves the
-device unless the person uploads it; there are no credentials anywhere in FortKnight.
+FortKnight has no AI of its own and never calls a provider. Instead the design has the app
+**generate a set of files** that the person uploads into *their own* AI workspace — a Claude
+Project, a ChatGPT / Kimi / NotebookLM workspace, anything that takes documents. The assistant
+there has the whole context; the person chats with it there, and pastes what it produces back into
+the app. Nothing leaves the device unless the person uploads it; there are no credentials anywhere
+in FortKnight. **The file set is a contract today, not a shipped feature**: the module and its
+tests are live, but the page that would publish the set — the downloads panel on `/profile/` — is
+the parked creation chain's, and is not on the live site.
 
 The contract lives in one pure module, `src/lib/shared/workspace-docs.js` (no
-DOM, no fetch), so tests, the `/profile/` page and future native clients (iOS/Android) all produce
-the same set. The same module holds the two prompts the app hands the person: `SPREADSHEET_PROMPT`
+DOM, no fetch), so the tests today — and, when the parked chain returns, the `/profile/` downloads
+and native clients (iOS/Android) — all produce the same set. The same module holds the two prompts the app hands the person: `SPREADSHEET_PROMPT`
 (FortKnight's assistant page, with `import-from-spreadsheet.md` and their spreadsheet) and
 `mealPlanPrompt({meals, answers, questionnaire})` (Fork Knife's assistant page: the person's meals — times of
 day, prep/cook minutes — and every answered meal preference from Fork Knife's questionnaire, option labels
@@ -49,8 +52,8 @@ of one of four kinds (`docs/llm-guide.md` → "Replying from an assistant worksp
 `userWeightsFromAnswers()` in `src/lib/shared/weights-rules.js` do the applying (mirrors of
 `fk_core.validate.check_standing_appointment` and friends).
 
-## The pages (`/profile/` on the live site; `/fortknight/assistant/` and `/forkknife/assistant/` in the parked creation chain's design)
-- **Workspace files** (Profile page — shared by FortKnight and Fork Knife — once a profile is saved) — one row per file (name, size, Copy, Download) and *Download all* (fires the
+## The pages (all the parked creation chain's design — the `/profile/` downloads panel, `/fortknight/assistant/` and `/forkknife/assistant/`; none is on the live site)
+- **Workspace files** (Profile page — shared by FortKnight and Fork Knife — once a profile is saved; the live `/profile/` carries no downloads panel yet) — one row per file (name, size, Copy, Download) and *Download all* (fires the
   downloads ~300 ms apart; browsers may ask once to allow multiple downloads, Safari may take only
   the first — Copy is the fallback). No zip: workspaces take individual files.
 - **Apply from assistant** (the parked creation chain's design: both assistant pages answer with a
