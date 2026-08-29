@@ -358,7 +358,7 @@ class ActivityTests(unittest.TestCase):
         self.assertIn(("wed-b", "Dinner: Lentil soup (leftovers)"), titles)
         self.assertIn(("mon-b", "Snack: Hummus"), titles)
         self.assertIn(("sun-a", "Breakfast"), titles)  # unplanned meals keep their name
-        self.assertEqual({activity["kind"] for activity in result["activities"]}, {"session", "practice", "meal"})  # prep/cook come as tasks from ForkKnife, not proposals
+        self.assertEqual({activity["kind"] for activity in result["activities"]}, {"session", "practice", "meal"})  # prep/cook come as tasks from Fork Knife, not proposals
 
     def test_over_committed_cells_are_listed_but_warned(self):
         # The clinic covers the whole early block on Mondays/Wednesdays; the practices there still show, with a warning.

@@ -136,7 +136,7 @@ export function renderYearPanel(year) {
   panel.appendChild(element("h2", null, `${year.year}`));
 
   const row = element("div", "keep-wheel-row");
-  // conic-gradient IS the wheel here. Focus Key draws it from nested rotated Views because React Native has
+  // conic-gradient IS the wheel here. Fortress Key draws it from nested rotated Views because React Native has
   // no such thing; a browser does, and the seed already carries the degrees, so there is nothing to
   // compute. Decorative: the same numbers are in the list beside it, which is what a reader gets.
   const stops = slices

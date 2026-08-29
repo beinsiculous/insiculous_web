@@ -61,7 +61,7 @@ def describe_schedule_document(parsed):
     if isinstance(meta, dict) and meta.get("format") in ("keep", "myfort"):
         return f"a keep (meta.format is \"{meta.get('format')}\")"
     if {"meta", "calendar", "days", "tasks"} <= set(parsed):
-        return "a Focus Key seed (meta, calendar, days and tasks together)"
+        return "a Fortress Key seed (meta, calendar, days and tasks together)"
     return None
 
 

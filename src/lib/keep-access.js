@@ -19,7 +19,7 @@
 //
 // A seed that reads fine but fails validation is the opposite case, and is KEPT. A refusal means the
 // document is intact but not drawable — wrong file, newer format, no days — and none of those is
-// wreckage. The sharpest case is a newer Focus Key export: the remedy is a website deploy, which the
+// wreckage. The sharpest case is a newer Fortress Key export: the remedy is a website deploy, which the
 // person holding the phone cannot do, and a seed forgotten at boot would be gone by the time the update
 // shipped. Keeping costs nothing: the seed stays deletable, from Keep's Forget button or /profile/.
 import { validateKeep } from "./keep.js";

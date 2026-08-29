@@ -180,7 +180,12 @@ export function menuForDay(plan, meals, dayKey) {
 // The meal slot ids (questionnaire.options.mealSlots) as the tasks' time-of-day words (import-document TIME_OF_DAY_WORDS).
 export const SLOT_TIME_OF_DAY = { "early-morning": "morning", "mid-morning": "morning", afternoon: "afternoon", evening: "evening", "late-evening": "night", anytime: "anytime" };
 export const PREP_TIME_OF_DAY = "evening";
-export const FORKKNIFE_SOURCE_KIND = "forkknife";
+// What Fork Knife writes into an import document's `source.kind`. Renamed from "forkknife" on
+// 2026-08-29 with the rest of the naming sweep. The schema still ACCEPTS the old value, because the
+// file set that documents it is downloaded into a person's own AI workspace by hand and never
+// re-syncs — an assistant working from a copy taken before the rename goes on emitting the old
+// string indefinitely. We write the new one; we refuse neither.
+export const FORK_KNIFE_SOURCE_KIND = "fork-knife";
 
 export function previousDayKey(dayKey) {
   return DAY_KEY_ORDER[(DAY_KEY_ORDER.indexOf(dayKey) - 1 + DAY_KEY_ORDER.length) % DAY_KEY_ORDER.length];
@@ -229,11 +234,11 @@ export function tasksFromMealPlan(plan, meals, datesByDayKey) {
 }
 
 /** The whole import document (version 2) the menu editor creates: the tasks, a readable review, and the menu itself. */
-export function forkknifeImportDocument(plan, meals, datesByDayKey, description = "Meal prep and cooking tasks from the fortnight menu") {
+export function forkKnifeImportDocument(plan, meals, datesByDayKey, description = "Meal prep and cooking tasks from the fortnight menu") {
   const { tasks, review } = tasksFromMealPlan(plan, meals, datesByDayKey);
   return {
     schemaVersion: 2,
-    source: { kind: FORKKNIFE_SOURCE_KIND, description },
+    source: { kind: FORK_KNIFE_SOURCE_KIND, description },
     commitments: [],
     tasks,
     skipped: [],

@@ -2,14 +2,14 @@
 // Keep: where the keep is uploaded — the fortnight the Fortress Key app exports, on a screen you can
 // read across a kitchen.
 //
-// Focus Key shows one day on a phone. This shows all fourteen, from a file the Focus Key app exports and the person
+// Fortress Key shows one day on a phone. This shows all fourteen, from a file the Fortress Key app exports and the person
 // who owns it loads here. Nothing is uploaded, nothing is held server-side, and this repository contains no
 // seed — scripts/fk_core/no_schedules.py makes that a check rather than a promise.
 //
 // The server renders an empty shell on purpose. Everything real comes from the visitor's own file, so a
 // crawler, a build artefact and a stranger all see the same thing: a page asking for a file.
 //
-// It resolves nothing. The seed arrives pre-joined by day key — Focus Key did the joining, where its parity
+// It resolves nothing. The seed arrives pre-joined by day key — Fortress Key did the joining, where its parity
 // suite covers it — so this page looks things up and draws them. That is not a shortcut: the site's own
 // FortKnight evaluator resolves Ostara and Fimbulsumar on sun-b and has no transition weeks, so a page that
 // resolved this data itself would be wrong for half the year.
@@ -26,7 +26,7 @@ import KeepStyles from "../../components/KeepStyles.astro";
   <section class="panel">
     <h1>Keep</h1>
     <p class="muted" id="keepIntro">
-      A fortnight from the Focus Key app: what is being eaten, what is booked, and the shape of each day.
+      A fortnight from the Fortress Key app: what is being eaten, what is booked, and the shape of each day.
       Load the seed the app exported — it stays on this device and is never uploaded.
     </p>
     <div class="button-row">
@@ -125,7 +125,7 @@ import KeepStyles from "../../components/KeepStyles.astro";
 
   // Boot is readStoredKeep()'s decision, not this page's: every seed-fed page reloads into the same
   // endings, and that module's header says why unreadable storage is forgotten but a readable seed the
-  // validator refuses is KEPT — a newer Focus Key export must survive until the website deploys the
+  // validator refuses is KEPT — a newer Fortress Key export must survive until the website deploys the
   // update, and the person holding the phone cannot redeploy the site.
   const stored = readStoredKeep();
   if (stored.status === "none") {

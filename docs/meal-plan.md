@@ -1,6 +1,6 @@
-# The meal plan (ForkKnife): the fortnight menu and its prep / cooking tasks
+# The meal plan (Fork Knife): the fortnight menu and its prep / cooking tasks
 
-**ForkKnife** is the site's second face (`docs/app.md`): its own Overview, **Spoon Feed**, Questionnaire and Assistant
+**Fork Knife** is the site's second face (`docs/app.md`): its own Overview, **Spoon Feed**, Questionnaire and Assistant
 pages under `/forkknife/`, sharing the profile with FortKnight. Its **questionnaire** (the `face: "forkknife"` section of
 `data/questionnaire.json`, "Your meals") is its settings: the meals question — a person's meals (Breakfast, Dinner,
 Snack by default; 2–5), when each is eaten (1–2 times of day, `meals.meals[].slots`), whether a menu item of that meal
@@ -10,12 +10,12 @@ embeds (`eaters`, `dietaryRules`, `allergiesAndDislikes`, `favouriteCuisines`, `
 `defaultAnswers`, kept whole under `weights.questionnaire.answers` — nothing here moves shares). The menu itself is not on that page:
 it is built on **Spoon Feed** (`/forkknife/spoon-feed/`, and by the same editor on FortKnight's Build page,
 `/fortknight/build/`) — for each meal, the dishes and the day(s) they are eaten across the fortnight — by hand, or by
-applying a **meal-plan document** (this contract) on ForkKnife's Assistant page, whose step 1 hands the person a **prompt**
+applying a **meal-plan document** (this contract) on Fork Knife's Assistant page, whose step 1 hands the person a **prompt**
 (`mealPlanPrompt`, `docs/assistant-workspace.md`) built from those answers, this contract and a template. Save keeps
 it all with the profile (`answers.mealPlan` → `weights.mealPlan`; every page saves only its own answer keys over the
 profile as stored at that moment — Spoon Feed writes `mealPlan` alone, Build writes it with the commitments and tasks,
-and ForkKnife's questionnaire writes `FORKKNIFE_ANSWER_KEYS`, carrying the menu through so that renaming a meal
-retags its dishes and dropping a meal drops them). ForkKnife's **Overview** shows the menu as the
+and Fork Knife's questionnaire writes `FORKKNIFE_ANSWER_KEYS`, carrying the menu through so that renaming a meal
+retags its dishes and dropping a meal drops them). Fork Knife's **Overview** shows the menu as the
 14-day grid and the **meal-prep and cooking tasks** the menu implies, as an import document (version 2) the person
 pastes into *Apply from assistant*, step 2 — so the tasks enter the profile the way everything else does. Rule and
 schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (`tasks`, `mealPlan`),
@@ -56,7 +56,7 @@ schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (
   (`Sunday A`); the second day must be an allowed one (above).
 - `leftoversMeal` — optional: the meal that eats the leftovers when it is not the same meal (name or slug; the
   cross-meal rule above applies).
-- `notes` — optional free text (shown on the ForkKnife list).
+- `notes` — optional free text (shown on the Fork Knife list).
 - `needsPrepped` / `needsCooked` — optional, this **dish's** own answer where it differs from its meal's:
   `false` means this dish needs no prepping / no cooking, so no Prep / Cook task is made for it (the editor's
   *no prep needed* and *no cooking needed* checkboxes); `true` means "as the meal says". Absent or `null` follows
@@ -64,7 +64,7 @@ schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (
   not have — the meal decides whether the step exists and how many minutes it takes, the dish only opts out.
 - `source` and top-level `notes` are optional provenance.
 
-Applying (the Assistant page, step 2 — it recognises `kind: "meal-plan"`; ForkKnife only downloads the template): every item is
+Applying (the Assistant page, step 2 — it recognises `kind: "meal-plan"`; Fork Knife only downloads the template): every item is
 normalised (`{id, meal (slug), dish, days (keys), notes}`), problems are listed one per item and nothing of a
 problematic item lands; valid items **merge by id** into the profile's plan (same id replaces, the rest is kept).
 The profile is re-derived and saved.
@@ -81,24 +81,24 @@ The profile is re-derived and saved.
 - every task `repeats: "every other week from <date>"` where the date is the next calendar date of that day key by
   the person's own seasons (`personDayKeyResolver`), so the app's every-other-week cadence lands it on the right
   A/B week; `category: "meals"`; leftover days get nothing.
-The document (`forkknife_import_document`) is a version-2 import document: `source {kind: "forkknife"}`,
+The document (`fork_knife_import_document`) is a version-2 import document: `source {kind: "fork-knife"}`,
 `commitments: []`, the `tasks`, a readable `review`, and **`mealPlan`** (the menu itself) — applying it on the
 Assistant page adds the tasks (deduped on title + time of day + weekdays, so re-applying is idempotent) and merges
-the menu into the profile's meal plan. ForkKnife shows it with *Copy* / *Download* (`meal-tasks.import.json`)
+the menu into the profile's meal plan. Fork Knife shows it with *Copy* / *Download* (`meal-tasks.import.json`)
 and a link to the Assistant page.
 
 ## What reads the menu
 - **Spoon Feed** (`/forkknife/spoon-feed/`) and **Build** (`/fortknight/build/`) — where it is edited by hand: the
   same editor on both, one section per meal with its coverage, its dishes — each with the *no prep needed* /
   *no cooking needed* checkboxes its meal's steps earn it — and one entry row (dish, first day, leftovers day, *Add*).
-- **ForkKnife's Overview** (`/forkknife/`) — the 14-day menu grid (one line per meal per day, `menuForDay`) and the tasks.
+- **Fork Knife's Overview** (`/forkknife/`) — the 14-day menu grid (one line per meal per day, `menuForDay`) and the tasks.
 - **Day pages** (`/fortknight/days/<dayKey>/`) — the menu line: "Breakfast: Overnight oats · Dinner: Lentil soup
   (leftovers) · Snack: —" (`dayPlan().menu`); the applied tasks show in their blocks (` · task`).
 - **The generator** (`docs/generator.md`, activities): each proposed meal activity is titled with its dish
   (`Dinner: Lentil soup`, `(leftovers)` on the second day); prep and cook are *not* proposed — they are the tasks
-  ForkKnife creates.
+  Fork Knife creates.
 - **The assistant workspace** publishes this document and its schema, so an assistant can draft a menu from the
-  person's meals and preferences (ForkKnife's assistant page hands them the prompt), a recipe list or a shopping
+  person's meals and preferences (Fork Knife's assistant page hands them the prompt), a recipe list or a shopping
   habit, and hand it back as a meal-plan document (applied on either Assistant page, `kind: "meal-plan"`).
 
 ## Not yet

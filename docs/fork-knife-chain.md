@@ -1,4 +1,4 @@
-# ForkKnife: the full chain (design; not built)
+# Fork Knife: the full chain (design; not built)
 
 From a handful of questions to a fortnight that is planned, shopped for, prepped, cooked and already
 on the agenda — the target flow end to end, stage by stage, with what exists today and what is
@@ -12,7 +12,7 @@ missing at each one.
 > (`src/lib/shared/workspace-docs.js`) and must not be added to it.
 
 The concept is small enough to say in a sentence, which is exactly what makes it hard: the thesis is
-in `docs/thesis.md` (ForkKnife — *plan the cooking, not the eating*).
+in `docs/thesis.md` (Fork Knife — *plan the cooking, not the eating*).
 
 ## The chain
 
@@ -29,11 +29,11 @@ and the prep/cooking tasks, and not for recipes, shopping schedule or shopping l
 **Target.** Questions about **location**, meals, **workload** and **time constraints**, alongside the
 preferences already asked.
 
-**Today.** The `meals` section of `data/questionnaire.json` (`face: "forkknife"`) asks ten questions —
+**Today.** The `meals` section of `data/questionnaire.json` (`face: "fork-knife"`) asks ten questions —
 `meals`, `eaters`, `dietaryRules`, `allergiesAndDislikes`, `favouriteCuisines`, `favouriteDishes`,
 `cookingSkill`, `foodBudget`, `kitchenKit`, `shoppingCadence` — with option lists under
 `questionnaire.options` and defaults under `defaultAnswers`. The questionnaire *is* the settings
-(`docs/app.md`); ForkKnife's page writes only `FORKKNIFE_ANSWER_KEYS`.
+(`docs/app.md`); Fork Knife's page writes only `FORKKNIFE_ANSWER_KEYS`.
 
 **Missing.**
 
@@ -42,7 +42,7 @@ preferences already asked.
   seasons already computed per person — what time of year it currently is where you are.
 - **Workload and time constraints.** Do **not** re-ask these. FortKnight already holds the answers:
   the waking window, the person's 2–5 blocks, the weights (`meals` is one of the seven categories,
-  with its own share of the fortnight), the standing appointments and the rest days. ForkKnife should
+  with its own share of the fortnight), the standing appointments and the rest days. Fork Knife should
   *read* them.
 
 **Decisions to make.**
@@ -84,7 +84,7 @@ shapes:
    drafting anything. The person answers in the chat; nothing comes back to the app until the menu
    does. Costs almost nothing to build — a prompt change — and the answers are lost to the app.
 2. **A question document.** The assistant returns a small validated document (`kind:
-   "meal-plan-questions"`), ForkKnife renders it as a form, and the answers are saved to the profile
+   "meal-plan-questions"`), Fork Knife renders it as a form, and the answers are saved to the profile
    and folded into the next prompt. Costs a schema, a classifier branch, a page and a round trip —
    and makes the interview repeatable, inspectable and part of the person's record.
 
@@ -108,7 +108,7 @@ step if the interview turns out to need iteration before it needs machinery.
   on Spoon Feed (`/forkknife/spoon-feed/`) or applied from the assistant.
 - **Prep and cooking tasks** — exist, derived rather than authored: `scripts/fk_core/meal_plan.py` ↔
   `src/lib/shared/meal-plan.js` turn the menu plus each meal's `needsPrepped` / `needsCooked` /
-  `prepMinutes` / `cookMinutes` into the tasks ForkKnife's Overview shows.
+  `prepMinutes` / `cookMinutes` into the tasks Fork Knife's Overview shows.
 
 **Missing.**
 
@@ -134,7 +134,7 @@ step if the interview turns out to need iteration before it needs machinery.
 
 **Target.** All of it on the agenda: cook Tuesday, prep Sunday, shop Saturday morning.
 
-**Today.** The path exists and is the one to reuse. ForkKnife's Overview already emits its prep and
+**Today.** The path exists and is the one to reuse. Fork Knife's Overview already emits its prep and
 cooking tasks as a **version 2 import document** that the person applies on the Assistant page
 (`docs/importers.md`, `data/schema/import.schema.json` — `tasks`, `mealPlan`), which is how food work
 reaches the day pages. `classifyAssistantDocument` routes the document by shape.
@@ -178,8 +178,8 @@ out on a phone before deciding anything; the same question applies to FortKnight
 The source for this document, lightly tidied (shorthand and typos cleaned; wording and meaning
 otherwise untouched):
 
-> ForkKnife is getting fleshed out next. The company, the game studio, and FortKnight all have big
-> future maps, but ForkKnife is a simple concept. Simple but difficult. It will ask the user a series
+> Fork Knife is getting fleshed out next. The company, the game studio, and FortKnight all have big
+> future maps, but Fork Knife is a simple concept. Simple but difficult. It will ask the user a series
 > of questions about location, meals, workload, time constraints etc. that will build docs for an
 > agent to **also** give the user a list of questions to answer before popping out a menu with recipe
 > options, meal prep schedule, cooking schedule, shopping schedule and list. These can be plugged

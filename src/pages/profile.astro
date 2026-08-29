@@ -36,7 +36,7 @@ import "../styles/app-widgets.css";
   <section class="panel">
     <h2>Keep</h2>
     <p class="muted">
-      Your keep — the fortnight exported from the Focus Key app and loaded on the Keep page. It stays on this device only —
+      Your keep — the fortnight exported from the Fortress Key app and loaded on the Keep page. It stays on this device only —
       it was never uploaded and this site holds no copy of it.
     </p>
     <p class="muted" id="seedStatus">Checking…</p>
@@ -173,7 +173,7 @@ import "../styles/app-widgets.css";
     elements.seedActions.hidden = !present;
     elements.seedStatus.textContent = present
       ? `A keep is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
-      : "No keep on this device yet. Export one from Focus Key and load it on the Keep page.";
+      : "No keep on this device yet. Export one from Fortress Key and load it on the Keep page.";
   }
 
   elements.deleteSeedButton.addEventListener("click", () => {

@@ -34,7 +34,7 @@ class WorkspaceDocumentsTests(unittest.TestCase):
         """Publishing a file into a person's own AI workspace is the sensitive act, so the set is
         pinned here: adding anything to WORKSPACE_STATIC_DOCUMENTS fails this test until someone
         blesses it deliberately. docs/ also holds design records — docs/thesis.md, docs/fortress.md
-        and docs/forkknife-chain.md each say at the top that they are not published — and the second
+        and docs/fork-knife-chain.md each say at the top that they are not published — and the second
         assertion names them so the failure message says why when one of them slips in."""
         published = set(run_node(module_import("workspace-docs.js", "WORKSPACE_STATIC_DOCUMENTS") + "process.stdout.write(JSON.stringify(WORKSPACE_STATIC_DOCUMENTS));", {}).values())
         blessed = {
@@ -50,7 +50,7 @@ class WorkspaceDocumentsTests(unittest.TestCase):
             "data/schema/weights.schema.json", "data/schema/user-settings.schema.json",
         }
         self.assertEqual(published, blessed, "the published workspace file set changed: bless the addition here, or take it back out")
-        for design_document in ("docs/thesis.md", "docs/fortress.md", "docs/forkknife-chain.md"):
+        for design_document in ("docs/thesis.md", "docs/fortress.md", "docs/fork-knife-chain.md"):
             self.assertTrue((REPOSITORY_ROOT / design_document).is_file(), f"{design_document} missing")
             self.assertNotIn(design_document, published, f"{design_document} is design, not a shipped contract: it must not be published into anyone's assistant workspace")
 
@@ -133,7 +133,7 @@ class WorkspaceDocumentsTests(unittest.TestCase):
         self.assertIn("exactly one JSON code block", prompt)
         self.assertNotIn("people eat these meals", result["bare"])  # 1 eater is the default and is not stated
         self.assertIn("I shop weekly", result["bare"])
-        self.assertNotIn("Preferences:", result["legacy"])  # a profile from before the ForkKnife questionnaire
+        self.assertNotIn("Preferences:", result["legacy"])  # a profile from before the Fork Knife questionnaire
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")

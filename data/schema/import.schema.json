@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fortknight.local/schema/import.schema.json",
   "title": "FortKnight import document",
-  "description": "What an importer — the person's own assistant reading a calendar, planner photo or export; the future Import page; scripts/build.py for a data set — hands the questionnaire (docs/importers.md). Version 2 is written for the person to read: `commitments` (repeats/start/lasts in words), untimed `tasks`, what was `skipped` and why, and a `review` summary; the app normalizes it on read. Version 1's machine sections (standingAppointments, fixedActivities, blockFocusGrid, appointmentBlocks, blocks, meals) stay valid in either version: the Assistant page merges standing appointments (and version-2 commitments) into the person's commitments (Startup 2), fixedActivities anchor the block split, blockFocusGrid (restricted to the profile's focus blocks) is what FortKnight's Overview shows, tasks land on the day pages; meals is reserved; mealPlan is the ForkKnife menu (docs/meal-plan.md).",
+  "description": "What an importer — the person's own assistant reading a calendar, planner photo or export; the future Import page; scripts/build.py for a data set — hands the questionnaire (docs/importers.md). Version 2 is written for the person to read: `commitments` (repeats/start/lasts in words), untimed `tasks`, what was `skipped` and why, and a `review` summary; the app normalizes it on read. Version 1's machine sections (standingAppointments, fixedActivities, blockFocusGrid, appointmentBlocks, blocks, meals) stay valid in either version: the Assistant page merges standing appointments (and version-2 commitments) into the person's commitments (Startup 2), fixedActivities anchor the block split, blockFocusGrid (restricted to the profile's focus blocks) is what FortKnight's Overview shows, tasks land on the day pages; meals is reserved; mealPlan is the Fork Knife menu (docs/meal-plan.md).",
   "type": "object",
   "properties": {
     "$schema": {
@@ -27,6 +27,7 @@
             "xlsx",
             "ics",
             "google-calendar",
+            "fork-knife",
             "forkknife",
             "other"
           ]
@@ -333,7 +334,7 @@
     },
     "mealPlan": {
       "type": "object",
-      "description": "The fortnight menu (docs/meal-plan.md), as the ForkKnife page writes it into the tasks document it creates: per meal, dishes with the day(s) they are eaten (the second day is leftovers). Applied into the profile's meal plan (merged by id) alongside the tasks.",
+      "description": "The fortnight menu (docs/meal-plan.md), as the Fork Knife page writes it into the tasks document it creates: per meal, dishes with the day(s) they are eaten (the second day is leftovers). Applied into the profile's meal plan (merged by id) alongside the tasks.",
       "properties": {
         "items": {
           "type": "array",

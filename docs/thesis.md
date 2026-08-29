@@ -1,7 +1,7 @@
 # Thesis
 
 What the studio is, how it speaks, and what each thing here argues — the games and the engine,
-FortKnight, ForkKnife, and the company over all three, each with what it refuses to do.
+FortKnight, Fork Knife, and the company over all three, each with what it refuses to do.
 
 This is a positioning document, not a contract. Nothing builds from it and no schema references it —
 but the site copy does, and so should anyone deciding whether a proposed feature belongs. It is also
@@ -15,7 +15,7 @@ refined here first and mirrored outward.
 
 **Be Insiculous is an Artificial Intelligence Development Studio.** That is the banner on `/`, spelled
 out, and it is the frame the games and the planner both sit inside: the engine is co-developed with
-coding agents and serves as a proving ground for them, and FortKnight and ForkKnife are tools an
+coding agents and serves as a proving ground for them, and FortKnight and Fork Knife are tools an
 agent drives. The tagline in the footer of every page says the whole of it in eleven words —
 **"Built with AI, for AI, and the humans in the loop"** — and every clause of that is literal, not
 rhetorical:
@@ -35,7 +35,7 @@ become more professional *literally*, by looking legitimate to people who might 
 manifesto voice.
 
 The **four projects each keep their own bubble of quirk**, and the quirk should be specific to each
-rather than one house style: FortKnight (`/fortknight/`), ForkKnife (its pages are folded into
+rather than one house style: FortKnight (`/fortknight/`), Fork Knife (its pages are folded into
 FortKnight's for now — see its section below), the games
 (`/games/`) and the devlog (`/devlog/`). Everything else — `/`, `/engine/`, `/404`, `/accessibility/`,
 `/profile/`, and the shared header, footer and meta copy — is the studio speaking and takes the
@@ -152,7 +152,7 @@ the device without the person choosing to send it.
 
 ---
 
-## ForkKnife
+## Fork Knife
 
 **Feeding yourself is a scheduling problem wearing a recipe problem's clothes. Plan the cooking, not
 the eating.**
@@ -160,7 +160,7 @@ the eating.**
 ### The claims
 
 - **Nobody's actual problem is inspiration.** Recipe apps solve discovery. The question at six in
-  the evening is *what is already made, and what does tonight cost me*. That is the one ForkKnife
+  the evening is *what is already made, and what does tonight cost me*. That is the one Fork Knife
   answers.
 - **Leftovers are the load-bearing structure.** About eight dishes cover fourteen days because six
   are eaten twice, and the spacing rules encode why it works: the second serving is never the next
@@ -188,7 +188,7 @@ is a chain that starts from questions about where you live, what you eat, and ho
 actually have, hands your own assistant enough context to **interview you back**, and ends with a
 menu, recipe options, a prep schedule, a cooking schedule, a shopping schedule and a shopping list —
 all of it landing in FortKnight's agenda. The stage-by-stage design, and what exists versus what is
-missing at each stage, is in `docs/forkknife-chain.md`.
+missing at each stage, is in `docs/fork-knife-chain.md`.
 
 ### What it refuses
 

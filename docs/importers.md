@@ -93,7 +93,7 @@ example (`build.py --overlay examples/workbook`), a future deterministic `.ics`/
   the questionnaire copies it into the weights for the block keys the profile has (the rest is
   dropped with a warning) — that grid is what FortKnight's Overview shows.
 - `appointmentBlocks` is `{dayKey: blockKey}` — the block each day opens for appointments.
-- `mealPlan` — the ForkKnife menu (`docs/meal-plan.md`): `{items[{meal, dish, days[1–2], notes?}]}`; the tasks document ForkKnife creates carries it next to its prep/cook `tasks`, and Apply merges it into the profile's meal plan.
+- `mealPlan` — the Fork Knife menu (`docs/meal-plan.md`): `{items[{meal, dish, days[1–2], notes?}]}`; the tasks document Fork Knife creates carries it next to its prep/cook `tasks`, and Apply merges it into the profile's meal plan.
 - `meals` is **reserved** for the weights/generator: the shape follows `data/menus/*.json` meals
   (`slot`, `menu`, `days[]` or `dayKey`, `cookExtra`); the questionnaire ignores it, but the day
   pages (`/fortknight/days/<dayKey>/`) list the entries of a day as its menu line, so a person's menus can
@@ -152,7 +152,7 @@ Planned flow, all on-device:
    appointments, with a note explaining each guess.
 3. The reply is validated (same rules as `check_import_document`), shown as a review table
    (done today, read-only: *Apply from assistant* on `/fortknight/assistant/` — built on the parked
-   `fortknightdev` playground branch; ForkKnife's own assistant page went with the `/forkknife/`
+   `fortknightdev` playground branch; Fork Knife's own assistant page went with the `/forkknife/`
    routes — and again under Startup 2 on `/fortknight/questionnaire/`; what landed is listed on `/fortknight/build/`),
    then applied to the saved answers; still open: editing rows in that table before applying.
 `.ics` and `.xlsx` can be parsed without any assistant (deterministic importers under

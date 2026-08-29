@@ -14,7 +14,7 @@ here on 2026-08-18 — one project, one repo, no sync step.)
 achievement store instead of the seed and shows the active profile's unlocked fortnight
 achievements. The studio side gains `/achievements/`, the every-achievement board (below).
 `/fortknight/build/`, `/fortknight/questionnaire/` and `/fortknight/assistant/`
-remain `src/components/FaceInDevelopment.astro` placeholders, and ForkKnife's routes
+remain `src/components/FaceInDevelopment.astro` placeholders, and Fork Knife's routes
 (`/forkknife/*`) were removed from the site on 2026-08-28 — its menu rendering will land under
 `/fortknight/` when the seed carries menu rows. The face branches `fortknightdev` and
 `forknifedev` were re-ruled the back-burnered creation chain's playgrounds on 2026-08-28 — never
@@ -25,7 +25,7 @@ applies again if the chain returns from the back burner.
 ## The seed-fed pages: Overview, Keep and the day pages
 
 The live face routes are neither placeholders nor built from a profile. They render a **Keep
-seed**: a small file the private **Focus Key** phone app exports
+seed**: a small file the private **Fortress Key** phone app exports
 (`focuskey/src/lib/keep.js`), carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
 
@@ -51,13 +51,13 @@ live in the spec and are not restated here.
   uploaded**. It is stored under its own key, separate from the profile, so neither document can
   migrate into the other.
 - **The pages resolve nothing.** The seed arrives pre-joined by day key. This is deliberate rather
-  than lazy: Focus Key anchors every season on `sun-a` and has transition weeks, while
+  than lazy: Fortress Key anchors every season on `sun-a` and has transition weeks, while
   `fk_core/dates.py` and `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b`
   starts for Ostara and Fimbulsumar — so **running this repository's date evaluator over a Keep
   seed would be wrong for half the year.** `src/lib/keep.js` validates and the pages draw.
 - **Validation is tolerant within a major version.** Unknown fields are ignored and only a *higher*
   `meta.version` is refused, because the two halves ship on different cadences and the person holding
-  the phone cannot redeploy the website. Focus Key's side of that bargain: the version bumps only for
+  the phone cannot redeploy the website. Fortress Key's side of that bargain: the version bumps only for
   a breaking change, so adding a field is not a bump.
 - **A keep is somebody's real schedule and must never be committed here.**
   `scripts/fk_core/no_schedules.py` enforces it, `validate.py` runs it, and the exact-path
@@ -91,16 +91,16 @@ Multi-page, no UI framework. `npm install` once, then:
 - **One face live, one profile** (`src/lib/faces.js`, `FaceLayout.astro`): **FortKnight** under `/fortknight/`
   (🏰🛡️: the fortnight schedule) is the live face, with the six-page menu **Overview · Keep ·
   Achievements · Build · Questionnaire · Assistant** — Achievements boarding the active profile's
-  unlocked fortnight achievements. **ForkKnife** under `/forkknife/` (🍴: the fortnight menu) had its routes removed on
+  unlocked fortnight achievements. **Fork Knife** under `/forkknife/` (🍴: the fortnight menu) had its routes removed on
   2026-08-28, and everything about it in this bullet — and the profile-driven FortKnight pages in the next two —
   is the parked creation chain's design, kept here as its contract. That design gave each face the same
   four-page menu **Overview · <its building page> · Questionnaire · Assistant**, where the building page is the one
-  that adds things by hand and is named for its face — ForkKnife's **Spoon Feed** (`/forkknife/spoon-feed/`) and
+  that adds things by hand and is named for its face — Fork Knife's **Spoon Feed** (`/forkknife/spoon-feed/`) and
   FortKnight's **Build** (`/fortknight/build/`), both declared as `FACES[face].build` in `src/lib/faces.js` and
   assembled by `faceNav()`; the shared **Profile** page at `/profile/`. `/` is the
   Be Insiculous studio home, not a face. The header's switcher sits left of the brand: the **studio button** (💧,
   `STUDIO.logo` in `src/lib/faces.js`) back out to the studio site. Every page takes a
-  `face` prop (`fortknight` | `forkknife` | null on Profile), and the face decides the page's skin and tab icon
+  `face` prop (`fortknight` | `fork-knife` | null on Profile), and the face decides the page's skin and tab icon
   (`FACES[face].theme` / `.favicon`) — so the face and the studio read as two different websites. Profile
   belongs to neither, so it takes the studio's: `DEFAULT_THEME` is a third theme id, `studio`, whose skin lives
   in the site's own `src/styles/studio-skin.css` (`themes.css` is mirrored from this repo and knows only the one
@@ -110,7 +110,7 @@ Multi-page, no UI framework. `npm install` once, then:
   each face's questionnaire is its settings, and each of the four writing pages saves only its own answer keys over
   the profile *as stored at save time* (`pickAnswers` in `weights-rules.js` over the key sets named in the site's
   `src/lib/answer-keys.js`: Spoon Feed owns `mealPlan`, Build owns `mealPlan` + `standingAppointments` + `tasks`,
-  ForkKnife's questionnaire owns `FORKKNIFE_ANSWER_KEYS`, FortKnight's owns the rest), so none wipes another's,
+  Fork Knife's questionnaire owns `FORKKNIFE_ANSWER_KEYS`, FortKnight's owns the rest), so none wipes another's,
   whatever tab or page saved last. Once a profile is saved on the device the top right shows the **profile dropdown** (every saved
   profile, the active unsaved one marked, and *New profile…*: switching makes that profile active and reloads the
   page, *New profile…* prompts for a name and opens the current face's Questionnaire — `data-questionnaire-href`;
@@ -139,7 +139,7 @@ Multi-page, no UI framework. `npm install` once, then:
   appointment block, the generator's proposed activities for that day (`docs/generator.md`, generated live for
   the person's own grid — or the proposed grid when they have none, the note says which — listed with a
   ` · proposed` suffix; *Show proposed activities* hides them for the session), the imported fixed activities of that day key (placed by their `block`, else by
-  start time, else listed "outside your blocks"), the standing appointments landing on it, the ForkKnife menu line
+  start time, else listed "outside your blocks"), the standing appointments landing on it, the Fork Knife menu line
   and the menu line from the import's `meals`; "no import applied yet" otherwise), `/fortknight/questionnaire/` — **the questionnaire is the answers**:
   the form rendered from `bundle.questionnaire` — the sections without a `face` (Startup, Your day and year,
   Your week, Focus, About you; typical-person defaults, one collapsible row per
@@ -154,7 +154,7 @@ Multi-page, no UI framework. `npm install` once, then:
   resolver, not the questionnaire's derivation; Save derives the active profile's weights file
   (`settings.weightsProfiles[activeWeightsId]`), Download gives `weights.<id>.json`, Reset touches only this page's
   answers; `/fortknight/assistant/` — *Apply from assistant* in two steps — 1: get the JSON from your assistant (the
-  spreadsheet guide + a copyable prompt), 2: `components/ApplyFromAssistant.astro` (shared with ForkKnife's assistant
+  spreadsheet guide + a copyable prompt), 2: `components/ApplyFromAssistant.astro` (shared with Fork Knife's assistant
   page: paste it and Apply — an import document, a meal-plan document, a weights or a settings file — then read the
   review; the component fetches the bundle itself, `data-face` picks its links) — the component is deleted on `main`
   with the rest of the chain and now lives only on the parked `fortknightdev`/`forknifedev` playground branches; `/fortknight/build/` — **Build**, the
@@ -162,7 +162,7 @@ Multi-page, no UI framework. `npm install` once, then:
   on the day pages (one entry row each, *Add* commits it into a compact read-only list, *Edit* only reveals remove),
   and the same fortnight-menu editor Spoon Feed carries. Save writes `standingAppointments`, `tasks` and `mealPlan`
   over the stored profile and re-derives, which is what turns the commitments back into `blockSplit.anchors`.
-- ForkKnife pages (the parked design — these routes are removed from the live site) (`docs/meal-plan.md`): `/forkknife/` **Overview** — the fortnight menu as the 14-day grid
+- Fork Knife pages (the parked design — these routes are removed from the live site) (`docs/meal-plan.md`): `/forkknife/` **Overview** — the fortnight menu as the 14-day grid
   (`components/MenuDayCard.astro`: one line per meal per day from `menuForDay`, leftovers marked, rotated to the
   person's week start; each card links to the FortKnight day page), the coverage per meal, and **the meal-prep and
   cooking tasks** the menu implies as an import document (Copy / Download; every other week from the next date of each day)
@@ -174,8 +174,8 @@ Multi-page, no UI framework. `npm install` once, then:
   `components/MealPlanEditor.astro`, which FortKnight's Build page renders too — both deleted on
   `main` with the rest of the chain and now living only on the parked `fortknightdev`/`forknifedev`
   playground branches; Save writes only `mealPlan`.
-  `/forkknife/questionnaire/` — **ForkKnife's questionnaire is its settings**:
-  the `face: "forkknife"` section of `bundle.questionnaire` (the meals question — names, when each is eaten (1–2 times
+  `/forkknife/questionnaire/` — **Fork Knife's questionnaire is its settings**:
+  the `face: "fork-knife"` section of `bundle.questionnaire` (the meals question — names, when each is eaten (1–2 times
   of day), prepping/cooking + minutes — and the meal preferences: eaters, dietary rules, allergies and dislikes,
   cuisines, favourite dishes, cooking skill, budget, kitchen kit, shopping cadence). The menu is Spoon Feed's, but
   this page still carries it: renaming a meal retags its dishes and lowering the meal count drops the dropped meal's

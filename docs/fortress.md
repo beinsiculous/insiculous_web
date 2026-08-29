@@ -105,7 +105,7 @@ and **nothing is published from a fort without a person choosing to publish it**
   and no roles — the degenerate case that already works, and the thing a real fort must stay
   compatible with.
 - The two faces already share one profile, so a fort's members each having a FortKnight and a
-  ForkKnife view falls out of the existing structure rather than needing a third face.
+  Fork Knife view falls out of the existing structure rather than needing a third face.
 
 ## Open questions
 
@@ -143,5 +143,5 @@ against:
 > current AI flow. I know Claude already has Cowork, so I thought the flagship might have to be
 > Cowork-centred.
 
-The Cowork question is a delivery question shared with ForkKnife and is tracked in
-`docs/forkknife-chain.md`, where the same flow already exists to be improved.
+The Cowork question is a delivery question shared with Fork Knife and is tracked in
+`docs/fork-knife-chain.md`, where the same flow already exists to be improved.

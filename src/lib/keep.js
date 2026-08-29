@@ -1,14 +1,15 @@
 // Is this a keep this page can render?
 //
-// The file is exported by the Focus Key app and picked by the person who owns it. It is the only document this
+// The file is exported by the Fortress Key app and picked by the person who owns it. It is the only document this
 // site reads that carries somebody's real schedule, so the rules here are about being useful rather than
 // being strict: what a page can draw, it draws.
 //
 // TOLERANT WITHIN A MAJOR VERSION, on purpose. The two halves of this feature ship on different cadences —
-// Focus Key at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
+// Fortress Key at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
 // the website. So an unknown field is ignored rather than refused, and `version` is refused only when it is
-// higher than this page understands. Focus Key's side of that bargain is in src/lib/keep.js: the version
-// bumps only for a breaking change.
+// higher than this page understands. Fortress Key's side of that bargain is in the phone app's own
+// src/lib/keep.js: the version bumps only for a breaking change. (This line used to say "in
+// src/lib/keep.js" while pointing at itself — it means the app's file, not this one.)
 //
 // Reasons are written for a person standing at a television, not for a log.
 
@@ -31,7 +32,7 @@ export function validateKeep(candidate) {
   if (!meta || typeof meta !== "object" || meta.format !== "keep") {
     // The likeliest wrong file by far is a whole keep_seed.json, which is the app's own data and far bigger.
     const hint = candidate.calendar && candidate.tasks
-      ? " That looks like Focus Key's own seed — Keep needs the smaller file the app exports for the web."
+      ? " That looks like Fortress Key's own seed — Keep needs the smaller file the app exports for the web."
       : "";
     return { ok: false, reason: `That file is not a keep.${hint}` };
   }

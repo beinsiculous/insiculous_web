@@ -413,7 +413,7 @@
     },
     "mealPlan": {
       "type": "object",
-      "description": "The fortnight menu built on the ForkKnife page or applied from a meal-plan document (docs/meal-plan.md): per meal, dishes with the day(s) they are eaten (the second day is leftovers).",
+      "description": "The fortnight menu built on the Fork Knife page or applied from a meal-plan document (docs/meal-plan.md): per meal, dishes with the day(s) they are eaten (the second day is leftovers).",
       "properties": {
         "items": {
           "type": "array",
@@ -1072,7 +1072,7 @@
         },
         "activities": {
           "type": "array",
-          "description": "Activities the generator proposes inside the proposed grid's cells (docs/generator.md): subject sessions sized from the Focus-1 hours, one daily activity per practice, one per meal at its slot (titled with the ForkKnife menu's dish; the menu's prep and cook tasks arrive as tasks, not proposals). Absent on files derived before the activities half shipped; the app regenerates them live.",
+          "description": "Activities the generator proposes inside the proposed grid's cells (docs/generator.md): subject sessions sized from the Focus-1 hours, one daily activity per practice, one per meal at its slot (titled with the Fork Knife menu's dish; the menu's prep and cook tasks arrive as tasks, not proposals). Absent on files derived before the activities half shipped; the app regenerates them live.",
           "items": {
             "type": "object",
             "properties": {

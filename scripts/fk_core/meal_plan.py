@@ -178,7 +178,12 @@ def menu_for_day(plan, meals, day_key):
 # The meal slot ids (questionnaire.options.mealSlots) as the tasks' time-of-day words (import_document.TIME_OF_DAY_WORDS).
 SLOT_TIME_OF_DAY = {"early-morning": "morning", "mid-morning": "morning", "afternoon": "afternoon", "evening": "evening", "late-evening": "night", "anytime": "anytime"}
 PREP_TIME_OF_DAY = "evening"
-FORKKNIFE_SOURCE_KIND = "forkknife"
+# What Fork Knife writes into an import document's `source.kind`. Renamed from "forkknife" on
+# 2026-08-29 with the rest of the naming sweep. The schema still ACCEPTS the old value, because the
+# file set that documents it is downloaded into a person's own AI workspace by hand and never
+# re-syncs — an assistant working from a copy taken before the rename goes on emitting the old
+# string indefinitely. We write the new one; we refuse neither.
+FORK_KNIFE_SOURCE_KIND = "fork-knife"
 
 
 def previous_day_key(day_key):
@@ -223,12 +228,12 @@ def tasks_from_meal_plan(plan, meals, dates_by_day_key):
     return tasks, review
 
 
-def forkknife_import_document(plan, meals, dates_by_day_key, description="Meal prep and cooking tasks from the fortnight menu"):
+def fork_knife_import_document(plan, meals, dates_by_day_key, description="Meal prep and cooking tasks from the fortnight menu"):
     """The whole import document (version 2) the menu editor creates: the tasks, a readable review, and the menu itself."""
     tasks, review = tasks_from_meal_plan(plan, meals, dates_by_day_key)
     return {
         "schemaVersion": 2,
-        "source": {"kind": FORKKNIFE_SOURCE_KIND, "description": description},
+        "source": {"kind": FORK_KNIFE_SOURCE_KIND, "description": description},
         "commitments": [],
         "tasks": tasks,
         "skipped": [],

@@ -354,7 +354,7 @@
     },
     "options": {
       "type": "object",
-      "description": "Option lists the form renders from. The six meal-preference lists (dietaryRules … shoppingCadences) belong to ForkKnife's questionnaire section.",
+      "description": "Option lists the form renders from. The six meal-preference lists (dietaryRules … shoppingCadences) belong to Fork Knife's questionnaire section.",
       "properties": {
         "mealSlots": {
           "type": "array",
@@ -1238,9 +1238,9 @@
             "type": "string",
             "enum": [
               "fortknight",
-              "forkknife"
+              "fork-knife"
             ],
-            "description": "Which questionnaire page renders the section: FortKnight's (default) or ForkKnife's."
+            "description": "Which questionnaire page renders the section: FortKnight's (default) or Fork Knife's."
           },
           "intro": {
             "type": "string"

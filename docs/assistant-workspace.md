@@ -10,8 +10,8 @@ The contract lives in one pure module, `src/lib/shared/workspace-docs.js` (no
 DOM, no fetch), so tests, the `/profile/` page and future native clients (iOS/Android) all produce
 the same set. The same module holds the two prompts the app hands the person: `SPREADSHEET_PROMPT`
 (FortKnight's assistant page, with `import-from-spreadsheet.md` and their spreadsheet) and
-`mealPlanPrompt({meals, answers, questionnaire})` (ForkKnife's assistant page: the person's meals — times of
-day, prep/cook minutes — and every answered meal preference from ForkKnife's questionnaire, option labels
+`mealPlanPrompt({meals, answers, questionnaire})` (Fork Knife's assistant page: the person's meals — times of
+day, prep/cook minutes — and every answered meal preference from Fork Knife's questionnaire, option labels
 rather than ids, free text quoted on its own line with code fences stripped and capped, blanks left out —
 asking for a meal-plan document, `meal-plan.md`). `tests/test_workspace_docs.py` pins it.
 
@@ -21,7 +21,7 @@ asking for a meal-plan document, `meal-plan.md`). `tests/test_workspace_docs.py`
 | `README.md` | app | header (generated date, file index, note when no weights are saved yet) + `docs/llm-guide.md` verbatim — how to help and **how to reply** |
 | `domain.md`, `data-model.md`, `weights.md`, `questionnaire.md`, `generator.md`, `importers.md` | copied from `docs/` | vocabulary, every field, the weights / questionnaire / generator / import contracts |
 | `import-from-spreadsheet.md` | copied from `docs/` | the spreadsheet → import-document method; in the app its row sits under *Apply from assistant*, step 1 (with a copyable prompt), so it can be handed to an assistant on its own together with the spreadsheet |
-| `meal-plan.md` | copied from `docs/` | the fortnight menu: the meal-plan document (dishes per meal and the days they are eaten) and how ForkKnife turns it into prep/cooking tasks |
+| `meal-plan.md` | copied from `docs/` | the fortnight menu: the meal-plan document (dishes per meal and the days they are eaten) and how Fork Knife turns it into prep/cooking tasks |
 | `import.schema.json`, `meal-plan.schema.json`, `weights.schema.json`, `user-settings.schema.json` | copied from `data/schema/` | what the assistant's replies must validate against |
 | `fortknight-data.json` | app | `build/fortknight.bundle.json` minus `questionnaire` (the form definition), plus `upcomingDates` |
 | `fortknight-user-settings.json` | app | the device's settings file (`docs/app.md`): every saved profile under `weightsProfiles` (answers inside each `questionnaire.answers`) and `activeWeightsId` |
@@ -44,20 +44,20 @@ of one of four kinds (`docs/llm-guide.md` → "Replying from an assistant worksp
 |---|---|---|
 | weights file | numeric `cycleLengthDays` + string `source` + `categories` | its `questionnaire.answers` replace the device's answers; the app **re-derives** the weights on device (`weightsFromAnswers`) — assistant-computed shares are never trusted, editing shares alone changes nothing |
 | import document | an integer `schemaVersion` (2 today; 1 still read) + `source.kind` (`docs/importers.md`) | its readable commitments (and any `standingAppointments`) and tasks merge into the current answers (deduplicated on title + start/time of day + weekdays; unreadable or invalid ones reported and left out); the document is kept as `startup.import` so its fixed activities anchor the block split and its block focus grid shows on `/`; weights re-derived; a review of what landed is shown |
-| meal-plan document | `kind: "meal-plan"` + `items` | its items are normalised against the profile's meals and merged into the meal plan (ForkKnife's Overview and the day pages show it); the profile is re-derived — the reply to `mealPlanPrompt` |
+| meal-plan document | `kind: "meal-plan"` + `items` | its items are normalised against the profile's meals and merged into the meal plan (Fork Knife's Overview and the day pages show it); the profile is re-derived — the reply to `mealPlanPrompt` |
 | user-settings file | integer `schemaVersion`, no `source` | migrated to the current shape; if it carries answers the weights are re-derived, otherwise only the device extras change and the current weights stay |
 `classifyAssistantDocument()` decides; `mergeImportedAppointments()` / `answersProblem()` /
 `userWeightsFromAnswers()` in `src/lib/shared/weights-rules.js` do the applying (mirrors of
 `fk_core.validate.check_standing_appointment` and friends).
 
 ## The pages (`/profile/` on the live site; `/fortknight/assistant/` and `/forkknife/assistant/` in the parked creation chain's design)
-- **Workspace files** (Profile page — shared by FortKnight and ForkKnife — once a profile is saved) — one row per file (name, size, Copy, Download) and *Download all* (fires the
+- **Workspace files** (Profile page — shared by FortKnight and Fork Knife — once a profile is saved) — one row per file (name, size, Copy, Download) and *Download all* (fires the
   downloads ~300 ms apart; browsers may ask once to allow multiple downloads, Safari may take only
   the first — Copy is the fallback). No zip: workspaces take individual files.
 - **Apply from assistant** (the parked creation chain's design: both assistant pages answer with a
   `FaceInDevelopment` placeholder on `main`, and step 2's shared component, `ApplyFromAssistant.astro`,
   is deleted there — it lives only on the parked `fortknightdev`/`forknifedev` playground branches.
-  In that design step 1 differs — FortKnight hands out the spreadsheet prompt + guide, ForkKnife the
+  In that design step 1 differs — FortKnight hands out the spreadsheet prompt + guide, Fork Knife the
   menu prompt + `meal-plan.md` + template — and step 2 is one shared component accepting any of the
   four kinds on either page) — paste or upload the JSON, *Apply*; the status line says what happened
   (including skipped appointments and why). A weights file goes to the profile of its `id` (updated,

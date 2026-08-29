@@ -25,7 +25,8 @@ folded roadmap in the working set carries the ruling). Seed-fed replacements are
 `main` lineage.
 
 **Fort Knight is planned in the working set, not here.** The apps, the phone app **Fortress Key**
-(Keep until 2026-08-27, then Focus Key), and the seed that joins them are one system with one plan:
+(Keep until 2026-08-27, Focus Key until 2026-08-28, now Fortress Key), and the seed that joins
+them are one system with one plan:
 `insiculous/docs/roadmap-fortnight-apps.md` in the admin repo. That file was folded together on
 2026-08-27, **re-ordered around the seed** — responding to the schedule that exists comes before
 authoring new ones — and on 2026-08-28 given a project spine.
@@ -52,7 +53,7 @@ What that means for the items this file used to number 1–9:
 - **Item 8, Forts and the Fortress** — no longer part of that queue. It was never seed-creation work,
   and it is planned separately in the working set. `docs/fortress.md` is unchanged and still says at
   its head that none of it exists.
-- **Item 3, ForkKnife's full chain** (`docs/forkknife-chain.md`) — **no longer "the next thing being
+- **Item 3, Fork Knife's full chain** (`docs/fork-knife-chain.md`) — **no longer "the next thing being
   built."** Its stage 3 does not exist at all, and it authors a menu from nothing while a real menu
   sits unread in the seed. What comes first is carrying the workbook's menu across in the Keep
   seed and rendering it under `/fortknight/` — the `/forkknife/` routes that design assumed are
@@ -104,7 +105,7 @@ What that means for the items this file used to number 1–9:
   between the app and their AI workspace, which is awkward on a phone. Claude's Cowork is a candidate
   answer and a Cowork-centred flagship is one option on the table — weighed against the
   bring-your-own-model position in `docs/thesis.md`, since it would tie the flow to one vendor.
-  Nothing is designed around it. See `docs/forkknife-chain.md` (Delivery) and `docs/fortress.md`.
+  Nothing is designed around it. See `docs/fork-knife-chain.md` (Delivery) and `docs/fortress.md`.
 
 ## The game studio (tracked in its own repositories)
 

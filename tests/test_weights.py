@@ -497,7 +497,7 @@ class RhythmAndAppointmentTests(unittest.TestCase):
     def test_meal_preferences_pass_through_and_missing_ones_mean_the_default(self):
         answers = load_fixture()
         for key in ("eaters", "dietaryRules", "cookingSkill", "kitchenKit"):
-            self.assertNotIn(key, answers, "the fixture predates the ForkKnife questionnaire")
+            self.assertNotIn(key, answers, "the fixture predates the Fork Knife questionnaire")
         weights = derive(answers)  # a pre-release answers file still derives
         self.assertNotIn("cookingSkill", weights["questionnaire"]["answers"])
         defaults = default_answers(DATA["questionnaire"], DATA["categories"])

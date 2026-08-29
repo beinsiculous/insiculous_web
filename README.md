@@ -21,7 +21,7 @@ deliberately read as two different websites:
 
 The planner is data-first — JSON files are the source of truth, Markdown docs are the assistant's
 context, and light Python scripts stand in for a backend. The on-device profile at `/profile/` is
-live. Users bring their own AI provider; nothing is stored server-side. **ForkKnife**, the second
+live. Users bring their own AI provider; nothing is stored server-side. **Fork Knife**, the second
 face (the fortnight menu), was removed from the live site on 2026-08-28; its chain stays as design
 documents under `docs/`, and its menu views will land under `/fortknight/` when the seed carries
 menu rows. See `CLAUDE.md` for the map and `docs/` for the contracts.
@@ -256,7 +256,7 @@ alongside the achievements boards (the studio's `/achievements/` and the face's
 `/fortknight/build|questionnaire|assistant/` remain
 `src/components/FaceInDevelopment.astro` placeholders, kept as files so the parked branches' edits
 could still merge as ordinary content merges rather than one modify/delete conflict per route.
-ForkKnife's routes (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu
+Fork Knife's routes (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu
 rendering will land under `/fortknight/` when the keep carries menu rows.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):

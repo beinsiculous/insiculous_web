@@ -103,10 +103,10 @@ timing: null | {estimatedStart, estimatedEnd, durationMinutes}, minutes, reason,
    (15), priority 2, reason `daily practice`. Rest days included (a daily habit).
 2. **Meals** (`weights.meals`, Day and year): per day and meal, the first slot whose `mealSlotTimes` clock falls in a
    focus block (`block_key_for_time`, wrap-midnight aware) — a timed activity of `mealMinutes` (30), priority 2,
-   categories `[meals]`, reason `meal slot <slot>`, titled `<Meal>: <dish>` when the ForkKnife menu (`weights.mealPlan`,
+   categories `[meals]`, reason `meal slot <slot>`, titled `<Meal>: <dish>` when the Fork Knife menu (`weights.mealPlan`,
    `docs/meal-plan.md`) has a dish for that meal and day (`(leftovers)` on the second day); a meal none of whose
    slots lands in a focus block (or only `anytime`) is warned about once, not placed. The menu's prep and cook
-   tasks are not proposed here — ForkKnife creates them as tasks.
+   tasks are not proposed here — Fork Knife creates them as tasks.
 3. **Targets**: `usable = Σ capacity of non-rest cells` after 1–2; per category `share × usable`, split among its
    non-peripheral subjects (categories.json order) by their range midpoints, rounded to the session grid
    (`sessionGridMinutes` 15). Sizing to the *usable* minutes (rather than to `minutesPerCycle`) keeps the targets

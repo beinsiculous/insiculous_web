@@ -4,7 +4,7 @@
 no rule that exists twice. It is driven through node the same way the twins are, which is what keeps it
 tested at all: tsconfig.json excludes `src/lib` from `astro check`, so these tests are its only safety net.
 
-The two that matter most are the tolerance pair. Focus Key and this website ship on different cadences, and the
+The two that matter most are the tolerance pair. Fortress Key and this website ship on different cadences, and the
 person holding the phone cannot redeploy the site — so an unknown field must not be refused, and a seed
 from a newer format must be refused with a message that names the real remedy.
 """
@@ -60,7 +60,7 @@ class ValidateKeepTests(unittest.TestCase):
         self.assertEqual(self.validate([OTHER_HOUSEHOLD_FIXTURE]), [{"ok": True}])
 
     def test_it_accepts_an_additive_version_carrying_fields_it_does_not_know(self):
-        """The tolerance the two release cadences depend on: Focus Key can add a field and the deployed page
+        """The tolerance the two release cadences depend on: Fortress Key can add a field and the deployed page
         keeps working, because a bump is reserved for a breaking change."""
         newer = json.loads(json.dumps(FIXTURE))
         newer["meta"]["somethingNew"] = "added later"
@@ -83,7 +83,7 @@ class ValidateKeepTests(unittest.TestCase):
         """The likeliest wrong file: the app's full seed rather than the small one it exports for the web."""
         [result] = self.validate([{"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": []}])
         self.assertFalse(result["ok"])
-        self.assertIn("Focus Key's own seed", result["reason"])
+        self.assertIn("Fortress Key's own seed", result["reason"])
 
     def test_a_fortknight_profile_is_refused(self):
         [result] = self.validate([{"schemaVersion": 2, "activeWeightsId": "x", "weightsProfiles": {}}])
@@ -488,8 +488,24 @@ class KeepSchemaTests(unittest.TestCase):
         self.assertTrue(report.ok, f"the spec's own example does not match the schema: {report.render()}")
 
 
-@unittest.skipUnless((REPOSITORY_ROOT.parent / "focuskey" / "seed" / "keep.schema.json").is_file(),
-                     "focuskey is not cloned beside this repository")
+#: The private app repo, which is being renamed focuskey -> fortresskey (2026-08-29). BOTH names are
+#: accepted for one transition cycle: this repository reaches production through its own m -> dev gate,
+#: so it cannot land in the same commit as the rename, and without tolerance one machine or the other
+#: is red until every clone has moved. The old name is dropped in a follow-up once they all have.
+APP_REPOSITORY_NAMES = ("fortresskey", "focuskey")
+
+
+def app_schema_copy():
+    """The keep schema's copy in the app repo, under whichever name that repo currently has here."""
+    for name in APP_REPOSITORY_NAMES:
+        candidate = REPOSITORY_ROOT.parent / name / "seed" / "keep.schema.json"
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+@unittest.skipUnless(app_schema_copy() is not None,
+                     "the app repository is not cloned beside this one")
 class SchemaCopyParityTests(unittest.TestCase):
     """The schema is copied into the private app repo so a standalone clone of it keeps a drift check.
     Copies that nothing compares drift, and this organisation has already proved it — so the byte
@@ -498,8 +514,8 @@ class SchemaCopyParityTests(unittest.TestCase):
     """
 
     def test_the_copy_is_byte_identical(self):
+        copy = app_schema_copy()
         canonical = (REPOSITORY_ROOT / "data" / "schema" / "keep.schema.json").read_bytes()
-        copy = (REPOSITORY_ROOT.parent / "focuskey" / "seed" / "keep.schema.json").read_bytes()
-        self.assertEqual(canonical, copy,
-                         "the keep schema and its copy in focuskey have drifted; see "
-                         "scripts/check-keep-format.sh in the working set")
+        self.assertEqual(canonical, copy.read_bytes(),
+                         f"the keep schema and its copy in {copy.parent.parent.name} have drifted; "
+                         "see scripts/check-keep-format.sh in the working set")

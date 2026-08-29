@@ -1,4 +1,4 @@
-"""The meal plan (ForkKnife): rules, normalisation of a meal-plan document, coverage, menus, and Python/JavaScript parity."""
+"""The meal plan (Fork Knife): rules, normalisation of a meal-plan document, coverage, menus, and Python/JavaScript parity."""
 import json
 import re
 import shutil
@@ -7,7 +7,7 @@ import unittest
 from tests.helpers import DATA, REPOSITORY_ROOT, STDIN_PRELUDE, module_import, run_node
 
 from fk_core import keys
-from fk_core.meal_plan import allowed_second_days, can_take_leftovers, coverage, day_key_from_text, day_label, forkknife_import_document, meal_plan_problem, meal_slug, menu_for_day, merge_meal_plan, normalize_meal_plan, retag_meal_plan, tasks_from_meal_plan
+from fk_core.meal_plan import allowed_second_days, can_take_leftovers, coverage, day_key_from_text, day_label, fork_knife_import_document, meal_plan_problem, meal_slug, menu_for_day, merge_meal_plan, normalize_meal_plan, retag_meal_plan, tasks_from_meal_plan
 from fk_core.validate import ValidationReport, check_against_schema_file, check_import_document, check_weights_references
 from fk_core.weights import default_answers, weights_from_answers
 
@@ -120,13 +120,13 @@ class RuleTests(unittest.TestCase):
         opted_in_tasks, _ = tasks_from_meal_plan(opted_in_normalized, MEALS, DATES)
         self.assertEqual([task["title"] for task in opted_in_tasks], ["Prep Oats (Breakfast)"])  # Breakfast never cooks
 
-    def test_the_opt_out_survives_the_forkknife_document_round_trip(self):
-        """The document ForkKnife writes carries the overrides, so re-applying it does not resurrect the tasks."""
+    def test_the_opt_out_survives_the_fork_knife_document_round_trip(self):
+        """The document Fork Knife writes carries the overrides, so re-applying it does not resurrect the tasks."""
         document = {"schemaVersion": 1, "kind": "meal-plan", "items": [
             {"meal": "Dinner", "dish": "Crackers", "days": ["wed-b"], "needsPrepped": False, "needsCooked": False},
         ]}
         normalized, _ = normalize_meal_plan(document, MEALS)
-        written = forkknife_import_document(normalized, MEALS, DATES)
+        written = fork_knife_import_document(normalized, MEALS, DATES)
         self.assertEqual(written["tasks"], [])
         self.assertEqual(written["mealPlan"]["items"][0]["needsPrepped"], False)
         self.assertEqual(written["mealPlan"]["items"][0]["needsCooked"], False)
@@ -136,10 +136,10 @@ class RuleTests(unittest.TestCase):
         again, _ = normalize_meal_plan(written["mealPlan"], MEALS)
         self.assertEqual(tasks_from_meal_plan(again, MEALS, DATES), ([], []))
 
-    def test_the_forkknife_document_is_a_valid_import_document(self):
+    def test_the_fork_knife_document_is_a_valid_import_document(self):
         normalized, _ = normalize_meal_plan(DOCUMENT, MEALS)
-        document = forkknife_import_document(normalized, MEALS, DATES)
-        self.assertEqual((document["schemaVersion"], document["source"]["kind"], len(document["tasks"]), len(document["mealPlan"]["items"])), (2, "forkknife", 5, 3))
+        document = fork_knife_import_document(normalized, MEALS, DATES)
+        self.assertEqual((document["schemaVersion"], document["source"]["kind"], len(document["tasks"]), len(document["mealPlan"]["items"])), (2, "fork-knife", 5, 3))
         report = ValidationReport()
         check_import_document(document, set(keys.CATEGORY_KEY_ORDER), report, DATA["categories"])
         self.assertTrue(report.ok, report.render())
@@ -247,22 +247,22 @@ class JavaScriptParityTests(unittest.TestCase):
         self.assertEqual(javascript["merged"], merge_meal_plan(normalized["items"], extra))
         self.assertEqual(javascript["problem"], meal_plan_problem(normalized, [{"name": "Breakfast"}]))
 
-    def test_tasks_and_the_forkknife_document_match(self):
-        script = module_import("meal-plan.js", "normalizeMealPlan", "tasksFromMealPlan", "forkknifeImportDocument") + STDIN_PRELUDE + """
+    def test_tasks_and_the_fork_knife_document_match(self):
+        script = module_import("meal-plan.js", "normalizeMealPlan", "tasksFromMealPlan", "forkKnifeImportDocument") + STDIN_PRELUDE + """
             const { normalized } = normalizeMealPlan(inputs.document, inputs.meals);
-            process.stdout.write(JSON.stringify({ tasks: tasksFromMealPlan(normalized, inputs.meals, inputs.dates), document: forkknifeImportDocument(normalized, inputs.meals, inputs.dates) }));"""
+            process.stdout.write(JSON.stringify({ tasks: tasksFromMealPlan(normalized, inputs.meals, inputs.dates), document: forkKnifeImportDocument(normalized, inputs.meals, inputs.dates) }));"""
         javascript = run_node(script, {"document": DOCUMENT, "meals": MEALS, "dates": DATES})
         normalized, _ = normalize_meal_plan(DOCUMENT, MEALS)
         tasks, review = tasks_from_meal_plan(normalized, MEALS, DATES)
         self.assertEqual(javascript["tasks"], {"tasks": tasks, "review": review})
-        self.assertEqual(javascript["document"], forkknife_import_document(normalized, MEALS, DATES))
+        self.assertEqual(javascript["document"], fork_knife_import_document(normalized, MEALS, DATES))
 
     def test_apply_import_document_merges_the_menu(self):
-        script = module_import("weights-rules.js", "applyImportDocument", "defaultAnswers") + module_import("meal-plan.js", "normalizeMealPlan", "forkknifeImportDocument") + STDIN_PRELUDE + """
+        script = module_import("weights-rules.js", "applyImportDocument", "defaultAnswers") + module_import("meal-plan.js", "normalizeMealPlan", "forkKnifeImportDocument") + STDIN_PRELUDE + """
             const answers = defaultAnswers(inputs.questionnaire, inputs.categories);
             answers.meals = { perDay: 3, meals: inputs.meals };
             const { normalized } = normalizeMealPlan(inputs.document, inputs.meals);
-            const importDocument = forkknifeImportDocument(normalized, inputs.meals, inputs.dates);
+            const importDocument = forkKnifeImportDocument(normalized, inputs.meals, inputs.dates);
             const weekdays = inputs.questionnaire.options.weekdays.map((weekday) => weekday.id);
             const first = applyImportDocument(answers, importDocument, inputs.categories.order, weekdays, null, inputs.categories, inputs.questionnaire);
             const second = applyImportDocument(answers, importDocument, inputs.categories.order, weekdays, null, inputs.categories, inputs.questionnaire);
