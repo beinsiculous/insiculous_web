@@ -10,7 +10,7 @@
     "Goal toggle: a subject marked `goal` is something the person wants in the schedule but does not do yet at that level; the form asks for the current actual (`currentMinutesPerDay`). A category with any goal subject counts as `wantMore` (x wantMoreMultiplier). Shares still use the goal range; the generator can ramp from current to goal.",
     "Rhythm & appointments: meals (count + time-of-day slots), year split (scheme + sections), standing appointments and tasks (weekdays + plain-language cadence; appointments become anchors alongside fixed activities and vote for their category's preferredBlocks; tasks are placed by a time-of-day word, never anchors), preferred appointment weekdays, and practices are recorded on the weights file for the generator. Startup Q2 lists the person's commitments (standing appointments) and tasks by hand; an import document (data/schema/import.schema.json, version 2 written for the person to read) is applied on the Assistant page: its commitments/standing appointments are appended to the standingAppointments answer, its tasks reach the day pages, its fixed activities become anchors and its block focus grid becomes the profile's blockFocusGrid (FortKnight's Overview); the default paste is FortKnight's empty example (build/derived/defaultImport.json); a person's own document — such as the workbook example set's (examples/workbook) — replaces it.",
     "Year split: any scheme prefills an editable section table (title, type, Gregorian equivalent, duration in weeks, start markers: date, rule, holiday, weather, manual); the result is the person's own year — the generator will later turn it into seasons like data/seasons.json.",
-    "Agenda context (no share effect, recorded on the weights file for an assistant or generator): rest days (`restDays`), the person's energy peak (`energyPeak`), and free-text `context`. Section order is Startup, Your day and year, Your week, Focus, About you (FortKnight's questionnaire), then Your meals (face 'fork-knife': Fork Knife's questionnaire — the meals question plus meal preferences the Fork Knife assistant page's prompt embeds); a section's optional `face` (default 'fortknight') says which questionnaire page renders it; the app renders sections and questions in file order."
+    "Agenda context (no share effect, recorded on the weights file for an assistant or generator): rest days (`restDays`), the person's energy peak (`energyPeak`), and free-text `context`. Section order is Startup, Your day and year, Your week, Focus, About you (FortKnight's questionnaire), then Your meals (face 'fork-knife': Fork Knife's questionnaire — the meals question plus the meal preferences the menu-drafting prompt in src/lib/shared/workspace-docs.js embeds); a section's optional `face` (default 'fortknight') says which app face owns it; the app renders sections and questions in file order."
   ],
   "wantMoreMultiplier": 1.25,
   "wakingWindow": {
@@ -2378,7 +2378,7 @@
     {
       "id": "rhythm",
       "title": "Your day and year",
-      "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda’s scope. Your meals — names, prepping and cooking, when you eat them — are Fork Knife’s questionnaire, and the fortnight menu itself is its Spoon Feed page.",
+      "intro": "The rest of the questions have preset defaults; change them now or later on this page. First the shape of a day and of a year: everything inside your waking window is the agenda’s scope. Your meals — names, prepping and cooking, when you eat them — belong to Fork Knife’s own section, Your meals; the fortnight menu itself you draft with your assistant.",
       "questions": [
         {
           "id": "wakingWindow",
@@ -2489,7 +2489,7 @@
       "id": "meals",
       "face": "fork-knife",
       "title": "Your meals",
-      "intro": "Fork Knife’s questionnaire: your meals and what your assistant needs to draft the fortnight menu. The menu itself — which dish is which meal on each day — is built on the Spoon Feed page. Nothing here changes FortKnight’s shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
+      "intro": "Fork Knife’s questionnaire: your meals and what your assistant needs to draft the fortnight menu. The menu itself — which dish is which meal on each day — comes back from your assistant as a meal plan. Nothing here changes FortKnight’s shares; the meals and their prep and cooking minutes reach the generator, everything else travels with your answers to your assistant workspace.",
       "questions": [
         {
           "id": "meals",
