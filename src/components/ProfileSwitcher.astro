@@ -7,12 +7,14 @@
 // and the creation chain left main on 2026-08-30 (preserved at the tag `creation-chain-parked`) — so there is
 // nowhere for it to go and nothing to finish. Creating a profile lives where achievements happen instead.
 //
-// Rendered in exactly one place per page, never two: FaceLayout puts it in the header of the face pages, and
-// the Profile page puts it in its own first panel. The Profile page needs its own copy because it is on
-// BaseLayout, which has no chrome to hold one.
+// Rendered in exactly one place per page, never two. The ids below are fixed, so a second copy on one page
+// ships duplicate navProfile / navProfileSelect ids and fails the axe gate on duplicate-id. Both layouts now
+// put it in the header — FaceLayout for the face pages, BaseLayout for the studio's — which is why /profile/
+// stopped rendering its own on 2026-08-31: BaseLayout used to have no chrome to hold one, and now it does.
 //
-// The slot takes whatever belongs beside the dropdown; FaceLayout passes its ⚙ Profile link, so that link is
-// hidden until a profile is saved too. The Profile page passes nothing — you are already there.
+// The slot takes whatever belongs beside the dropdown. FaceLayout passes its ⚙ Profile link, so that link is
+// hidden until a profile is saved too. BaseLayout passes nothing: its icon row already leads with the gear to
+// /profile/, and the face only needs the slot because its own icon row is spent on the way back out.
 ---
 <div class="nav-profile" id="navProfile" hidden>
   <label class="nav-profile-label">Profile <select id="navProfileSelect" aria-label="Profile"></select></label>

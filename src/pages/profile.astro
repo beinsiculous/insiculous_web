@@ -1,9 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import { facePath } from "../lib/faces.js";
 // This page belongs to beinsiculous.com rather than to the app, so it is a studio page like any other: BaseLayout,
-// global.css, the seven-link header and the studio footer. Only the widgets it shares with the face come from
+// global.css, the six-link header with its icon row and the studio footer. Only the widgets it shares with the face come from
 // elsewhere (src/styles/app-widgets.css) — the panels and the buttons.
 import "../styles/app-widgets.css";
 
@@ -11,7 +10,10 @@ import "../styles/app-widgets.css";
 // keep and the achievements board. The assistant-workspace downloads and the pages that edited a profile's
 // answers belong to the creation chain, removed from main on 2026-08-30 and preserved at the tag
 // `creation-chain-parked` — this page holds everything a profile still has.
-// The switcher lives here rather than in the header: BaseLayout has no chrome for it.
+// The switcher is NOT here any more. BaseLayout grew chrome to hold one on 2026-08-31, so it lives in
+// the header on every studio page, the way the face keeps it. Rendering a second copy here would ship
+// the component's fixed navProfile / navProfileSelect ids twice on this one page and fail the axe gate
+// on duplicate-id — so this page reads the header's switcher rather than owning one.
 ---
 <BaseLayout
   title="Profile — Be Insiculous"
@@ -20,7 +22,6 @@ import "../styles/app-widgets.css";
   <section class="panel">
     <h1>Profile</h1>
     <h2 id="profileHeading"></h2>
-    <ProfileSwitcher />
     <form class="button-row profile-name-form" id="profileNameForm">
       <label class="inline-field">Name <input type="text" id="profileNameInput" autocomplete="off" required /></label>
       <button type="button" id="regenerateNameButton">Regenerate</button>
@@ -32,7 +33,7 @@ import "../styles/app-widgets.css";
       <button type="button" id="duplicateProfileButton">Duplicate as…</button>
       <button type="button" id="deleteProfileButton">Delete</button>
     </div>
-    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown above. Your fortnight is on FortKnight’s <a href={facePath("fortknight")}>Overview</a>, rendered from the keep you load.</p>
+    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown in the header menu. Your fortnight is on FortKnight’s <a href={facePath("fortknight")}>Overview</a>, rendered from the keep you load.</p>
   </section>
 
   <section class="panel">
@@ -104,7 +105,7 @@ import "../styles/app-widgets.css";
     if (active) {
       elements.profileStatus.textContent = `Saved on this device${active.questionnaire?.answeredAt ? ` (answers from ${active.questionnaire.answeredAt})` : ""}${savedCount > 1 ? `; ${savedCount} profiles saved` : ""}.`;
     } else if (savedCount) {
-      elements.profileStatus.textContent = `Not saved yet. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown above.`;
+      elements.profileStatus.textContent = `Not saved yet. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown in the header menu.`;
     } else {
       elements.profileStatus.textContent = "No profile saved yet — create one from the Be Insiculous home page or FortKnight’s Overview.";
     }
