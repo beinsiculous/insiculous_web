@@ -1,0 +1,87 @@
+---
+// Folk Knowledge: the stone's focused home for the seasons.
+//
+// One of Name Drop's eight stones (docs/megaseed/name-drop.md in the working set). Its domain is
+// Friends & Family, and the seasons sit in its scope through event and party planning — which is why
+// the season card and the year wheel live here rather than on a page of their own.
+//
+// It draws nothing new. renderSeasonPanel and renderYearPanel are the same builders keep.astro uses,
+// so a season shows the same colours on both pages — the positional palette (position pinned to first
+// appearance in year.slices, never keyed to a household's season ids) is a property of the builder,
+// not of a page, and that is the point of sharing it.
+//
+// Like every keep-fed page, the server renders an empty shell: the keep lives only in the visitor's
+// localStorage, so a crawler, a build artefact and a stranger all see a page asking for a keep. And
+// like every keep-fed page it resolves nothing — keep.astro's header carries that argument in full.
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import KeepStyles from "../../components/KeepStyles.astro";
+import { facePath } from "../../lib/faces.js";
+
+const keep = facePath("fortknight", "keep/");
+---
+<FaceLayout title="Folk Knowledge" face="fortknight">
+  <KeepStyles />
+  <section class="panel" id="folkPrompt">
+    <h1>Folk Knowledge</h1>
+    <p class="muted">
+      Friends and family — and the year they happen in. This page shows the season your keep was
+      exported in and the shape of its whole year.
+    </p>
+    <p class="muted" id="folkStatus" role="status" aria-live="polite">
+      Load your keep to see them.
+    </p>
+    <div class="button-row">
+      <a class="button" href={keep}>Load your keep on Keep</a>
+    </div>
+    <noscript><p class="muted">This page needs JavaScript to read your keep.</p></noscript>
+  </section>
+
+  <div id="folkBody" hidden></div>
+</FaceLayout>
+
+<script>
+  import { readStoredKeep } from "../../lib/keep-access.js";
+  import { element, renderSeasonPanel, renderYearPanel } from "../../lib/keep-view.js";
+
+  const prompt = document.getElementById("folkPrompt");
+  const status = document.getElementById("folkStatus");
+  const body = document.getElementById("folkBody");
+
+  function showLoadPrompt(message) {
+    body.hidden = true;
+    body.replaceChildren();
+    prompt.hidden = false;
+    if (message) status.textContent = message;
+  }
+
+  // Boot is readStoredKeep()'s decision, like every keep-fed page: "cleared" says the wreckage was
+  // forgotten, "kept" says an intact but undrawable keep was NOT deleted, and both only report into the
+  // prompt's status line. "none" leaves the prompt standing with its own words.
+  const stored = readStoredKeep();
+  if (stored.status === "cleared" || stored.status === "kept") {
+    showLoadPrompt(stored.reason);
+  } else if (stored.status !== "keep") {
+    showLoadPrompt();
+  } else {
+    const season = stored.keep.season;
+    const yearPanel = stored.keep.year ? renderYearPanel(stored.keep.year) : null;
+    // A keep whose season and year are both absent is a real and legitimate export — Fort Knight writes
+    // null for both when no season resolves — so this page says so plainly instead of showing an empty
+    // frame. It does not send anyone to re-export: the file was never the problem.
+    if (!season && !yearPanel) {
+      showLoadPrompt("Your keep carries no season and no year — Fort Knight writes both only when a season resolves.");
+    } else {
+      prompt.hidden = true;
+      body.hidden = false;
+      body.replaceChildren();
+      body.appendChild(element("h1", null, "Folk Knowledge"));
+      if (season) body.appendChild(renderSeasonPanel(season));
+      if (yearPanel) body.appendChild(yearPanel);
+      // Said only when one of the two is missing: with both present there is nothing to explain.
+      if (!season || !yearPanel) {
+        const missing = season ? "year wheel" : "season card";
+        body.appendChild(element("p", "muted", `This keep carries no ${missing}.`));
+      }
+    }
+  }
+</script>

@@ -135,13 +135,20 @@ try {
     }
   }
 
-  // The pages that render from the stored seed — the Overview, Keep and the fourteen day pages —
-  // are the only output that changes with the seed, so only they get a second pass, seeded with the
-  // other invented household. Its season ids and names are not the ones the original palette was
-  // keyed to, which is exactly what certifies the positional palette's contrast on a seed that is
-  // not the original household's; re-auditing the rest of the site would audit identical output.
+  // The pages that render from the stored seed are the only output that changes with the seed, so only
+  // they get a second pass, seeded with the other invented household. Its season ids and names are not
+  // the ones the original palette was keyed to, which is exactly what certifies the positional palette's
+  // contrast on a seed that is not the original household's; re-auditing the rest of the site would
+  // audit identical output.
+  //
+  // ADD A STONE PAGE HERE WHEN IT RENDERS KEEP CONTENT. The list is explicit rather than a prefix match
+  // on /fortknight/ because most stone pages draw honest empty states, whose output does not vary with
+  // the seed — auditing those twice would cost a browser context to prove nothing. A page that draws
+  // season colours belongs here; /fortknight/folkknowledge/ draws the year wheel, which is the single
+  // strongest reason this second pass exists.
+  const SEED_FED_ROUTES = new Set(["/fortknight/", "/fortknight/keep/", "/fortknight/folkknowledge/"]);
   const seedFed = chosen.filter((route) =>
-    route === "/fortknight/" || route === "/fortknight/keep/" || route.startsWith("/fortknight/days/"));
+    SEED_FED_ROUTES.has(route) || route.startsWith("/fortknight/days/"));
   const otherHouseholdSeed = readFileSync(new URL("../tests/fixtures/keep.other-household.json", import.meta.url), "utf8");
   const otherHouseholdContext = await browser.newContext();
   await otherHouseholdContext.addInitScript(([settings, seed]) => {
