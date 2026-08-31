@@ -96,9 +96,14 @@ function snippetAround(text, index, length) {
   return text.slice(Math.max(0, index - 45), index + length + 45).replace(/\s+/g, ' ');
 }
 
-/** Straight apostrophes in rendered prose (tags and their attributes removed). */
+/** Straight apostrophes in rendered prose (tags and their attributes removed).
+ *
+ *  `&#39;` counts. Prose that reaches the page through an Astro prop or expression is HTML-escaped on
+ *  the way out, so `The fortnight's meals` ships as `The fortnight&#39;s meals` — a straight apostrophe
+ *  to every reader, and invisible to a check that only looks for the character itself. That is how five
+ *  stone pages passed this gate on 2026-08-31 while showing exactly what it exists to forbid. */
 export function findStraightApostrophes(html) {
-  const text = stripNonProse(html).replace(/<[^>]+>/g, ' ');
+  const text = stripNonProse(html).replace(/<[^>]+>/g, ' ').replace(/&#0*39;|&#x0*27;|&apos;/gi, "'");
   return [...text.matchAll(/\w'\w/g)].map((match) => ({
     snippet: snippetAround(text, match.index, match[0].length),
   }));

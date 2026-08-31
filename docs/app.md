@@ -19,11 +19,19 @@ That removal has a consequence worth stating plainly: **nothing under `src/` rea
 more.** The committed bundle was the only path from the repository's data to a rendered page. `data/`
 is now a person-neutral vocabulary that `validate.py` checks and that ships nowhere.
 
-The face's nav is six pills — **Overview · Keep · Fork Knife · Fresh Keep · Folk Knowledge ·
-Achievements**, one per Name Drop stone with a page — and **three of them 404 today**: Fork Knife,
-Fresh Keep and Folk Knowledge have no page until `beinsiculous/insiculous_web#18`, `#19` and `#20`
-land. Nothing catches that automatically, so **`dev` → `main` is held until they do.** Six is itself
-interim: Name Drop has eight stones, and `#23` takes the nav to ten.
+The face's nav is ten pills — **Overview · Keep**, one per Name Drop stone (**Fork Knife · Fresh
+Keep · Folk Knowledge · Fix Knitt · Foe Kiss · Fun Knee · Fret Knot**), then **Achievements**. Fort
+Knight itself has no pill: it is the agenda stone, and the agenda is what the Overview, Keep and the
+day pages already are.
+
+Four of those stones — Fix Knitt, Foe Kiss, Fun Knee and Fret Knot — have subjects-only slabs and no
+keep section, and Fresh Keep's cleaning deliberately never travels, so those five pages are honest
+empty states sharing one component (`src/components/StoneEmptyState.astro`). Fork Knife draws the
+menu; Folk Knowledge draws the season card and the year wheel.
+
+**Every pill has a page, and that is now checked.** `scripts/postbuild-check.mjs` fails the build
+when a `faceNav()` entry has no route in `dist/`. It was added on 2026-08-31, after three pills spent
+a day pointing at pages that did not exist behind nothing but a written `dev → main` hold.
 
 **Removed URLs hard-404.** `/fortknight/{build,questionnaire,assistant,ask}/` and every
 `/forkknife/*` URL return 404. Redirect stubs are scoped to *moves*, not removals: `myfort` →

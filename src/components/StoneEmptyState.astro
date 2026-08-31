@@ -1,0 +1,68 @@
+---
+// A stone's page while its domain carries no keep data yet.
+//
+// Five of Name Drop's eight stones are here (docs/megaseed/name-drop.md in the working set): Fresh Keep,
+// whose cleaning deliberately never travels, and Fix Knitt, Foe Kiss, Fun Knee and Fret Knot, whose slabs
+// hold subjects only. They are one component rather than five near-identical pages because they are one
+// contract — the empty-state contract the display-only ruling set, the part of it Name Drop left standing:
+// a page never invents content, falls back to the load-your-keep message with no keep stored, and states
+// plainly when a loaded keep carries no section for it.
+//
+// The keep format is additive, so these pages are written for the day that changes. If a section DOES turn
+// up under the stone's name, the page says how many rows it holds and that it cannot draw them yet — which
+// is the honest answer, and a better one than silently showing "carries no data" over a keep that does.
+// Drawing them is each stone's own issue, not this component's.
+//
+// `section` is the top-level keep key this stone would use. It is deliberately a guess about a format that
+// has not grown yet; being wrong costs nothing, because an absent section is what every one of these pages
+// expects today.
+import { facePath } from "../lib/faces.js";
+
+const { stone, domain, blurb, note, section } = Astro.props;
+const keep = facePath("fortknight", "keep/");
+---
+<section
+  class="panel"
+  id="stonePrompt"
+  data-stone={stone}
+  data-domain={domain}
+  data-section={section}
+>
+  <h1>{stone}</h1>
+  <p class="muted">{blurb}</p>
+  {note && <p class="muted">{note}</p>}
+  <p class="muted" id="stoneStatus" role="status" aria-live="polite">
+    Load your keep to see what it carries for {domain}.
+  </p>
+  <div class="button-row">
+    <a class="button" href={keep}>Load your keep on Keep</a>
+  </div>
+  <noscript><p class="muted">This page needs JavaScript to read your keep.</p></noscript>
+</section>
+
+<script>
+  import { readStoredKeep } from "../lib/keep-access.js";
+  import { describeSection } from "../lib/keep.js";
+
+  // Unlike the face pages, this component is type-checked: tsconfig.json excludes src/pages/fortknight
+  // and src/lib, not src/components generally. So the DOM lookups are guarded rather than assumed —
+  // which is the honest shape anyway, since a template edit that renames an id should leave the
+  // prerendered prose standing rather than throwing on boot.
+  const panel = document.getElementById("stonePrompt");
+  const status = document.getElementById("stoneStatus");
+  const domain = panel?.dataset.domain ?? "";
+  const section = panel?.dataset.section ?? "";
+
+  // Boot is readStoredKeep()'s decision, like every keep-fed page: "cleared" says the wreckage was
+  // forgotten, "kept" says an intact but undrawable keep was NOT deleted, and both report into the status
+  // line. "none" leaves the prompt's own words standing.
+  const stored = readStoredKeep();
+  if (status && (stored.status === "cleared" || stored.status === "kept")) {
+    status.textContent = stored.reason ?? "";
+  } else if (status && stored.status === "keep") {
+    const found = describeSection(stored.keep, section);
+    status.textContent = found.state === "present"
+      ? `This keep carries ${found.count} ${section} row${found.count === 1 ? "" : "s"}. This page cannot draw them yet.`
+      : `Your keep carries no ${domain.toLowerCase()} data.`;
+  }
+</script>

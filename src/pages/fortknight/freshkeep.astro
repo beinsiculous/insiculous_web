@@ -1,0 +1,21 @@
+---
+// Fresh Keep: Cleaning, one of Name Drop's eight stones (docs/megaseed/name-drop.md in the working set).
+//
+// Its contribution is cleaning, and the keep deliberately carries none: Fort Knight's own tests
+// assert that cleaning areas never travel. So the honest empty state is the whole page, and may stay that
+// way — beinsiculous/fortknight#15 owns that adjudication.
+//
+// The page, its empty states and its boot are all StoneEmptyState.astro — five stones share one contract,
+// so they share one component rather than repeating it five times.
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import StoneEmptyState from "../../components/StoneEmptyState.astro";
+---
+<FaceLayout title="Fresh Keep" face="fortknight">
+  <StoneEmptyState
+    stone="Fresh Keep"
+    domain="Cleaning"
+    section="cleaning"
+    blurb="The fortnight’s cleaning: which areas are looked after, and when."
+    note="Your keep will not carry this. Fort Knight keeps chores off the file it exports — the app’s own tests assert that cleaning areas never travel — so this page’s empty state may be its permanent and correct content. Whether cleaning ever reaches the web is its own adjudication (beinsiculous/fortknight#15), not a side effect of building the app."
+  />
+</FaceLayout>

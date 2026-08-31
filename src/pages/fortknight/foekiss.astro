@@ -1,0 +1,19 @@
+---
+// Foe Kiss: Spirituality & Development, one of Name Drop's eight stones (docs/megaseed/name-drop.md in the working set).
+//
+// Its slab holds subjects only today, so there is no keep section to draw and the honest empty state
+// is the whole page until its domain grows data.
+//
+// The page, its empty states and its boot are all StoneEmptyState.astro — five stones share one contract,
+// so they share one component rather than repeating it five times.
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import StoneEmptyState from "../../components/StoneEmptyState.astro";
+---
+<FaceLayout title="Foe Kiss" face="fortknight">
+  <StoneEmptyState
+    stone="Foe Kiss"
+    domain="Spirituality & Development"
+    section="development"
+    blurb="The fortnight’s spirituality and development: practice, study, and the work of becoming."
+  />
+</FaceLayout>

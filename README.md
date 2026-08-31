@@ -268,9 +268,9 @@ by ruling — a redirect stub records a move, and these were removals. Fork Knif
 (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu rendering lands at
 `/fortknight/forkknife/` when that page is built (issue #18).
 
-The face's nav is six pills — Overview · Keep · Fork Knife · Fresh Keep · Folk Knowledge ·
-Achievements — and **three of them 404 until issues #18, #19 and #20 land**, so `dev` → `main` is
-held until they do.
+The face's nav is ten pills — Overview · Keep, one per Name Drop stone (Fork Knife · Fresh Keep ·
+Folk Knowledge · Fix Knitt · Foe Kiss · Fun Knee · Fret Knot), then Achievements. Every one has a
+page, and `scripts/postbuild-check.mjs` fails the build if that stops being true.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

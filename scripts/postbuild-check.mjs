@@ -21,6 +21,9 @@
 // 6. No straight apostrophe in rendered prose: the site's copy uses ’, which Markdown content gets
 //    from smartypants — without this the .astro pages drift the other way and the two spellings sit
 //    side by side on one page.
+// 7. Every pill in a face's nav (src/lib/faces.js faceNav) resolves to a real page in dist/. Nothing
+//    else notices a dead nav link: the visual gates walk dist/, so a route that does not exist is
+//    simply absent from what they check.
 
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
@@ -147,6 +150,38 @@ if (existsSync(DIST)) {
       errors.push(`${path}: straight apostrophe in prose (use ’): …${apostrophe.snippet}…`);
     }
   });
+}
+
+// 7. Every face nav pill points at a page that exists.
+//
+// This gate is here because its absence cost something real. The display-only removals landed the
+// six-pill nav a day before three of those pills had pages, and for that day FortKnight's primary
+// navigation carried dead links on every face page with nothing able to notice: this file had no link
+// check, and a11y-check.mjs and screenshot-pages.mjs both walk dist/, where a route that does not exist
+// simply is not there. The only thing standing in that spot was a written "dev → main is held" note —
+// friction and a paper trail, not a check. So: a written hold is what you use while the pages are being
+// built, and this is what makes forgetting to lift it impossible.
+//
+// Scoped to the face nav on purpose. A general internal-link crawler is a different, larger tool; this
+// one checks the single list that is generated from code and rendered on every page of a face.
+if (existsSync(DIST)) {
+  // FACES and faceNav, not facePath: facePath goes through withBase(), which reads
+  // import.meta.env.BASE_URL and exists only under Vite. Importing the module is fine — that value is
+  // read when withBase is CALLED — so the route is composed from the face's own `home` instead, which
+  // is the same string facePath would prefix. dist/ is laid out from the site root regardless of any
+  // configured base path, so composing without it is also the correct thing to look up here.
+  const { FACES, FACE_IDS, faceNav } = await import(new URL('../src/lib/faces.js', import.meta.url));
+  for (const faceId of FACE_IDS) {
+    for (const item of faceNav()) {
+      const route = `${FACES[faceId].home}${item.path}`;
+      if (!existsSync(join(DIST, route, 'index.html'))) {
+        errors.push(
+          `face nav "${item.label}" points at /${route}, which has no page in dist/. ` +
+          `Add the route, or take the pill out of faceNav() in src/lib/faces.js until it exists.`
+        );
+      }
+    }
+  }
 }
 
 if (errors.length > 0) {
