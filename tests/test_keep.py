@@ -180,6 +180,72 @@ class SliceColourTests(unittest.TestCase):
         self.assertEqual(self.colours(slices), ["#4d7c0f", "#c2410c", "#4d7c0f"])
 
 
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class MenuGroupingTests(unittest.TestCase):
+    """Fork Knife's two views (/fortknight/forkknife/), at the only layer that can be tested without a browser.
+
+    The renderers themselves need a document — every builder in keep-view.js does — so the rules they run
+    on are exported separately and checked here, the same warrant as SliceColourTests above. What is a rule
+    and what is drawing: the slot order and the day regrouping are rules; turning them into elements is not.
+    """
+
+    DAY_KEY_ORDER = ["sun-a", "mon-b", "tue-a", "wed-b", "thu-a", "fri-b", "sat-a",
+                     "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b"]
+
+    def ordered(self, menu):
+        script = (f'import {{ orderedSlots }} from {json.dumps(KEEP_VIEW_MODULE)};' + STDIN_PRELUDE
+                  + "process.stdout.write(JSON.stringify(orderedSlots(inputs).map((slot) => slot.slot)));")
+        return run_node(script, menu)
+
+    def by_day(self, menu, day_order=None):
+        script = (f'import {{ menuByDayKey }} from {json.dumps(KEEP_VIEW_MODULE)};' + STDIN_PRELUDE
+                  + "process.stdout.write(JSON.stringify(menuByDayKey(inputs.menu, inputs.dayOrder)));")
+        return run_node(script, {"menu": menu, "dayOrder": self.DAY_KEY_ORDER if day_order is None else day_order})
+
+    def test_slots_run_in_the_order_a_day_does(self):
+        """Ordered by KEY, printed by LABEL: the other household calls brunch 'First Meal', and a menu
+        sorted by its own labels would run First Meal, Last Meal, Nibble."""
+        self.assertEqual(self.ordered(FIXTURE["menu"]), ["brunch", "snack", "dinner"])
+        shuffled = list(reversed(OTHER_HOUSEHOLD_FIXTURE["menu"]))
+        self.assertEqual(self.ordered(shuffled), ["brunch", "snack", "dinner"])
+
+    def test_an_unknown_slot_draws_after_the_known_ones_in_file_order(self):
+        """The keep is additive, so a slot this page has never heard of is data, not an error."""
+        menu = [{"slot": "supper", "label": "Supper", "entries": [{"menu": "x", "cookDay": "sun-a"}]},
+                {"slot": "dinner", "label": "Dinner", "entries": [{"menu": "y", "cookDay": "sun-a"}]},
+                {"slot": "elevenses", "label": "Elevenses", "entries": [{"menu": "z", "cookDay": "sun-a"}]}]
+        self.assertEqual(self.ordered(menu), ["dinner", "supper", "elevenses"])
+
+    def test_an_empty_slot_is_not_a_slot(self):
+        self.assertEqual(self.ordered([{"slot": "dinner", "label": "Dinner", "entries": []}]), [])
+        self.assertEqual(self.ordered([]), [])
+        self.assertEqual(self.ordered(None), [])
+
+    def test_one_dish_lands_on_both_its_cook_day_and_its_leftovers_day(self):
+        """This is Fork Knife's whole argument made checkable: eight dishes cover fourteen days because
+        most of them are eaten twice, so one entry must produce two rows."""
+        days = dict(self.by_day(FIXTURE["menu"]))
+        self.assertEqual([row["kind"] for row in days["sun-a"]], ["cooked", "cooked", "cooked"])
+        self.assertEqual(days["tue-a"], [{"slotLabel": "Brunch", "dish": "Example eggs on toast", "kind": "leftovers"}])
+        self.assertEqual(days["thu-a"], [{"slotLabel": "Dinner", "dish": "Example garden soup", "kind": "leftovers"}])
+
+    def test_days_come_back_in_canonical_order_and_only_when_the_menu_names_them(self):
+        """A fortnight the menu half-covers draws the days it covers, in fortnight order — not the order
+        the slots happen to list them, and not fourteen cells with gaps."""
+        self.assertEqual([day for day, _ in self.by_day(FIXTURE["menu"])],
+                         ["sun-a", "mon-b", "tue-a", "wed-b", "thu-a"])
+
+    def test_a_day_key_the_order_does_not_know_is_kept_not_dropped(self):
+        menu = [{"slot": "dinner", "label": "Dinner",
+                 "entries": [{"menu": "x", "cookDay": "someday"}, {"menu": "y", "cookDay": "sun-a"}]}]
+        self.assertEqual([day for day, _ in self.by_day(menu)], ["sun-a", "someday"])
+
+    def test_a_dish_with_no_leftovers_day_lands_once(self):
+        days = dict(self.by_day(FIXTURE["menu"]))
+        porridge = [row for rows in days.values() for row in rows if row["dish"] == "Example porridge"]
+        self.assertEqual(porridge, [{"slotLabel": "Brunch", "dish": "Example porridge", "kind": "cooked"}])
+
+
 class PageStyleScopingTests(unittest.TestCase):
     """The one thing about these pages that no gate can see.
 
@@ -215,9 +281,14 @@ class PageStyleScopingTests(unittest.TestCase):
                 if part.startswith("."):
                     self.assertTrue(part.startswith(".keep-"), f"{part} is global but not namespaced")
 
-    def test_the_keep_page_carries_the_shared_styles(self):
-        page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "keep.astro").read_text(encoding="utf-8")
-        self.assertIn("KeepStyles", page)
+    def test_every_keep_fed_page_carries_the_shared_styles(self):
+        """Each page includes the component, or its script-built DOM renders unstyled — the year wheel at
+        876x0, the menu grid as bare lists. Named one by one so adding a stone page that forgets it fails."""
+        pages = REPOSITORY_ROOT / "src" / "pages" / "fortknight"
+        for name in ("keep.astro", "index.astro", "folkknowledge.astro", "forkknife.astro",
+                     "days/[dayKey].astro"):
+            with self.subTest(page=name):
+                self.assertIn("KeepStyles", (pages / name).read_text(encoding="utf-8"))
 
 
 class KeepFedPageTests(unittest.TestCase):

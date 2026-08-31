@@ -65,6 +65,7 @@ const shotNames = {
   "/fortknight/days/wed-b/": "fortknight-day",
   "/fortknight/achievements/": "fortknight-achievements",
   "/fortknight/folkknowledge/": "fortknight-folkknowledge",
+  "/fortknight/forkknife/": "fortknight-forkknife",
 };
 
 // The phone pass emulates touch, so `@media (pointer: coarse)` — where the 44px tap targets live — is

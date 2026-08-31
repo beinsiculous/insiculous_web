@@ -92,6 +92,113 @@ export function renderDayPanel(day) {
   return panel;
 }
 
+/** The menu's slots, in the order a day runs. The keep names its own slots — a household may call
+ *  brunch "First Meal" — so this orders by KEY and prints the keep's LABEL. Anything the keep carries
+ *  under an unknown key still draws, after these, in the order the file gives it. */
+const MENU_SLOT_ORDER = ["brunch", "snack", "dinner"];
+
+/** The menu's non-empty slots in the order a day runs. Exported because it is a rule, not drawing:
+ *  everything else in this module needs a document, and a rule that cannot be tested without a browser
+ *  is a rule nothing checks (tests/test_keep.py drives this through node). */
+export function orderedSlots(menu) {
+  const slots = (Array.isArray(menu) ? menu : []).filter((slot) => Array.isArray(slot?.entries) && slot.entries.length);
+  const rank = (slot) => {
+    const position = MENU_SLOT_ORDER.indexOf(slot?.slot);
+    return position === -1 ? MENU_SLOT_ORDER.length : position;
+  };
+  return slots.map((slot, index) => ({ slot, index })) // a stable sort by rank, then by file order
+    .sort((left, right) => rank(left.slot) - rank(right.slot) || left.index - right.index)
+    .map(({ slot }) => slot);
+}
+
+/** The menu regrouped by day key: `[[dayKey, [{slotLabel, dish, kind}, …]], …]`, canonical order first
+ *  and anything the order does not know after it, so an unexpected day key shows its dish rather than
+ *  losing it silently. `kind` is "cooked" or "leftovers" — one entry produces up to two rows, which is
+ *  exactly the fact this view exists to show. A rule, like orderedSlots, and tested like one. */
+export function menuByDayKey(menu, dayOrder) {
+  const byDay = new Map();
+  for (const slot of orderedSlots(menu)) {
+    const slotLabel = slot.label ?? slot.slot;
+    for (const entry of slot.entries) {
+      const dish = entry?.menu ?? "Unnamed dish";
+      for (const [dayKey, kind] of [[entry?.cookDay, "cooked"], [entry?.leftoversDay, "leftovers"]]) {
+        if (typeof dayKey !== "string" || !dayKey) continue;
+        if (!byDay.has(dayKey)) byDay.set(dayKey, []);
+        byDay.get(dayKey).push({ slotLabel, dish, kind });
+      }
+    }
+  }
+  const known = (Array.isArray(dayOrder) ? dayOrder : []).filter((key) => byDay.has(key));
+  const extra = [...byDay.keys()].filter((key) => !known.includes(key));
+  return [...known, ...extra].map((dayKey) => [dayKey, byDay.get(dayKey)]);
+}
+
+/** By dish: every dish once, with the day it is cooked and the day its leftovers land.
+ *
+ *  This is the view that makes Fork Knife's argument visible — a handful of dishes covering fourteen
+ *  days, because most of them are cooked once and eaten twice. A dish with no leftovers day says so
+ *  rather than showing a blank: "cooked fresh" is a real answer, not missing data. */
+export function renderMenuByDish(menu) {
+  const slots = orderedSlots(menu);
+  if (!slots.length) return null;
+  const panel = element("section", "panel");
+  panel.appendChild(element("h2", null, "By dish"));
+  for (const slot of slots) {
+    panel.appendChild(element("h3", "keep-menu-slot", slot.label ?? slot.slot));
+    const list = element("ul", "keep-menu-dishes");
+    for (const entry of slot.entries) {
+      const item = element("li", "keep-menu-dish");
+      item.appendChild(element("span", "keep-menu-name", entry?.menu ?? "Unnamed dish"));
+      const cook = entry?.cookDayLabel ?? entry?.cookDay;
+      const leftovers = entry?.leftoversDayLabel ?? entry?.leftoversDay;
+      const when = cook
+        ? (leftovers ? `Cooked ${cook}, again ${leftovers}` : `Cooked ${cook}, no leftovers`)
+        : "No cook day recorded";
+      item.appendChild(element("span", "keep-menu-when muted", when));
+      // The note is the household's own sentence about why extra is made; it is worth the room.
+      if (entry?.cookExtra && typeof entry.cookExtraNote === "string" && entry.cookExtraNote) {
+        item.appendChild(element("span", "keep-menu-note muted", entry.cookExtraNote));
+      } else if (entry?.cookExtra) {
+        item.appendChild(element("span", "keep-menu-note muted", "Extra is made."));
+      }
+      list.appendChild(item);
+    }
+    panel.appendChild(list);
+  }
+  return panel;
+}
+
+/** By day: the fourteen days in canonical order, each with what is eaten and whether it is cooked
+ *  that day or is the leftovers of another.
+ *
+ *  Built from the menu section rather than from each day's own `meals`, because the two say different
+ *  things: `day.meals` is what is eaten, and this is where it came from. `dayOrder` is passed in
+ *  rather than imported so this module keeps drawing and nothing else — the caller already knows the
+ *  canonical order. Days the menu never mentions are skipped, not drawn empty. */
+export function renderMenuByDay(menu, dayOrder, labelForDayKey = (key) => key) {
+  const days = menuByDayKey(menu, dayOrder);
+  if (!days.length) return null;
+  const panel = element("section", "panel");
+  panel.appendChild(element("h2", null, "By day"));
+  const grid = element("div", "keep-menu-grid");
+  for (const [dayKey, meals] of days) {
+    const cell = element("div", "keep-menu-day");
+    cell.appendChild(element("h3", null, labelForDayKey(dayKey)));
+    const list = element("ul", "keep-menu-meals");
+    for (const { slotLabel, dish, kind } of meals) {
+      const item = element("li", kind === "leftovers" ? "keep-menu-meal keep-menu-again" : "keep-menu-meal");
+      item.appendChild(element("span", "keep-menu-name muted", slotLabel));
+      item.appendChild(element("span", null, dish));
+      if (kind === "leftovers") item.appendChild(element("span", "keep-menu-when muted", "again"));
+      list.appendChild(item);
+    }
+    cell.appendChild(list);
+    grid.appendChild(cell);
+  }
+  panel.appendChild(grid);
+  return panel;
+}
+
 /** The season card: name, range, how much of the day is safe outside, and what is in season. */
 export function renderSeasonPanel(season) {
   const panel = element("section", "panel");

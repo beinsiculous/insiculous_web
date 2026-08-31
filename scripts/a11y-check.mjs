@@ -146,7 +146,7 @@ try {
   // the seed — auditing those twice would cost a browser context to prove nothing. A page that draws
   // season colours belongs here; /fortknight/folkknowledge/ draws the year wheel, which is the single
   // strongest reason this second pass exists.
-  const SEED_FED_ROUTES = new Set(["/fortknight/", "/fortknight/keep/", "/fortknight/folkknowledge/"]);
+  const SEED_FED_ROUTES = new Set(["/fortknight/", "/fortknight/keep/", "/fortknight/folkknowledge/", "/fortknight/forkknife/"]);
   const seedFed = chosen.filter((route) =>
     SEED_FED_ROUTES.has(route) || route.startsWith("/fortknight/days/"));
   const otherHouseholdSeed = readFileSync(new URL("../tests/fixtures/keep.other-household.json", import.meta.url), "utf8");
