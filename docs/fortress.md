@@ -22,14 +22,21 @@ description of the model, quoted in the appendix — the prose above it is writt
 Both are units of *measurement* before they are units of social software. A fort weighs and measures
 who is doing what inside the household; a fortress does the same across the households in it.
 
-## The four roles
+## The five roles
 
 | role | who they are | what the role is for |
 |---|---|---|
 | **Knight** | productive members — school-age children and working adults | the people whose time the fortnight actually allocates |
 | **Royal** | dependants — small children, the elderly, the infirm | people the fort's work is done *for*, and whose care is itself allocated work |
+| **Guest** | visitors — people staying or helping in the household without being members | seen by the fortnight without being allocated by it; a fort keeps a Guest keep to give out (ruled in the working set's `docs/megaseed/name-drop.md`, 2026-08-30) |
 | **Champion** | the fort's manager | runs one household: sees its measurements, curates its board |
 | **Commander** | the fortress's manager, and the Champions' manager | runs the community: the only role that can post publicly |
+
+Each role's **keep** is a member's file, cut from the fort's Champion keep at derivation time —
+never filtered at display time — so what a role can see is a property of the file it holds. The
+ladder is Name Drop's (`docs/megaseed/name-drop.md` in the working set): the Champion's keep is
+the whole, the Commander's keep holds 2+ Champion keeps, and Guest/Knight/Royal keeps are the
+derived slices (none of which exist yet — see below).
 
 Two things follow from the Knight/Royal split that are worth stating plainly. Care for a Royal is
 **work someone else is doing** — it belongs in the fort's measurements as time spent, not as an

@@ -1,13 +1,13 @@
-// Drawing a keep: the DOM builders every seed-fed page shares.
+// Drawing a keep: the DOM builders every keep-fed page shares.
 //
 // This module exists because the Keep rendering outgrew its first page. keep.astro was the only place
-// that drew a seed, so the builders lived in its inline script — but a fortnight, a season card and the year
+// that drew a keep, so the builders lived in its inline script — but a fortnight, a season card and the year
 // wheel are wanted on more than one page, and an inline <script> cannot be imported. The builders are here,
 // once, and each page wires them to its own shell.
 //
 // Framework-free on purpose, like everything the site draws with. The site has no UI framework and no build
 // step for its JavaScript (AGENTS.md: KISS, and tsconfig.json excludes src/lib from astro check — the tests
-// driving these functions through node are their safety net). A builder here is a function that takes seed
+// driving these functions through node are their safety net). A builder here is a function that takes keep
 // data and returns a detached element; what a page does with that element is the page's business.
 //
 // The styles these classes rely on are NOT here: they are global, because this DOM is built with
@@ -25,7 +25,7 @@ export const NEUTRAL_SLICE_COLOUR = "#78716c";
 
 /** One colour per slice, assigned by position of FIRST APPEARANCE rather than by season id. The map this
  *  replaced was keyed to one household's five season ids, which made every other household's wheel grey.
- *  A seed's slices arrive in year order, so position is the household-independent fact to key on; keying on
+ *  A keep's slices arrive in year order, so position is the household-independent fact to key on; keying on
  *  first appearance (by key, else name) keeps a repeated slice the same colour rather than spending a new
  *  one on it. Returns an array parallel to `slices`. */
 export function sliceColours(slices) {
@@ -127,7 +127,7 @@ function drawableSlices(year) {
 }
 
 /** The year wheel and its key, or null when the year has nothing drawable — a wheel with no slices is
- *  not a panel at all, and the caller draws the rest of the seed without it. */
+ *  not a panel at all, and the caller draws the rest of the keep without it. */
 export function renderYearPanel(year) {
   const slices = drawableSlices(year);
   if (!slices.length) return null;
@@ -136,8 +136,8 @@ export function renderYearPanel(year) {
   panel.appendChild(element("h2", null, `${year.year}`));
 
   const row = element("div", "keep-wheel-row");
-  // conic-gradient IS the wheel here. Fortress Key draws it from nested rotated Views because React Native has
-  // no such thing; a browser does, and the seed already carries the degrees, so there is nothing to
+  // conic-gradient IS the wheel here. Fort Knight draws it from nested rotated Views because React Native has
+  // no such thing; a browser does, and the keep already carries the degrees, so there is nothing to
   // compute. Decorative: the same numbers are in the list beside it, which is what a reader gets.
   const stops = slices
     .map((slice, index) => `${colours[index]} ${slice.startDegree}deg ${slice.startDegree + slice.sweepDegree}deg`)
@@ -161,7 +161,7 @@ export function renderYearPanel(year) {
   panel.appendChild(row);
   if (year.coversWholeYear === false) {
     panel.appendChild(element("p", "muted",
-      `This seed covers ${year.daysCovered} of ${year.year}'s ${year.daysInYear} days.`));
+      `This keep covers ${year.daysCovered} of ${year.year}'s ${year.daysInYear} days.`));
   }
   return panel;
 }

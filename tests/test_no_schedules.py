@@ -1,6 +1,6 @@
 """The guard that keeps a person's schedule out of a public repository.
 
-Two halves, and the second is the one that matters day to day: it must refuse a seed, and it must NOT
+Two halves, and the second is the one that matters day to day: it must refuse a keep, and it must NOT
 refuse the six committed files a naive marker would have caught. A guard that blocks every build gets
 deleted, and then nothing is guarding anything.
 """
@@ -28,7 +28,7 @@ KEEP_SEED = {"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": 
 
 
 class DescribeScheduleDocumentTests(unittest.TestCase):
-    def test_it_names_a_my_fort_seed(self):
+    def test_it_names_a_my_fort_keep(self):
         self.assertIn("a keep", describe_schedule_document(LEGACY_KEEP))
 
     def test_a_current_format_keep_is_recognised(self):
@@ -36,8 +36,8 @@ class DescribeScheduleDocumentTests(unittest.TestCase):
         self.assertIn("a keep", describe_schedule_document(current))
         self.assertIn('"keep"', describe_schedule_document(current))
 
-    def test_it_names_a_keep_seed(self):
-        self.assertIn("Fortress Key seed", describe_schedule_document(KEEP_SEED))
+    def test_it_names_a_champion_keep(self):
+        self.assertIn("Fort Knight champion keep", describe_schedule_document(KEEP_SEED))
 
     def test_a_bare_tasks_or_days_key_is_not_a_schedule(self):
         """The subtlety the guard exists around: data/questionnaire.json carries `tasks`, days.json carries
@@ -59,11 +59,11 @@ class FindScheduleDocumentsTests(unittest.TestCase):
         """The claim CLAUDE.md, README.md and docs/thesis.md all make, checked rather than asserted."""
         self.assertEqual(find_schedule_documents(), [])
 
-    def test_it_finds_a_seed_wherever_it_is_dropped(self):
+    def test_it_finds_a_keep_wherever_it_is_dropped(self):
         import tempfile
 
         for relative in ("public/myfort.json", "data/whatever.json", "stray.json",
-                         "src/pages/fortknight/seed.json"):
+                         "src/pages/fortknight/keep.json"):
             with self.subTest(path=relative), tempfile.TemporaryDirectory() as directory:
                 planted = Path(directory) / relative
                 planted.parent.mkdir(parents=True, exist_ok=True)
@@ -90,9 +90,9 @@ class FindScheduleDocumentsTests(unittest.TestCase):
             self.assertTrue((CHECKOUT_ROOT / relative).is_file(), f"{relative} is exempt but missing")
 
     def test_both_fixtures_are_read_by_the_gate_that_justifies_them(self):
-        """The exemptions' whole warrant is that the accessibility gate renders the seed-fed pages
+        """The exemptions' whole warrant is that the accessibility gate renders the keep-fed pages
         from each fixture — the sample pass sees fourteen real panels instead of an empty file
-        picker, and the other-household pass certifies the positional palette's contrast on a seed
+        picker, and the other-household pass certifies the positional palette's contrast on a keep
         that is not the original household's. If nothing reads one, its exemption is a hole with a
         story attached."""
         harness = (CHECKOUT_ROOT / "scripts" / "a11y-check.mjs").read_text(encoding="utf-8")
@@ -100,7 +100,7 @@ class FindScheduleDocumentsTests(unittest.TestCase):
         self.assertIn("keep.other-household.json", harness)
 
     def test_the_other_household_fixture_is_read_by_the_tests_that_justify_it(self):
-        """The second fixture also earns its exemption in the rendering tests, which need a seed
+        """The second fixture also earns its exemption in the rendering tests, which need a keep
         whose season ids are not the ones the original colour map was keyed to. Same rule — an
         exemption nothing reads is a hole with a story attached."""
         rendering_tests = (CHECKOUT_ROOT / "tests" / "test_keep.py").read_text(encoding="utf-8")
@@ -115,7 +115,7 @@ class FindScheduleDocumentsTests(unittest.TestCase):
             text = json.dumps(fixture)
             self.assertIn("Example", text, f"{relative} should be obviously invented")
 
-    def test_any_other_seed_under_tests_is_still_a_seed(self):
+    def test_any_other_keep_under_tests_is_still_a_keep(self):
         import tempfile
 
         with tempfile.TemporaryDirectory() as directory:
@@ -125,7 +125,7 @@ class FindScheduleDocumentsTests(unittest.TestCase):
             self.assertEqual([path for path, _ in find_schedule_documents(directory)],
                              ["tests/fixtures/somebody-elses.json"])
 
-    def test_a_seed_it_cannot_read_is_reported_rather_than_skipped(self):
+    def test_a_keep_it_cannot_read_is_reported_rather_than_skipped(self):
         """The guard's only job is never to be quietly wrong. A UTF-16 or malformed file cannot be shown
         NOT to be a schedule, so it is named instead of passed over."""
         import tempfile
@@ -153,13 +153,13 @@ class FindScheduleDocumentsTests(unittest.TestCase):
         exemption is dead weight, and if another JSONC config appears this test is where it surfaces."""
         self.assertIn("tsconfig.json", {path.name for path in CHECKOUT_ROOT.glob("*.json")})
 
-    def test_a_seed_with_a_byte_order_mark_is_still_caught(self):
+    def test_a_keep_with_a_byte_order_mark_is_still_caught(self):
         """Notepad writes one by default, and json.loads refuses a BOM outright — so reading as plain
         utf-8 would have skipped a real export in silence."""
         import tempfile
 
         with tempfile.TemporaryDirectory() as directory:
-            (Path(directory) / "seed.json").write_text(json.dumps(LEGACY_KEEP), encoding="utf-8-sig")
+            (Path(directory) / "keep.json").write_text(json.dumps(LEGACY_KEEP), encoding="utf-8-sig")
             self.assertEqual([reason for _, reason in find_schedule_documents(directory)],
                              ["a keep (meta.format is \"myfort\")"])
 

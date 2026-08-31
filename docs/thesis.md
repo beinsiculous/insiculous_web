@@ -142,7 +142,7 @@ A fort weighs and measures **who is doing what** in a household, and a fortress 
 a community of households — the multi-person extension of exactly this vocabulary, where the missing
 primitive is per-person attribution of the same category minutes. That direction brings a real login
 with it, which is the first time this project would hold anyone's data on a server, and it is in open
-tension with the claim directly above. The model, the four roles, the boards and that unresolved
+tension with the claim directly above. The model, the five roles, the boards and that unresolved
 tension are recorded in `docs/fortress.md`. None of it is built.
 
 ### What it refuses
@@ -177,9 +177,9 @@ the eating.**
   about what dinner costs the rest of your week. Two faces was the shape while both were being
   built; with the creation chain on the back burner, the `/forkknife/` routes came down
   (2026-08-28), and this section's argument moves with them: the by-dish and by-day menu views land
-  where the seed already lives, on FortKnight's seed-fed pages, once the keep carries menu
+  where the keep already lives, on FortKnight's keep-fed pages, once the keep carries menu
   rows. Leftovers stay load-bearing there — eight dishes covering fourteen days is exactly what a
-  real household's seed shows.
+  real household's keep shows.
 
 ### Simple, and therefore difficult
 

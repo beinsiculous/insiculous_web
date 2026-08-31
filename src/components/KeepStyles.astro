@@ -1,8 +1,8 @@
 ---
-// The styles for the Keep DOM, as a component so every seed-fed page can carry them.
+// The styles for the Keep DOM, as a component so every keep-fed page can carry them.
 //
-// They lived in keep.astro's own <style is:global> while that page was the only place a seed was drawn.
-// The builders moved to src/lib/keep-view.js so more than one page can render a seed, and a plain .js
+// They lived in keep.astro's own <style is:global> while that page was the only place a keep was drawn.
+// The builders moved to src/lib/keep-view.js so more than one page can render a keep, and a plain .js
 // module cannot carry an Astro style block — so the styles became a component, and each consuming page
 // includes this once. Keep the block is:global and keep every selector prefixed keep-; both are
 // asserted in tests/test_keep.py, because no gate can see a zero-area div.

@@ -4,7 +4,7 @@ One repository, two surfaces of one site (`docs/app.md`): the **Be Insiculous** 
 `/games/`, `/achievements/`, `/devlog/`, `/engine/`) and the planner face **FortKnight** (`/fortknight/`), with the
 shared profile at `/profile/`. The second face, **Fork Knife** (`/forkknife/`), was removed from the
 live site on 2026-08-28; its chain stays as design documents (`docs/meal-plan.md`,
-`docs/fork-knife-chain.md`), and its menu views will land under `/fortknight/` when the seed carries
+`docs/fork-knife-chain.md`), and its menu views will land under `/fortknight/` when the keep carries
 menu rows.
 
 The planner is *data first*: a set of JSON files (edited by humans and assistants) plus companion
@@ -68,7 +68,7 @@ validate → tests → `astro check` → build → axe-core over every page → 
 ## Invariants (validate.py enforces most of these)
 - Exactly 14 day keys in canonical order: `sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`.
 - The neutral five-block day: `too-early, early, midday, late, too-late`; only early/midday/late carry a focus and activities. Questionnaire profiles carry their own 2–5 blocks (`weights.*.json` → `blocks`; rule in `docs/questionnaire.md`; a one-focus-block day's block is keyed `flexible` and shown without a header).
-- The site has one face (`docs/app.md`): FortKnight (`/fortknight/`), with **Overview · Keep · Achievements · Build · Questionnaire · Assistant** — Build being where things would be added by hand (`/fortknight/build/`: commitments, tasks, and the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. What is live on `main` is the seed-fed half: the Overview keeps its thesis front-door content while no seed is loaded, with **Load your seed** (to `/fortknight/keep/`) as its primary action, and renders a compact fortnight grid linking to the day pages once a seed is stored; `/fortknight/keep/` and the fourteen `/fortknight/days/<dayKey>/` pages render the loaded seed's blocks, meals and appointments by day key — lookup only, no date resolution — falling back to a load-your-seed message. `/fortknight/build|questionnaire|assistant/` remain `FaceInDevelopment` placeholders (see "The site" below). The creation chain the placeholders stand for is the back-burnered design the playground branches were built to, documented in `docs/app.md`: a schedule entering a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks), the Overview and day pages rendering from the person's active profile, and Fork Knife's pages under `/forkknife/` (the meal plan — `docs/meal-plan.md`) with its **Spoon Feed** building page (`/forkknife/spoon-feed/`) — routes now removed from the live site. Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
+- The site has one face (`docs/app.md`): FortKnight (`/fortknight/`), with **Overview · Keep · Achievements · Build · Questionnaire · Assistant** — Build being where things would be added by hand (`/fortknight/build/`: commitments, tasks, and the fortnight menu) — plus the shared `/profile/` (the studio's skin and chrome, not a face's) and a landing at `/`. What is live on `main` is the keep-fed half: the Overview keeps its thesis front-door content while no keep is loaded, with **Load your keep** (to `/fortknight/keep/`) as its primary action, and renders a compact fortnight grid linking to the day pages once a keep is stored; `/fortknight/keep/` and the fourteen `/fortknight/days/<dayKey>/` pages render the loaded keep's blocks, meals and appointments by day key — lookup only, no date resolution — falling back to a load-your-keep message. `/fortknight/build|questionnaire|assistant/` remain `FaceInDevelopment` placeholders (see "The site" below). The creation chain the placeholders stand for is the back-burnered design the playground branches were built to, documented in `docs/app.md`: a schedule entering a profile as an import document applied on the Assistant page (version 2, written for the person to read — `docs/importers.md`; `build/derived/defaultImport.json` is the empty example) or by hand on the Build page (commitments + tasks), the Overview and day pages rendering from the person's active profile, and Fork Knife's pages under `/forkknife/` (the meal plan — `docs/meal-plan.md`) with its **Spoon Feed** building page (`/forkknife/spoon-feed/`) — routes now removed from the live site. Questionnaire Startup 2 keeps the question and the review of what an import brought in, but only counts the commitments and tasks and links to those two ways in.
 - Seven categories: `meals, cleaning, working, spirituality-development, friends-family, health, operations` (+ `flexible` pseudo-focus).
 - In every menu file present, every day has exactly one brunch, snack, and dinner; every meal-prep `mealRef` resolves to a menu meal (the neutral `data/` has no menu files).
 - Season starts are computed by rule (`fk_core/dates.py` `start_date_for_rule`, one structured rule shape for the workbook seasons and a person's year-split sections), never typed in — the only typed dates are `manual` sections' `knownStarts`; each season restarts the fortnight on its `startDayKey`.
@@ -110,10 +110,10 @@ none scrolls sideways — desktop, phone, 641px, and 125% text on a phone via `L
 codebase. After changing a layout or an interactive component, also do the manual pass the PR template
 lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
 
-**The seed-fed pages are live; the creation chain is parked.** `main` is production and only
+**The keep-fed pages are live; the creation chain is parked.** `main` is production and only
 receives merges — `dev` integrates, and a `dev → main` pull request is the deploy. Re-ruled
 2026-08-28: the face branches `fortknightdev` and `forknifedev` are the back-burnered creation
-chain's playgrounds and never merge; seed-fed pages are built fresh in the `main` lineage
+chain's playgrounds and never merge; keep-fed pages are built fresh in the `main` lineage
 (`docs/roadmap.md`). Both branches are local-only as of 2026-08-29: deleted from origin and kept off
 it by a `pre-push` hook, they exist on the maintainer's machine alone. The annotated tag
 `creation-chain-parked` names the same commit on origin, so the parked work survives a fresh clone
@@ -126,22 +126,22 @@ FortKnight's `/fortknight/` Overview, `/fortknight/keep/` and the fourteen
 placeholders — kept as files rather than deleted so the parked chain returning would be an ordinary
 content merge instead of one modify/delete conflict per route; the component's header comment is the
 canonical statement. Fork Knife's routes (`/forkknife/*`) are removed from the live site; its menu
-rendering will land under `/fortknight/` when the seed carries menu rows. Also live on `main`: the
+rendering will land under `/fortknight/` when the keep carries menu rows. Also live on `main`: the
 studio pages (including `/achievements/`), `/fortknight/achievements/` and `/profile/`.
 
-**The keep** is a small file the private Fortress Key app exports (`fortresskey/src/lib/keep.js`): the fourteen
+**The keep** is a small file the private Fort Knight app exports (`fortknight/src/lib/keep.js`): the fourteen
 day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The day keys are the
-format's skeleton: this is a fourteen-day system, so a conforming seed uses exactly the canonical fourteen
+format's skeleton: this is a fourteen-day system, so a conforming keep uses exactly the canonical fourteen
 (`sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`, the order the
 Invariants above pin). The
 visitor loads their own file; it is kept in `localStorage` under `beinsiculous.keep`
 (`src/lib/keep-store.js`), deletable from `/profile/`, and never uploaded. The rendering is
-shared across the three seed-fed pages: `src/lib/keep-view.js` draws the panels, with season
+shared across the three keep-fed pages: `src/lib/keep-view.js` draws the panels, with season
 colours from a **positional palette** — position pinned to first appearance in `year.slices`, never
-keyed to a household's season ids — and one stored-seed boot path serves the Overview, Keep and
+keyed to a household's season ids — and one stored-keep boot path serves the Overview, Keep and
 the day pages.
 
-The seed-fed pages **resolve nothing** — the seed arrives pre-joined by day key. That is not a shortcut: Fortress Key
+The keep-fed pages **resolve nothing** — the keep arrives pre-joined by day key. That is not a shortcut: Fort Knight
 anchors every season on `sun-a` and has transition weeks, while `fk_core/dates.py` and
 `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b` starts for Ostara and
 Fimbulsumar, so **running this repository's date evaluator over a keep would be wrong for half the
@@ -155,7 +155,7 @@ exempt by exact path: `tests/fixtures/keep.sample.json`, which `a11y-check.mjs` 
 a page with fourteen real panels instead of an empty file picker, and `tests/fixtures/keep.other-household.json`,
 a second invented household the rendering tests and the a11y gate's second seeded pass use to prove the year wheel's
 colours are positional rather than keyed to one household's season ids — that pass is what certifies the palette's
-contrast on a seed that is not the original household's. Both are invented, and tests assert all of that.
+contrast on a keep that is not the original household's. Both are invented, and tests assert all of that.
 
 ## Achievements
 
@@ -293,8 +293,8 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | achievements — the three types, the two stores, the registry | `src/lib/achievements.js`, `src/lib/games-achievements.js` |
 | how an assistant should propose changes | `docs/llm-guide.md` |
 | assistant workspace (file set, reply contract) | `docs/assistant-workspace.md` |
-| what comes next for Fort Knight — the system and its five apps | `insiculous/docs/roadmap-fortnight-apps.md` in the working set |
+| what comes next for Fort Knight — the one app and the eight stones | `insiculous/docs/roadmap-fortnight-apps.md` in the working set |
 | what comes next that is web-specific, and the studio | `docs/roadmap.md` |
 | Fork Knife's full chain: questions → the agent interviewing back → menu, recipes, prep, cooking, shopping (design, not built) | `docs/fork-knife-chain.md` |
-| forts, the four roles, boards, a real login — the household/community direction (design, not built) | `docs/fortress.md` |
+| forts, the five roles, boards, a real login — the household/community direction (design, not built) | `docs/fortress.md` |
 | adversarial review workflow | `.claude/skills/adversarial-review/SKILL.md`, `.kimi-code/skills/adversarial-review/SKILL.md`, `scripts/request-review.sh`, `prompts/` |

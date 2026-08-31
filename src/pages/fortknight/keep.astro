@@ -1,22 +1,22 @@
 ---
-// Keep: where the keep is uploaded — the fortnight the Fortress Key app exports, on a screen you can
+// Keep: where the keep is uploaded — the fortnight the Fort Knight app exports, on a screen you can
 // read across a kitchen.
 //
-// Fortress Key shows one day on a phone. This shows all fourteen, from a file the Fortress Key app exports and the person
+// Fort Knight shows one day on a phone. This shows all fourteen, from a file the Fort Knight app exports and the person
 // who owns it loads here. Nothing is uploaded, nothing is held server-side, and this repository contains no
-// seed — scripts/fk_core/no_schedules.py makes that a check rather than a promise.
+// keep — scripts/fk_core/no_schedules.py makes that a check rather than a promise.
 //
 // The server renders an empty shell on purpose. Everything real comes from the visitor's own file, so a
 // crawler, a build artefact and a stranger all see the same thing: a page asking for a file.
 //
-// It resolves nothing. The seed arrives pre-joined by day key — Fortress Key did the joining, where its parity
+// It resolves nothing. The keep arrives pre-joined by day key — Fort Knight did the joining, where its parity
 // suite covers it — so this page looks things up and draws them. That is not a shortcut: the site's own
 // FortKnight evaluator resolves Ostara and Fimbulsumar on sun-b and has no transition weeks, so a page that
 // resolved this data itself would be wrong for half the year.
 //
-// The drawing is not here: src/lib/keep-view.js builds the panels (shared with every seed-fed page),
+// The drawing is not here: src/lib/keep-view.js builds the panels (shared with every keep-fed page),
 // src/components/KeepStyles.astro carries their styles (is:global, because the DOM is built in script),
-// and src/lib/keep-access.js decides what the stored seed is. What remains below is this page's own
+// and src/lib/keep-access.js decides what the stored keep is. What remains below is this page's own
 // wiring: its file picker, its Forget button, and its status line.
 import FaceLayout from "../../layouts/FaceLayout.astro";
 import KeepStyles from "../../components/KeepStyles.astro";
@@ -26,16 +26,16 @@ import KeepStyles from "../../components/KeepStyles.astro";
   <section class="panel">
     <h1>Keep</h1>
     <p class="muted" id="keepIntro">
-      A fortnight from the Fortress Key app: what is being eaten, what is booked, and the shape of each day.
-      Load the seed the app exported — it stays on this device and is never uploaded.
+      A fortnight from the Fort Knight app: what is being eaten, what is booked, and the shape of each day.
+      Load the keep the app exported — it stays on this device and is never uploaded.
     </p>
     <div class="button-row">
       <label class="file-button">Load a keep
         <input type="file" id="keepFileInput" accept="application/json" hidden /></label>
-      <button type="button" id="keepForgetButton" hidden>Forget this seed</button>
+      <button type="button" id="keepForgetButton" hidden>Forget this keep</button>
     </div>
     <p class="muted" id="keepStatus" role="status" aria-live="polite"></p>
-    <noscript><p class="muted">This page needs JavaScript to read your seed.</p></noscript>
+    <noscript><p class="muted">This page needs JavaScript to read your keep.</p></noscript>
   </section>
 
   <div id="keepBody"></div>
@@ -55,17 +55,17 @@ import KeepStyles from "../../components/KeepStyles.astro";
   const status = document.getElementById("keepStatus");
   const body = document.getElementById("keepBody");
 
-  function render(seed) {
+  function render(keep) {
     body.replaceChildren();
-    const days = readableDays(seed);
+    const days = readableDays(keep);
     for (const day of days) body.appendChild(renderDayPanel(day));
-    if (seed.season) body.appendChild(renderSeasonPanel(seed.season));
-    const yearPanel = seed.year ? renderYearPanel(seed.year) : null;
+    if (keep.season) body.appendChild(renderSeasonPanel(keep.season));
+    const yearPanel = keep.year ? renderYearPanel(keep.year) : null;
     if (yearPanel) body.appendChild(yearPanel);
 
     forgetButton.hidden = false;
     intro.hidden = true;
-    const age = describeExportAge(seed, localTodayIsoDate());
+    const age = describeExportAge(keep, localTodayIsoDate());
     status.textContent = `${days.length} days.` + (age
       ? ` Exported ${age.exportedDay}.${age.stale ? " The season and the year are from that day — re-export to refresh them." : ""}`
       : "");
@@ -81,16 +81,16 @@ import KeepStyles from "../../components/KeepStyles.astro";
   function adopt(candidate) {
     const check = validateKeep(candidate);
     if (!check.ok) {
-      // A refused PICK leaves everything alone. The stored seed is still good and still on screen, so
+      // A refused PICK leaves everything alone. The stored keep is still good and still on screen, so
       // wiping the fortnight to report a bad file would take away the thing that was working — and the
       // Forget button with it. Only the status line changes.
       status.textContent = check.reason;
       return false;
     }
-    render(check.seed);
-    // A seed that drew is a seed loaded: the "Moved In" achievement. Idempotent, so repeat loads
+    render(check.keep);
+    // A keep that drew is a keep loaded: the "Moved In" achievement. Idempotent, so repeat loads
     // cost nothing; and earning an achievement is what the once-ever create-profile prompt waits
-    // for. The stored-seed boot branch below does the same — it must, because a seed stored before
+    // for. The stored-keep boot branch below does the same — it must, because a keep stored before
     // this feature shipped never passed through here.
     unlockAchievement("moved-in");
     maybePromptForProfile();
@@ -120,12 +120,12 @@ import KeepStyles from "../../components/KeepStyles.astro";
 
   forgetButton.addEventListener("click", () => {
     clearKeep();
-    showLoadPrompt("Forgotten. Load a seed to show the fortnight again.");
+    showLoadPrompt("Forgotten. Load a keep to show the fortnight again.");
   });
 
-  // Boot is readStoredKeep()'s decision, not this page's: every seed-fed page reloads into the same
-  // endings, and that module's header says why unreadable storage is forgotten but a readable seed the
-  // validator refuses is KEPT — a newer Fortress Key export must survive until the website deploys the
+  // Boot is readStoredKeep()'s decision, not this page's: every keep-fed page reloads into the same
+  // endings, and that module's header says why unreadable storage is forgotten but a readable keep the
+  // validator refuses is KEPT — a newer Fort Knight export must survive until the website deploys the
   // update, and the person holding the phone cannot redeploy the site.
   const stored = readStoredKeep();
   if (stored.status === "none") {
@@ -133,13 +133,13 @@ import KeepStyles from "../../components/KeepStyles.astro";
   } else if (stored.status === "cleared") {
     showLoadPrompt(stored.reason);
   } else if (stored.status === "kept") {
-    // Reported, not forgotten: the seed stays stored, and the Forget button stays visible because it is
-    // now the only way this page offers to delete a seed it cannot draw.
+    // Reported, not forgotten: the keep stays stored, and the Forget button stays visible because it is
+    // now the only way this page offers to delete a keep it cannot draw.
     showLoadPrompt(stored.reason);
     forgetButton.hidden = false;
   } else {
-    render(stored.seed);
-    // The stored-seed route earns "Moved In" too — it is the only way a seed stored before the
+    render(stored.keep);
+    // The stored-keep route earns "Moved In" too — it is the only way a keep stored before the
     // achievements feature shipped can ever earn it. Idempotent, so every later boot is a no-op.
     unlockAchievement("moved-in");
     maybePromptForProfile();

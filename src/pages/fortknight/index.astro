@@ -1,18 +1,18 @@
 ---
-// FortKnight's Overview: the thesis front door, and — once the visitor has a seed — their fortnight grid.
+// FortKnight's Overview: the thesis front door, and — once the visitor has a keep — their fortnight grid.
 //
 // The claims below are condensed from docs/thesis.md — this page says what the face argues. That argument
-// is also the no-seed state and the no-JS fallback, on purpose: a crawler, a build artefact and a stranger
+// is also the no-keep state and the no-JS fallback, on purpose: a crawler, a build artefact and a stranger
 // all see the front door, because everything personal comes from the visitor's own keep in
-// localStorage. When a seed is there, the script draws a compact grid of the fourteen days ABOVE the front
-// door — the seed is the overview, the thesis is the footnote.
+// localStorage. When a keep is there, the script draws a compact grid of the fourteen days ABOVE the front
+// door — the keep is the overview, the thesis is the footnote.
 //
-// It resolves nothing. The seed arrives pre-joined by day key, so the grid shows the seed's own words in
-// the seed's own order and links each cell to the day page; keep.astro's header says why running this
-// repository's date evaluator over a seed would be wrong for half the year.
+// It resolves nothing. The keep arrives pre-joined by day key, so the grid shows the keep's own words in
+// the keep's own order and links each cell to the day page; keep.astro's header says why running this
+// repository's date evaluator over a keep would be wrong for half the year.
 //
 // Two actions live under "What is here now", and the order is the argument. The primary one is loading a
-// seed: it is what makes this page an Overview. The secondary one is creating a profile, and it exists at
+// keep: it is what makes this page an Overview. The secondary one is creating a profile, and it exists at
 // all only while the questionnaires are placeholders — it writes a real, saved profile rather than only
 // making one active, because on this branch there is no questionnaire to do the saving (which is also why
 // the nav does not offer "New profile…", src/components/ProfileSwitcher.astro). When the questionnaires
@@ -61,13 +61,13 @@ const keep = facePath("fortknight", "keep/");
 
     <h2>What is here now</h2>
     <p>
-      <a href={keep}>Keep</a> shows a fortnight exported from the Fortress Key app: what is being eaten,
-      what is booked, and the shape of each day. The seed stays on this device and is never uploaded.
+      <a href={keep}>Keep</a> shows a fortnight exported from the Fort Knight app: what is being eaten,
+      what is booked, and the shape of each day. The keep stays on this device and is never uploaded.
       The planner itself runs on a profile kept on this device; the questionnaires that will build one are
       still being built, so one can be created empty here.
     </p>
     <div class="button-row">
-      <a class="button" href={keep}>Load your seed</a>
+      <a class="button" href={keep}>Load your keep</a>
       <button type="button" id="createProfileButton" hidden>Create a profile</button>
     </div>
     <p class="muted" id="profileStatus"></p>
@@ -81,25 +81,25 @@ const keep = facePath("fortknight", "keep/");
   import { element } from "../../lib/keep-view.js";
   import { facePath } from "../../lib/faces.js";
 
-  // Boot is readStoredKeep()'s decision, like every seed-fed page. "none" renders nothing extra —
+  // Boot is readStoredKeep()'s decision, like every keep-fed page. "none" renders nothing extra —
   // the front door below is already the right thing to show. "cleared" and "kept" both only report, in
   // the same spot beside the load link: one says the wreckage was forgotten, the other that an intact but
-  // undrawable seed was NOT deleted. Only "seed" draws.
+  // undrawable keep was NOT deleted. Only "keep" draws.
   const container = document.getElementById("keepGrid");
   const status = document.getElementById("keepOverviewStatus");
 
   const stored = readStoredKeep();
   if (stored.status === "cleared" || stored.status === "kept") {
     status.textContent = stored.reason;
-  } else if (stored.status === "seed") {
+  } else if (stored.status === "keep") {
     // Compact by design: the full panels live on Keep and on the day pages; here a cell is a label, a
     // focus and the meals, and the whole cell is the link. The classes are keep-grid-* and global for
     // the same reason as the rest of KeepStyles.astro — this DOM is built here, not stamped by Astro.
     // The heading is an h2: the prerendered <h1>FortKnight</h1> below is the document's one h1 in every
-    // state, seeded or not.
+    // state, keeped or not.
     container.appendChild(element("h2", null, "Your fortnight"));
     const grid = element("div", "keep-grid");
-    for (const day of readableDays(stored.seed)) {
+    for (const day of readableDays(stored.keep)) {
       const cell = element("a", "panel keep-grid-cell");
       cell.href = facePath("fortknight", `days/${day.dayKey}/`);
       cell.appendChild(element("span", "keep-grid-day", day.label ?? day.dayKey));

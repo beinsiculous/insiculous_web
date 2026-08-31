@@ -37,12 +37,12 @@ import "../styles/app-widgets.css";
   <section class="panel">
     <h2>Keep</h2>
     <p class="muted">
-      Your keep — the fortnight exported from the Fortress Key app and loaded on the Keep page. It stays on this device only —
+      Your keep — the fortnight exported from the Fort Knight app and loaded on the Keep page. It stays on this device only —
       it was never uploaded and this site holds no copy of it.
     </p>
-    <p class="muted" id="seedStatus">Checking…</p>
-    <div class="button-row" id="seedActions" hidden>
-      <button type="button" id="deleteSeedButton">Delete the seed from this device</button>
+    <p class="muted" id="keepStatus">Checking…</p>
+    <div class="button-row" id="keepActions" hidden>
+      <button type="button" id="deleteKeepButton">Delete the keep from this device</button>
     </div>
   </section>
 
@@ -74,9 +74,9 @@ import "../styles/app-widgets.css";
   import { clearSiteAchievements, renderAchievementsBoard } from "../lib/achievements.js";
 
   const elements = {
-    seedStatus: document.getElementById("seedStatus"),
-    seedActions: document.getElementById("seedActions"),
-    deleteSeedButton: document.getElementById("deleteSeedButton"),
+    keepStatus: document.getElementById("keepStatus"),
+    keepActions: document.getElementById("keepActions"),
+    deleteKeepButton: document.getElementById("deleteKeepButton"),
     profileHeading: document.getElementById("profileHeading"),
     profileNameForm: document.getElementById("profileNameForm"),
     profileNameInput: document.getElementById("profileNameInput"),
@@ -168,19 +168,19 @@ import "../styles/app-widgets.css";
       location.reload();
     }
   });
-  /** What is on this device, never what is in it: whether a seed is here and when it was exported. */
-  function renderSeed() {
+  /** What is on this device, never what is in it: whether a keep is here and when it was exported. */
+  function renderKeep() {
     const { present, exportedAt } = describeKeep();
-    elements.seedActions.hidden = !present;
-    elements.seedStatus.textContent = present
+    elements.keepActions.hidden = !present;
+    elements.keepStatus.textContent = present
       ? `A keep is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
-      : "No keep on this device yet. Export one from Fortress Key and load it on the Keep page.";
+      : "No keep on this device yet. Export one from Fort Knight and load it on the Keep page.";
   }
 
-  elements.deleteSeedButton.addEventListener("click", () => {
+  elements.deleteKeepButton.addEventListener("click", () => {
     if (!confirm("Delete the keep from this device? Load it again to bring it back.")) return;
     clearKeep();
-    renderSeed();
+    renderKeep();
   });
 
   /** All three achievement types on one board; the shared renderer owns the groups (src/lib/achievements.js). */
@@ -198,6 +198,6 @@ import "../styles/app-widgets.css";
   });
 
   renderProfile();
-  renderSeed();
+  renderKeep();
   renderAchievements();
 </script>

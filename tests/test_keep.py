@@ -5,7 +5,7 @@ no rule that exists twice. It is driven through node the same way the twins are,
 tested at all: tsconfig.json excludes `src/lib` from `astro check`, so these tests are its only safety net.
 
 The two that matter most are the tolerance pair. Fortress Key and this website ship on different cadences, and the
-person holding the phone cannot redeploy the site — so an unknown field must not be refused, and a seed
+person holding the phone cannot redeploy the site — so an unknown field must not be refused, and a keep
 from a newer format must be refused with a message that names the real remedy.
 """
 import json
@@ -39,7 +39,7 @@ READ_STORED = (STDIN_PRELUDE
                  f"const {{ readStoredKeep }} = await import({json.dumps(KEEP_ACCESS_MODULE)});"
                  "const result = readStoredKeep();"
                  "process.stdout.write(JSON.stringify({ status: result.status, reason: result.reason ?? null,"
-                 "  hasSeed: Boolean(result.seed), cleared: globalThis.localStorage.cleared }));")
+                 "  hasKeep: Boolean(result.keep), cleared: globalThis.localStorage.cleared }));")
 
 FIXTURE = json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / "keep.sample.json").read_text(encoding="utf-8"))
 OTHER_HOUSEHOLD_FIXTURE = json.loads(
@@ -79,11 +79,11 @@ class ValidateKeepTests(unittest.TestCase):
         self.assertIn("website needs updating", result["reason"])
         self.assertIn("the file is fine", result["reason"])
 
-    def test_keeps_own_seed_is_refused_and_named(self):
-        """The likeliest wrong file: the app's full seed rather than the small one it exports for the web."""
+    def test_keeps_own_keep_is_refused_and_named(self):
+        """The likeliest wrong file: the app's full keep rather than the small one it exports for the web."""
         [result] = self.validate([{"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": []}])
         self.assertFalse(result["ok"])
-        self.assertIn("Fortress Key's own seed", result["reason"])
+        self.assertIn("Fort Knight's own champion keep", result["reason"])
 
     def test_a_fortknight_profile_is_refused(self):
         [result] = self.validate([{"schemaVersion": 2, "activeWeightsId": "x", "weightsProfiles": {}}])
@@ -95,12 +95,12 @@ class ValidateKeepTests(unittest.TestCase):
             self.assertFalse(result["ok"])
             self.assertIn("not a keep", result["reason"])
 
-    def test_a_seed_with_no_version_is_refused_rather_than_guessed_at(self):
+    def test_a_keep_with_no_version_is_refused_rather_than_guessed_at(self):
         [result] = self.validate([{"meta": {"format": "keep"}, "days": [{"dayKey": "sun-a"}]}])
         self.assertFalse(result["ok"])
         self.assertIn("does not say which format", result["reason"])
 
-    def test_a_seed_with_no_days_has_no_fortnight_to_show(self):
+    def test_a_keep_with_no_days_has_no_fortnight_to_show(self):
         for empty in ({"meta": {"format": "keep", "version": 1}, "days": []},
                       {"meta": {"format": "keep", "version": 1}, "days": [{"label": "no key"}]},
                       {"meta": {"format": "keep", "version": 1}}):
@@ -119,24 +119,24 @@ class ValidateKeepTests(unittest.TestCase):
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
 class ExportAgeTests(unittest.TestCase):
-    def describe(self, seed, today):
+    def describe(self, keep, today):
         script = (f'import {{ describeExportAge }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
-                  + "process.stdout.write(JSON.stringify(describeExportAge(inputs.seed, inputs.today)));")
-        return run_node(script, {"seed": seed, "today": today})
+                  + "process.stdout.write(JSON.stringify(describeExportAge(inputs.keep, inputs.today)));")
+        return run_node(script, {"keep": keep, "today": today})
 
-    def test_a_seed_exported_today_is_not_stale(self):
-        seed = {"meta": {"exportedAt": "2026-08-27T18:00:00+00:00"}}
-        self.assertEqual(self.describe(seed, "2026-08-27"), {"exportedDay": "2026-08-27", "stale": False})
+    def test_a_keep_exported_today_is_not_stale(self):
+        keep = {"meta": {"exportedAt": "2026-08-27T18:00:00+00:00"}}
+        self.assertEqual(self.describe(keep, "2026-08-27"), {"exportedDay": "2026-08-27", "stale": False})
 
-    def test_an_older_seed_is_stale_without_counting_the_days(self):
+    def test_an_older_keep_is_stale_without_counting_the_days(self):
         """Stale or not, never how many days — counting them is date arithmetic, and this page does none."""
-        seed = {"meta": {"exportedAt": "2026-06-01T00:00:00+00:00"}}
-        self.assertEqual(self.describe(seed, "2026-08-27"), {"exportedDay": "2026-06-01", "stale": True})
+        keep = {"meta": {"exportedAt": "2026-06-01T00:00:00+00:00"}}
+        self.assertEqual(self.describe(keep, "2026-08-27"), {"exportedDay": "2026-06-01", "stale": True})
 
-    def test_a_seed_without_a_timestamp_says_nothing(self):
-        for seed in ({"meta": {}}, {"meta": {"exportedAt": "not a date"}}, {}):
-            with self.subTest(seed=seed):
-                self.assertIsNone(self.describe(seed, "2026-08-27"))
+    def test_a_keep_without_a_timestamp_says_nothing(self):
+        for keep in ({"meta": {}}, {"meta": {"exportedAt": "not a date"}}, {}):
+            with self.subTest(keep=keep):
+                self.assertIsNone(self.describe(keep, "2026-08-27"))
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
@@ -190,7 +190,7 @@ class PageStyleScopingTests(unittest.TestCase):
     regardless, because axe checks the contrast of rendered text, not font sizes or zero-area divs. So this
     is asserted at the source, because there is nowhere else to assert it.
 
-    The styles live in src/components/KeepStyles.astro so every seed-fed page can carry them; the page is
+    The styles live in src/components/KeepStyles.astro so every keep-fed page can carry them; the page is
     pinned to the component so a future edit cannot drop the styles while keeping the builders.
     """
 
@@ -220,12 +220,12 @@ class PageStyleScopingTests(unittest.TestCase):
         self.assertIn("KeepStyles", page)
 
 
-class SeedFedPageTests(unittest.TestCase):
-    """The seed-fed FortKnight pages, pinned at the source for what no gate can see.
+class KeepFedPageTests(unittest.TestCase):
+    """The keep-fed FortKnight pages, pinned at the source for what no gate can see.
 
     Same warrant as PageStyleScopingTests: axe audits the rendered pages, but nothing rendered shows WHY an
     import must never appear — a date-resolution import would look up fine, build fine and audit fine, and
-    still be wrong for half the seed's year (this repository's evaluator resolves Ostara and Fimbulsumar on
+    still be wrong for half the keep's year (this repository's evaluator resolves Ostara and Fimbulsumar on
     sun-b; a keep arrives pre-joined by day key). So the rule "lookup only" is asserted here.
     """
 
@@ -236,21 +236,21 @@ class SeedFedPageTests(unittest.TestCase):
         return [line.strip() for line in path.read_text(encoding="utf-8").splitlines()
                 if line.strip().startswith("import")]
 
-    def test_the_overview_boots_from_the_stored_seed(self):
+    def test_the_overview_boots_from_the_stored_keep(self):
         source = self.OVERVIEW.read_text(encoding="utf-8")
         self.assertIn("readStoredKeep", source)
         self.assertIn("KeepStyles", source)  # the grid is script-built; scoped styles cannot reach it
 
     def test_the_overview_offers_profile_creation_as_the_secondary_action(self):
-        """Loading a seed is the primary action, but creating a profile is the only creation path on
-        production while the questionnaires are placeholders — so it stays, after the seed's button-link."""
+        """Loading a keep is the primary action, but creating a profile is the only creation path on
+        production while the questionnaires are placeholders — so it stays, after the keep's button-link."""
         source = self.OVERVIEW.read_text(encoding="utf-8")
         self.assertIn("createProfileButton", source)
         self.assertIn("user-settings", source)
-        self.assertLess(source.index("Load your seed"), source.index("createProfileButton"))
+        self.assertLess(source.index("Load your keep"), source.index("createProfileButton"))
 
-    def test_the_seeded_grid_heading_is_not_a_second_h1(self):
-        """The prerendered <h1>FortKnight</h1> is the document's one h1 in every state, seeded or not."""
+    def test_the_keeped_grid_heading_is_not_a_second_h1(self):
+        """The prerendered <h1>FortKnight</h1> is the document's one h1 in every state, keeped or not."""
         source = self.OVERVIEW.read_text(encoding="utf-8")
         self.assertIn('element("h2", null, "Your fortnight")', source)
         self.assertNotIn('element("h1"', source)
@@ -278,11 +278,11 @@ class SeedFedPageTests(unittest.TestCase):
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
-class StoredSeedBootTests(unittest.TestCase):
-    """readStoredKeep(): the two ways a stored seed cannot be drawn, and why only one deletes.
+class StoredKeepBootTests(unittest.TestCase):
+    """readStoredKeep(): the two ways a stored keep cannot be drawn, and why only one deletes.
 
     Unreadable storage is wreckage and is forgotten, or it sits there failing on every reload of a wall
-    display. A readable seed the validator refuses is intact data — the sharpest case being a newer Focus
+    display. A readable keep the validator refuses is intact data — the sharpest case being a newer Focus
     Key export, whose remedy is a website deploy the person holding the phone cannot do — so it is KEPT,
     and the reason must say nothing was deleted, because the person cannot see storage to check.
     """
@@ -292,12 +292,12 @@ class StoredSeedBootTests(unittest.TestCase):
 
     def test_nothing_stored_is_none_and_untouched(self):
         outcome = self.boot(None)
-        self.assertEqual(outcome, {"status": "none", "reason": None, "hasSeed": False, "cleared": False})
+        self.assertEqual(outcome, {"status": "none", "reason": None, "hasKeep": False, "cleared": False})
 
-    def test_a_valid_stored_seed_is_drawn_and_untouched(self):
+    def test_a_valid_stored_keep_is_drawn_and_untouched(self):
         outcome = self.boot(json.dumps(FIXTURE))
-        self.assertEqual(outcome["status"], "seed")
-        self.assertTrue(outcome["hasSeed"])
+        self.assertEqual(outcome["status"], "keep")
+        self.assertTrue(outcome["hasKeep"])
         self.assertFalse(outcome["cleared"])
 
     def test_unreadable_storage_is_cleared(self):
@@ -308,10 +308,10 @@ class StoredSeedBootTests(unittest.TestCase):
                 self.assertTrue(outcome["cleared"])
                 self.assertIn("forgotten", outcome["reason"])
 
-    def test_a_seed_the_validator_refuses_is_kept_not_cleared(self):
+    def test_a_keep_the_validator_refuses_is_kept_not_cleared(self):
         newer = json.loads(json.dumps(FIXTURE))
         newer["meta"]["version"] = 99
-        for stored, fragment in ((json.dumps({"not": "a seed"}), "not a keep"),
+        for stored, fragment in ((json.dumps({"not": "a keep"}), "not a keep"),
                                  (json.dumps(newer), "the file is fine")):
             with self.subTest(fragment=fragment):
                 outcome = self.boot(stored)
@@ -320,9 +320,9 @@ class StoredSeedBootTests(unittest.TestCase):
                 self.assertIn(fragment, outcome["reason"])
                 self.assertIn("nothing was deleted", outcome["reason"])
 
-    def test_every_seed_fed_page_reports_the_kept_case(self):
+    def test_every_keep_fed_page_reports_the_kept_case(self):
         """The split only exists if the pages show it: each consumer must name "kept" alongside "cleared",
-        or a kept seed would fall through to whatever the page's default does."""
+        or a kept keep would fall through to whatever the page's default does."""
         for page in ("index.astro", "keep.astro"):
             source = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / page).read_text(encoding="utf-8")
             self.assertIn('"kept"', source, page)
@@ -331,7 +331,7 @@ class StoredSeedBootTests(unittest.TestCase):
 
 
 DESCRIBE = (f'import {{ describeSection }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
-            + "process.stdout.write(JSON.stringify(inputs.map(([seed, name]) => describeSection(seed, name))));")
+            + "process.stdout.write(JSON.stringify(inputs.map(([keep, name]) => describeSection(keep, name))));")
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
@@ -379,11 +379,11 @@ class DescribeSectionTests(unittest.TestCase):
         [wrong] = self.describe([[{"menu": {"dinner": []}}, "menu"]])
         self.assertEqual(wrong["state"], "wrong-shape")
 
-    def test_it_survives_a_seed_that_is_not_there(self):
+    def test_it_survives_a_keep_that_is_not_there(self):
         """Callers get this from storage, which can hold anything."""
-        for seed in (None, {}):
-            with self.subTest(seed=seed):
-                [result] = self.describe([[seed, "menu"]])
+        for keep in (None, {}):
+            with self.subTest(keep=keep):
+                [result] = self.describe([[keep, "menu"]])
                 self.assertEqual(result["state"], "absent")
 
     def test_a_version_one_section_that_is_null_is_not_called_late(self):
@@ -606,19 +606,22 @@ class KeepSchemaTests(unittest.TestCase):
         self.assertTrue(report.ok, f"the spec's own example does not match the schema: {report.render()}")
 
 
-#: The private app repo, which is being renamed focuskey -> fortresskey (2026-08-29). BOTH names are
-#: accepted for one transition cycle: this repository reaches production through its own m -> dev gate,
-#: so it cannot land in the same commit as the rename, and without tolerance one machine or the other
-#: is red until every clone has moved. The old name is dropped in a follow-up once they all have.
-APP_REPOSITORY_NAMES = ("fortresskey", "focuskey")
+#: The private app repo, renamed twice: focuskey -> fortresskey (2026-08-29) and fortresskey ->
+#: fortknight (Operation Name Drop, 2026-08-30, which also moved its keep files seed/ -> keep/).
+#: ALL names and both layouts are accepted for the transition: this repository reaches production
+#: through its own m -> dev gate, so it cannot land in the same commit as a rename, and without
+#: tolerance one machine or the other is red until every clone has moved. Old names and the old
+#: layout are dropped in Name Drop's Phase 3 cleanup once they all have.
+APP_REPOSITORY_NAMES = ("fortknight", "fortresskey", "focuskey")
 
 
 def app_schema_copy():
-    """The keep schema's copy in the app repo, under whichever name that repo currently has here."""
+    """The keep schema's copy in the app repo, under whichever name and layout it currently has here."""
     for name in APP_REPOSITORY_NAMES:
-        candidate = REPOSITORY_ROOT.parent / name / "seed" / "keep.schema.json"
-        if candidate.is_file():
-            return candidate
+        for layout in ("keep", "seed"):
+            candidate = REPOSITORY_ROOT.parent / name / layout / "keep.schema.json"
+            if candidate.is_file():
+                return candidate
     return None
 
 

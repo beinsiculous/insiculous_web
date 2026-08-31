@@ -2,7 +2,7 @@
 
 This repository is public and holds nobody's schedule (CLAUDE.md, README.md, docs/thesis.md). Until now
 that was a sentence; this makes it a check. What it guards against is one tired commit — dropping a
-keep into `public/` to try it on the TV, or a `keep_seed.json` next to the scripts that read it.
+keep into `public/` to try it on the TV, or a `champion_keep.json` next to the scripts that read it.
 Either one deploys a household's fortnight to a public website, and git history makes it painful to undo.
 
 The shapes it knows, and why they are that specific:
@@ -12,7 +12,7 @@ The shapes it knows, and why they are that specific:
     reading this string when the format was renamed, but this guard never does: old exports exist on
     the household's devices, and the keep deliberately omits `calendar` and `tasks`, so the shape
     below cannot catch one. The one place "myfort" stays alive, on purpose.
-  * `meta`, `calendar`, `days` and `tasks` ALL present — a `keep_seed.json`.
+  * `meta`, `calendar`, `days` and `tasks` ALL present — a `champion_keep.json`.
 
 A bare `tasks` or `days` key is NOT the test, and that is the whole subtlety. `data/questionnaire.json`
 carries `tasks`, `data/days.json` and `examples/workbook/days.json` carry `days`, and
@@ -61,7 +61,7 @@ def describe_schedule_document(parsed):
     if isinstance(meta, dict) and meta.get("format") in ("keep", "myfort"):
         return f"a keep (meta.format is \"{meta.get('format')}\")"
     if {"meta", "calendar", "days", "tasks"} <= set(parsed):
-        return "a Fortress Key seed (meta, calendar, days and tasks together)"
+        return "a Fort Knight champion keep (meta, calendar, days and tasks together)"
     return None
 
 

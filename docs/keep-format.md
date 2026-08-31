@@ -131,7 +131,7 @@ section at all, which says the export predates menus; a keep with an empty menu 
 has none. Those are different sentences, and a report that conflates them sends someone to
 re-export a file that was never the problem.
 
-`describeSection(seed, name)` in `src/lib/keep.js` is where that distinction lives — it answers
+`describeSection(keep, name)` in `src/lib/keep.js` is where that distinction lives — it answers
 *absent*, *empty*, *present* or *wrong-shape*, with a sentence for each. Renderers still collapse
 the two, deliberately: `validateKeep` ignores what it does not know and every panel degrades with
 `?? []`, which is the right behaviour for something drawing a page. The requirement is on tools that

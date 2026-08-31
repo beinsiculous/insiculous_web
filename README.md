@@ -12,7 +12,7 @@ deliberately read as two different websites:
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
   iOS rather than here (`docs/thesis.md` is the source of that policy's wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
-  organised by Norse-wheel seasons, five daily blocks and seven life categories. Its seed-fed pages
+  organised by Norse-wheel seasons, five daily blocks and seven life categories. Its keep-fed pages
   are live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day
   pages (`/fortknight/days/<dayKey>/`) all read a **keep** the visitor loads from their own
   device, and **Achievements** (`/fortknight/achievements/`) shows the active profile's unlocked
@@ -23,7 +23,7 @@ The planner is data-first — JSON files are the source of truth, Markdown docs 
 context, and light Python scripts stand in for a backend. The on-device profile at `/profile/` is
 live. Users bring their own AI provider; nothing is stored server-side. **Fork Knife**, the second
 face (the fortnight menu), was removed from the live site on 2026-08-28; its chain stays as design
-documents under `docs/`, and its menu views will land under `/fortknight/` when the seed carries
+documents under `docs/`, and its menu views will land under `/fortknight/` when the keep carries
 menu rows. See `CLAUDE.md` for the map and `docs/` for the contracts.
 
 ## Setup
@@ -252,13 +252,13 @@ The branch model behind that: `main` is production and only ever receives merges
 integration branch, and a `dev → main` pull request **is** the production deploy. The creation chain
 the face apps were built around (questionnaire → weights → generator → import) was re-ruled on
 2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge, and
-seed-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). Both
+keep-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). Both
 branches are local-only as of 2026-08-29: deleted from origin and kept off it by a `pre-push` hook,
 they exist on the maintainer's machine alone. The annotated tag `creation-chain-parked` names the
 same commit on origin, so the parked work survives a fresh clone even though the branches do not.
 Ten files were deleted from `main` with the chain — `ApplyFromAssistant.astro`,
 `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each
-is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's seed-fed pages
+is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's keep-fed pages
 are live — the Overview, Keep and the fourteen day pages — alongside the achievements boards (the
 studio's `/achievements/` and the face's `/fortknight/achievements/`), while
 `/fortknight/build|questionnaire|assistant/` remain `src/components/FaceInDevelopment.astro`

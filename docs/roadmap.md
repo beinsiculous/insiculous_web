@@ -12,7 +12,7 @@ Done (this pass): workbook → canonical JSON, schemas, validator, builder, allo
 weights, date resolver, the web app, questionnaire-as-settings, assistant workspace (files for the
 person's own AI workspace + apply-back), docs, tests.
 
-**Shipping status.** `main` is production. FortKnight's seed-fed pages are live — the Overview
+**Shipping status.** `main` is production. FortKnight's keep-fed pages are live — the Overview
 (`/fortknight/`), Keep (`/fortknight/keep/`) and the fourteen day pages
 (`/fortknight/days/<dayKey>/`), all reading a visitor-loaded keep — as are the achievements boards:
 the studio's `/achievements/`, listing every achievement the site knows, and the face's
@@ -21,7 +21,7 @@ the studio's `/achievements/`, listing every achievement the site knows, and the
 `FaceInDevelopment` placeholders, and the `/forkknife/` routes were removed on 2026-08-28. The face
 pages built on `fortknightdev` and `forknifedev` belong to the back-burnered creation chain, and
 those branches are its playgrounds — it no longer ships by merging (re-ruled 2026-08-28; the folded
-roadmap in the working set carries the ruling). Seed-fed replacements are built fresh in the `main`
+roadmap in the working set carries the ruling). Keep-fed replacements are built fresh in the `main`
 lineage. Both branches are local-only as of 2026-08-29: deleted from origin and kept off it by a
 `pre-push` hook, they exist on the maintainer's machine alone. The annotated tag
 `creation-chain-parked` names the same commit on origin, so the parked work survives a fresh clone
@@ -29,22 +29,22 @@ even though the branches do not. Ten files were deleted from `main` with the cha
 `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the
 `/forkknife/` pages — and each is recoverable with `git show creation-chain-parked:PATH`.
 
-**Fort Knight is planned in the working set, not here.** The apps, the phone app **Fortress Key**
-(Keep until 2026-08-27, Focus Key until 2026-08-28, now Fortress Key), and the seed that joins
+**Fort Knight is planned in the working set, not here.** The apps, the phone app **Fort Knight**
+(Keep until 2026-08-27, Focus Key until 2026-08-28, now Fort Knight), and the keep that joins
 them are one system with one plan:
 `insiculous/docs/roadmap-fortnight-apps.md` in the admin repo. That file was folded together on
-2026-08-27, **re-ordered around the seed** — responding to the schedule that exists comes before
+2026-08-27, **re-ordered around the keep** — responding to the schedule that exists comes before
 authoring new ones — and on 2026-08-28 given a project spine.
 
 **Fort Knight is the system, not an app** (ruled 2026-08-28). `/fortknight/` on this site is the
 system's own web face, and through the current phase it is the only agenda surface there is. The work
 runs in gated projects, in order; the two that concern this repository are:
 
-1. **Project Mega Seed — the current phase.** Build seeds to flesh out the receiver app: the Keep
+1. **Project Mega Keep — the current phase.** Build keeps to flesh out the receiver app: the Keep
    format gets a public spec and machine schema, both canonical *here* because a person hand-making a
-   seed cannot see the private repo. Nothing new consumes the format until it is written down.
-2. **Project Ant Hill.** Reverse-engineer a seed builder from the hand-made seeds. The creation chain
-   below belongs to it. **It is gated**: nothing in it starts before Mega Seed is done, so the
+   keep cannot see the private repo. Nothing new consumes the format until it is written down.
+2. **Project Ant Hill.** Reverse-engineer a keep builder from the hand-made keeps. The creation chain
+   below belongs to it. **It is gated**: nothing in it starts before Mega Keep is done, so the
    per-item conditions that used to say "returns when" are now ordering inside that project.
 
 Later projects exist and are planned in the working set.
@@ -55,33 +55,33 @@ What that means for the items this file used to number 1–9:
   exporters, and assistant-workspace follow-ups — are **Project Ant Hill** in the folded roadmap.
   Their contracts (`docs/questionnaire.md`, `docs/generator.md`, `docs/importers.md`,
   `docs/weights.md`, `docs/assistant-workspace.md`) are unchanged and still shipped; nothing is deleted.
-- **Item 8, Forts and the Fortress** — no longer part of that queue. It was never seed-creation work,
+- **Item 8, Forts and the Fortress** — no longer part of that queue. It was never keep-creation work,
   and it is planned separately in the working set. `docs/fortress.md` is unchanged and still says at
   its head that none of it exists.
 - **Item 3, Fork Knife's full chain** (`docs/fork-knife-chain.md`) — **no longer "the next thing being
   built."** Its stage 3 does not exist at all, and it authors a menu from nothing while a real menu
-  sits unread in the seed. What comes first is carrying the workbook's menu across in the Keep
-  seed and rendering it under `/fortknight/` — the `/forkknife/` routes that design assumed are
+  sits unread in the keep. What comes first is carrying the workbook's menu across in the Keep
+  keep and rendering it under `/fortknight/` — the `/forkknife/` routes that design assumed are
   removed.
 - **Item 7, "native clients reading the same bundle"** — **obsolete, not deferred.** The phone app exists
-  and does not read `build/fortknight.bundle.json`; it renders the workbook's own seed. The two meet
+  and does not read `build/fortknight.bundle.json`; it renders the workbook's own keep. The two meet
   at the keep, not at the bundle.
 - **Item 9**, the "Open for Appointments (Tuesday A, early)" vs week-1-midday question, is a data
   question for the owner and stays open.
 
 ## What is web-specific, and stays here
 
-- **The seed-fed pages** are live on `main`. `/fortknight/keep` renders a keep the
+- **The keep-fed pages** are live on `main`. `/fortknight/keep` renders a keep the
   visitor loads from their own device, resolving nothing and never uploading it; the Overview
-  (`/fortknight/`) keeps its thesis front-door content as the no-seed state — its primary action is
-  **Load your seed** — and renders a compact fortnight grid once a seed is stored; the fourteen
-  `/fortknight/days/<dayKey>/` pages render the seed's blocks, meals and appointments by day key,
-  falling back to the load-your-seed message. Keep is in the face nav (`src/lib/faces.js`), and
+  (`/fortknight/`) keeps its thesis front-door content as the no-keep state — its primary action is
+  **Load your keep** — and renders a compact fortnight grid once a keep is stored; the fourteen
+  `/fortknight/days/<dayKey>/` pages render the keep's blocks, meals and appointments by day key,
+  falling back to the load-your-keep message. Keep is in the face nav (`src/lib/faces.js`), and
   the rendering is factored into `src/lib/keep-view.js` with a positional season palette. All of
   it is documented in `docs/app.md`.
 - **The face branches are playgrounds (re-ruled 2026-08-28).** They belong to the back-burnered
-  creation chain and are not absorbed or merged; seed-fed pages are built fresh in the `main`
-  lineage. The earlier rule here — absorb `main` before seed-fed work — guarded a merge that no
+  creation chain and are not absorbed or merged; keep-fed pages are built fresh in the `main`
+  lineage. The earlier rule here — absorb `main` before keep-fed work — guarded a merge that no
   longer happens. `keep.astro`, `src/lib/keep.js`, `src/lib/keep-store.js`,
   `src/lib/keep-view.js` and `tests/fixtures/keep.sample.json` exist only on `main` and stay
   the live copies.
@@ -101,7 +101,7 @@ What that means for the items this file used to number 1–9:
   `/fortknight/` carry Create-a-profile buttons.
 - **The `sun-b` starts for `ostara` and `fimbulsumar`** in `data/seasons.json` disagree with Focus
   Key's `sun-a` ruling. Porting it touches `seasons.json`, `docs/domain.md` and the test
-  expectations here — which is why it is deferred and why every seed-fed page looks up rather than
+  expectations here — which is why it is deferred and why every keep-fed page looks up rather than
   resolves.
 
 ## Open, not tied to an item

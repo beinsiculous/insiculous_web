@@ -7,17 +7,17 @@ the canonical JS modules are all in **this** repository (`insiculous_web` — be
 on 2026-08-17, and the FortKnight repository that had stayed canonical for the data was folded in
 here on 2026-08-18 — one project, one repo, no sync step.)
 
-**Deployment status.** On production (`main`), FortKnight's seed-fed pages are live: the Overview
+**Deployment status.** On production (`main`), FortKnight's keep-fed pages are live: the Overview
 (`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day pages
 (`/fortknight/days/<dayKey>/`), all reading a keep the visitor loads from their own device (next
 section), plus **Achievements** (`/fortknight/achievements/`), which reads the site's achievement
-store instead of the seed and shows the active profile's unlocked fortnight achievements. The studio
+store instead of the keep and shows the active profile's unlocked fortnight achievements. The studio
 side gains `/achievements/`, the every-achievement board (below). `/fortknight/build/`,
 `/fortknight/questionnaire/` and `/fortknight/assistant/` remain
 `src/components/FaceInDevelopment.astro` placeholders, and Fork Knife's routes (`/forkknife/*`) were
 removed from the site on 2026-08-28 — its menu rendering will land under `/fortknight/` when the
-seed carries menu rows. The face branches `fortknightdev` and `forknifedev` were re-ruled the
-back-burnered creation chain's playgrounds on 2026-08-28 — never absorbed, never merged; seed-fed
+keep carries menu rows. The face branches `fortknightdev` and `forknifedev` were re-ruled the
+back-burnered creation chain's playgrounds on 2026-08-28 — never absorbed, never merged; keep-fed
 pages are built fresh in the `main` lineage (`docs/roadmap.md`). Both branches are local-only as of
 2026-08-29: deleted from origin and kept off it by a `pre-push` hook, they exist on the maintainer's
 machine alone. The annotated tag `creation-chain-parked` names the same commit on origin, so the
@@ -27,11 +27,11 @@ parked work survives a fresh clone even though the branches do not. Ten files we
 creation-chain-parked:PATH`. The profile-driven body below stays as-is: it is the contract that
 chain was built against, and it applies again if the chain returns from the back burner.
 
-## The seed-fed pages: Overview, Keep and the day pages
+## The keep-fed pages: Overview, Keep and the day pages
 
 The live face routes are neither placeholders nor built from a profile. They render a **Keep
-seed**: a small file the private **Fortress Key** phone app exports
-(`focuskey/src/lib/keep.js`), carrying fourteen day keys with their meals, appointments and
+keep**: a small file the private **Fort Knight** phone app exports
+(`fortknight/src/lib/keep.js`), carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
 
 **The format is written down.** `docs/keep-format.md` is its specification, written for a person
@@ -41,28 +41,28 @@ that one. This section describes what the pages do with a keep; the format's own
 fourteen canonical day keys, what a keep should omit, why adding a field is not a version bump —
 live in the spec and are not restated here.
 
-- **Three pages, one seed.** `/fortknight/keep/` draws the whole fortnight — fourteen day panels,
-  the season card and the year wheel — and sits in the face nav (`src/lib/faces.js`). With no seed
+- **Three pages, one keep.** `/fortknight/keep/` draws the whole fortnight — fourteen day panels,
+  the season card and the year wheel — and sits in the face nav (`src/lib/faces.js`). With no keep
   stored, `/fortknight/` keeps its thesis front-door content and its primary action is **Load your
-  seed** (to `/fortknight/keep/`); with a seed stored it renders a compact fortnight grid linking
+  keep** (to `/fortknight/keep/`); with a keep stored it renders a compact fortnight grid linking
   to the day pages. Each `/fortknight/days/<dayKey>/` page renders that day key's blocks, meals and
-  appointments, falling back to the load-your-seed message. The rendering is factored into
+  appointments, falling back to the load-your-keep message. The rendering is factored into
   `src/lib/keep-view.js` — season colours come from a **positional palette** (position pinned to
-  first appearance in `year.slices`), never keyed to a household's season ids — and the stored-seed
+  first appearance in `year.slices`), never keyed to a household's season ids — and the stored-keep
   boot logic is shared by all three pages.
 
 - **The visitor loads their own file.** It is kept in `localStorage` under
   `beinsiculous.keep` (`src/lib/keep-store.js`), deleted from `/profile/`, and **never
   uploaded**. It is stored under its own key, separate from the profile, so neither document can
   migrate into the other.
-- **The pages resolve nothing.** The seed arrives pre-joined by day key. This is deliberate rather
-  than lazy: Fortress Key anchors every season on `sun-a` and has transition weeks, while
+- **The pages resolve nothing.** The keep arrives pre-joined by day key. This is deliberate rather
+  than lazy: Fort Knight anchors every season on `sun-a` and has transition weeks, while
   `fk_core/dates.py` and `src/lib/shared/fortknight-rules.js` still evaluate the archived `sun-b`
   starts for Ostara and Fimbulsumar — so **running this repository's date evaluator over a Keep
-  seed would be wrong for half the year.** `src/lib/keep.js` validates and the pages draw.
+  keep would be wrong for half the year.** `src/lib/keep.js` validates and the pages draw.
 - **Validation is tolerant within a major version.** Unknown fields are ignored and only a *higher*
   `meta.version` is refused, because the two halves ship on different cadences and the person holding
-  the phone cannot redeploy the website. Fortress Key's side of that bargain: the version bumps only for
+  the phone cannot redeploy the website. Fort Knight's side of that bargain: the version bumps only for
   a breaking change, so adding a field is not a bump.
 - **A keep is somebody's real schedule and must never be committed here.**
   `scripts/fk_core/no_schedules.py` enforces it, `validate.py` runs it, and the exact-path
@@ -74,7 +74,7 @@ live in the spec and are not restated here.
 The earlier gaps are closed: Keep is in the face nav, the season colours are positional rather than
 keyed to Jesse's season ids, and the face branches no longer matter to these pages — `fortknightdev`
 and `forknifedev` were re-ruled the creation chain's playgrounds on 2026-08-28, never absorbed or
-merged, and **seed-fed pages are built fresh in the `main` lineage** (see `docs/roadmap.md`). Both
+merged, and **keep-fed pages are built fresh in the `main` lineage** (see `docs/roadmap.md`). Both
 branches are local-only as of 2026-08-29 and are not on origin; the tag `creation-chain-parked`
 names their commit there instead.
 
@@ -126,7 +126,7 @@ Multi-page, no UI framework. `npm install` once, then:
   unsaved edits can veto a switch by cancelling `fortknight:profile-switch`) and a **⚙ Profile** link. Old URLs keep
   working through meta-refresh stubs: `/fortknight/settings/` → `/profile/`,
   `/fortknight/allocations/` and `/fortknight/fortnight/` → `/fortknight/`, `/fortknight/ask/` → `/fortknight/assistant/`.
-- FortKnight pages (the parked design — the live Overview and day pages are the seed-fed ones of the previous section): `/fortknight/` **Overview** — the fortnight grid + date resolver (navigates to the resolved day) and, below it,
+- FortKnight pages (the parked design — the live Overview and day pages are the keep-fed ones of the previous section): `/fortknight/` **Overview** — the fortnight grid + date resolver (navigates to the resolved day) and, below it,
   time by category (bars rendered from the active profile by `src/lib/shared/allocations-rules.js` — the "Weights"
   view always, the "Focus grid" view once the profile has a grid, "Proposed grid" for the generator's proposal
   recomputed for the resolver's date) — **rendered from the

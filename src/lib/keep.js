@@ -1,13 +1,13 @@
 // Is this a keep this page can render?
 //
-// The file is exported by the Fortress Key app and picked by the person who owns it. It is the only document this
+// The file is exported by the Fort Knight app and picked by the person who owns it. It is the only document this
 // site reads that carries somebody's real schedule, so the rules here are about being useful rather than
 // being strict: what a page can draw, it draws.
 //
 // TOLERANT WITHIN A MAJOR VERSION, on purpose. The two halves of this feature ship on different cadences —
-// Fortress Key at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
+// Fort Knight at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
 // the website. So an unknown field is ignored rather than refused, and `version` is refused only when it is
-// higher than this page understands. Fortress Key's side of that bargain is in the phone app's own
+// higher than this page understands. Fort Knight's side of that bargain is in the phone app's own
 // src/lib/keep.js: the version bumps only for a breaking change. (This line used to say "in
 // src/lib/keep.js" while pointing at itself — it means the app's file, not this one.)
 //
@@ -22,7 +22,7 @@ function looksLikeDay(day) {
     && typeof day.dayKey === "string" && day.dayKey.length > 0;
 }
 
-/** {ok: true, seed} or {ok: false, reason}. Never throws: the boot path calls this on whatever was left in
+/** {ok: true, keep} or {ok: false, reason}. Never throws: the boot path calls this on whatever was left in
  *  localStorage, which may be half a document written by a browser that ran out of room. */
 export function validateKeep(candidate) {
   if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
@@ -30,9 +30,9 @@ export function validateKeep(candidate) {
   }
   const meta = candidate.meta;
   if (!meta || typeof meta !== "object" || meta.format !== "keep") {
-    // The likeliest wrong file by far is a whole keep_seed.json, which is the app's own data and far bigger.
+    // The likeliest wrong file by far is a whole champion_keep.json, which is the app's own data and far bigger.
     const hint = candidate.calendar && candidate.tasks
-      ? " That looks like Fortress Key's own seed — Keep needs the smaller file the app exports for the web."
+      ? " That looks like Fort Knight's own champion keep — Keep needs the smaller file the app exports for the web."
       : "";
     return { ok: false, reason: `That file is not a keep.${hint}` };
   }
@@ -51,13 +51,13 @@ export function validateKeep(candidate) {
   if (!Array.isArray(candidate.days) || !candidate.days.some(looksLikeDay)) {
     return { ok: false, reason: "That keep has no days in it, so there is no fortnight to show." };
   }
-  return { ok: true, seed: candidate };
+  return { ok: true, keep: candidate };
 }
 
 /** The days worth drawing, in the order the file gives them. A day without a key cannot be a panel; the
  *  rest of a sparse day is the page's problem and it renders what is there. */
-export function readableDays(seed) {
-  return (seed?.days ?? []).filter(looksLikeDay);
+export function readableDays(keep) {
+  return (keep?.days ?? []).filter(looksLikeDay);
 }
 
 /** Absent, empty, or present — and a sentence saying which.
@@ -75,8 +75,8 @@ export function readableDays(seed) {
  *  re-export a file that was never the problem. Anything not listed here arrived additively. */
 const VERSION_ONE_SECTIONS = new Set(["meta", "days", "season", "year"]);
 
-export function describeSection(seed, name) {
-  const value = seed == null ? undefined : seed[name];
+export function describeSection(keep, name) {
+  const value = keep == null ? undefined : keep[name];
   if (value === undefined || value === null) {
     return {
       state: "absent",
@@ -98,8 +98,8 @@ export function describeSection(seed, name) {
 /** How stale the season and the wheel are. The fourteen days carry no dates and never go off; `season` and
  *  `year` are snapshots of the moment the file was exported, so this is the one thing the page says about
  *  age — and it says it in days, never by resolving a date, because nothing here evaluates a calendar. */
-export function describeExportAge(seed, todayIsoDate) {
-  const exportedAt = seed?.meta?.exportedAt;
+export function describeExportAge(keep, todayIsoDate) {
+  const exportedAt = keep?.meta?.exportedAt;
   if (typeof exportedAt !== "string" || typeof todayIsoDate !== "string") return null;
   const exportedDay = exportedAt.slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(exportedDay) || !/^\d{4}-\d{2}-\d{2}$/.test(todayIsoDate)) return null;
