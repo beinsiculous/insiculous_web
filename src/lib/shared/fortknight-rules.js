@@ -23,7 +23,8 @@ export const SUBJECT_CADENCES = ["fortnight", "section"];
  *  contributes it on `daysPerPeriod` of the cycle's 14 days. A subject on the section cadence, and one marked
  *  "not often" (peripheral), contribute nothing — they are done in the fortnight's flexible time rather than in
  *  its rhythm, and it is their absence from the declaration that leaves that time free. Twin of
- *  fk_core.keys.subject_daily_minutes; lives here so the generator can read it without importing weights-rules. */
+ *  fk_core.keys.subject_daily_minutes. It lived here so the generator could read it without importing
+ *  weights-rules.js; both of those were removed 2026-08-30 with the creation chain. */
 export function subjectDailyMinutes(subjectAnswer) {
   if (subjectAnswer.peripheral) return 0;
   const midpoint = (subjectAnswer.minutesPerDay.min + subjectAnswer.minutesPerDay.max) / 2;

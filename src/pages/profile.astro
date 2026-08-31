@@ -66,10 +66,9 @@ import "../styles/app-widgets.css";
 </BaseLayout>
 
 <script>
-  import { deleteProfile, duplicateProfile, loadSettings, profileIds, renameProfile, saveSettings } from "../lib/shared/user-settings.js";
+  import { activeWeights, deleteProfile, duplicateProfile, loadSettings, profileIds, renameProfile, saveSettings } from "../lib/shared/user-settings.js";
   import { unusedProfileName } from "../lib/shared/profile-names.js";
   import { askProfileName } from "../lib/profile-name-dialog.js";
-  import { activeWeights } from "../lib/shared/weights-rules.js";
   import { clearKeep, describeKeep } from "../lib/keep-store.js";
   import { clearGameAchievements } from "../lib/games-achievements.js";
   import { clearSiteAchievements, renderAchievementsBoard } from "../lib/achievements.js";

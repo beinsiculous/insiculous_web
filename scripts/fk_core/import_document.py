@@ -1,8 +1,11 @@
 """The import document (docs/importers.md, data/schema/import.schema.json): a person's existing system, as
 their assistant read it, in a shape the person can check. Version 2 is written for the reader
 ("repeats": "monthly on the 2nd tuesday", "start": "7:00 PM", "lasts": "2 h"); this module turns it into the
-canonical objects the rest of FortKnight consumes. Mirror of src/lib/shared/import-document.js (+ src/lib/shared/clock.js)
-— keep both in sync; tests/test_import_document.py runs both on the same fixture."""
+canonical objects the rest of FortKnight consumes. Its JavaScript twin, src/lib/shared/import-document.js,
+was removed on 2026-08-30 with the creation chain and is preserved at the tag `creation-chain-parked`,
+along with tests/test_import_document.py, which used to run both on the same fixture. The clock half below
+still has a live twin in src/lib/shared/clock.js — keep those two in sync (nothing exercises the pair any
+more; beinsiculous/insiculous_web#10 owns that gap)."""
 import copy
 import re
 

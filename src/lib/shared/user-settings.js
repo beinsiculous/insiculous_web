@@ -2,9 +2,7 @@
 // The questionnaire IS the settings: named weights profiles (the answers ride inside each at
 // weights.questionnaire.answers), one of them active, plus device-only extras. Nothing secret lives here.
 import { DAY_KEY_ORDER } from "./fortknight-rules.js";
-import { DEFAULT_WEIGHTS_ID, activeWeights, slugifyId } from "./weights-rules.js";
 import { randomProfileName } from "./profile-names.js";
-import { classifyAssistantDocument } from "./workspace-docs.js";
 
 const STORAGE_KEY = "fortknight.user-settings";
 /** The pre-migration record of each schema step, kept (minus the old AI-provider block and its key) so a bad
@@ -14,8 +12,26 @@ const backupStorageKey = (schemaVersion) => `${STORAGE_KEY}.v${Number.isInteger(
  *  small write instead of a whole settings record nobody asked to save yet. */
 const DEVICE_NAME_KEY = "fortknight.default-profile-id";
 export const SETTINGS_SCHEMA_VERSION = 3;
+/** The default (and first) profile id of a device's settings. Moved here from weights-rules.js when the
+ *  creation chain was removed (2026-08-30); it lived there so workspace-docs.js could read it without an
+ *  import cycle, and both of those files are gone. */
+export const DEFAULT_WEIGHTS_ID = "username";
 /** The default profile id (kept under its old name for the pages that import it). */
 export const USER_WEIGHTS_ID = DEFAULT_WEIGHTS_ID;
+
+/** Lowercase kebab-case id from a free-text name (weights ids are immutable once published). */
+export function slugifyId(text) {
+  return String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "username";
+}
+
+/** The active profile's weights of a device's settings (docs/app.md "User settings":
+ *  `weightsProfiles` keyed by weights id + `activeWeightsId`), or null when that profile has not been
+ *  saved yet. */
+export function activeWeights(settings) {
+  const profiles = settings?.weightsProfiles;
+  if (!profiles || typeof profiles !== "object") return null;
+  return profiles[settings.activeWeightsId] || null;
+}
 
 export function defaultSettings() {
   return {
@@ -242,15 +258,29 @@ export function deleteProfile(settings, id) {
   return settings;
 }
 
-export { activeWeights };
-
 export function exportSettings(settings) {
   return JSON.stringify(settings, null, 2) + "\n";
+}
+
+/** Is this parsed JSON a user-settings file?
+ *
+ *  This is the surviving half of `classifyAssistantDocument` (workspace-docs.js, removed 2026-08-30
+ *  with the creation chain — see the tag `creation-chain-parked`), and it keeps that function's BRANCH
+ *  ORDER, not just its last test. The order is load-bearing: a meal-plan document also carries an
+ *  integer `schemaVersion` with no `source` and no `cycleLengthDays` (meal-plan.schema.json requires
+ *  only schemaVersion/kind/items), so the settings test alone would accept one and migrateSettings
+ *  would quietly merge it into the device's profiles. The classifier returned "meal-plan" first; so
+ *  does this. A weights file needs no separate exclusion — it carries both `cycleLengthDays` and
+ *  `source`, which the final test already rejects. */
+function isUserSettingsDocument(value) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  if (value.kind === "meal-plan" && Array.isArray(value.items)) return false;
+  return Number.isInteger(value.schemaVersion) && value.source === undefined && value.cycleLengthDays === undefined;
 }
 
 /** Parse a settings file (any schema version) into the current shape; throws when it is not one. */
 export function importSettings(jsonText) {
   const parsed = JSON.parse(jsonText);
-  if (classifyAssistantDocument(parsed) !== "user-settings") throw new Error("Not a FortKnight user-settings file.");
+  if (!isUserSettingsDocument(parsed)) throw new Error("Not a FortKnight user-settings file.");
   return migrateSettings(parsed);
 }

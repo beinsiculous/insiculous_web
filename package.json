@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "data": "python3 scripts/validate.py && python3 scripts/build.py",
     "validate": "python3 scripts/validate.py",
     "build": "astro build && node scripts/postbuild-check.mjs",
     "preview": "astro preview",

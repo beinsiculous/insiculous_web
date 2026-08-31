@@ -153,29 +153,6 @@ main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 
 
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
 
-/* ---------- fortnight grid ---------- */
-.fortnight-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 0.5rem; }
-/* The fortnight grid collapses from seven day-columns to two below 900px. The value is in px while everything
-   else here is in rem (see the note at the phone block) — kept as-is rather than re-tuned in rem. */
-@media (max-width: 900px) { .fortnight-grid { grid-template-columns: repeat(2, 1fr); } }
-.grid-views { margin-top: 0.75rem; }
-.grid-views .button-row button:not(.active):not(#adoptProposal) { background: transparent; color: var(--accent); }
-.proposal-reasons { margin: 0.25rem 0 0; padding-left: 1.2rem; font-size: 0.85rem; max-height: 16rem; overflow-y: auto; }
-.proposal-reasons .warning { color: var(--warning, #b25a00); }
-.week-divider { grid-column: 1 / -1; font-size: 0.75rem; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 0.25rem; }
-
-/* ---------- date resolver ---------- */
-.date-resolver { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
-.date-resolver input { font: inherit; padding: 0.3rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
-
-/* ---------- day detail ---------- */
-.day-detail-block { border-left: 4px solid var(--line); padding: 0.3rem 0.6rem; margin: 0.4rem 0; }
-.day-detail-block h3 { margin: 0; font-size: 0.95rem; }
-.day-detail-block ul { margin: 0.2rem 0 0; padding-left: 1.1rem; font-size: 0.88rem; }
-.appointment-tag { font-size: 0.7rem; background: var(--accent); color: var(--on-accent); border-radius: 3px; padding: 0 0.3rem; margin-left: 0.3rem; }
-.menu-line { font-size: 0.88rem; margin: 0.2rem 0; }
-.back-link { font-size: 0.85rem; }
-
 /* ---------- settings ---------- */
 .button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 button, .file-button, .button { font: inherit; padding: 0.4rem 0.9rem; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); border-radius: 6px; cursor: var(--cursor-pointer); }
@@ -185,33 +162,20 @@ button:disabled { opacity: 0.5; cursor: var(--cursor-forbidden); }
 input:disabled, select:disabled { opacity: 0.55; }
 
 [hidden] { display: none !important; }   /* display rules on classes (flex/grid) must never beat the hidden attribute */
-.block-bar { display: flex; width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin: 0.5rem 0; font-size: 0.78rem; }
-/* min-width: 0 is what lets the ellipsis work: without it a flex item floors at its content width and
-   the bar's min-content is the sum of every untruncated label. */
-.block-segment { min-width: 0; padding: 0.35rem 0.4rem; background: var(--panel-soft); border-right: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.block-segment:last-child { border-right: 0; }
-.block-segment.unscheduled { background: var(--flexible); color: var(--muted); }
-.block-warnings { margin: 0.25rem 0 0 1rem; padding: 0; }
-
-/* ---------- assistant ---------- */
-.paste-box textarea { width: 100%; font: inherit; padding: 0.45rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); color: var(--ink); }
-
 /* Cursor: wooden by default; sword on anything clickable; shield on anything disabled. */
 html, body { cursor: var(--cursor-default); }
 a, area, button, select, summary, label, input[type=checkbox], input[type=radio], input[type=file], input[type=range], [role=button], [role=link] { cursor: var(--cursor-pointer); }
 button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-disabled=true] { cursor: var(--cursor-forbidden); }
-.apply-step { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--line); }
-.apply-step h3 { font-size: 1rem; margin: 0 0 0.35rem; display: flex; align-items: center; gap: 0.5rem; }
-.step-number { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 0.85rem; font-weight: 700; }
-.prompt-text { margin: 0.25rem 0 0.5rem; padding: 0.4rem 0.6rem; border-left: 3px solid var(--accent); background: var(--panel-soft); font-style: italic; font-size: 0.9rem; }
 
 /* ---------- theme layout (Astro app only) ---------- */
 /* themes.css owns the skin (palette/fonts/textures); geometry lives here. This file loads after themes.css. */
 
 /* ==== one content column, centered ====
-   62rem, not a rounder 60, is load-bearing: .fortnight-grid asks for 7 × 120px + 6 × 8px = 888px, and a
-   60rem column leaves only 876-878px inside the panel's padding and border, so the grid overflowed it by
-   12px. 62rem leaves 908-910px. */
+   62rem, not a rounder 60, and the reason is worth keeping even though what demanded it is gone: the
+   parked chain's .fortnight-grid asked for 7 × 120px + 6 × 8px = 888px, and a 60rem column leaves only
+   876-878px inside the panel's padding and border, so it overflowed by 12px. 62rem leaves 908-910px.
+   The width stays — the keep's own panels (src/components/KeepStyles.astro) are sized to be read from
+   across a room and want every pixel of it. */
 [data-theme="fort-knight"] main { max-width: 62rem; }
 
 /* `main` is a grid, so every panel is a grid item and its default `min-width: auto` resolves to

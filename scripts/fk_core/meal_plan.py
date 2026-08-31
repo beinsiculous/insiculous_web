@@ -1,4 +1,6 @@
-"""The meal plan: the fortnight menu (docs/meal-plan.md), mirrored exactly by src/lib/shared/meal-plan.js.
+"""The meal plan: the fortnight menu (docs/meal-plan.md). Its JavaScript twin, src/lib/shared/meal-plan.js,
+was removed on 2026-08-30 with the creation chain and is preserved at the tag `creation-chain-parked`;
+this module is now the only copy.
 
 For each meal the questionnaire names (Breakfast, Lunch, Dinner, …) the person lists dishes and the day(s)
 they are eaten: the first day is the fresh serving, an optional second day is leftovers. Rules:

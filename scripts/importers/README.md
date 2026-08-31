@@ -7,7 +7,7 @@ the fortnight view. Planned sources, one module each (single responsibility):
 | module (planned)        | source                         | notes |
 |-------------------------|--------------------------------|-------|
 | `google_calendar.py`    | Google Calendar API            | user's own OAuth credentials, on device; read now, write later |
-| `spreadsheet.py`        | .xlsx / .csv                   | reuse `fk_core.xlsx` |
+| `spreadsheet.py`        | .xlsx / .csv                   | needs an .xlsx reader; `fk_core.xlsx` was one, removed 2026-08-30 with the creation chain (preserved at `creation-chain-parked`) |
 | `image.py`              | photo of a hand-written schedule | needs the user's own AI provider (see `docs/ai-providers.md`) for OCR/structuring |
 
 Rules: importers are read-only with respect to `data/`; they never store credentials;

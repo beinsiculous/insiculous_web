@@ -1,6 +1,8 @@
 """Questionnaire answers -> weights (the questionnaire contract, docs/weights.md).
 
-The rule, in one place (mirrored exactly by src/lib/shared/weights-rules.js — keep both in sync):
+The rule, in one place. Its JavaScript twin, src/lib/shared/weights-rules.js, was removed on 2026-08-30
+with the creation chain and is preserved at the tag `creation-chain-parked` — this module is now the only
+copy, so there is nothing to keep in sync:
   1. Every subject contributes the midpoint of its chosen minutes-per-day range — the slider always means
      one day. A subject that is not everyday contributes that midpoint on the days it happens
      (`daysPerPeriod / 14` for the fortnight cadence); one on the section cadence, and one marked
@@ -27,10 +29,13 @@ The rule, in one place (mirrored exactly by src/lib/shared/weights-rules.js — 
      blockFocusGrid (what FortKnight's Overview shows); the import's appointmentBlocks pass through.
   8. Sentiment / delegable / essential flags and the per-subject ranges pass straight through;
      the raw answers are kept under `questionnaire.answers`.
-  9. The generator (fk_core/generator.py) proposes a grid from the finished weights for the season the
-     caller names (`season_focus`, `season_id`); it rides along as `proposal` with a diff against
-     `blockFocusGrid`.
 Answers shape: see docs/questionnaire.md ("Answers file").
+
+Step 9 used to be here: the generator (fk_core/generator.py) proposed a grid from the finished weights
+and it rode along as `proposal`. The generator was removed on 2026-08-30 with the creation chain
+(preserved at the tag `creation-chain-parked`), so `weights_from_answers` no longer emits `proposal` —
+which weights.schema.json has always allowed, the key being optional. `season_focus` / `season_id` are
+kept in the signature because they are part of the questionnaire contract this module documents.
 """
 import json
 import math
@@ -470,7 +475,6 @@ def weights_from_answers(answers, categories, questionnaire, *, weights_id, answ
     """Turn a questionnaire answers object into a weights object (weights.schema.json).
     `season_focus` / `season_id` name the season the proposal is generated for (the current one; a person's own
     sections carry no focus list, so the generator then works from weights and anchors alone)."""
-    from .generator import proposal_from_weights  # imported here: generator.py reads finished weights, weights.py builds them
     defaults = default_answers(questionnaire, categories)
     subject_time = {**defaults["subjectTime"], **answers.get("subjectTime", {})}
     # A category "wants more" when any of its subjects is a goal (Focus Q2 was folded into the goal toggle).
@@ -568,7 +572,6 @@ def weights_from_answers(answers, categories, questionnaire, *, weights_id, answ
         "energyPeak": answers.get("energyPeak", defaults["energyPeak"]),
         "context": answers.get("context", defaults["context"]),
         "questionnaire": questionnaire_record,
-        "notes": ["Derived from questionnaire answers by the rule in fk_core/weights.py / src/lib/shared/weights-rules.js."],
+        "notes": ["Derived from questionnaire answers by the rule in fk_core/weights.py."],
     }
-    weights["proposal"] = proposal_from_weights(weights, questionnaire, categories, season_focus, season_id)
     return weights
