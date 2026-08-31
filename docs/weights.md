@@ -1,5 +1,19 @@
 # Weights — the questionnaire contract
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `src/lib/shared/weights-rules.js`, `scripts/questionnaire_to_weights.py`,
+> `scripts/analyze_allocations.py` and `scripts/generate_grid.py`. `scripts/fk_core/weights.py`
+> survives only because `validate.py` imports one function from it, and it no longer emits a
+> `proposal`. `data/schema/weights.schema.json` is still validated.
+
 **Goal:** a questionnaire the user fills out produces a `weights` JSON that says how the
 fortnight should be apportioned across the seven categories. The generator (`docs/generator.md`) turns
 weights into a concrete schedule; today the baseline weights (`examples/workbook/weights.baseline.json`)

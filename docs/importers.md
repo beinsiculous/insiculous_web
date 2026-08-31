@@ -1,5 +1,19 @@
 # Importers — turning an existing system into FortKnight objects
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `src/lib/shared/import-document.js` and `import-review.js`, and the
+> fixtures `tests/fixtures/import.sample.json` and `import.v2.sample.json`.
+> `scripts/fk_core/import_document.py` survives, kept alive by `validate.py` rather than by a twin,
+> and `data/schema/import.schema.json` is still validated.
+
 People arrive with a system already: a hand-written planner, a spreadsheet, a Google Calendar,
 an `.ics` export, a photo of the fridge whiteboard. FortKnight does not want them to retype it.
 A future **Import** section of the app (and, for scripts/assistants, the same contract) turns

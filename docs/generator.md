@@ -1,5 +1,18 @@
 # The generator: weights → a proposed block focus grid, and activities inside it
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `scripts/fk_core/generator.py`, `src/lib/shared/generator-rules.js` and
+> `scripts/generate_grid.py`. `fk_core/weights.py` survives but **no longer emits a `proposal`** —
+> the step that called the generator went with it.
+
 Roadmap 2. A pure, deterministic rule that reads a finished weights file and proposes (a) a focus for every
 (day key × focus block) cell — the `blockFocusGrid` FortKnight's Overview shows — so that the minutes each
 category gets track its share, with the person's fixed activities, rest days, preferred blocks, energy peak

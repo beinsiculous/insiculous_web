@@ -1,5 +1,19 @@
 # Assistant workspace (no AI in the app)
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `src/lib/shared/workspace-docs.js`, which held the file list, the classifier
+> and the two prompts. **`/profile/` has no workspace downloads and no page promises any** — that
+> correction is `beinsiculous/insiculous_web#5`. The app never calling an LLM and holding no
+> credentials is permanent and is not part of what was parked.
+
 FortKnight has no AI of its own and never calls a provider. Instead the design has the app
 **generate a set of files** that the person uploads into *their own* AI workspace — a Claude
 Project, a ChatGPT / Kimi / NotebookLM workspace, anything that takes documents. The assistant

@@ -30,7 +30,7 @@ is `source/import.my-activities.json`.
 | | Flexibility | `flexibility` lower-cased (`null` when blank/"null") |
 | | Category | `categories[]` (`Operations/Health` → two keys) |
 | | Link/Tasks | `detail{raw, kind, mealRefs|url|text}` |
-| Menu | (all) | not imported — it is a formula view of Spooky Season; rebuilt as `derived/menuByDay.json` and checked by `tests/test_build.py` |
+| Menu | (all) | not imported — it is a formula view of Spooky Season; was rebuilt as `derived/menuByDay.json` and checked by `tests/test_build.py`, both removed 2026-08-30 with the creation chain |
 | Subjects | Subjects / Category | `subjects{key}`, `categories{key}.subjects[]` |
 | Spooky Season | # / Meal / Meal Key / Menu | `menus/spooky-season.json` `meals[]` (`number`, `slot`, `mealKey`, `menu`, `cookExtra` from leading `*`) |
 

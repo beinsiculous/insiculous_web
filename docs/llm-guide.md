@@ -2,14 +2,14 @@
 
 You are editing a person's real schedule. Be precise and conservative.
 
-1. **Only edit `data/`.** Never `build/` (generated) or `source/` (archive).
+1. **Only edit `data/`.** Never `source/` (archive). (`build/` was deleted on 2026-08-30 with the creation chain; there is no generated tree any more.)
 2. **Keep `raw`.** When changing a structured field, leave `raw` and `sourceRow` untouched; if the change is new information, add it to the structured fields only.
 3. **Use canonical keys** — day keys `sun-a…sat-b`, block keys, category keys, `HH:MM` times. Never invent a new key without also updating `fk_core/keys.py`, the schema, and `docs/data-model.md`.
 4. **Ids are immutable.** New activity → new id (`slug(title)--dayKey--block`).
-5. **After every change:** `python3 scripts/validate.py` then `python3 scripts/build.py`. Report warnings to the user; do not silence them.
+5. **After every change:** `python3 scripts/validate.py`. Report warnings to the user; do not silence them. (`scripts/build.py` is gone — see `docs/scripts.md`.)
 6. **Explain in domain terms** — "moved Laundry from Monday B early to midday (week 2 appointment block is early)" — and cite `docs/domain.md` when a rule applies.
 7. **Menus** (when a person carries them, in a menu file or their import document's `meals`): every day needs exactly one brunch, snack, dinner. When you move a dish, update the meal key *and* any meal-prep `mealRefs` that pointed at it.
-8. **Weights:** treat `weights.*.json` as the contract; propose schedule changes as changes to weights first when the user is talking about balance ("more family time"), and as activity edits when they are talking about specifics ("piano moved to 4pm").
+8. **Weights:** treat `weights.*.json` as the contract; propose schedule changes as changes to weights first when the user is talking about balance ("more family time"), and as activity edits when they are talking about specifics ("piano moved to 4pm"). Note the weights pipeline is parked design — `docs/weights.md` carries the banner — so nothing on the site consumes what you write.
 9. **There are no credentials.** FortKnight holds no API keys and calls no provider; never ask for keys. What you were given is one person's private schedule — keep it inside their workspace.
 
 ## Replying from an assistant workspace

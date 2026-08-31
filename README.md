@@ -40,13 +40,13 @@ npm run dev   # dev server at http://localhost:4321
 | Command             | Action                                                        |
 | ------------------- | ------------------------------------------------------------- |
 | `npm run dev`       | Dev server with hot reload                                    |
-| `npm run data`      | `validate.py` then `build.py` — run after any change under `data/` |
+| `npm run validate`  | `validate.py` — run after any change under `data/`             |
 | `npm run test:data` | The Python suite, including the JavaScript parity tests       |
 | `npm run build`     | Build to `dist/` + postbuild checks (see below)               |
 | `npm run preview`   | Serve the production build locally                            |
 | `npm run check`     | Type-check `.astro` files and content schemas                 |
 | `npm run a11y`      | Accessibility audit of every built page (axe-core; see below) |
-| `npm run verify`    | `test:data` + `check` + `build` + `a11y` — run before pushing; CI gates deploys on the same |
+| `npm run verify`    | `validate` + `test:data` + `check` + `build` + `a11y` + the layout gate (`LARGE_TEXT=1 npm run shots`) — run before pushing; CI gates deploys on the same |
 | `npm run deploy`    | `verify`, then `wrangler deploy` (manual release; see below)  |
 
 ## The planner's data and tooling
@@ -58,21 +58,23 @@ build/      the generated bundle, committed — the site imports it directly
 scripts/    *.py tooling (fk_core/ is the shared library) beside the site's own .mjs gates
 tests/      the Python suite; several tests drive src/lib/shared/*.js through node
 docs/       domain, data model, weights, generator, questionnaire, importers, app, roadmap
-src/lib/shared/   the canonical browser modules — exact twins of scripts/fk_core/
+src/lib/shared/   the surviving browser modules (three have a Python twin in scripts/fk_core/)
 ```
 
-The edit loop is: change `data/` → `npm run data` → `npm run test:data`. **Commit `build/` too** —
-the site imports the bundle, so skipping `build.py` ships a bundle that disagrees with the data
-beside it. `src/pages/bundle.json.js` re-serves that same module at `/bundle.json` for the pages
-that fetch it on the client, so there is exactly one bundle in the repository.
+The edit loop is: change `data/` → `npm run validate` → `npm run test:data`. Nothing to regenerate
+and nothing to commit alongside. The committed bundle and its `/bundle.json` endpoint were deleted
+on 2026-08-30 with the creation chain, and with them the only path from `data/` to a rendered page —
+nothing under `src/` reads `data/` now, so a data edit changes what `validate.py` checks and nothing
+a visitor sees.
 
-Several `scripts/fk_core/*.py` modules have an exact JavaScript twin in `src/lib/shared/` (dates,
-weights, the generator, the meal plan, import documents, astronomy, allocations). The file headers
-name each pair and the tests run both on the same fixtures — change one, change the other.
+**Three twin pairs survive:** `clock.js`/`timeconv.py`, `astronomy.js`/`astronomy.py` and
+`fortknight-rules.js`/`dates.py`. The file headers name each pair; change one, change the other. The
+clock pair is no longer exercised by any test — its test went with the chain (issue #10). The other
+twins named in older docs (weights, the generator, the meal plan, import documents, allocations) are
+gone, preserved at `creation-chain-parked`.
 
 This repository is public and holds nobody's schedule. The archived workbook and the owner's own
-import document live outside it, in a gitignored `source/`; `tests/test_build.py`'s workbook
-cross-check skips unless `FORTKNIGHT_WORKBOOK` points at that copy.
+import document live outside it, in a gitignored `source/`.
 
 ## Content
 
@@ -261,11 +263,14 @@ Ten files were deleted from `main` with the chain — `ApplyFromAssistant.astro`
 is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's keep-fed pages
 are live — the Overview, Keep and the fourteen day pages — alongside the achievements boards (the
 studio's `/achievements/` and the face's `/fortknight/achievements/`), while
-`/fortknight/build|questionnaire|assistant/` remain `src/components/FaceInDevelopment.astro`
-placeholders, kept as files so the parked chain's return would be an ordinary content merges rather
-than one modify/delete conflict per route. Fork Knife's routes (`/forkknife/*`) were removed from
-the live site on 2026-08-28; its menu rendering will land under `/fortknight/` when the keep carries
-menu rows.
+`/fortknight/{build,questionnaire,assistant,ask}/` were deleted outright on 2026-08-30 and hard-404
+by ruling — a redirect stub records a move, and these were removals. Fork Knife's routes
+(`/forkknife/*`) were removed from the live site on 2026-08-28; its menu rendering lands at
+`/fortknight/forkknife/` when that page is built (issue #18).
+
+The face's nav is six pills — Overview · Keep · Fork Knife · Fresh Keep · Folk Knowledge ·
+Achievements — and **three of them 404 until issues #18, #19 and #20 land**, so `dev` → `main` is
+held until they do.
 
 It needs two repository secrets (Settings → Secrets and variables → Actions):
 

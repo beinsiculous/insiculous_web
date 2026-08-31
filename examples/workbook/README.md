@@ -8,8 +8,6 @@ The original FortKnight workbook (`source/FortKnight.xlsx`, `docs/workbook-mappi
 
 ```
 python3 scripts/validate.py --overlay examples/workbook
-python3 scripts/build.py --overlay examples/workbook --out build/examples/workbook   # gitignored demo bundle
-python3 scripts/analyze_allocations.py --overlay examples/workbook
 ```
 Tests load it as `WORKBOOK_DATA` (`tests/helpers.py`). Its import document (`build/examples/workbook/derived/defaultImport.json`)
 is what a person would apply on the Assistant page (*Apply from assistant*) to make this schedule theirs; the owner's own

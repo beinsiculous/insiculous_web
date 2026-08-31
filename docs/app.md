@@ -1,31 +1,55 @@
 # The app (frontend-only)
 
-There is no backend. A client (web today; iOS/Android later) ships with `build/fortknight.bundle.json`
-and stores everything user-specific on the device. The web frontend, the data, the Python tooling and
-the canonical JS modules are all in **this** repository (`insiculous_web` — beinsiculous.com).
-(The zero-install legacy viewer was removed on 2026-08-16; the two faces moved onto beinsiculous.com
-on 2026-08-17, and the FortKnight repository that had stayed canonical for the data was folded in
-here on 2026-08-18 — one project, one repo, no sync step.)
+There is no backend and no build step feeding the pages. The web frontend, the data, the Python
+tooling and the surviving JS modules are all in **this** repository (`insiculous_web` —
+beinsiculous.com). (The zero-install legacy viewer was removed on 2026-08-16; the two faces moved
+onto beinsiculous.com on 2026-08-17, and the FortKnight repository that had stayed canonical for the
+data was folded in here on 2026-08-18 — one project, one repo, no sync step.)
 
-**Deployment status.** On production (`main`), FortKnight's keep-fed pages are live: the Overview
-(`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day pages
-(`/fortknight/days/<dayKey>/`), all reading a keep the visitor loads from their own device (next
-section), plus **Achievements** (`/fortknight/achievements/`), which reads the site's achievement
-store instead of the keep and shows the active profile's unlocked fortnight achievements. The studio
-side gains `/achievements/`, the every-achievement board (below). `/fortknight/build/`,
-`/fortknight/questionnaire/` and `/fortknight/assistant/` remain
-`src/components/FaceInDevelopment.astro` placeholders, and Fork Knife's routes (`/forkknife/*`) were
-removed from the site on 2026-08-28 — its menu rendering will land under `/fortknight/` when the
-keep carries menu rows. The face branches `fortknightdev` and `forknifedev` were re-ruled the
-back-burnered creation chain's playgrounds on 2026-08-28 — never absorbed, never merged; keep-fed
-pages are built fresh in the `main` lineage (`docs/roadmap.md`). Both branches are local-only as of
-2026-08-29: deleted from origin and kept off it by a `pre-push` hook, they exist on the maintainer's
-machine alone. The annotated tag `creation-chain-parked` names the same commit on origin, so the
-parked work survives a fresh clone even though the branches do not. Ten files were deleted from
-`main` with the chain — `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`,
-`forkknife.js` and the `/forkknife/` pages — and each is recoverable with `git show
-creation-chain-parked:PATH`. The profile-driven body below stays as-is: it is the contract that
-chain was built against, and it applies again if the chain returns from the back burner.
+## The face is display-only
+
+**Ruled 2026-08-30** (`docs/megaseed/display-only-face.md` in the working set, and
+`docs/megaseed/name-drop.md` for the vocabulary). The face reads a keep the visitor loads and renders
+it. **Nothing on this site builds a keep.** The creation chain that did — the Build, Questionnaire
+and Assistant pages, the builder JavaScript graph in `src/lib/shared/`, six Python CLIs and half of
+`fk_core`, the committed bundle and its `/bundle.json` endpoint — was removed from `main` on
+2026-08-30 and is preserved at the annotated tag `creation-chain-parked`.
+
+That removal has a consequence worth stating plainly: **nothing under `src/` reads `data/` any
+more.** The committed bundle was the only path from the repository's data to a rendered page. `data/`
+is now a person-neutral vocabulary that `validate.py` checks and that ships nowhere.
+
+The face's nav is six pills — **Overview · Keep · Fork Knife · Fresh Keep · Folk Knowledge ·
+Achievements**, one per Name Drop stone with a page — and **three of them 404 today**: Fork Knife,
+Fresh Keep and Folk Knowledge have no page until `beinsiculous/insiculous_web#18`, `#19` and `#20`
+land. Nothing catches that automatically, so **`dev` → `main` is held until they do.** Six is itself
+interim: Name Drop has eight stones, and `#23` takes the nav to ten.
+
+**Removed URLs hard-404.** `/fortknight/{build,questionnaire,assistant,ask}/` and every
+`/forkknife/*` URL return 404. Redirect stubs are scoped to *moves*, not removals: `myfort` →
+`keep/`, `settings` → `/profile/`, and `allocations`/`fortnight` → the Overview all still have live
+targets and keep their stubs. `ask` pointed at the Assistant, which is gone, so it went too — a stub
+aimed at a page that absorbed nothing would record a move that never happened.
+
+`/fortknight/keep/` **will regain building**: slab uploads producing a downloadable keep, per
+Operation Name Drop (`#24`). That is a new writer, not this chain returning.
+
+**Deployment status.** Live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`), the
+fourteen day pages (`/fortknight/days/<dayKey>/`) — all reading a visitor-loaded keep (next section)
+— and **Achievements** (`/fortknight/achievements/`), which reads the site's achievement store
+instead of the keep. The studio side has `/achievements/`, the every-achievement board (below).
+
+**Recovery, and why the tag alone is not enough.** `creation-chain-parked` lives on origin and
+preserves the functional chain, but it pins the **2026-08-26** snapshot — before the 2026-08-28/29
+naming settlements. So `git show creation-chain-parked:PATH` recovers the parked *pages*, while a
+file's state *at removal* comes from `main` history: the removal commit's parent. Restoring from the
+tag alone would reintroduce naming drift. The face branches `fortknightdev` and `forknifedev` are
+that chain's playgrounds, never merge, and have been local-only since 2026-08-29 — deleted from
+origin and kept off it by a `pre-push` hook.
+
+**Everything below the keep-fed section describes the parked chain**, not the site. It is kept as
+the design record the chain was built against; read it as history, and read `docs/megaseed/` for
+what replaces it.
 
 ## The keep-fed pages: Overview, Keep and the day pages
 
@@ -85,19 +109,21 @@ the **Be Insiculous studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/en
 and the FortKnight planner face under `FaceLayout.astro`, with its own skin.
 
 Multi-page, no UI framework. `npm install` once, then:
-- `npm run dev` / `npm run build` / `npm run preview`; `npm run data` (= `validate.py` then `build.py`)
-  after any change under `data/`, and `npm run verify` for everything CI gates on.
-- **One copy of everything.** `build/fortknight.bundle.json` is generated by `scripts/build.py` and
-  committed; the static pages import it directly and `src/pages/bundle.json.js` re-serves it at
-  `/bundle.json` for the pages that fetch it on the client, so the served bundle can never drift from
-  the rendered one. The assistant-workspace file list (`WORKSPACE_STATIC_DOCUMENTS` in
-  `src/lib/shared/workspace-docs.js`) names its sources in `docs/` and `data/schema/`, and
-  `tests/test_workspace_docs.py` checks every named source exists. The canonical JS modules live in `src/lib/shared/` — the same
-  files `tests/helpers.py` drives through node to check them against their Python twins.
+- `npm run dev` / `npm run build` / `npm run preview`; `npm run validate` after any change under
+  `data/`, and `npm run verify` for everything CI gates on. **There is no `npm run data`** — it ran
+  `build.py`, which is gone.
+- **No generated tree.** `build/fortknight.bundle.json`, the `/bundle.json` endpoint that re-served
+  it and `scripts/build.py` were all deleted on 2026-08-30, and with them the only path from `data/`
+  to a rendered page: nothing under `src/` reads `data/` now. So `data/` is a validated vocabulary
+  that ships nowhere, and there is nothing to regenerate or commit alongside a data edit. The
+  surviving JS modules live in `src/lib/shared/` — three of them are twins `tests/helpers.py` drives
+  through node against their Python counterparts (see "Shared modules" below).
 - **One face live, one profile** (`src/lib/faces.js`, `FaceLayout.astro`): **FortKnight** under `/fortknight/`
-  (🏰🛡️: the fortnight schedule) is the live face, with the six-page menu **Overview · Keep ·
-  Achievements · Build · Questionnaire · Assistant** — Achievements boarding the active profile's
-  unlocked fortnight achievements. **Fork Knife** under `/forkknife/` (🍴: the fortnight menu) had its routes removed on
+  (🏰🛡️: the fortnight schedule) is the live face. Its menu is the six pills **Overview · Keep ·
+  Fork Knife · Fresh Keep · Folk Knowledge · Achievements**, of which the middle three 404 until
+  issues #18, #19 and #20 land — see "The face is display-only" above, including the deploy hold that
+  follows from it. Achievements boards the active profile's unlocked fortnight achievements.
+  **Fork Knife** under `/forkknife/` (🍴: the fortnight menu) had its routes removed on
   2026-08-28, and everything about it in this bullet — and the profile-driven FortKnight pages in the next two —
   is the parked creation chain's design, kept here as its contract. That design gave each face the same
   four-page menu **Overview · <its building page> · Questionnaire · Assistant**, where the building page is the one
@@ -123,9 +149,13 @@ Multi-page, no UI framework. `npm install` once, then:
   profile, the active unsaved one marked, and *New profile…*: switching makes that profile active and reloads the
   page, *New profile…* prompts for a name and opens the current face's Questionnaire — `data-questionnaire-href`;
   `FaceLayout.astro` re-renders it on the `fortknight:settings-saved` event that Save and Apply dispatch, and a page with
-  unsaved edits can veto a switch by cancelling `fortknight:profile-switch`) and a **⚙ Profile** link. Old URLs keep
-  working through meta-refresh stubs: `/fortknight/settings/` → `/profile/`,
-  `/fortknight/allocations/` and `/fortknight/fortnight/` → `/fortknight/`, `/fortknight/ask/` → `/fortknight/assistant/`.
+  unsaved edits can veto a switch by cancelling `fortknight:profile-switch`) and a **⚙ Profile** link.
+  *(Of that switcher, only the dropdown survives: "New profile…", the two custom events and the
+  `data-questionnaire-href` were removed on 2026-08-30 with the pages that fed them.)* Old URLs keep
+  working through meta-refresh stubs: `/fortknight/settings/` → `/profile/`, and
+  `/fortknight/allocations/` and `/fortknight/fortnight/` → `/fortknight/`. **`/fortknight/ask/` no
+  longer redirects** — it pointed at the Assistant, which is removed, so it was deleted with it and
+  now 404s.
 - FortKnight pages (the parked design — the live Overview and day pages are the keep-fed ones of the previous section): `/fortknight/` **Overview** — the fortnight grid + date resolver (navigates to the resolved day) and, below it,
   time by category (bars rendered from the active profile by `src/lib/shared/allocations-rules.js` — the "Weights"
   view always, the "Focus grid" view once the profile has a grid, "Proposed grid" for the generator's proposal
@@ -214,13 +244,26 @@ Multi-page, no UI framework. `npm install` once, then:
 
 ## Shared modules (`src/lib/shared/`)
 Plain ES modules with no build step (the root `package.json` marks the repository `"type": "module"`,
-so node imports them directly — `tests/helpers.py` drives them that way): `fortknight-rules.js` (the JavaScript port of
-`fk_core/dates.py` — keep them in sync), `weights-rules.js` (of `fk_core/weights.py`), `import-document.js`
-+ `clock.js` (of `fk_core/import_document.py`), `generator-rules.js` (of `fk_core/generator.py`),
-`meal-plan.js` (of `fk_core/meal_plan.py`), `astronomy.js`, `user-settings.js`, `profile-names.js`,
-`workspace-docs.js`, `day-plan.js`, `allocations-rules.js`, `import-review.js`, `download.js`; plus
-`themes.css` (at `public/app/shared/`, linked by `FaceLayout.astro`) and `cursors/` (at
-`src/styles/cursors/`, inlined by Vite from `faces.css`). Each of these is the only copy — edit it in place.
+so node imports them directly — `tests/helpers.py` drives them that way). **Five survive** the
+creation chain's removal:
+
+| module | Python twin | note |
+|---|---|---|
+| `fortknight-rules.js` | `fk_core/dates.py` | day keys, season start rules; `tests/test_dates.py` runs both |
+| `astronomy.js` | `fk_core/astronomy.py` | equinoxes, solstices, new moons; `tests/test_dates.py` runs both |
+| `clock.js` | `fk_core/timeconv.py` | **the pair is no longer exercised** — its test went with the chain (`#10`) |
+| `user-settings.js` | none | on-device settings, migration, the profile operations |
+| `profile-names.js` | none | the generated `adjective-noun-title` profile name |
+
+Plus `themes.css` (at `public/app/shared/`, linked by `FaceLayout.astro`) and `cursors/` (at
+`src/styles/cursors/`, inlined by Vite from `faces.css`). Each is the only copy — edit it in place.
+
+**Nine modules were deleted on 2026-08-30** and are preserved at `creation-chain-parked`:
+`weights-rules.js`, `generator-rules.js`, `workspace-docs.js`, `import-document.js`, `meal-plan.js`,
+`day-plan.js`, `allocations-rules.js`, `import-review.js`, `download.js`. Their Python counterparts
+`weights.py`, `meal_plan.py` and `import_document.py` survive — kept alive by `validate.py`, not by a
+twin — so those three files' headers now say so rather than claiming a mirror. Anywhere else in
+`docs/` that names one of the nine as a live twin is describing the parked design.
 
 ## User settings (`data/schema/user-settings.schema.json`)
 ```json

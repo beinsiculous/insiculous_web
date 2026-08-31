@@ -7,8 +7,10 @@ is doing what, and a **community of households** that can share a calendar and a
 > so the shape is written down before it is built, and so a decision made here can be argued with
 > later. Nothing in `data/`, `src/` or `scripts/` implements any of it today.
 >
-> Not published into anyone's assistant workspace — it is not in `WORKSPACE_STATIC_DOCUMENTS`
-> (`src/lib/shared/workspace-docs.js`) and must not be added to it.
+> Not published into anyone's assistant workspace. That list was `WORKSPACE_STATIC_DOCUMENTS` in
+> `src/lib/shared/workspace-docs.js`, removed 2026-08-30 with the creation chain and preserved at
+> `creation-chain-parked` — so the mechanism is gone, but the rule stands for whatever replaces it:
+> this document is not published, and must not be added to such a list.
 
 The vocabulary here extends the one in `docs/domain.md` and the contract in `docs/weights.md`; the
 positioning it serves is in `docs/thesis.md`. The ground truth for this document is the owner's own

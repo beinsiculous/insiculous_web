@@ -1,5 +1,18 @@
 # Questionnaire
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `src/lib/shared/weights-rules.js`, `scripts/questionnaire_to_weights.py`,
+> and the fixture `tests/fixtures/questionnaire-answers.sample.json`. `data/questionnaire.json`
+> stays as this design's vocabulary, but no page renders it.
+
 The startup questionnaire turns a person's answers into a **weights** file (`docs/weights.md`) —
 how much of the fortnight each category should get. This document is the record of the questions
 as the owner drafted them, how each answer lands in the weights contract, and the open questions.

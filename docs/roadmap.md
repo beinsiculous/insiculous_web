@@ -16,9 +16,12 @@ person's own AI workspace + apply-back), docs, tests.
 (`/fortknight/`), Keep (`/fortknight/keep/`) and the fourteen day pages
 (`/fortknight/days/<dayKey>/`), all reading a visitor-loaded keep — as are the achievements boards:
 the studio's `/achievements/`, listing every achievement the site knows, and the face's
-`/fortknight/achievements/`, the active profile's unlocked fortnight achievements. Meanwhile
-`/fortknight/build/`, `/fortknight/questionnaire/` and `/fortknight/assistant/` remain
-`FaceInDevelopment` placeholders, and the `/forkknife/` routes were removed on 2026-08-28. The face
+`/fortknight/achievements/`, the active profile's unlocked fortnight achievements. **The face is display-only as of 2026-08-30** (`docs/megaseed/display-only-face.md` in the working
+set): `/fortknight/{build,questionnaire,assistant,ask}/` were deleted outright rather than left as
+placeholders, along with the builder JavaScript, six Python CLIs, half of `fk_core` and the
+committed bundle — all preserved at `creation-chain-parked`. The `/forkknife/` routes had gone on
+2026-08-28. The nav is now six pills, one per Name Drop stone with a page, and three of them 404
+until issues #18, #19 and #20 land — so `dev` → `main` is held until they do. The face
 pages built on `fortknightdev` and `forknifedev` belong to the back-burnered creation chain, and
 those branches are its playgrounds — it no longer ships by merging (re-ruled 2026-08-28; the folded
 roadmap in the working set carries the ruling). Keep-fed replacements are built fresh in the `main`
@@ -63,9 +66,9 @@ What that means for the items this file used to number 1–9:
   sits unread in the keep. What comes first is carrying the workbook's menu across in the Keep
   keep and rendering it under `/fortknight/` — the `/forkknife/` routes that design assumed are
   removed.
-- **Item 7, "native clients reading the same bundle"** — **obsolete, not deferred.** The phone app exists
-  and does not read `build/fortknight.bundle.json`; it renders the workbook's own keep. The two meet
-  at the keep, not at the bundle.
+- **Item 7, "native clients reading the same bundle"** — **obsolete, not deferred**, and now doubly
+  so: the phone app renders its own keep, and the bundle itself was deleted on 2026-08-30. The two
+  meet at the keep, and there is no bundle for anything to read.
 - **Item 9**, the "Open for Appointments (Tuesday A, early)" vs week-1-midday question, is a data
   question for the owner and stays open.
 

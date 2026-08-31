@@ -34,13 +34,20 @@ Schemas in `data/schema/` are JSON Schema 2020-12 and double as field documentat
 | `derived/planByDay.json` | `{dayKey → {label,mainFocus,appointmentBlock,menu,blocks[{block,start,end,focus,isAppointmentBlock,activities[…+mealPrepTargets]}]}}` — the data set's own plan (empty blocks on the neutral data); the Astro day pages render the person's profile instead |
 | `derived/allocations.json` | `focusWindow`, `byBlockFocus`, `byActivities` — minutes and shares per category/day/block of the data set (all flexible / zero on the neutral data) |
 | `derived/defaultImport.json` | the data set as an import document (`data/schema/import.schema.json`) — the example import document (applied on the Assistant page): on the neutral data FortKnight's empty version-2 example (`source.kind: other`, empty commitments/tasks/skipped, a review line); on the workbook example set the workbook itself (`source.kind: xlsx`) (`docs/importers.md`) |
-| `fortknight.bundle.json` | everything above in one object with `buildInfo.buildHash`; what the app loads |
+| `fortknight.bundle.json` | everything above in one object with `buildInfo.buildHash`; what the app used to load |
+
+> **The `build/` tree above no longer exists.** It and its generator `scripts/build.py` were deleted
+> on 2026-08-30 with the creation chain (preserved at `creation-chain-parked`), and with them the
+> only path from `data/` to a rendered page — nothing under `src/` reads `data/` now. The table is
+> kept as the record of what the derived views were. `data/` itself is unchanged and still validated.
 
 ## Edit loop
 1. Edit `data/…`. Keep `raw`; add structured fields beside it.
 2. `python3 scripts/validate.py` — fix every ERROR; read WARNINGs.
-3. `python3 scripts/build.py` — regenerates `build/`.
-4. `python3 -m unittest discover tests`.
+3. `python3 -m unittest discover tests`.
+
+Nothing to regenerate and nothing to commit alongside: a `data/` edit changes what `validate.py`
+checks and nothing a visitor sees.
 
 ## Adding things
 - **A new season menu**: copy `menus/spooky-season.json`, change `id`/`seasonId`, set the season's `menuId`. Every day must get exactly one brunch/snack/dinner.

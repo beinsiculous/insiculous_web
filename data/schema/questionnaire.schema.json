@@ -598,7 +598,7 @@
                 "enum": [
                   "seasons"
                 ],
-                "description": "Prefill from data/seasons.json instead of `template` (mapping in fk_core/weights.py year_split_from_seasons / weights-rules.js yearSplitFromSeasons)."
+                "description": "Prefill from data/seasons.json instead of `template` (mapping in fk_core/weights.py year_split_from_seasons; the JavaScript twin was removed 2026-08-30 with the creation chain)."
               },
               "editable": {
                 "type": "boolean",

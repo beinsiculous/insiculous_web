@@ -1,5 +1,19 @@
 # The meal plan (Fork Knife): the fortnight menu and its prep / cooking tasks
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `src/lib/shared/meal-plan.js`. `scripts/fk_core/meal_plan.py` survives, kept
+> alive by `validate.py` rather than by a twin, and `data/schema/meal-plan.schema.json` is still
+> validated. Fork Knife's `/forkknife/*` routes were removed on 2026-08-28; its menu views land at
+> `/fortknight/forkknife/` (`beinsiculous/insiculous_web#18`).
+
 **Fork Knife** is the site's second face (`docs/app.md`): its own Overview, **Spoon Feed**, Questionnaire and Assistant
 pages under `/forkknife/`, sharing the profile with FortKnight. Its **questionnaire** (the `face: "forkknife"` section of
 `data/questionnaire.json`, "Your meals") is its settings: the meals question — a person's meals (Breakfast, Dinner,
@@ -19,7 +33,7 @@ retags its dishes and dropping a meal drops them). Fork Knife's **Overview** sho
 14-day grid and the **meal-prep and cooking tasks** the menu implies, as an import document (version 2) the person
 pastes into *Apply from assistant*, step 2 — so the tasks enter the profile the way everything else does. Rule and
 schemas: `data/schema/meal-plan.schema.json`, `data/schema/import.schema.json` (`tasks`, `mealPlan`),
-`scripts/fk_core/meal_plan.py` ↔ `src/lib/shared/meal-plan.js`.
+`scripts/fk_core/meal_plan.py` (its twin `src/lib/shared/meal-plan.js` was removed 2026-08-30).
 
 ## The shape of a menu
 - A meal covers the 14 day keys with about **8 dishes**: 6 eaten twice (the second day is **leftovers**) and 2

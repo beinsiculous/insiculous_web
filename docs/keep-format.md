@@ -10,6 +10,19 @@ in a text editor, and it is canonical: the machine schema beside it is
 You do not need the app. A keep you write yourself is a first-class keep, and it is checked against
 the same schema as one the app exports.
 
+**Where this file sits in the chain** (Operation Name Drop, 2026-08-30 —
+`docs/megaseed/name-drop.md` in the working set has the model). A fort's complete file is a
+**Champion's keep**, and it is built of **stones**: one per domain — Fort Knight the agenda, Fork
+Knife the meals, Fresh Keep the cleaning, Folk Knowledge friends and family, and four more. A stone
+is chiselled from a **slab**, the human- and AI-readable `.xlsx` a person writes; a slab is quarried
+from a **mountain**, whatever raw material they started with. Smaller files cut from the Champion's
+keep — a **Guest**, **Knight** or **Royal keep** — are a single member's slice of it.
+
+What this document specifies is the Champion's keep: the whole fourteen-day file. The vocabulary it
+replaces, in anything you read from before 2026-08-30: *seed* meant the Champion's keep,
+*companion* meant a stone, *kernel* meant a Guest/Knight/Royal keep, *silo* meant a Commander's
+keep (2+ Champion keeps), and *workbook* meant a slab.
+
 ## Two bars: readable and conforming
 
 The format has two bars, and it matters which one you are aiming at.

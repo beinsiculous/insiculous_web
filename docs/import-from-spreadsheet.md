@@ -1,5 +1,18 @@
 # Reading a spreadsheet into an import document
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> Code removed with it: `scripts/xlsx_to_json.py` and `scripts/fk_core/xlsx.py` (and `parse.py`), so
+> the repository no longer has an `.xlsx` reader. The import-document contract it targets is
+> `docs/importers.md`, also parked.
+
 You (an assistant in the person's workspace) were handed a spreadsheet — an `.xlsx`, a Google
 Sheets export, a `.csv` — that holds their existing schedule: a timetable, a chore rota, a list of
 appointments, a bill calendar, a fortnight grid. Your job is to hand back **one import document**

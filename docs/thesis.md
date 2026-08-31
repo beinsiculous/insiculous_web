@@ -8,8 +8,10 @@ but the site copy does, and so should anyone deciding whether a proposed feature
 the **source of truth for the wording of the art policy** (below): if that policy is refined, it is
 refined here first and mirrored outward.
 
-> Not published into anyone's assistant workspace — it is not in `WORKSPACE_STATIC_DOCUMENTS`
-> (`src/lib/shared/workspace-docs.js`) and must not be added to it.
+> Not published into anyone's assistant workspace. That list was `WORKSPACE_STATIC_DOCUMENTS` in
+> `src/lib/shared/workspace-docs.js`, removed 2026-08-30 with the creation chain and preserved at
+> `creation-chain-parked` — so the mechanism is gone, but the rule stands for whatever replaces it:
+> this document is not published, and must not be added to such a list.
 
 ## How the studio presents itself
 

@@ -1,5 +1,18 @@
 # Fork Knife: the full chain (design; not built)
 
+> **Parked design — not implemented on this site.** This document is the design record of the
+> creation chain, which was removed from `main` on 2026-08-30 by the display-only ruling
+> (`docs/megaseed/display-only-face.md` in the working set) and is preserved at the annotated tag
+> `creation-chain-parked`. **Nothing on beinsiculous.com runs any of it.** The face reads a keep the
+> visitor loads and renders it; it builds nothing. The slab-upload builder that will return to
+> `/fortknight/keep/` (`beinsiculous/insiculous_web#24`) is a new writer, not this chain coming back
+> — its model is `docs/megaseed/name-drop.md`. Read what follows as history and as a contract, not as
+> a description of running code.
+>
+> This was already marked "design; not built". What changed on 2026-08-30 is that the JavaScript it
+> described — `meal-plan.js`, `workspace-docs.js` and the rest — is gone too, so
+> `classifyAssistantDocument` and its siblings named below no longer exist.
+
 From a handful of questions to a fortnight that is planned, shopped for, prepped, cooked and already
 on the agenda — the target flow end to end, stage by stage, with what exists today and what is
 missing at each one.
