@@ -14,10 +14,6 @@ dist/
 __pycache__/
 *.pyc
 
-# demo builds of the sample data sets
-# (python3 scripts/build.py --overlay examples/<set> --out build/examples/<set>)
-build/examples/
-
 # the archived workbook and the owner's own import document: personal data, deliberately
 # outside this public repository. Kept here so a stray copy can never be committed.
 source/

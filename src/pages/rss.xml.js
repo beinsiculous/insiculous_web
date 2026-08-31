@@ -1,5 +1,5 @@
-// The devlog as an RSS feed at /rss.xml. Plain endpoint in the style of bundle.json.js —
-// the studio site has no UI framework, and this needs none either.
+// The devlog as an RSS feed at /rss.xml. A plain endpoint: the studio site has no UI framework,
+// and this needs none either.
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { publishedPosts } from '../lib/devlog-posts.js';

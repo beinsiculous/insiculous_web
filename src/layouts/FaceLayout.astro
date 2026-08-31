@@ -3,7 +3,6 @@ import "../styles/faces.css";
 import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import AccessibilityBootScript from "../components/AccessibilityBootScript.astro";
 import AccessibilityControls from "../components/AccessibilityControls.astro";
-import bundle from "../../build/fortknight.bundle.json";
 import { withBase } from "../lib/paths.js";
 import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
@@ -100,11 +99,10 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
   <main id="main" tabindex="-1">
     <slot />
   </main>
+  {/* No timezone claim here any more: it came from the built bundle, and a keep carries its own local
+      time strings. The footer states what the site owes a visitor and nothing else. */}
   <footer class="site-footer muted">
-    Times shown in {bundle.meta.timezone} · <a href={withBase("accessibility/")}>Accessibility</a>
+    <a href={withBase("accessibility/")}>Accessibility</a>
   </footer>
-  <script define:vars={{ buildHash: bundle.buildInfo.buildHash, timezone: bundle.meta.timezone }}>
-    console.log(`beinsiculous bundle ${buildHash} · ${timezone}`);
-  </script>
 </body>
 </html>

@@ -7,23 +7,25 @@
     "shots",
     // The FortKnight data set, its Python tooling and its docs: nothing here is TypeScript, and the
     // JSON is large enough that walking it slows `astro check` down for no benefit.
-    "build",
     "data",
     "docs",
     "examples",
     "scripts",
     "source",
     "tests",
-    // FortKnight's pages are plain untyped JavaScript with a Python twin in
-    // scripts/fk_core/ — the parity tests, not the type checker, are what keep them honest.
-    // `astro check` stays pointed at the studio's own TypeScript rather than reporting thousands of
-    // strict-mode errors on code written to a different contract. `astro build` type-checks nothing,
-    // so this does not weaken the build.
+    // FortKnight's pages are plain untyped JavaScript, so `astro check` stays pointed at the studio's
+    // own TypeScript rather than reporting thousands of strict-mode errors on code written to a
+    // different contract. `astro build` type-checks nothing, so this does not weaken the build.
+    //
+    // This list used to be justified as "a Python twin in scripts/fk_core/ — the parity tests, not the
+    // type checker, keep them honest". That was always only half true (FaceLayout and ProfileSwitcher
+    // have no twin, and neither does most of src/lib), and after the creation chain's removal on
+    // 2026-08-30 the surviving twins are clock.js/timeconv.py, astronomy.js/astronomy.py and
+    // fortknight-rules.js/dates.py — with nothing left exercising the first pair (insiculous_web#10).
+    // So: these are excluded because they are untyped JavaScript, and nothing more is claimed.
     "src/pages/fortknight",
-    "src/pages/bundle.json.js",
     "src/pages/profile.astro",
     "src/layouts/FaceLayout.astro",
-    "src/components/FaceInDevelopment.astro",
     "src/components/ProfileSwitcher.astro",
     "src/lib"
   ]

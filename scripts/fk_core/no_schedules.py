@@ -15,10 +15,11 @@ The shapes it knows, and why they are that specific:
   * `meta`, `calendar`, `days` and `tasks` ALL present — a `champion_keep.json`.
 
 A bare `tasks` or `days` key is NOT the test, and that is the whole subtlety. `data/questionnaire.json`
-carries `tasks`, `data/days.json` and `examples/workbook/days.json` carry `days`, and
-`build/fortknight.bundle.json` carries both `days` and `meta` — six committed files that a naive marker
-would refuse, blocking every build from the day the guard landed. Requiring all four together separates a
-seed from every legitimate file here; verified against every JSON in the repository, which trips none.
+carries `tasks`, and `data/days.json` and `examples/workbook/days.json` carry `days` — committed files
+that a naive marker would refuse, blocking every build from the day the guard landed. (The built bundle
+carried both `days` and `meta` and was another; it was removed on 2026-08-30 with the creation chain.)
+Requiring all four together separates a keep from every legitimate file here; verified against every JSON
+in the repository, which trips none.
 
 What this does NOT cover: `examples/workbook/` is workbook-derived reference data that would not match
 these shapes, and whether it belongs in a public repository is an older question this guard does not
