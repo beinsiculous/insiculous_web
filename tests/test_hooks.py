@@ -4,6 +4,14 @@ Each test runs the script as a subprocess with a fabricated hook payload on
 stdin, in a throwaway git repository under tmp. The scripts gate on a repo
 marker (`.kimi-code/skills/adversarial-review/SKILL.md` or the `.claude`
 equivalent) because kimi's hooks are registered globally.
+
+Twin note: the scripts under test are this repo's COPIES. The canonical pair
+lives in `beinsiculous/insiculous`, which carries no test suite of its own
+(`beinsiculous/insiculous#23`), and `scripts/check-skill-parity.sh` there is
+what holds every copy byte-identical to it. So this file is the whole org's
+coverage of those two hooks, and it is coverage of the canonical only while
+that parity check is green. The adversarial-review SKILL.md names this file
+from the other side of the pair.
 """
 import json
 import shutil
