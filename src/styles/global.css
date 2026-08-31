@@ -80,6 +80,16 @@ video {
   display: block;
 }
 
+/* Display rules on classes must never beat the hidden attribute. The UA's `[hidden] { display: none }`
+   is an author-vs-UA loss for any author `display:` at all, whatever its specificity — so a component
+   that hides itself with `el.hidden = true` stays on screen. src/styles/faces.css and
+   src/styles/app-widgets.css have carried this same line for the same reason; global.css did not need
+   one until the profile switcher put a `display: flex` on a class the component toggles `hidden`, and
+   without it the studio bar showed an empty Profile dropdown to a visitor with no profile saved. */
+[hidden] {
+  display: none !important;
+}
+
 h1,
 h2,
 h3,
@@ -157,6 +167,70 @@ td a {
   color: var(--accent);
   border: 1px solid var(--accent-dim);
   font-weight: 500;
+}
+
+/* ---------- the profile switcher, in the studio's chrome (src/components/ProfileSwitcher.astro) ---------- */
+/* Here rather than in BaseLayout's <style> because Astro scopes a component's styles to its own markup:
+   a rule written there carries BaseLayout's data-astro-cid and never matches the switcher's elements,
+   which carry ProfileSwitcher's. faces.css does the same job for the face by being a plain global file.
+   Scoped to `header` on purpose: app-widgets.css styles the same class names for a page panel with a
+   block margin, and /profile/, /achievements/ and /games/ load it — element + class beats its bare class
+   whichever order the two happen to be bundled in, so the bar never inherits the panel's margins. */
+header .nav-profile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  min-width: 0;
+}
+
+header .nav-profile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* 11rem, not the 14rem the panel copy allows: the select is content-sized by the active profile's id,
+   and in the bar its width is what decides whether the six links still fit on one row. 11rem shows a
+   generated id like "lucky-garden-poet" whole (measured 170px) and caps what a longer one can take,
+   so the fold breakpoint in BaseLayout.astro stays where it was measured instead of drifting with
+   whatever the visitor named their profile. A longer id truncates, which is a select's own behaviour. */
+header .nav-profile select {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text);
+  max-width: min(11rem, 100%);
+  min-width: 0;
+}
+
+/* In the folded panel it is a full-width row like the links above it, not a chip in a bar. 66rem is
+   BaseLayout.astro's fold breakpoint, not the 40rem the rest of this file uses for phones — the panel
+   and these rules have to change over at the same width or the switcher styles the wrong shape. */
+@media (width < 66rem) {
+  header .nav-profile {
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+
+  header .nav-profile-label {
+    flex: 1 1 auto;
+    max-width: 100%;
+  }
+
+  header .nav-profile select {
+    max-width: 100%;
+    min-height: 44px;
+  }
 }
 
 /* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */

@@ -4,6 +4,7 @@ import '@fontsource-variable/space-grotesk';
 import '../styles/global.css';
 import AccessibilityBootScript from '../components/AccessibilityBootScript.astro';
 import AccessibilityControls from '../components/AccessibilityControls.astro';
+import ProfileSwitcher from '../components/ProfileSwitcher.astro';
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../lib/site-links.js';
 
 interface Props {
@@ -18,23 +19,25 @@ const {
 
 // FortKnight is the planner face that lives on this domain under its own
 // layout and its own skin (src/layouts/FaceLayout.astro); its pages link back here.
-// `icon` is decorative and rides inside an aria-hidden span, so the link's accessible name stays the
-// bare label — "Profile", not "gear Profile".
-const nav: { href: string; label: string; icon?: string }[] = [
+//
+// Text destinations only. The two icon links — ⚙️ Profile and the ☕ tip jar — are not here: they are
+// the icon row at the foot of the panel, the studio's twin of the face's .face-switch, and neither is
+// a word in this list.
+const nav = [
   { href: '/', label: 'Home' },
   { href: '/games/', label: 'Games' },
   { href: '/achievements/', label: 'Achievements' },
   { href: '/devlog/', label: 'Devlog' },
   { href: '/engine/', label: 'Engine' },
   { href: '/fortknight/', label: 'FortKnight' },
-  // The studio's way in to /profile/. The page is shared with the face and is a studio page on this
-  // layout, yet until now nothing on a studio page linked to it — its only entrance was FortKnight's
-  // ☰ (FaceLayout.astro's ⚙ Profile). Last in the list, the way the face puts ⚙ Profile after its
-  // pills. Unlike the face's, it does NOT hide until a profile is saved: the face wraps that link in
-  // ProfileSwitcher, and here a first-time visitor is exactly who needs the way in — /profile/'s empty
-  // state names the two places that create a profile.
-  { href: '/profile/', label: 'Profile', icon: '⚙' },
 ];
+
+// The studio's way in to /profile/. The page is shared with the face and is a studio page on this
+// layout, yet until 2026-08-31 nothing on a studio page linked to it — its only entrance was
+// FortKnight's ☰. Unlike the face's, it does NOT hide until a profile is saved: the face wraps its
+// link in ProfileSwitcher, and here a first-time visitor is exactly who needs the way in —
+// /profile/'s empty state names the two places that create a profile.
+const PROFILE_HREF = '/profile/';
 
 const currentPath = Astro.url.pathname;
 const isActive = (href: string) =>
@@ -68,35 +71,59 @@ const isActive = (href: string) =>
         <div class="nav-side">
           <AccessibilityControls />
           <details class="menu">
-          <summary>
-            <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
-          </summary>
-          <ul>
-            {
-              nav.map(({ href, label, icon }) => (
-                <li>
-                  <a href={href} aria-current={isActive(href) ? 'page' : undefined}>
-                    {/* The gap rides inside the aria-hidden span so it does not land in the
-                        accessible name, and so prose-check's glued-boundary rule sees the
-                        aria-hidden it exempts rather than a lost line break. */}
-                    {icon && <span aria-hidden="true">{icon} </span>}{label}
-                  </a>
-                </li>
-              ))
-            }
-            {/* The tip jar rides in the menu list so it folds into the ☰ panel with everything else,
-                the way the ☕ does in the faces' switcher. It is not in the `nav` array above: that
-                array is internal hrefs the aria-current test runs over, and this one leaves the site. */}
-            <li>
-              <a
-                class="coffee-link"
-                href={KOFI_URL}
-                title={KOFI_TITLE}
-                aria-label={KOFI_LABEL}
-                target="_blank"
-                rel="noopener noreferrer">☕</a>
-            </li>
-          </ul>
+            <summary>
+              <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
+            </summary>
+            {/* The panel wrapper is what the phone positions and what desktop dissolves with
+                display: contents. The list used to be that element itself; the icon row needs a
+                sibling to sit beside, and this is the same shape FaceLayout.astro uses. */}
+            <div class="menu-panel">
+              <ul>
+                {
+                  nav.map(({ href, label }) => (
+                    <li>
+                      <a href={href} aria-current={isActive(href) ? 'page' : undefined}>
+                        {label}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+              {/* The switcher, in the same slot the face keeps it: after the destinations, before the
+                  icons. It renders nothing until a profile is saved on this device, so a first-time
+                  visitor sees the bar it has always had.
+                  It is passed no slot content, and that is the one place this parts from FaceLayout.
+                  The face passes its ⚙ Profile link into the slot because its own icon row is spent
+                  on the 💧 back out to the studio. The studio has nowhere to go back out to, so its
+                  icon row leads with the gear instead — and a second link to /profile/ in the slot
+                  would be the same destination twice, a step apart.
+                  This is now the only switcher on a studio page: /profile/ used to render its own,
+                  and two would ship duplicate navProfile ids and fail the axe gate. */}
+              <ProfileSwitcher />
+              {/* The studio's twin of the face's .face-switch (FaceLayout.astro, rules in
+                  src/styles/faces.css). Same two roles in the same two places: the one that
+                  navigates is large and leads on the left, the tip jar is small and pushed to the
+                  far end by an auto margin, where it reads as an aside rather than a second
+                  destination. The auto margin does that without touching source order, so the tab
+                  sequence still matches the paint (WCAG 2.4.3).
+                  Both are icon-only, so each carries its own aria-label — the emoji is the whole
+                  link, and an unlabelled one would announce as its character name or its href. */}
+              <nav class="site-icons" aria-label="Site links">
+                <a
+                  class="icon-link icon-profile"
+                  href={PROFILE_HREF}
+                  title="Profile"
+                  aria-label="Profile"
+                  aria-current={isActive(PROFILE_HREF) ? 'page' : undefined}>⚙️</a>
+                <a
+                  class="icon-link icon-kofi"
+                  href={KOFI_URL}
+                  title={KOFI_TITLE}
+                  aria-label={KOFI_LABEL}
+                  target="_blank"
+                  rel="noopener noreferrer">☕</a>
+              </nav>
+            </div>
           </details>
         </div>
       </nav>
@@ -179,7 +206,7 @@ const isActive = (href: string) =>
      again. The button only exists on a phone; above that breakpoint the list is the plain row it has always been.
      FaceLayout.astro carries the twin of this menu, with its rules in src/styles/faces.css. */
   .menu {
-    /* min-width: 0 lets the row shrink; without it the seven links set an unshrinkable min-content floor and the
+    /* min-width: 0 lets the row shrink; without it the six links set an unshrinkable min-content floor and the
        whole page scrolls sideways. */
     min-width: 0;
   }
@@ -202,42 +229,68 @@ const isActive = (href: string) =>
     clip-path: inset(50%);
   }
 
+  /* 0.9rem, not the 1.4rem this carried before the switcher joined the bar. The studio's header lives
+     inside .container (68rem) while the face's nav spans the viewport, so this bar has about 200px less
+     to spend — and at 1.4rem the six links wrapped to three rows the moment the switcher took its 233px.
+     Measured at 1280px: 1.4rem gives a 516x78 list, 0.9rem a single row. */
   ul {
     display: flex;
-    gap: 1.4rem;
+    gap: 0.9rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  /* global.css sets no emoji stack the way faces.css does for .face-link, so the cup needs its own
-     or it renders in the mono face. src/pages/devlog/index.astro styles a .coffee-link beside the
-     listing's h1 the same way; both are Astro-scoped, so they cannot reach each other — if this
-     one changes, look at that one.
-     `ul a.coffee-link` and not a bare `.coffee-link`, which lost to `ul a` above: Astro scopes every
-     compound in a selector, so that rule ships as `ul[data-astro-cid-…] a[data-astro-cid-…]` and
-     carries two attributes plus two elements, out-specifying one class plus one attribute. Scoped
-     selectors are not as weak as they read in this file. */
-  ul a.coffee-link {
+  /* The icon row: the studio's twin of .face-switch / .face-link in src/styles/faces.css. The sizes
+     are that file's, so the ⚙️ matches the 💧 the face wears in the same slot — 1.15rem in the bar,
+     1.75rem in the panel, with the tip jar left small either way.
+     global.css sets no emoji stack the way faces.css does for .face-link, so these need their own or
+     they render in the mono face. src/pages/devlog/index.astro styles a .coffee-link beside the
+     listing's h1 the same way; both are Astro-scoped, so they cannot reach each other — if this one
+     changes, look at that one. */
+  .site-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .icon-link {
     font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     line-height: 1;
+    padding: 0.15rem 0.4rem;
+    border-radius: 999px;
     opacity: 0.8;
   }
 
-  ul a.coffee-link:hover {
+  .icon-link:hover {
     opacity: 1;
+    text-decoration: none;
+  }
+
+  /* The list marks the page you are on with brackets around the word; an icon has no word to bracket,
+     so the current page shows as a fully-opaque icon on the accent ring instead. */
+  .icon-link[aria-current='page'] {
+    opacity: 1;
+    outline: 1px solid var(--accent);
   }
 
   /* A closed <details> hides its content, and browsers do it in two different ways: an older UA rule on the
      children, and newer Chrome’s content-visibility on the generated ::details-content box. Override both, so the
      bar reads as an ordinary row here whether the element happens to be open or not. */
-  @media (min-width: 40rem) {
-    /* Wrap: seven links do not fit the moment the phone panel stops, only once the viewport is wide
-       enough for all of them in a row. Without this the header overflowed from 641px upwards. */
-    .menu > ul {
+  @media (width >= 66rem) {
+    /* Kept as a safety net rather than a working rule: above the fold breakpoint the row is measured to
+       fit on one line, and this is what stops an overflow if it ever stops fitting. */
+    .menu-panel > ul {
       display: flex;
       flex-wrap: wrap;
+    }
+
+    /* Both the disclosure and its panel dissolve, so the list and the icon row become flex items of
+       .nav-side and the bar is one flat row again — the same two lines FaceLayout.astro uses. */
+    .menu,
+    .menu-panel {
+      display: contents;
     }
 
     .menu::details-content {
@@ -246,10 +299,25 @@ const isActive = (href: string) =>
     }
   }
 
-  /* Phone: the seven links do not fit 390px, so they fold behind the ☰ and drop as a full-width panel under the
-     header. The panel is positioned against <header>, which is sticky and therefore the containing block, so it
-     spans the viewport rather than the container’s column. */
-  @media (max-width: 40rem) {
+  /* Folded: the links do not fit, so they drop behind the ☰ as a full-width panel under the header. The
+     panel is positioned against <header>, which is sticky and therefore the containing block, so it spans
+     the viewport rather than the container’s column.
+     66rem (1056px), not the 40rem this used to be, and not the 40rem the rest of global.css uses for
+     phones. The bar carries the profile switcher now, and its 233px is the difference between six links
+     on one row and six links on three. Measured on the built page with a profile seeded: one row from
+     1050px up, three rows at 1049 — 66rem takes that threshold and a little slack. Below it the header is
+     a flat 82px at every width; at the old breakpoint the 641–1049 band was a 100–143px header of stacked
+     links, which is the thing a fold breakpoint exists to prevent. FaceLayout.astro reaches for the same
+     answer at its own width.
+     Range syntax (`width >= 66rem` / `width < 66rem`) rather than the min-width/max-width pair faces.css
+     uses, because that pair cannot express a clean boundary and this layout proved it: at 40rem/40rem both
+     queries match at exactly the breakpoint, and the two blocks set different properties, so both applied —
+     measured at 1056px, a 294px header showing the ☰ AND all six links at once. Splitting them to
+     66rem/66.0625rem only trades that for the other half of the bug faces.css already documents: a
+     fractional viewport in the gap (routine with display scaling or zoom) matches NEITHER, the ☰ is hidden,
+     and the closed <details> keeps the links hidden too, so no page is reachable. `>=` and `<` are exact
+     complements — no overlap, no gap, at any fractional width. */
+  @media (width < 66rem) {
     summary {
       display: grid;
       place-items: center;
@@ -264,21 +332,61 @@ const isActive = (href: string) =>
       color: var(--accent);
     }
 
-    .menu > ul {
+    /* The wrapper is the positioned panel now, not the list — the list is one of its two children. */
+    .menu-panel {
       position: absolute;
       left: 0;
       right: 0;
       top: 100%;
-      flex-direction: column;
-      gap: 0;
-      padding: 0.25rem 1.25rem 0.6rem;
+      padding: 0.25rem 1.25rem calc(0.6rem + env(safe-area-inset-bottom));
       background: var(--bg);
       border-bottom: 1px solid var(--border);
+      max-height: calc(100vh - 100%);
+      overflow-y: auto; /* a long panel scrolls rather than running off screen */
+    }
+
+    .menu-panel > ul {
+      flex-direction: column;
+      gap: 0;
     }
 
     ul a {
       display: flex;
       align-items: center;
+      min-height: 44px;
+    }
+
+    /* The panel reads top to bottom as "the site", then "you and the tip jar" — the markup's order,
+       so nothing here reorders anything. The rule separates the icons from the destinations, and the
+       two stay a row rather than a column: they are icons, and two emoji stacked read as a list of
+       nothing. Same reasoning, same rule, as faces.css's .menu-panel .face-switch. */
+    .site-icons {
+      gap: 0.5rem;
+      padding-top: 0.6rem;
+      margin-top: 0.2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* The one that navigates is big enough to hit without looking; the tip jar keeps the small size
+       and an auto margin puts it at the far end. */
+    .icon-link:not(.icon-kofi) {
+      font-size: 1.75rem;
+      padding: 0.15rem 0.5rem;
+    }
+
+    .icon-kofi {
+      margin-left: auto;
+    }
+  }
+
+  /* Keyed to the pointer, not the viewport: a touchscreen laptop needs a 44px target in the flat bar
+     too, and a narrow desktop window does not. faces.css closes with the same block. */
+  @media (pointer: coarse) {
+    .icon-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
       min-height: 44px;
     }
   }

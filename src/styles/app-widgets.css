@@ -78,7 +78,11 @@ select {
 .profile-name-form .inline-field { min-width: 0; }   /* else the field pins the row at the input's width */
 .profile-name-form input { width: 22rem; min-width: 0; max-width: 100%; }  /* fits the longest generated id */
 
-/* ---------- the profile switcher, in the panel rather than in chrome ---------- */
+/* ---------- the profile switcher, as a page panel ---------- */
+/* Both layouts keep the switcher in their chrome now (global.css for the studio, faces.css for the
+   face), so nothing renders it inside a panel any more — /profile/ gave up its own copy on
+   2026-08-31. This block is what a panel copy would need if one comes back; the chrome rules in
+   those two files out-specify it with a leading element, so it cannot reach a header. */
 .nav-profile { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0.25rem; }
 .nav-profile-label {
   display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; max-width: 100%;
