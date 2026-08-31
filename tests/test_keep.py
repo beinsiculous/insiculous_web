@@ -4,7 +4,7 @@
 no rule that exists twice. It is driven through node the same way the twins are, which is what keeps it
 tested at all: tsconfig.json excludes `src/lib` from `astro check`, so these tests are its only safety net.
 
-The two that matter most are the tolerance pair. Fortress Key and this website ship on different cadences, and the
+The two that matter most are the tolerance pair. Fort Knight and this website ship on different cadences, and the
 person holding the phone cannot redeploy the site — so an unknown field must not be refused, and a keep
 from a newer format must be refused with a message that names the real remedy.
 """
@@ -60,7 +60,7 @@ class ValidateKeepTests(unittest.TestCase):
         self.assertEqual(self.validate([OTHER_HOUSEHOLD_FIXTURE]), [{"ok": True}])
 
     def test_it_accepts_an_additive_version_carrying_fields_it_does_not_know(self):
-        """The tolerance the two release cadences depend on: Fortress Key can add a field and the deployed page
+        """The tolerance the two release cadences depend on: Fort Knight can add a field and the deployed page
         keeps working, because a bump is reserved for a breaking change."""
         newer = json.loads(json.dumps(FIXTURE))
         newer["meta"]["somethingNew"] = "added later"
