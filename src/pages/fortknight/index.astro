@@ -12,11 +12,11 @@
 // repository's date evaluator over a keep would be wrong for half the year.
 //
 // Two actions live under "What is here now", and the order is the argument. The primary one is loading a
-// keep: it is what makes this page an Overview. The secondary one is creating a profile, and it exists at
-// all only while the questionnaires are placeholders — it writes a real, saved profile rather than only
-// making one active, because on this branch there is no questionnaire to do the saving (which is also why
-// the nav does not offer "New profile…", src/components/ProfileSwitcher.astro). When the questionnaires
-// are real, profile creation moves into them and the button here goes.
+// keep: it is what makes this page an Overview. The secondary one is creating a profile — a permanent home
+// for it, not a stopgap. The creation chain that would have owned it left main on 2026-08-30 (preserved at
+// the tag `creation-chain-parked`), so a profile is made where achievements happen: here and on the studio
+// home page. It writes a real, saved profile rather than only making one active, which is also why the nav
+// offers no "New profile…" (src/components/ProfileSwitcher.astro).
 import FaceLayout from "../../layouts/FaceLayout.astro";
 import KeepStyles from "../../components/KeepStyles.astro";
 import { facePath } from "../../lib/faces.js";
@@ -63,8 +63,7 @@ const keep = facePath("fortknight", "keep/");
     <p>
       <a href={keep}>Keep</a> shows a fortnight exported from the Fort Knight app: what is being eaten,
       what is booked, and the shape of each day. The keep stays on this device and is never uploaded.
-      The planner itself runs on a profile kept on this device; the questionnaires that will build one are
-      still being built, so one can be created empty here.
+      The planner itself runs on a profile kept on this device, and one can be created here.
     </p>
     <div class="button-row">
       <a class="button" href={keep}>Load your keep</a>
@@ -125,11 +124,11 @@ const keep = facePath("fortknight", "keep/");
   import { PROFILE_PATH } from "../../lib/faces.js";
   import { withBase } from "../../lib/paths.js";
 
-  // Creating a profile lives here while the questionnaires are placeholders. It writes a real, saved
-  // profile rather than only making one active: `createProfile` sets the active id and leaves the saving
-  // to a questionnaire, and on this branch there is no questionnaire to do it — which is the whole reason
-  // the nav's "New profile…" is not offered (src/components/ProfileSwitcher.astro). The name is rolled for
-  // you; you can change it on the Profile page, which is where this lands.
+  // Creating a profile lives here for good. It writes a real, saved profile rather than only making one
+  // active: `createProfile` sets the active id and leaves the saving to its caller, and the creation chain
+  // that used to do that is gone — which is the whole reason the nav's "New profile…" is not offered
+  // (src/components/ProfileSwitcher.astro). The name is rolled for you; you can change it on the Profile
+  // page, which is where this lands.
   //
   // The button starts hidden and is only revealed here: it is the one control on the page that does
   // nothing without JavaScript, and a dead button is worse than no button.

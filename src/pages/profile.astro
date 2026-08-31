@@ -8,8 +8,9 @@ import { facePath } from "../lib/faces.js";
 import "../styles/app-widgets.css";
 
 // Profile (FortKnight's, held by the studio): the active profile (switch, name, Duplicate, Delete), the stored
-// keep and the achievements board. The assistant-workspace downloads are the parked creation chain's design
-// (docs/assistant-workspace.md), not on this page yet. Answers are edited on the face's Questionnaire page (docs/app.md).
+// keep and the achievements board. The assistant-workspace downloads and the pages that edited a profile's
+// answers belong to the creation chain, removed from main on 2026-08-30 and preserved at the tag
+// `creation-chain-parked` — this page holds everything a profile still has.
 // The switcher lives here rather than in the header: BaseLayout has no chrome for it.
 ---
 <BaseLayout
@@ -19,7 +20,7 @@ import "../styles/app-widgets.css";
   <section class="panel">
     <h1>Profile</h1>
     <h2 id="profileHeading"></h2>
-    <ProfileSwitcher questionnaireHref={facePath("fortknight", "questionnaire/")} />
+    <ProfileSwitcher />
     <form class="button-row profile-name-form" id="profileNameForm">
       <label class="inline-field">Name <input type="text" id="profileNameInput" autocomplete="off" required /></label>
       <button type="button" id="regenerateNameButton">Regenerate</button>
@@ -31,7 +32,7 @@ import "../styles/app-widgets.css";
       <button type="button" id="duplicateProfileButton">Duplicate as…</button>
       <button type="button" id="deleteProfileButton">Delete</button>
     </div>
-    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown above. Your answers live on FortKnight’s <a href={facePath("fortknight", "questionnaire/")}>Questionnaire</a> and the fortnight on its <a href={facePath("fortknight")}>Overview</a>; the menu is edited on its <a href={facePath("fortknight", "build/")}>Build page</a>.</p>
+    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown above. Your fortnight is on FortKnight’s <a href={facePath("fortknight")}>Overview</a>, rendered from the keep you load.</p>
   </section>
 
   <section class="panel">
@@ -104,9 +105,9 @@ import "../styles/app-widgets.css";
     if (active) {
       elements.profileStatus.textContent = `Saved on this device${active.questionnaire?.answeredAt ? ` (answers from ${active.questionnaire.answeredAt})` : ""}${savedCount > 1 ? `; ${savedCount} profiles saved` : ""}.`;
     } else if (savedCount) {
-      elements.profileStatus.textContent = `Not saved yet — answer the Questionnaire and Save. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown above.`;
+      elements.profileStatus.textContent = `Not saved yet. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown above.`;
     } else {
-      elements.profileStatus.textContent = "No profile saved yet — answer the Questionnaire and Save; the Overview shows default answers until then.";
+      elements.profileStatus.textContent = "No profile saved yet — create one from the Be Insiculous home page or FortKnight’s Overview.";
     }
   }
 
@@ -162,9 +163,8 @@ import "../styles/app-widgets.css";
     const current = loadSettings();
     if (!confirm(`Delete profile ${current.activeWeightsId} from this device? Its saved answers are removed.`)) return;
     if (withProfiles((settings) => deleteProfile(settings, settings.activeWeightsId))) {
-      const remaining = loadSettings();
-      // Reload either way while the faces are placeholders: with no profile left there is nowhere to send
-      // someone to make one, and this page's own empty state is the honest answer.
+      // Reload either way: with no profile left, this page's own empty state is the honest answer and it
+      // names the two places that make one.
       location.reload();
     }
   });

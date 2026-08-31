@@ -9,8 +9,9 @@ import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } 
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 
 // The layout of the site's planner face (docs/app.md): every page rendered here belongs to a face in FACES
-// (FortKnight), so `face` is required. Its menu is Overview, Keep, Achievements, the face's own building
-// page (Build), Questionnaire, Assistant. The face brings its own skin (FACES[face].theme). The switcher sits
+// (FortKnight), so `face` is required. Its menu is Overview, Keep, Fork Knife, Fresh Keep, Folk Knowledge,
+// Achievements — the middle three of which have no page yet; src/lib/faces.js carries the warning and the
+// hold that goes with it. The face brings its own skin (FACES[face].theme). The switcher sits
 // left of the brand: the Be Insiculous logo back out to the studio site (and any further face's logo, were
 // one added).
 // The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
@@ -19,7 +20,7 @@ import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 const { title, face } = Astro.props;
 const currentFace = FACES[face];
 const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
-const navItems = faceNav(face).map((item) => ({ ...item, href: facePath(face, item.path) }));
+const navItems = faceNav().map((item) => ({ ...item, href: facePath(face, item.path) }));
 const profileHref = withBase(PROFILE_PATH);
 const pathname = Astro.url.pathname;
 function isActive(item) {
@@ -50,7 +51,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
-    {/* Below 40rem the bar does not fit: five pills, a profile dropdown and two site links push it
+    {/* Below 40rem the bar does not fit: six pills, a profile dropdown and two site links push it
         to three rows and about a sixth of a phone screen. They fold behind a ☰ instead, leaving the
         brand and the Aa control as a single row. The disclosure is native, like the studio's in
         BaseLayout.astro — no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard,
@@ -83,7 +84,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
             </a>
           ))}
         </nav>
-        <ProfileSwitcher questionnaireHref={facePath(face, "questionnaire/")}>
+        <ProfileSwitcher>
           <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
         </ProfileSwitcher>
         <nav class="face-switch" aria-label="Site links">

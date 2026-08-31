@@ -63,14 +63,11 @@ const shotNames = {
   "/profile/": "profile",
   "/fortknight/": "fortknight-overview",
   "/fortknight/days/wed-b/": "fortknight-day",
-  "/fortknight/build/": "fortknight-build",
-  "/fortknight/questionnaire/": "fortknight-questionnaire",
-  "/fortknight/assistant/": "fortknight-assistant",
   "/fortknight/achievements/": "fortknight-achievements",
 };
 
-// The phone pass emulates touch, so `@media (pointer: coarse)` — where the 44px tap targets and the bigger
-// dual-range thumbs live — is actually exercised rather than silently skipped.
+// The phone pass emulates touch, so `@media (pointer: coarse)` — where the 44px tap targets live — is
+// actually exercised rather than silently skipped.
 const viewports = {
   desktop: { suffix: "", context: { viewport: { width: 1440, height: 900 } } },
   mobile: { suffix: "-mobile", context: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true } },

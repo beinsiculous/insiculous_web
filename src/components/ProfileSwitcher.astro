@@ -1,7 +1,11 @@
 ---
 // The profile dropdown: shows once a profile is saved on this device; switching makes that profile active and
-// reloads the page so every page re-renders from it; "New profile…" creates an unsaved profile and opens the
-// questionnaire at `questionnaireHref` to answer and save it. Rename/Duplicate/Delete live on the Profile page.
+// reloads the page so every page re-renders from it. Rename/Duplicate/Delete live on the Profile page, and a
+// profile is created from the buttons on / and /fortknight/ (src/lib/profile-name-dialog.js).
+//
+// It offers no "New profile…" option. That option redirected to a face's questionnaire to fill in and save,
+// and the creation chain left main on 2026-08-30 (preserved at the tag `creation-chain-parked`) — so there is
+// nowhere for it to go and nothing to finish. Creating a profile lives where achievements happen instead.
 //
 // Rendered in exactly one place per page, never two: FaceLayout puts it in the header of the face pages, and
 // the Profile page puts it in its own first panel. The Profile page needs its own copy because it is on
@@ -9,18 +13,14 @@
 //
 // The slot takes whatever belongs beside the dropdown; FaceLayout passes its ⚙ Profile link, so that link is
 // hidden until a profile is saved too. The Profile page passes nothing — you are already there.
-const { questionnaireHref } = Astro.props;
 ---
-<div class="nav-profile" id="navProfile" hidden data-questionnaire-href={questionnaireHref}>
+<div class="nav-profile" id="navProfile" hidden>
   <label class="nav-profile-label">Profile <select id="navProfileSelect" aria-label="Profile"></select></label>
   <slot />
 </div>
 <script>
-  import { createProfile, loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
-  import { unusedProfileName } from "../lib/shared/profile-names.js";
-  import { askProfileName } from "../lib/profile-name-dialog.js";
+  import { loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
 
-  const NEW_PROFILE_VALUE = "__new__";
   const container = document.getElementById("navProfile");
   const select = document.getElementById("navProfileSelect");
 
@@ -34,11 +34,6 @@ const { questionnaireHref } = Astro.props;
     const activeId = settings.activeWeightsId;
     const options = savedIds.map((id) => ({ value: id, label: id }));
     if (activeId && !savedIds.includes(activeId)) options.push({ value: activeId, label: `${activeId} (not saved yet)` });
-    // "New profile…" is not offered while the faces are placeholders (src/components/FaceInDevelopment.astro).
-    // Creating one redirects to that face's questionnaire to be filled in and saved, and on this branch the
-    // questionnaire is a placeholder — so the profile would be created active-but-unsaved with nowhere to
-    // finish it. The option comes back when a face branch merges and brings its questionnaire with it.
-    // Duplicating an existing profile is untouched: it completes in place on /profile/ and reloads.
     for (const { value, label } of options) {
       const option = document.createElement("option");
       option.value = value;
@@ -48,36 +43,11 @@ const { questionnaireHref } = Astro.props;
     select.value = activeId && options.some((option) => option.value === activeId) ? activeId : savedIds[0];
   }
 
-  select.addEventListener("change", async () => {
+  select.addEventListener("change", () => {
     const current = loadSettings(); // another tab may have saved meanwhile
-    // Captured before the dialog opens: a settings-saved listener firing meanwhile rebuilds the options,
-    // so Cancel must restore from this, not from a re-read afterwards.
+    // Captured first, so a failed switch can put the dropdown back where it was.
     const previousId = current.activeWeightsId;
-    // A page with unsaved edits (the questionnaire) may veto the switch: it listens for this cancelable event.
-    const allowed = document.dispatchEvent(new CustomEvent("fortknight:profile-switch", { cancelable: true, detail: { to: select.value } }));
-    if (!allowed) { select.value = previousId; return; }
     try {
-      if (select.value === NEW_PROFILE_VALUE) {
-        // Nothing exists until a name comes back, so this dialog keeps its Cancel. The taken list holds the
-        // active id even when unsaved: newProfileId rejects it too, and on a fresh device it is the name shown.
-        const takenIds = [...profileIds(current), previousId];
-        const created = await askProfileName({
-          title: "Name the new profile",
-          name: unusedProfileName(takenIds),
-          takenIds,
-          confirmLabel: "Create profile",
-          canCancel: true,
-          commit(typed) {
-            const settings = loadSettings(); // re-read here: the dialog may have been open a while
-            createProfile(settings, typed);
-            saveSettings(settings);
-            return settings.activeWeightsId;
-          },
-        });
-        if (!created) { select.value = previousId; return; }
-        location.href = container.dataset.questionnaireHref;
-        return;
-      }
       switchProfile(current, select.value);
       saveSettings(current);
       location.reload();
@@ -86,7 +56,5 @@ const { questionnaireHref } = Astro.props;
       select.value = previousId;
     }
   });
-  // Pages that save or apply settings without reloading (Questionnaire Save, Assistant Apply) announce it.
-  document.addEventListener("fortknight:settings-saved", renderNavProfile);
   renderNavProfile();
 </script>
