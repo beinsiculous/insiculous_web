@@ -18,13 +18,22 @@ const {
 
 // FortKnight is the planner face that lives on this domain under its own
 // layout and its own skin (src/layouts/FaceLayout.astro); its pages link back here.
-const nav = [
+// `icon` is decorative and rides inside an aria-hidden span, so the link's accessible name stays the
+// bare label — "Profile", not "gear Profile".
+const nav: { href: string; label: string; icon?: string }[] = [
   { href: '/', label: 'Home' },
   { href: '/games/', label: 'Games' },
   { href: '/achievements/', label: 'Achievements' },
   { href: '/devlog/', label: 'Devlog' },
   { href: '/engine/', label: 'Engine' },
   { href: '/fortknight/', label: 'FortKnight' },
+  // The studio's way in to /profile/. The page is shared with the face and is a studio page on this
+  // layout, yet until now nothing on a studio page linked to it — its only entrance was FortKnight's
+  // ☰ (FaceLayout.astro's ⚙ Profile). Last in the list, the way the face puts ⚙ Profile after its
+  // pills. Unlike the face's, it does NOT hide until a profile is saved: the face wraps that link in
+  // ProfileSwitcher, and here a first-time visitor is exactly who needs the way in — /profile/'s empty
+  // state names the two places that create a profile.
+  { href: '/profile/', label: 'Profile', icon: '⚙' },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -64,10 +73,13 @@ const isActive = (href: string) =>
           </summary>
           <ul>
             {
-              nav.map(({ href, label }) => (
+              nav.map(({ href, label, icon }) => (
                 <li>
                   <a href={href} aria-current={isActive(href) ? 'page' : undefined}>
-                    {label}
+                    {/* The gap rides inside the aria-hidden span so it does not land in the
+                        accessible name, and so prose-check's glued-boundary rule sees the
+                        aria-hidden it exempts rather than a lost line break. */}
+                    {icon && <span aria-hidden="true">{icon} </span>}{label}
                   </a>
                 </li>
               ))
@@ -167,7 +179,7 @@ const isActive = (href: string) =>
      again. The button only exists on a phone; above that breakpoint the list is the plain row it has always been.
      FaceLayout.astro carries the twin of this menu, with its rules in src/styles/faces.css. */
   .menu {
-    /* min-width: 0 lets the row shrink; without it the six links set an unshrinkable min-content floor and the
+    /* min-width: 0 lets the row shrink; without it the seven links set an unshrinkable min-content floor and the
        whole page scrolls sideways. */
     min-width: 0;
   }
@@ -221,7 +233,7 @@ const isActive = (href: string) =>
      children, and newer Chrome’s content-visibility on the generated ::details-content box. Override both, so the
      bar reads as an ordinary row here whether the element happens to be open or not. */
   @media (min-width: 40rem) {
-    /* Wrap: six links do not fit the moment the phone panel stops, only once the viewport is wide
+    /* Wrap: seven links do not fit the moment the phone panel stops, only once the viewport is wide
        enough for all of them in a row. Without this the header overflowed from 641px upwards. */
     .menu > ul {
       display: flex;
@@ -234,7 +246,7 @@ const isActive = (href: string) =>
     }
   }
 
-  /* Phone: the six links do not fit 390px, so they fold behind the ☰ and drop as a full-width panel under the
+  /* Phone: the seven links do not fit 390px, so they fold behind the ☰ and drop as a full-width panel under the
      header. The panel is positioned against <header>, which is sticky and therefore the containing block, so it
      spans the viewport rather than the container’s column. */
   @media (max-width: 40rem) {
