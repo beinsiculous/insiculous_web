@@ -15,8 +15,18 @@ the same schema as one the app exports.
 **Champion's keep**, and it is built of **stones**: one per domain — Fort Knight the agenda, Fork
 Knife the meals, Fresh Keep the cleaning, Folk Knowledge friends and family, and four more. A stone
 is chiselled from a **slab**, the human- and AI-readable `.xlsx` a person writes; a slab is quarried
-from a **mountain**, whatever raw material they started with. Smaller files cut from the Champion's
-keep — a **Guest**, **Knight** or **Royal keep** — are a single member's slice of it.
+from a **mountain**, whatever raw material they started with. The tool that cuts one slab is a
+**chisel** — there are eight, one per slab — and the **mason** is what wields them and lays the
+stones into a keep. Smaller files cut from the Champion's keep — a **Guest**, **Knight** or
+**Royal keep** — are a single member's slice of it.
+
+**Which slabs you must write** (extended 2026-09-01). `FortKnightSlab.xlsx` — the fourteen-day
+agenda — is the **only required slab**; every keep has a Fort Knight stone. The other seven are
+optional, and a fort writes only the ones it wants. **One caveat if you are using our exporter
+rather than writing the JSON yourself:** it still requires all eight files to be present, empty
+templates included, and exits without writing if one is missing. Making them genuinely optional is
+planned, not done. Hand-making a keep has never had that restriction — this document is the whole
+contract, and a keep is judged by what it contains, not by how many slabs produced it.
 
 What this document specifies is the Champion's keep: the whole fourteen-day file. The vocabulary it
 replaces, in anything you read from before 2026-08-30: *seed* meant the Champion's keep,
