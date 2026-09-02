@@ -23,7 +23,7 @@ in the repository, which trips none.
 
 What this does NOT cover: `examples/workbook/` is workbook-derived reference data that would not match
 these shapes, and whether it belongs in a public repository is an older question this guard does not
-settle. It is about seed files.
+settle. It is about keeps.
 """
 import json
 from pathlib import Path
@@ -39,13 +39,13 @@ SKIPPED_DIRECTORIES = {".git", ".astro", "node_modules", "dist", "__pycache__", 
 #: This is a statement about tooling formats, not a permission for anything to hide in them.
 JSONC_CONFIG_NAMES = {"tsconfig.json", "jsconfig.json"}
 
-#: The fabricated fixtures allowed to look like a seed. `keep.sample.json` is loaded into the browser by
+#: The fabricated fixtures allowed to look like a keep. `keep.sample.json` is loaded into the browser by
 #: scripts/a11y-check.mjs so axe audits the Keep page with fourteen real panels rather than an empty file
 #: picker — the page's one hard requirement is being legible, and a gate that only ever sees the empty state
 #: checks nothing. `keep.other-household.json` is a second invented household, read by the rendering tests
-#: and by that same gate's second pass over the seed-fed pages: the year wheel's colours are assigned
-#: positionally, and proving that takes a seed whose season ids are NOT the ones the original palette was
-#: keyed to — the a11y pass is what certifies the palette's contrast on such a seed.
+#: and by that same gate's second pass over the keep-fed pages: the year wheel's colours are assigned
+#: positionally, and proving that takes a keep whose season ids are NOT the ones the original palette was
+#: keyed to — the a11y pass is what certifies the palette's contrast on such a keep.
 #:
 #: An earlier version listed the sample's path BEFORE the fixture existed, which was a pre-approved hole at
 #: exactly the path and name a real export would be given by someone trying the import flow. Each entry is
@@ -84,13 +84,13 @@ def find_schedule_documents(root=REPOSITORY_ROOT):
         if relative.as_posix() in ALLOWED_FIXTURES:
             continue
         try:
-            # utf-8-sig, because a seed saved by Notepad carries a BOM and json.loads refuses it outright.
+            # utf-8-sig, because a keep saved by Notepad carries a BOM and json.loads refuses it outright.
             parsed = json.loads(path.read_text(encoding="utf-8-sig"))
         except (ValueError, UnicodeDecodeError, OSError) as error:
             if path.name in JSONC_CONFIG_NAMES:
                 continue
             # NOT skipped in silence. A file this cannot read is a file it cannot clear, and the whole
-            # value of the guard is never being quietly wrong: a UTF-16 seed dropped in public/ would
+            # value of the guard is never being quietly wrong: a UTF-16 keep dropped in public/ would
             # otherwise be reported as a clean repository. Only data/ has a validator that would complain
             # about it separately; nothing speaks for the rest of the checkout.
             found.append((relative.as_posix(), f"unreadable JSON ({type(error).__name__}), so it cannot be "

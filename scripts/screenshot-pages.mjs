@@ -10,7 +10,7 @@
 //
 // The studio pages wear BaseLayout's dark mono look (the Profile page among them); FortKnight brings
 // its own skin from public/app/shared/themes.css (the page's face picks it — see src/lib/faces.js).
-// The seed-fed pages render from the invented keep fixture seeded below (the same one the a11y
+// The keep-fed pages render from the invented keep fixture seeded below (the same one the a11y
 // gate uses) — without it they would all measure the empty file-picker state instead of the
 // fourteen panels.
 //
@@ -108,7 +108,7 @@ if (!baseUrl) {
 }
 
 // Same seeding as the a11y gate's main sweep, minus the achievement stores: a saved profile so the
-// faces render their full UI, and the invented keep fixture so the seed-fed pages measure the
+// faces render their full UI, and the invented keep fixture so the keep-fed pages measure the
 // fourteen panels rather than an empty file picker. The fixture is invented, not anybody's fortnight.
 const keepSeed = readFileSync(new URL("../tests/fixtures/keep.sample.json", import.meta.url), "utf8");
 
