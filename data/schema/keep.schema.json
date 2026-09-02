@@ -44,7 +44,7 @@
           },
           "label": { "type": "string", "description": "The day's name as the household writes it. Rendered verbatim." },
           "week": { "type": "integer", "enum": [1, 2] },
-          "mainFocus": { "type": "string" },
+          "mainFocus": { "type": "string", "enum": ["meals", "cleaning", "working", "spirituality-development", "friends-family", "health", "operations", "flexible"], "description": "One of the seven categories, or the flexible pseudo-focus for a day left deliberately unassigned. The categories are the format's skeleton, not household vocabulary (working set docs/megaseed/categories.md, 2026-09-02)." },
           "mainFocusLabel": { "type": "string" },
           "blocks": {
             "type": "array",
@@ -88,7 +88,7 @@
               "properties": {
                 "id": { "type": "string" },
                 "title": { "type": "string" },
-                "category": { "type": "string" },
+                "category": { "type": "string", "enum": ["meals", "cleaning", "working", "spirituality-development", "friends-family", "health", "operations"], "description": "One of the seven categories - the closed set (working set docs/megaseed/categories.md)." },
                 "timing": {
                   "type": "object",
                   "properties": {
@@ -163,7 +163,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "key": { "type": "string" },
+              "key": { "type": "string", "enum": ["meals", "cleaning", "working", "spirituality-development", "friends-family", "health", "operations"], "description": "One of the seven categories - the closed set (working set docs/megaseed/categories.md)." },
               "label": { "type": "string" }
             }
           }
