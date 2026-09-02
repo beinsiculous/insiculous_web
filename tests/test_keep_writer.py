@@ -173,6 +173,52 @@ class KeepTests(unittest.TestCase):
         self.assertIsNotNone(answerable["season"])
         self.assertEqual(answerable["year"]["year"], LAST_DATE[:4])
 
+    def test_composition_travels_verbatim(self):
+        """meta.stones and meta.foci are the Champion's keep's own statement of what the keep is built
+        of (fortknight#19); the writer copies them, additively, and infers nothing."""
+        self.assertEqual(self.built["meta"]["stones"], KEEP["meta"]["stones"])
+        self.assertEqual(self.built["meta"]["foci"], KEEP["meta"]["foci"])
+        self.assertLessEqual(len(self.built["meta"]["foci"]), 4)
+
+    def test_a_champion_keep_from_before_composition_yields_a_keep_without_it(self):
+        """Absent has to stay sayable: no stones says the export predates composition, which is not
+        the same sentence as a fort that added no optional stone."""
+        older = json.loads(json.dumps(KEEP))
+        del older["meta"]["stones"]
+        del older["meta"]["foci"]
+        built = build(keep=older)
+        self.assertNotIn("stones", built["meta"])
+        self.assertNotIn("foci", built["meta"])
+        self.assertEqual(len(built["days"]), 14)
+
+    def test_a_source_with_stones_and_no_foci_yields_stones_and_no_foci(self):
+        """Review round 1, F1: the writer copies what the source says and invents no empty half of
+        the statement — foci: [] would assert 'no focus stones', which this source never said."""
+        partial = json.loads(json.dumps(KEEP))
+        del partial["meta"]["foci"]
+        built = build(keep=partial)
+        self.assertEqual(built["meta"]["stones"], KEEP["meta"]["stones"])
+        self.assertNotIn("foci", built["meta"])
+
+    def test_a_fort_with_only_the_required_stone_still_builds_a_conforming_keep(self):
+        """The 2^7 stone sets share one shape: an absent stone's sections are present and empty, so
+        the writer meets nothing new — no seasons means no calendar, and so no season and no year."""
+        bare = json.loads(json.dumps(KEEP))
+        bare["meta"]["stones"] = ["fort-knight"]
+        bare["meta"]["foci"] = []
+        for section in ("seasons", "calendar", "years", "menu", "meals", "cleaningAreas"):
+            bare[section] = []
+        for category in bare["categories"]:
+            category["subjects"] = []
+        built = build(keep=bare)
+        self.assertEqual((built["meta"]["stones"], built["meta"]["foci"]), (["fort-knight"], []))
+        self.assertEqual(built["menu"], [])
+        self.assertIsNone(built["season"])
+        self.assertIsNone(built["year"])
+        self.assertEqual(len(built["days"]), 14)
+        self.assertEqual([day["meals"] for day in built["days"]], [None] * 14)
+        self.assertTrue(check_web_keep(built).ok, check_web_keep(built).render())
+
     def test_a_sparse_keep_degrades_rather_than_throwing(self):
         sparse = json.loads(json.dumps(KEEP))
         del sparse["meals"][5]

@@ -81,6 +81,24 @@ function keepDay(championKeep, day) {
   };
 }
 
+/** Which stones the keep is built of, and which are foci — copied verbatim from the Champion's keep
+ *  (beinsiculous/fortknight#19; the rule is fortknight's DOMAIN.md, "Composition"), additively: no
+ *  version bump. A Champion's keep from before its schemaVersion 6 carries neither list, and then
+ *  neither is written, because absent has to stay sayable: "this export predates composition" is a
+ *  different sentence from "this fort added no optional stone" (stones: ["fort-knight"], foci: []).
+ *  Each list is copied only when the source carries it — a source with stones and no foci yields
+ *  stones and no foci, never an invented "no focus stones" (adversarial review, code round, F1).
+ *  The lists are the Champion's keep's own statement — their order and their agreement are the
+ *  mason's contract, checked where they are made — and nothing here infers a stone from a section
+ *  being empty: a template slab's stone is present AND empty, where the stone owns no required data. */
+function composition(championKeep) {
+  const meta = championKeep.meta ?? {};
+  if (!Array.isArray(meta.stones)) return {};
+  const declared = { stones: [...meta.stones] };
+  if (Array.isArray(meta.foci)) declared.foci = [...meta.foci];
+  return declared;
+}
+
 /** The whole file. `isoDate` picks the season and the year — the fourteen days carry no dates and cannot
  *  go stale, but the season card and the wheel are snapshots of the moment this was exported, which is why
  *  `exportedAt` travels with them and the page can say how old they are.
@@ -100,6 +118,7 @@ export function buildKeep(championKeep, isoDate, exportedAt = null) {
       format: "keep",
       version: KEEP_FORMAT_VERSION,
       exportedAt,
+      ...composition(championKeep),
     },
     days: (championKeep.days ?? []).map((day) => keepDay(championKeep, day)),
     // The fortnight menu, by slot. resolveMenu is the Menu screen's own projection, reused rather

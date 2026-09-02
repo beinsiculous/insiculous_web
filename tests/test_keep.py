@@ -564,6 +564,24 @@ class KeepSchemaTests(unittest.TestCase):
                         with self.subTest(fixture=name, dayKey=entry["leftoversDay"]):
                             self.assertEqual(entry["leftoversDayLabel"], labels[entry["leftoversDay"]])
 
+    def test_composition_keywords_are_checked_not_documentation(self):
+        """Review round 1, F2 and F3: the checker learned uniqueItems and dependentRequired with the
+        composition fields, so a keep saying foci without stones, or a stone twice, is refused by
+        the conformance gate rather than certified."""
+        from fk_core.validate import ValidationReport, check_schema
+
+        def checked(meta):
+            document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+            document["meta"].update(meta)
+            report = ValidationReport()
+            check_schema(document, self.schema, "keep", report)
+            return report
+
+        self.assertTrue(checked({"stones": ["fort-knight", "fork-knife"], "foci": ["fork-knife"]}).ok)
+        self.assertIn("'foci' requires 'stones'", checked({"foci": ["fork-knife"]}).render())
+        self.assertIn("not unique", checked({"stones": ["fort-knight", "fort-knight"]}).render())
+        self.assertIn("more than 4 items", checked({"stones": ["fort-knight"], "foci": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "fun-knee"]}).render())
+
     def test_the_schema_is_open_everywhere(self):
         """Forward tolerance, made a check. Closing any object here would certify the opposite of the
         contract the two halves ship on: adding a field is not a version bump, so a reader must
