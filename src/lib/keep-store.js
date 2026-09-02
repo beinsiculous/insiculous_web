@@ -1,6 +1,6 @@
 // Where a keep lives in the browser, and the only place that name is written down.
 //
-// A keep is exported from the Fort Knight app and loaded here by the person who owns it. It is a
+// A keep is written by src/lib/champion/keep-writer.js and loaded here by the person who owns it. It is a
 // household's schedule, so it never leaves this device: no upload, no server, no copy in this repository.
 //
 // Its own key, deliberately separate from `fortknight.user-settings`. The two are different documents from

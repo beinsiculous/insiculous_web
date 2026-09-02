@@ -7,7 +7,7 @@ Either one deploys a household's fortnight to a public website, and git history 
 
 The shapes it knows, and why they are that specific:
 
-  * `meta.format == "keep"` — a keep, exported by the phone app. It says what it is.
+  * `meta.format == "keep"` — a keep, written by src/lib/champion/keep-writer.js. It says what it is.
   * `meta.format == "myfort"` — a keep under the format's pre-2026-08-28 name. The validator stopped
     reading this string when the format was renamed, but this guard never does: old exports exist on
     the household's devices, and the keep deliberately omits `calendar` and `tasks`, so the shape

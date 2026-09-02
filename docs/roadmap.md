@@ -32,7 +32,7 @@ even though the branches do not. Ten files were deleted from `main` with the cha
 `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the
 `/forkknife/` pages — and each is recoverable with `git show creation-chain-parked:PATH`.
 
-**Fort Knight is planned in the working set, not here.** The apps, the phone app **Fort Knight**
+**Fort Knight is planned in the working set, not here.** The system, the phone app **Fort Knight** (deleted 2026-09-02; the next one is derived from this site)
 (Keep until 2026-08-27, Focus Key until 2026-08-28, now Fort Knight), and the keep that joins
 them are one system with one plan:
 `insiculous/docs/roadmap-fortnight-apps.md` in the admin repo. That file was folded together on
