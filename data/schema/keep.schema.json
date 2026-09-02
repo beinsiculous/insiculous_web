@@ -10,6 +10,7 @@
       "type": "object",
       "description": "What the file is, and when it was made.",
       "required": ["format", "version"],
+      "dependentRequired": { "foci": ["stones"] },
       "properties": {
         "format": {
           "const": "keep",
@@ -23,6 +24,19 @@
         "exportedAt": {
           "type": ["string", "null"],
           "description": "When the file was written. Null is legitimate: the writer takes this as an argument and defaults it to null, so a caller that omits a clock produces null rather than omitting the key. The fourteen days carry no dates and never go stale; only the season and year snapshots age."
+        },
+        "stones": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+          "description": "COMPOSITION: the stones the keep is built of - fort-knight first, always, then the optional stones the fort added, in slab order - copied from the Champion's keep since 2026-09-02 (beinsiculous/fortknight#19). ABSENT IS NOT EMPTY, again: a keep written before then has no stones at all, which says the export predates composition; [\"fort-knight\"] says the fort added no optional stone. A reader draws what it is given either way and never infers a stone from a section being empty. ORDER IS THE MASON'S CONTRACT: fort-knight first, then slab order, is checked where the list is made (fortknight's slabs_to_keep.py, composition_errors, held by its test_slabs.py); this schema cannot express order and the writer copies verbatim."
+        },
+        "foci": {
+          "type": "array",
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+          "description": "The focus stones: at most four of those in stones, never fort-knight, in slab order - a set, not a ranking (season.focus is the ranked axis). The rest of the stones present are peripheral. Never without stones (dependentRequired), and copied only when the Champion's keep says it; that every entry is one of stones is the mason's contract, checked with the order."
         }
       }
     },

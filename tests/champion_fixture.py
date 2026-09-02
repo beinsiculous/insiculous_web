@@ -10,8 +10,9 @@ THIS FILE DOES CALENDAR MATH ON PURPOSE. It stands in for the mason (fortknight/
 slabs_to_keep.py), which is the one place calendar math belongs; the resolver under test does none, and
 the point of the parity suite is to prove it. Nothing here is a rule a page or a reader should copy.
 
-The shape is the champion keep schema's (fortknight/keep/champion_keep.schema.json, schemaVersion 5):
-twelve sections, the fourteen canonical day keys, four blocks, five seasons in wheel order, a calendar
+The shape is the champion keep schema's (fortknight/keep/champion_keep.schema.json, schemaVersion 6):
+twelve sections, every stone declared in meta.stones with four of them foci, the fourteen canonical
+day keys, four blocks, five seasons in wheel order, a calendar
 with two transition weeks and one season split either side of a year boundary the way Hogmanay is, and
 one `years` row whose numbers are pinned as literals (see YEARS below). The cases the suites need are
 built in and named as constants at the bottom.
@@ -263,8 +264,13 @@ def build_champion_keep():
             "sourceSlabs": ["ExampleFortKnightSlab.xlsx", "ExampleForkKnifeSlab.xlsx", "ExampleFreshKeepSlab.xlsx",
                             "ExampleFretKnotSlab.xlsx", "ExampleFoeKissSlab.xlsx", "ExampleFolkKnowledgeSlab.xlsx",
                             "ExampleFunKneeSlab.xlsx", "ExampleFixKnittSlab.xlsx"],
+            # Composition (beinsiculous/fortknight#19): every stone, and the four foci the shipped slabs
+            # mark — the McIntosh keep's shape, invented content.
+            "stones": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge",
+                       "fun-knee", "fix-knitt"],
+            "foci": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss"],
             "generatedBy": "tests/champion_fixture.py",
-            "schemaVersion": 5,
+            "schemaVersion": 6,
             "exportedAt": "2026-08-27T18:00:00+00:00",
             "seasonNote": "Example: every fortnight starts on Sunday A.",
             "assumptions": [],

@@ -1,9 +1,10 @@
 """Validation of canonical data: a small JSON-Schema subset checker plus referential rules.
 
 Supported schema keywords (enough for data/schema/*.schema.json): type, enum, const, properties,
-required, additionalProperties, items, minItems, maxItems, minimum, maximum, pattern.
-Everything else in the schema files is documentation for humans/LLMs/editors.
+required, dependentRequired, additionalProperties, items, minItems, maxItems, uniqueItems, minimum,
+maximum, pattern. Everything else in the schema files is documentation for humans/LLMs/editors.
 """
+import json
 import re
 
 from . import import_document, keys, meal_plan
@@ -70,6 +71,8 @@ def check_schema(value, schema, path, report):
             report.error(f"{path}: fewer than {schema['minItems']} items")
         if "maxItems" in schema and len(value) > schema["maxItems"]:
             report.error(f"{path}: more than {schema['maxItems']} items")
+        if schema.get("uniqueItems") and len({json.dumps(item, sort_keys=True) for item in value}) != len(value):
+            report.error(f"{path}: items are not unique")
         if "items" in schema:
             for index, item in enumerate(value):
                 check_schema(item, schema["items"], f"{path}[{index}]", report)
@@ -78,6 +81,10 @@ def check_schema(value, schema, path, report):
         for required_key in schema.get("required", []):
             if required_key not in value:
                 report.error(f"{path}: missing required key {required_key!r}")
+        for present_key, dependents in schema.get("dependentRequired", {}).items():
+            for dependent in dependents:
+                if present_key in value and dependent not in value:
+                    report.error(f"{path}: {present_key!r} requires {dependent!r}")
         for key, item in value.items():
             if key in properties:
                 check_schema(item, properties[key], f"{path}.{key}", report)

@@ -21,13 +21,14 @@ from a **mountain**, whatever raw material they started with. The tool that cuts
 stones into a keep. Smaller files cut from the Champion's keep — a **Guest**, **Knight** or
 **Royal keep** — are a single member's slice of it.
 
-**Which slabs you must write** (extended 2026-09-01). `FortKnightSlab.xlsx` — the fourteen-day
-agenda — is the **only required slab**; every keep has a Fort Knight stone. The other seven are
-optional, and a fort writes only the ones it wants. **One caveat if you are using our exporter
-rather than writing the JSON yourself:** it still requires all eight files to be present, empty
-templates included, and exits without writing if one is missing. Making them genuinely optional is
-planned, not done. Hand-making a keep has never had that restriction — this document is the whole
-contract, and a keep is judged by what it contains, not by how many slabs produced it.
+**Which slabs you must write** (extended 2026-09-01; the mason caught up on 2026-09-02,
+`beinsiculous/fortknight#19`). `FortKnightSlab.xlsx` — the fourteen-day agenda — is the **only
+required slab**; every keep has a Fort Knight stone. The other seven are optional, and a fort
+writes only the ones it wants; at most **four** of the ones it adds are its **foci**, and the rest
+are peripheral. A keep says which stones it has and which it focuses on in `meta.stones` and
+`meta.foci` (below), copied from the Champion's keep, whose own rule is `fortknight/DOMAIN.md`,
+*Composition*. Hand-making a keep never needed every slab — this document is the whole contract,
+and a keep is judged by what it contains, not by how many slabs produced it.
 
 What this document specifies is the Champion's keep: the whole fourteen-day file. The vocabulary it
 replaces, in anything you read from before 2026-08-30: *seed* meant the Champion's keep,
@@ -189,7 +190,9 @@ given above.
   "meta": {
     "format": "keep",
     "version": 1,
-    "exportedAt": "2026-08-27T18:00:00+00:00"
+    "exportedAt": "2026-08-27T18:00:00+00:00",
+    "stones": ["fort-knight", "fork-knife", "folk-knowledge"],
+    "foci": ["fork-knife"]
   },
   "days": [
     {
@@ -325,6 +328,15 @@ given above.
   writer takes this as an argument and defaults it to null, so a keep made without a clock has the
   key present and null rather than missing. Readers use it only to say how old the season snapshot
   is, and never to do date arithmetic.
+- `stones` — optional: the stones the keep is built of, as stone keys — `fort-knight`,
+  `fork-knife`, `fresh-keep`, `fret-knot`, `foe-kiss`, `folk-knowledge`, `fun-knee`, `fix-knitt` —
+  with `fort-knight` first, always, and the rest in that order. **Absent is not empty, again:** a
+  keep exported before 2026-09-02 has no `stones` at all, which says the export predates
+  composition; `["fort-knight"]` says the fort added no optional stone. A reader draws what it is
+  given either way, and never infers a stone from a section being empty.
+- `foci` — optional, present whenever `stones` is: at most four of the stones in `stones`, never
+  `fort-knight`, in the same order. A set, not a ranking — the ranked axis is `season.focus`. The
+  other stones present are peripheral.
 
 **`days`** — required, exactly fourteen, keys as above. Only `dayKey` is required on a day;
 everything else degrades to nothing if you leave it out, which is what makes a draft loadable.

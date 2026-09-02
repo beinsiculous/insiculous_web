@@ -11,7 +11,7 @@ from champion_fixture import (DAY_KEY_ORDER, FIRST_DATE, FIRST_SUN_A, LAST_DATE,
                               build_champion_keep)
 
 SECTION_KEYS = {
-    "meta": {"sourceSlabs", "generatedBy", "schemaVersion", "exportedAt", "seasonNote", "assumptions"},
+    "meta": {"sourceSlabs", "stones", "foci", "generatedBy", "schemaVersion", "exportedAt", "seasonNote", "assumptions"},
     "categories": {"key", "label", "subjects"},
     "blocks": {"key", "label", "start", "end", "wrapsMidnight", "mealPrimary", "mealSecondary", "sourceRow"},
     "days": {"index", "dayKey", "weekday", "variant", "mainFocus", "mainFocusLabel", "blockFocus", "sourceRow"},
