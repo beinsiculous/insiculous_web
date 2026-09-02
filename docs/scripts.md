@@ -1,10 +1,11 @@
 # Scripts
 
-All scripts are Python 3 standard library only, run from the repository root, exit non-zero on error, and support `--help`.
+All scripts are Python 3 standard library only (one drives node), run from the repository root, exit non-zero on error, and support `--help`.
 
 | script | purpose | typical use |
 |---|---|---|
 | `scripts/validate.py [data-dir] [--overlay DIR]` | schema-subset check + referential rules (day keys, blocks, categories, meal refs, menu completeness, monotonic times, appointment-block warnings), plus the no-schedules privacy sweep | after every data edit |
+| `scripts/export_keep.py --champion PATH [--date YYYY-MM-DD] [--out PATH \| --check]` | build the web keep from a Champion's keep kept **outside** this checkout (or under the ignored `source/`), validate it against `data/schema/keep.schema.json`, and write it whole — or `--check` and write nothing. **The one script here that needs node**: the writer is `src/lib/champion/keep-writer.js` | making your keep for `/fortknight/keep/`; the working set's `check-keep-format.sh` and fortknight's gate call `--check` |
 | `python3 -m unittest discover tests` | tests | always |
 
 That is the whole list. There is no build step: `validate.py` checks `data/`, and nothing turns

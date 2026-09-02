@@ -89,7 +89,8 @@ export function localTodayIsoDate(now = new Date()) {
 }
 
 /** Which of `blocks` ({key, start, end}) contains the wall time `time` (HH:MM); wraps past midnight. Null when none.
- *  Twin of fk_core.generator.block_key_for_time. */
+ *  Twin of tests/champion_reference.py's block_key_for_time, which the resolver's parity suite
+ *  compares it against over every minute of the day (tests/test_clock.py). */
 export function blockKeyForTime(blocks, time) {
   const minutes = timeStringToMinutes(time);
   for (const block of blocks) {
