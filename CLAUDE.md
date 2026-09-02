@@ -25,7 +25,7 @@ focus, weights) is specific to this project.
    day, day keys, seasons, questionnaire, schemas) and *nobody's* schedule — `activities` is empty,
    `menus/` is empty, `days.json` carries no focus. A fresh device starts blank. **Edit these** for
    vocabulary/rules; never put a person's schedule here.
-2. `examples/workbook/` — the original workbook as a **sample data set** (64 activities, the block focus
+2. `examples/workbook/` — *the workbook* — a proper noun here, meaning the archived single `FortKnight.xlsx` of August 2026 and never a slab (the working set's `docs/megaseed/name-drop.md`, *The word "workbook"*) — as a **sample data set** (64 activities, the block focus
    grid, the Spooky Season menu, the baseline weights), laid over `data/` with `--overlay examples/workbook`
    and used by `validate.py` and the tests. Every record keeps its spreadsheet text under `raw`
    (+ `sourceRow`). The CLIs that also read it are gone; `validate.py` is the only one left that takes

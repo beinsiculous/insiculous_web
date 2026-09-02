@@ -31,7 +31,9 @@ contract, and a keep is judged by what it contains, not by how many slabs produc
 What this document specifies is the Champion's keep: the whole fourteen-day file. The vocabulary it
 replaces, in anything you read from before 2026-08-30: *seed* meant the Champion's keep,
 *companion* meant a stone, *kernel* meant a Guest/Knight/Royal keep, *silo* meant a Commander's
-keep (2+ Champion keeps), and *workbook* meant a slab.
+keep (2+ Champion keeps), and *workbook* meant the slab, back when there was one. The word itself is not
+retired: the `.xlsx` format keeps it for its own container, and this repository's `examples/workbook/`
+is named for the archived original.
 
 ## Two bars: readable and conforming
 
