@@ -76,9 +76,10 @@ them or `flexible`, the pseudo-focus for a day left deliberately unassigned. A c
 and the stones were named when the format was; a fort chooses which stones it has, never what a
 stone is (the working set’s `docs/megaseed/categories.md`, 2026-09-02). The same two bars apply
 as for the day keys: **conforming** pins them, and the schema enumerates them; **readable**
-tolerates them — a page that meets a key it does not know renders its label in the flexible colour
-and does not refuse the file. Subjects, by contrast, are yours: the keep carries none, and a
-fort’s slabs list whatever it likes under each category.
+tolerates them — a page that meets a key it does not know renders its label as text and does not
+refuse the file, which is what every page does today, since nothing on the face keys a colour to a
+category. Subjects, by contrast, are yours: the keep carries none, and a fort’s slabs list whatever
+it likes under each category.
 
 Everything else — block keys, season names, focus labels — is **your household’s vocabulary**.
 One fort’s day runs `early`, `midday`, `late`, `too-dark`; another’s need not. The format does not
