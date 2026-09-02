@@ -62,8 +62,9 @@ what replaces it.
 ## The keep-fed pages: Overview, Keep and the day pages
 
 The live face routes are neither placeholders nor built from a profile. They render a **Keep
-keep**: a small file the private **Fort Knight** phone app exports
-(`fortknight/src/lib/keep.js`), carrying fourteen day keys with their meals, appointments and
+keep**: a small file `src/lib/champion/keep-writer.js` writes from a Champion's keep
+(`scripts/export_keep.py` drives it; the phone app that used to is gone — Operation MVP, 2026-09-02),
+carrying fourteen day keys with their meals, appointments and
 block shapes, plus a season card and a year wheel.
 
 **The format is written down.** `docs/keep-format.md` is its specification, written for a person

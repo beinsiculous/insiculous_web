@@ -675,39 +675,3 @@ class KeepSchemaTests(unittest.TestCase):
         document["days"] = [{**json.loads(json.dumps(template)), "dayKey": key} for key in DAY_KEY_ORDER]
         report = self.check(document)
         self.assertTrue(report.ok, f"the spec's own example does not match the schema: {report.render()}")
-
-
-#: The private app repo, renamed twice: focuskey -> fortresskey (2026-08-29) and fortresskey ->
-#: fortknight (Operation Name Drop, 2026-08-30, which also moved its keep files seed/ -> keep/).
-#: ALL names and both layouts are accepted for the transition: this repository reaches production
-#: through its own m -> dev gate, so it cannot land in the same commit as a rename, and without
-#: tolerance one machine or the other is red until every clone has moved. Old names and the old
-#: layout are dropped in Name Drop's Phase 3 cleanup once they all have.
-APP_REPOSITORY_NAMES = ("fortknight", "fortresskey", "focuskey")
-
-
-def app_schema_copy():
-    """The keep schema's copy in the app repo, under whichever name and layout it currently has here."""
-    for name in APP_REPOSITORY_NAMES:
-        for layout in ("keep", "seed"):
-            candidate = REPOSITORY_ROOT.parent / name / layout / "keep.schema.json"
-            if candidate.is_file():
-                return candidate
-    return None
-
-
-@unittest.skipUnless(app_schema_copy() is not None,
-                     "the app repository is not cloned beside this one")
-class SchemaCopyParityTests(unittest.TestCase):
-    """The schema is copied into the private app repo so a standalone clone of it keeps a drift check.
-    Copies that nothing compares drift, and this organisation has already proved it — so the byte
-    comparison runs here, where `npm run verify` executes it, rather than only in a script somebody
-    has to remember. It compares two SCHEMA files: neither is anybody's schedule.
-    """
-
-    def test_the_copy_is_byte_identical(self):
-        copy = app_schema_copy()
-        canonical = (REPOSITORY_ROOT / "data" / "schema" / "keep.schema.json").read_bytes()
-        self.assertEqual(canonical, copy.read_bytes(),
-                         f"the keep schema and its copy in {copy.parent.parent.name} have drifted; "
-                         "see scripts/check-keep-format.sh in the working set")

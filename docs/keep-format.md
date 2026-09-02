@@ -1,13 +1,14 @@
 # The keep format: a fortnight you can write by hand
 
 A **keep** is a small JSON file describing one fourteen-day fortnight — what is eaten, what is
-booked, and what each block of each day is for. The planner app writes one; `/fortknight/keep/`
+booked, and what each block of each day is for. The writer, `src/lib/champion/keep-writer.js`,
+builds one from a fort's Champion's keep (`scripts/export_keep.py` runs it); `/fortknight/keep/`
 draws it. This document is the format's specification, written for a person making a keep by hand
 in a text editor, and it is canonical: the machine schema beside it is
 `data/schema/keep.schema.json`, and the reader that decides whether a page can draw your file is
 `src/lib/keep.js`.
 
-You do not need the app. A keep you write yourself is a first-class keep, and it is checked against
+You do not need the writer. A keep you write yourself is a first-class keep, and it is checked against
 the same schema as one the app exports.
 
 **Where this file sits in the chain** (Operation Name Drop, 2026-08-30 —
@@ -156,7 +157,7 @@ breaking change and nothing else.
 
 There are two constants, in two codebases, and they are two different ideas:
 
-- `KEEP_FORMAT_VERSION`, in the app that writes keeps — the version it **writes**.
+- `KEEP_FORMAT_VERSION`, in `src/lib/champion/keep-writer.js` — the version the writer **writes**.
 - `READABLE_VERSION`, in `src/lib/keep.js` — the highest version this website **reads**.
 
 They are allowed to differ; the whole cadence argument is that they will, briefly, whenever one
@@ -358,7 +359,11 @@ everything else degrades to nothing if you leave it out, which is what makes a d
 `safeOutsidePercent` is a number, not necessarily whole. `focus`, `produce` and `mealIdeas` are the
 season’s content and may be omitted entirely.
 
-**`year`** — the year wheel, or `null`.
+**`year`** — the year wheel, or `null`. **`season` and `year` are null together:** the writer ties
+them, because they are one question — what is it right now — and a date the calendar cannot answer
+yields neither, even when the wheel's year row exists (the last day of a year the calendar stops
+short of would otherwise draw a full wheel with no season beside it). A keep with a `year` and no
+`season` is not one the writer produces; a reader still draws whichever it is given.
 
 - `year` is a **string** — `"2026"`, not `2026`.
 - `slices[]` draw the wheel. `percent`, `startDegree` and `sweepDegree` are numbers and need not be

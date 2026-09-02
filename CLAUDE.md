@@ -33,7 +33,11 @@ focus, weights) is specific to this project.
 3. `src/` — the site. `src/lib/keep*.js` read and draw a loaded keep; `src/lib/shared/*.js` is what
    survived the creation chain's removal — `clock.js`, `astronomy.js` and `fortknight-rules.js`
    (each with a Python twin in `scripts/fk_core/`), plus `user-settings.js` and `profile-names.js`,
-   which have none.
+   which have none. **`src/lib/champion/`** is the resolver and the web-keep **writer**
+   (`resolve.js`, `keep-writer.js` — moved here from the Fort Knight phone app on 2026-09-02,
+   Operation MVP): their input is a **Champion's keep**, the fort's complete private file, which this
+   repository never holds — the tests feed them an invented one built by `tests/champion_fixture.py`,
+   and `scripts/export_keep.py` drives the writer over a real one kept outside the checkout.
 
 **There is no `build/` step and no bundle.** `scripts/build.py` and `build/fortknight.bundle.json`
 were deleted on 2026-08-30, and with them the only path from `data/` to a rendered page — verified:
@@ -69,7 +73,7 @@ validate → tests → `astro check` → build → axe-core over every page → 
 
 ## Coding conventions (apply to Python, JavaScript, and JSON field names)
 - **Human-readable names, no abbreviations.** `estimatedStartTime`, not `estStart`; `dayKey`, not `dk`; `durationMinutes`, not `dur`. Loop variables included (`activity`, not `a`).
-- **DRY** — shared logic lives in `scripts/fk_core/` (Python) or `src/lib/shared/*.js` (plain ES modules with no build step, driven by the tests through node); never copy a rule (day-key order, season rules, time parsing) into a second place. **Three twin pairs survive** the creation chain's removal: `clock.js`/`timeconv.py`, `astronomy.js`/`astronomy.py`, `fortknight-rules.js`/`dates.py`. The file headers name each pair. Change one, change the other — and note that **nothing exercises the clock pair any more** (`beinsiculous/insiculous_web#10` owns that gap), so its parity is currently a promise rather than a check. Every other "mirrored by" claim you meet in `docs/` refers to a JavaScript file that no longer exists.
+- **DRY** — shared logic lives in `scripts/fk_core/` (Python) or `src/lib/shared/*.js` (plain ES modules with no build step, driven by the tests through node); never copy a rule (day-key order, season rules, time parsing) into a second place. **Three twin pairs survive** the creation chain's removal: `clock.js`/`timeconv.py`, `astronomy.js`/`astronomy.py`, `fortknight-rules.js`/`dates.py`. The file headers name each pair. Change one, change the other. A fourth pair arrived with the writer: `src/lib/champion/resolve.js` and `tests/champion_reference.py`, held by `tests/test_champion_resolve.py` over every date of the fixture's calendar; `tests/test_clock.py` holds `clock.js`'s block rule against that same twin (`beinsiculous/insiculous_web#10` was the gap). Every other "mirrored by" claim you meet in `docs/` refers to a JavaScript file that no longer exists.
 - **KISS** — the simplest thing that works; stdlib only in Python; `src/lib/shared/` stays framework-free with no build step, the site is plain Astro with no UI framework.
 - **SRP** — one responsibility per module and per script; a script orchestrates, a module implements.
 - Times are `"HH:MM"` 24h strings; dates ISO `YYYY-MM-DD`; durations integer minutes; ids lowercase kebab-case and **immutable** once published.
@@ -141,7 +145,7 @@ Live on `main`'s lineage: FortKnight's Overview, `/fortknight/keep/`, the fourte
 including `/achievements/`. Fork Knife's `/forkknife/*` routes are removed; its menu rendering lands
 under `/fortknight/forkknife/` (`#18`).
 
-**The keep** is a small file the private Fort Knight app exports (`fortknight/src/lib/keep.js`): the fourteen
+**The keep** is a small file written by `src/lib/champion/keep-writer.js` from a Champion's keep — by `scripts/export_keep.py` today (the private keep stays outside this checkout), by the slab-upload builder (`#24`) later, and by the phone when it returns: the fourteen
 day keys with their meals, appointments and block shapes, plus a season card and the year wheel. The day keys are the
 format's skeleton: this is a fourteen-day system, so a conforming keep uses exactly the canonical fourteen
 (`sun-a, mon-b, tue-a, wed-b, thu-a, fri-b, sat-a, sun-b, mon-a, tue-b, wed-a, thu-b, fri-a, sat-b`, the order the
@@ -168,6 +172,9 @@ a page with fourteen real panels instead of an empty file picker, and `tests/fix
 a second invented household the rendering tests and the a11y gate's second seeded pass use to prove the year wheel's
 colours are positional rather than keyed to one household's season ids — that pass is what certifies the palette's
 contrast on a keep that is not the original household's. Both are invented, and tests assert all of that.
+The resolver and writer suites need a **Champion's** keep too, and get one from a **builder**
+(`tests/champion_fixture.py`) rather than a file: nothing champion-shaped is committed and no
+exemption was added — an exemption of that shape is exactly what the guard's second rule exists to catch.
 
 ## Achievements
 
