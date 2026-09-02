@@ -43,7 +43,9 @@ authoring new ones — and on 2026-08-28 given a project spine.
 system's own web face, and through the current phase it is the only agenda surface there is. The work
 runs in gated projects, in order; the two that concern this repository are:
 
-1. **Project Mega Keep — the current phase.** Build keeps to flesh out the receiver app: the Keep
+1. **Project Mega Seed — the current project, in Operation MVP** (2026-09-02, the working set's
+   `docs/megaseed/mvp.md`). Build keeps to flesh out the receiver, which is this site — the phone
+   app is parked until Operation Phoney Bologna: the Keep
    format gets a public spec and machine schema, both canonical *here* because a person hand-making a
    keep cannot see the private repo. Nothing new consumes the format until it is written down.
 2. **Project Ant Hill.** Reverse-engineer a keep builder from the hand-made keeps. The creation chain
