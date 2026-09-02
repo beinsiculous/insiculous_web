@@ -38,8 +38,12 @@ answers, cut around fixed activities (`docs/questionnaire.md`). Flexible blocks 
 
 ## Categories and subjects
 Seven categories are the units everything is weighted in: `meals`, `cleaning`, `working`,
-`spirituality-development`, `friends-family`, `health`, `operations`. Each has subjects
-(e.g. `laundry` → cleaning, `pet-care` → friends-family) listed in `data/categories.json`.
+`spirituality-development`, `friends-family`, `health`, `operations`. **The set is closed** — a
+category is a stone, and a fort chooses which stones it has, never what one is (the working set's
+`docs/megaseed/categories.md`, 2026-09-02). Each has subjects (e.g. `laundry` → cleaning,
+`pet-care` → friends-family); **subjects are open** — a fort's slabs list its own — and the 41 in
+`data/categories.json` are the shipped default that the questionnaire and the baseline weights are
+keyed on.
 `flexible` is a pseudo-focus meaning "deliberately unassigned"; it is not a category. It is not a leftover
 either: `flexibleShare` is the part of the waking window the seven categories did not claim (`docs/weights.md`
 rule 3) — the fortnight's open time, where rest days, seasonal and occasional work, and anything not yet
