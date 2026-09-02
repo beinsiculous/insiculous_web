@@ -39,7 +39,7 @@ them are one system with one plan:
 2026-08-27, **re-ordered around the keep** — responding to the schedule that exists comes before
 authoring new ones — and on 2026-08-28 given a project spine.
 
-**Fort Knight is the system, not an app** (ruled 2026-08-28). `/fortknight/` on this site is the
+**Fort Knight is the app and the system** (Operation Name Drop, 2026-08-30, reversing 2026-08-28's system-not-an-app ruling). `/fortknight/` on this site is the
 system's own web face, and through the current phase it is the only agenda surface there is. The work
 runs in gated projects, in order; the two that concern this repository are:
 
