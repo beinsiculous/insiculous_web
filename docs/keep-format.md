@@ -334,9 +334,15 @@ given above.
   keep exported before 2026-09-02 has no `stones` at all, which says the export predates
   composition; `["fort-knight"]` says the fort added no optional stone. A reader draws what it is
   given either way, and never infers a stone from a section being empty.
-- `foci` — optional, present whenever `stones` is: at most four of the stones in `stones`, never
-  `fort-knight`, in the same order. A set, not a ranking — the ranked axis is `season.focus`. The
-  other stones present are peripheral.
+- `foci` — optional, present whenever `stones` is: one to four stone keys, never `fort-knight`,
+  **ordered by the fort's rank, primary first** (the working set's `docs/megaseed/periphery.md`,
+  2026-09-02 — before that day it was written as a set in slab order, and a reader that treats it
+  as a set is still right). Since `slab-defaults.md` the same day a focus may name a stone that is
+  not in `stones`. The other stones are peripheral.
+- `fociRanks` — optional, only with `foci`: integers `1`–`4`, one per entry of `foci`, in the same
+  order. Only five rank sets exist — `1`, `1 2`, `1 2 3`, `1 2 3 4` and `1 4 4 4` (one primary, three
+  tied at fourth) — so a reader may show a tie and must not invent one. Absent on a keep exported
+  before this ruling; the writer emits it from the Champion's keep's `{stone, rank}` items.
 
 **`days`** — required, exactly fourteen, keys as above. Only `dayKey` is required on a day;
 everything else degrades to nothing if you leave it out, which is what makes a draft loadable.
