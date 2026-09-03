@@ -32,18 +32,20 @@ even though the branches do not. Ten files were deleted from `main` with the cha
 `ApplyFromAssistant.astro`, `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the
 `/forkknife/` pages — and each is recoverable with `git show creation-chain-parked:PATH`.
 
-**Fort Knight is planned in the working set, not here.** The apps, the phone app **Fort Knight**
+**Fort Knight is planned in the working set, not here.** The system, the phone app **Fort Knight** (deleted 2026-09-02; the next one is derived from this site)
 (Keep until 2026-08-27, Focus Key until 2026-08-28, now Fort Knight), and the keep that joins
 them are one system with one plan:
 `insiculous/docs/roadmap-fortnight-apps.md` in the admin repo. That file was folded together on
 2026-08-27, **re-ordered around the keep** — responding to the schedule that exists comes before
 authoring new ones — and on 2026-08-28 given a project spine.
 
-**Fort Knight is the system, not an app** (ruled 2026-08-28). `/fortknight/` on this site is the
+**Fort Knight is the app and the system** (Operation Name Drop, 2026-08-30, reversing 2026-08-28's system-not-an-app ruling). `/fortknight/` on this site is the
 system's own web face, and through the current phase it is the only agenda surface there is. The work
 runs in gated projects, in order; the two that concern this repository are:
 
-1. **Project Mega Keep — the current phase.** Build keeps to flesh out the receiver app: the Keep
+1. **Project Mega Seed — the current project, in Operation MVP** (2026-09-02, the working set's
+   `docs/megaseed/mvp.md`). Build keeps to flesh out the receiver, which is this site — the phone
+   app is parked until Operation Phoney Bologna: the Keep
    format gets a public spec and machine schema, both canonical *here* because a person hand-making a
    keep cannot see the private repo. Nothing new consumes the format until it is written down.
 2. **Project Ant Hill.** Reverse-engineer a keep builder from the hand-made keeps. The creation chain

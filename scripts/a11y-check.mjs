@@ -1,8 +1,8 @@
 // Accessibility gate: serve dist/ locally, run axe-core (WCAG 2.0/2.2 A+AA) on every page, and
 // fail the build on any violation. Runs as part of `npm run verify`, so a regression blocks a
-// deploy exactly like a type error does. The seed-fed pages are audited twice, once per invented
+// deploy exactly like a type error does. The keep-fed pages are audited twice, once per invented
 // Keep fixture: the second household's pass is what certifies the positional season palette's
-// contrast on a seed that is not the original household's.
+// contrast on a keep that is not the original household's.
 //
 // axe finds roughly half of real-world issues — the rest is the manual checklist in README
 // (keyboard pass, screen-reader pass, zoom/reflow). Zero violations here is necessary, not
@@ -82,7 +82,7 @@ try {
   const page = await context.newPage();
   // The faces only render their full UI once a profile exists locally — same seeding the
   // screenshot harness uses, so axe sees what a returning user sees.
-  // Keep renders entirely from a seed in localStorage. Without this the page audited is a file picker
+  // Keep renders entirely from a keep in localStorage. Without this the page audited is a file picker
   // on an otherwise empty page, and the one hard requirement it has — being readable across a room — is
   // checked by a gate that never sees it. The fixture is invented, not anybody's fortnight.
   const keepSeed = readFileSync(new URL("../tests/fixtures/keep.sample.json", import.meta.url), "utf8");
@@ -135,19 +135,19 @@ try {
     }
   }
 
-  // The pages that render from the stored seed are the only output that changes with the seed, so only
+  // The pages that render from the stored keep are the only output that changes with the keep, so only
   // they get a second pass, seeded with the other invented household. Its season ids and names are not
   // the ones the original palette was keyed to, which is exactly what certifies the positional palette's
-  // contrast on a seed that is not the original household's; re-auditing the rest of the site would
+  // contrast on a keep that is not the original household's; re-auditing the rest of the site would
   // audit identical output.
   //
   // ADD A STONE PAGE HERE WHEN IT RENDERS KEEP CONTENT. The list is explicit rather than a prefix match
   // on /fortknight/ because most stone pages draw honest empty states, whose output does not vary with
-  // the seed — auditing those twice would cost a browser context to prove nothing. A page that draws
+  // the keep — auditing those twice would cost a browser context to prove nothing. A page that draws
   // season colours belongs here; /fortknight/folkknowledge/ draws the year wheel, which is the single
   // strongest reason this second pass exists.
   const SEED_FED_ROUTES = new Set(["/fortknight/", "/fortknight/keep/", "/fortknight/folkknowledge/", "/fortknight/forkknife/"]);
-  const seedFed = chosen.filter((route) =>
+  const keepFed = chosen.filter((route) =>
     SEED_FED_ROUTES.has(route) || route.startsWith("/fortknight/days/"));
   const otherHouseholdSeed = readFileSync(new URL("../tests/fixtures/keep.other-household.json", import.meta.url), "utf8");
   const otherHouseholdContext = await browser.newContext();
@@ -156,7 +156,7 @@ try {
     localStorage.setItem("beinsiculous.keep", seed);
   }, [JSON.stringify({ schemaVersion: 2 }), otherHouseholdSeed]);
   const otherHouseholdPage = await otherHouseholdContext.newPage();
-  for (const route of seedFed) {
+  for (const route of keepFed) {
     await otherHouseholdPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
     const results = await new AxeBuilder({ page: otherHouseholdPage })
       .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
@@ -164,7 +164,7 @@ try {
     analyzed++;
     for (const violation of results.violations) {
       const targets = violation.nodes.map((node) => node.target.join(" ")).join("; ");
-      failures.push(`${route} (seed: other-household)  [${violation.id}] ${violation.help}\n    ${targets}`);
+      failures.push(`${route} (keep: other-household)  [${violation.id}] ${violation.help}\n    ${targets}`);
     }
   }
   await otherHouseholdContext.close();

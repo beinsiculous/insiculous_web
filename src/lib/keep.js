@@ -1,15 +1,14 @@
 // Is this a keep this page can render?
 //
-// The file is exported by the Fort Knight app and picked by the person who owns it. It is the only document this
+// The file is written by src/lib/champion/keep-writer.js and picked by the person who owns it. It is the only document this
 // site reads that carries somebody's real schedule, so the rules here are about being useful rather than
 // being strict: what a page can draw, it draws.
 //
 // TOLERANT WITHIN A MAJOR VERSION, on purpose. The two halves of this feature ship on different cadences —
 // Fort Knight at native-rebuild speed, this page at push speed — and the person holding the phone cannot redeploy
 // the website. So an unknown field is ignored rather than refused, and `version` is refused only when it is
-// higher than this page understands. Fort Knight's side of that bargain is in the phone app's own
-// src/lib/keep.js: the version bumps only for a breaking change. (This line used to say "in
-// src/lib/keep.js" while pointing at itself — it means the app's file, not this one.)
+// higher than this page understands. The writer's side of that bargain is src/lib/champion/keep-writer.js
+// (moved here from the phone app on 2026-09-02): the version bumps only for a breaking change.
 //
 // Reasons are written for a person standing at a television, not for a log.
 

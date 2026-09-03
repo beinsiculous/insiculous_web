@@ -1,13 +1,14 @@
 # The keep format: a fortnight you can write by hand
 
 A **keep** is a small JSON file describing one fourteen-day fortnight — what is eaten, what is
-booked, and what each block of each day is for. The planner app writes one; `/fortknight/keep/`
+booked, and what each block of each day is for. The writer, `src/lib/champion/keep-writer.js`,
+builds one from a fort's Champion's keep (`scripts/export_keep.py` runs it); `/fortknight/keep/`
 draws it. This document is the format's specification, written for a person making a keep by hand
 in a text editor, and it is canonical: the machine schema beside it is
 `data/schema/keep.schema.json`, and the reader that decides whether a page can draw your file is
 `src/lib/keep.js`.
 
-You do not need the app. A keep you write yourself is a first-class keep, and it is checked against
+You do not need the writer. A keep you write yourself is a first-class keep, and it is checked against
 the same schema as one the app exports.
 
 **Where this file sits in the chain** (Operation Name Drop, 2026-08-30 —
@@ -15,13 +16,26 @@ the same schema as one the app exports.
 **Champion's keep**, and it is built of **stones**: one per domain — Fort Knight the agenda, Fork
 Knife the meals, Fresh Keep the cleaning, Folk Knowledge friends and family, and four more. A stone
 is chiselled from a **slab**, the human- and AI-readable `.xlsx` a person writes; a slab is quarried
-from a **mountain**, whatever raw material they started with. Smaller files cut from the Champion's
-keep — a **Guest**, **Knight** or **Royal keep** — are a single member's slice of it.
+from a **mountain**, whatever raw material they started with. The tool that cuts one slab is a
+**chisel** — there are eight, one per slab — and the **mason** is what wields them and lays the
+stones into a keep. Smaller files cut from the Champion's keep — a **Guest**, **Knight** or
+**Royal keep** — are a single member's slice of it.
+
+**Which slabs you must write** (extended 2026-09-01; the mason caught up on 2026-09-02,
+`beinsiculous/fortknight#19`). `FortKnightSlab.xlsx` — the fourteen-day agenda — is the **only
+required slab**; every keep has a Fort Knight stone. The other seven are optional, and a fort
+writes only the ones it wants; at most **four** of the ones it adds are its **foci**, and the rest
+are peripheral. A keep says which stones it has and which it focuses on in `meta.stones` and
+`meta.foci` (below), copied from the Champion's keep, whose own rule is `fortknight/DOMAIN.md`,
+*Composition*. Hand-making a keep never needed every slab — this document is the whole contract,
+and a keep is judged by what it contains, not by how many slabs produced it.
 
 What this document specifies is the Champion's keep: the whole fourteen-day file. The vocabulary it
 replaces, in anything you read from before 2026-08-30: *seed* meant the Champion's keep,
 *companion* meant a stone, *kernel* meant a Guest/Knight/Royal keep, *silo* meant a Commander's
-keep (2+ Champion keeps), and *workbook* meant a slab.
+keep (2+ Champion keeps), and *workbook* meant the slab, back when there was one. The word itself is not
+retired: the `.xlsx` format keeps it for its own container, and this repository's `examples/workbook/`
+is named for the archived original.
 
 ## Two bars: readable and conforming
 
@@ -57,9 +71,21 @@ of these exactly once, in this sequence”, so a file with `sun-a` fourteen time
 schema and still breaks this rule. The rule is the specification’s, and a test enforces it. If you
 are generating keeps, do not rely on the schema to catch a shuffled or repeated day.
 
-Everything else — block keys, season names, focus labels, categories — is **your household’s
-vocabulary**. One fort’s day runs `early`, `midday`, `late`, `too-dark`; another’s need not. The
-format does not enumerate them and no reader should either.
+**The seven categories are the skeleton too.** `meals`, `cleaning`, `working`,
+`spirituality-development`, `friends-family`, `health`, `operations` — in that order — are the only
+values of `appointments[].category` and `season.focus[].key`, and a day’s `mainFocus` is one of
+them or `flexible`, the pseudo-focus for a day left deliberately unassigned. A category is a stone,
+and the stones were named when the format was; a fort chooses which stones it has, never what a
+stone is (the working set’s `docs/megaseed/categories.md`, 2026-09-02). The same two bars apply
+as for the day keys: **conforming** pins them, and the schema enumerates them; **readable**
+tolerates them — a page that meets a key it does not know renders its label as text and does not
+refuse the file, which is what every page does today, since nothing on the face keys a colour to a
+category. Subjects, by contrast, are yours: the keep carries none, and a fort’s slabs list whatever
+it likes under each category.
+
+Everything else — block keys, season names, focus labels — is **your household’s vocabulary**.
+One fort’s day runs `early`, `midday`, `late`, `too-dark`; another’s need not. The format does not
+enumerate them and no reader should either.
 
 ## What travels, and what does not
 
@@ -132,7 +158,7 @@ breaking change and nothing else.
 
 There are two constants, in two codebases, and they are two different ideas:
 
-- `KEEP_FORMAT_VERSION`, in the app that writes keeps — the version it **writes**.
+- `KEEP_FORMAT_VERSION`, in `src/lib/champion/keep-writer.js` — the version the writer **writes**.
 - `READABLE_VERSION`, in `src/lib/keep.js` — the highest version this website **reads**.
 
 They are allowed to differ; the whole cadence argument is that they will, briefly, whenever one
@@ -164,7 +190,9 @@ given above.
   "meta": {
     "format": "keep",
     "version": 1,
-    "exportedAt": "2026-08-27T18:00:00+00:00"
+    "exportedAt": "2026-08-27T18:00:00+00:00",
+    "stones": ["fort-knight", "fork-knife", "folk-knowledge"],
+    "foci": ["fork-knife"]
   },
   "days": [
     {
@@ -300,6 +328,15 @@ given above.
   writer takes this as an argument and defaults it to null, so a keep made without a clock has the
   key present and null rather than missing. Readers use it only to say how old the season snapshot
   is, and never to do date arithmetic.
+- `stones` — optional: the stones the keep is built of, as stone keys — `fort-knight`,
+  `fork-knife`, `fresh-keep`, `fret-knot`, `foe-kiss`, `folk-knowledge`, `fun-knee`, `fix-knitt` —
+  with `fort-knight` first, always, and the rest in that order. **Absent is not empty, again:** a
+  keep exported before 2026-09-02 has no `stones` at all, which says the export predates
+  composition; `["fort-knight"]` says the fort added no optional stone. A reader draws what it is
+  given either way, and never infers a stone from a section being empty.
+- `foci` — optional, present whenever `stones` is: at most four of the stones in `stones`, never
+  `fort-knight`, in the same order. A set, not a ranking — the ranked axis is `season.focus`. The
+  other stones present are peripheral.
 
 **`days`** — required, exactly fourteen, keys as above. Only `dayKey` is required on a day;
 everything else degrades to nothing if you leave it out, which is what makes a draft loadable.
@@ -334,7 +371,11 @@ everything else degrades to nothing if you leave it out, which is what makes a d
 `safeOutsidePercent` is a number, not necessarily whole. `focus`, `produce` and `mealIdeas` are the
 season’s content and may be omitted entirely.
 
-**`year`** — the year wheel, or `null`.
+**`year`** — the year wheel, or `null`. **`season` and `year` are null together:** the writer ties
+them, because they are one question — what is it right now — and a date the calendar cannot answer
+yields neither, even when the wheel's year row exists (the last day of a year the calendar stops
+short of would otherwise draw a full wheel with no season beside it). A keep with a `year` and no
+`season` is not one the writer produces; a reader still draws whichever it is given.
 
 - `year` is a **string** — `"2026"`, not `2026`.
 - `slices[]` draw the wheel. `percent`, `startDegree` and `sweepDegree` are numbers and need not be
