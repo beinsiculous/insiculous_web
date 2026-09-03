@@ -324,6 +324,8 @@ class CommitReviewHookTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("adversarial CODE review", result.stderr)
         self.assertIn("--reviewer=claude", result.stderr)
+        self.assertIn("--reviewer=gemini", result.stderr)
+        self.assertIn("review/<subject>/draft.diff", result.stderr)
 
     def test_big_commit_denied_claude(self):
         stage_changes(self.repository, BIG_LINES)
@@ -544,8 +546,9 @@ class PlanReviewHookTest(unittest.TestCase):
     def test_kimi_prints_routing_instruction(self):
         result = run_hook(PLAN_HOOK, "kimi", "", self.repository)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("review/plan.md", result.stdout)
+        self.assertIn("review/<subject>/plan.md", result.stdout)
         self.assertIn("--reviewer=claude", result.stdout)
+        self.assertIn("--reviewer=gemini", result.stdout)
 
     def test_claude_prints_additional_context_json(self):
         result = run_hook(PLAN_HOOK, "claude", "", self.repository)
