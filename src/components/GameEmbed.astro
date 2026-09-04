@@ -72,10 +72,16 @@ const { src, title, width = 800, height = 600 } = Astro.props;
   const status = document.getElementById('game-loading');
   if (src) {
     // Gate BEFORE the import: browsers without WebGPU (or with the API but
-    // no usable adapter) never download the wasm module.
+    // no usable adapter) never download the wasm module. An adapter alone is
+    // not proof: the engine then asks for a device at the default limits, and
+    // an adapter that exposes the API without them fails there with a generic
+    // 'Failed to start'. So the gate asks for the same device — default
+    // limits, no features — and releases it before the wasm asks for its own.
     const gpu = 'gpu' in navigator ? (navigator as any).gpu : null;
     const adapter = gpu ? await gpu.requestAdapter().catch(() => null) : null;
-    if (!adapter) {
+    const device = adapter ? await adapter.requestDevice().catch(() => null) : null;
+    device?.destroy();
+    if (!adapter || !device) {
       if (status)
         status.textContent =
           'This game needs WebGPU — available in Chrome and Edge. In Firefox, enable dom.webgpu.enabled in about:config and fully restart the browser.';
