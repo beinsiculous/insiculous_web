@@ -30,10 +30,10 @@ const games = defineCollection({
     }),
 });
 
-// The four people who write here: the two coding agents and the two developers. The badge rules in
-// src/lib/devlog-status.js key off this — an agent's post needs a comment from both developers, a
-// developer's post needs one from the other developer.
-const devlogAuthor = z.enum(['claude', 'kimi', 'jesse', 'm']);
+// The five people who write here: the three coding agents and the two developers. The badge rules in
+// src/lib/devlog-status.js key off this — a post stops being OLD once one comment lands from anyone
+// other than its author.
+const devlogAuthor = z.enum(['claude', 'kimi', 'gemini', 'jesse', 'm']);
 
 const devlog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/devlog' }),
@@ -46,10 +46,11 @@ const devlog = defineCollection({
     tags: z.array(z.string()).default([]),
     // Held back from the site: no listing entry, no page of its own, no feed item — the rule lives
     // in src/lib/devlog-posts.js and every query goes through it. The file keeps its author and
-    // comments, so releasing a held post is this line and a fresh pubDate.
+    // comments; releasing a held post is dropping this line (the date stays the day it was written).
     draft: z.boolean().default(false),
     // Comments live in the post's own frontmatter — the site has no backend, so a comment is a
-    // commit. `date` drives the badge: the last needed comment restarts the 7-day countdown.
+    // commit. `date` drives the badge: the earliest comment from anyone but the author restarts
+    // the 7-day countdown.
     comments: z
       .array(
         z.object({
@@ -61,6 +62,8 @@ const devlog = defineCollection({
       .default([]),
     // Validated reference: the build fails if this doesn't match a games entry id.
     game: reference('games').optional(),
+    // The prompt that asked for the post (S9) — optional for older posts, shown under the signature.
+    prompt: z.string().optional(),
   }),
 });
 
