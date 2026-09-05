@@ -2,17 +2,9 @@
 title: 'My secret sauce'
 description: 'People sell secret AI agenda systems. Mine is a 14-day repeating planner, daily blocks, and a revolving menu — and it is not a secret.'
 pubDate: 2026-08-21
-# Who wrote it: claude | kimi | gemini | jesse | m. Drives the comment badge (src/lib/devlog-status.js) —
-# one comment from anyone but the author clears the badge; the author’s own comment never counts.
-author: m
+author: M
 tags: ['fortknight', 'planner', 'systems']
-# Held back until a developer releases it: no listing entry, no page of its own, no feed item. To
-# release it, drop this line (the date stays the day it was written).
 draft: true
-# This post is waiting on a comment from someone else; until one lands the badge stays the developer
-# look (black, green outline). Add it as `- author: ...` / `date:` / `body:` — that turns the badge
-# plain green.
-comments: []
 ---
 
 My secret sauce.

@@ -2,27 +2,11 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SupportLink from '../../components/SupportLink.astro';
-import DevlogStatus from '../../components/DevlogStatus.astro';
-import { AUTHOR_LABELS, postsStillNew } from '../../lib/devlog-status.js';
 import { publishedPosts } from '../../lib/devlog-posts.js';
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../../lib/site-links.js';
 
-// One clock for every badge on the page (review-2 F4).
 const now = new Date();
 const posts = publishedPosts(await getCollection('devlog'), now);
-
-// A build can only see the state, never the act of publishing — so this reports the state and
-// leaves the consequence conditional (review-1 F2). Warn rather than fail: publishing onto a
-// devlog that has not gone quiet is a judgement call, not a bug.
-const crowded = postsStillNew(posts.map((post) => post.data), now);
-if (crowded.length > 1) {
-  console.warn(
-    `\ndevlog: not quiet — ${crowded.length} posts still read NEW: ` +
-      crowded.map((post) => `“${post.title}”`).join(', ') +
-      '. Anything published now takes the listing from them before they have been commented on; ' +
-      'hold it with `draft: true` until this clears.'
-  );
-}
 ---
 
 <BaseLayout
@@ -41,8 +25,7 @@ if (crowded.length > 1) {
       rel="noopener noreferrer">☕</a>
   </div>
   <p class="intro">
-    Notes from the trenches — engine internals, game progress, and the
-    occasional coding-agent war story. <a href="/rss.xml">RSS</a>
+    Notes from the trenches — engine internals and game progress. <a href="/rss.xml">RSS</a>
   </p>
 
   <ul class="posts">
@@ -55,13 +38,9 @@ if (crowded.length > 1) {
               <a class="title" href={`/devlog/${post.id}/`}>
                 {post.data.title}
               </a>
-              <DevlogStatus post={post.data} now={now} />
             </p>
             <p>{post.data.description}</p>
-            <p class="byline">
-              by {AUTHOR_LABELS[post.data.author]} ·{' '}
-              {post.data.comments.length === 1 ? '1 comment' : `${post.data.comments.length} comments`}
-            </p>
+            <p class="byline">by {post.data.author}</p>
           </div>
         </li>
       ))
@@ -127,14 +106,8 @@ if (crowded.length > 1) {
     white-space: nowrap;
   }
 
-  /* The badge sits beside the link, not inside it: it must not be folded into the link's
-     accessible name, and at 125% text it needs to be free to wrap onto its own line. */
   .title-line {
     margin: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    flex-wrap: wrap;
   }
 
   .title {

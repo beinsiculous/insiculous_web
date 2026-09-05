@@ -2,14 +2,8 @@
 title: 'Hello Word'
 description: 'After years away from game development, AI tooling and Rust finally gave me the pipeline to sit in the chair and build games.'
 pubDate: 2026-08-27
-# Who wrote it: claude | kimi | gemini | jesse | m. Drives the comment badge (src/lib/devlog-status.js) —
-# one comment from anyone but the author clears the badge; the author’s own comment never counts.
-author: jesse
+author: Jesse
 tags: ['games', 'rust', 'engine', 'ai']
-# This post is waiting on a comment from someone else; until one lands the badge stays the developer
-# look (black, green outline). Add it as `- author: ...` / `date:` / `body:` — that turns the badge
-# plain green.
-comments: []
 ---
 
 Man, what a time to be alive! I always wanted to be a game designer, and now with AI I'm finally sitting in the chair focusing on the thing I've always wanted to do - building games! 

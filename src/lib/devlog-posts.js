@@ -6,24 +6,23 @@
  * than none: the listing would still link a page that was never built, and nothing here
  * link-checks the build, so it would ship as a silent 404. Hence one function, four callers.
  *
- * Framework-free plain ES module (see CLAUDE.md), in the style of devlog-status.js: no imports,
- * no build step, driven directly by tests/test_devlog_posts.py through node.
+ * Framework-free plain ES module (see CLAUDE.md): no imports, no build step, driven directly by
+ * tests/test_devlog_posts.py through node.
  */
 
 /**
  * The posts the site shows, newest first. A post with `draft: true` is held back: no listing
- * entry, no page of its own, no feed item. The file stays in src/content/devlog/ with its author
- * and comments intact, so releasing it is one line of frontmatter.
+ * entry, no page of its own, no feed item. The file stays in src/content/devlog/, so releasing it
+ * is one line of frontmatter.
  *
- * A publication date or comment date in the future relative to `now` throws — a typo'd date must
- * fail the build rather than pinning a badge into the future. A comment dated before the post’s
- * pubDate also throws: a comment cannot predate what it comments on. Drafts are exempt: a draft
+ * A publication date in the future relative to `now` throws — a typo'd date must fail the build
+ * rather than ship a post from next year at the top of the listing. Drafts are exempt: a draft
  * builds nothing, so a future date on one is harmless.
  *
  * Generic in the entry so the collection's own type survives the filter — the post route passes
  * what comes back straight into the page's props, and a narrowed type breaks `astro check`.
  *
- * @template {{id: string, data: {pubDate: Date|string, draft?: boolean, comments?: Array<{author?: string, date: Date|string}>}}} Entry
+ * @template {{id: string, data: {pubDate: Date|string, draft?: boolean}}} Entry
  * @param {Entry[]} entries  collection entries as Astro loads them
  * @param {Date|string} now  the clock to check against
  * @returns {Entry[]}
@@ -45,20 +44,6 @@ export function publishedPosts(entries, now) {
       throw new Error(
         `devlog post '${entry.id}' pubDate (${pubDate.toISOString().slice(0, 10)}) is in the future relative to ${nowDate.toISOString().slice(0, 10)}`
       );
-    }
-    const comments = entry.data.comments ?? [];
-    for (const comment of comments) {
-      const commentDate = comment.date instanceof Date ? comment.date : new Date(comment.date);
-      if (commentDate.valueOf() > nowDate.valueOf()) {
-        throw new Error(
-          `devlog post '${entry.id}' comment date (${commentDate.toISOString().slice(0, 10)}) is in the future relative to ${nowDate.toISOString().slice(0, 10)}`
-        );
-      }
-      if (commentDate.valueOf() < pubDate.valueOf()) {
-        throw new Error(
-          `devlog post '${entry.id}' comment date (${commentDate.toISOString().slice(0, 10)}) is before the post’s pubDate (${pubDate.toISOString().slice(0, 10)})`
-        );
-      }
     }
   }
 

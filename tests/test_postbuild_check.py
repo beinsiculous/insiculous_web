@@ -1,5 +1,5 @@
 """The prose rules of the build gate (scripts/lib/prose-check.mjs), driven through node the same way
-tests/test_devlog_status.py drives the devlog badge.
+tests/test_devlog_posts.py drives the devlog listing.
 
 The rule, stated once here so a change to it has to come through this file: a word must not run
 into an inline tag. Astro drops the newline + indentation between a word and an inline tag that sit
@@ -81,7 +81,7 @@ class GlueRuleStaysQuiet(unittest.TestCase):
 
     def test_visually_hidden_screen_reader_text(self):
         # "NEW" + " — Claude's post" reads as one phrase to a screen reader; a space would show.
-        self.assertEqual(boundaries('<span class="devlog-status">NEW<span class="visually-hidden"> — still waiting</span></span>'), [])
+        self.assertEqual(boundaries('<span class="status">NEW<span class="visually-hidden"> — still waiting</span></span>'), [])
 
     def test_empty_element(self):
         self.assertEqual(boundaries('<div class="day-label"><span>Sunday A<span class="day-tags"></span></span></div>'), [])

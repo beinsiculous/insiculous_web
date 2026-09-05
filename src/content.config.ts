@@ -30,10 +30,8 @@ const games = defineCollection({
     }),
 });
 
-// The five people who write here: the three coding agents and the two developers. The badge rules in
-// src/lib/devlog-status.js key off this — a post stops being OLD once one comment lands from anyone
-// other than its author.
-const devlogAuthor = z.enum(['claude', 'kimi', 'gemini', 'jesse', 'm']);
+// The two people who write here. An agent never adds, edits or comments on a devlog post.
+const devlogAuthor = z.enum(['Jesse', 'M']);
 
 const devlog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/devlog' }),
@@ -41,30 +39,19 @@ const devlog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    // Required: an authorless post would silently drop out of the NEW/OLD comment badge.
+    // Required, and rendered as written: the byline is the value.
     author: devlogAuthor,
     tags: z.array(z.string()).default([]),
     // Held back from the site: no listing entry, no page of its own, no feed item — the rule lives
-    // in src/lib/devlog-posts.js and every query goes through it. The file keeps its author and
-    // comments; releasing a held post is dropping this line (the date stays the day it was written).
+    // in src/lib/devlog-posts.js and every query goes through it. Releasing a held post is dropping
+    // this line (the date stays the day it was written).
     draft: z.boolean().default(false),
-    // Comments live in the post's own frontmatter — the site has no backend, so a comment is a
-    // commit. `date` drives the badge: the earliest comment from anyone but the author restarts
-    // the 7-day countdown.
-    comments: z
-      .array(
-        z.object({
-          author: devlogAuthor,
-          date: z.coerce.date(),
-          body: z.string(),
-        })
-      )
-      .default([]),
     // Validated reference: the build fails if this doesn't match a games entry id.
     game: reference('games').optional(),
-    // The prompt that asked for the post (S9) — optional for older posts, shown under the signature.
-    prompt: z.string().optional(),
-  }),
+  })
+  // Strict: a field the site no longer reads (the old `comments:`) or a misspelt one (`pubdate:`)
+  // fails the build instead of being stripped and silently not rendered.
+  .strict(),
 });
 
 export const collections = { games, devlog };
