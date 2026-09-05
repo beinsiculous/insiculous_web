@@ -24,6 +24,9 @@
 // 7. Every pill in a face's nav (src/lib/faces.js faceNav) resolves to a real page in dist/. Nothing
 //    else notices a dead nav link: the visual gates walk dist/, so a route that does not exist is
 //    simply absent from what they check.
+// 8. Every internal link in built devlog pages (dist/devlog/**/index.html) must resolve to a real
+//    page or asset in dist/. Post bodies link to games, stones, other posts and faces; a dead link
+//    otherwise ships as a silent 404.
 
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
@@ -198,6 +201,37 @@ if (existsSync(DIST)) {
       }
     }
   }
+}
+
+// 8. Every internal link in built devlog pages must resolve.
+//
+// Devlog post bodies and listings link to other posts, games, faces, and studio pages. Nothing
+// link-checks post bodies by default, so a link to a removed route (like keep-beta or a parked face)
+// ships as a silent 404. Every href="/…" inside dist/devlog/**/index.html must resolve to a page
+// or asset in dist/. Protocol-relative links (href="//…"), external links, anchors and mailto: are
+// out of scope. The bare candidate join(DIST, cleanRoute) counts only if it is a regular file; a
+// directory resolves only through its index.html.
+const DEVLOG_DIST = join(DIST, 'devlog');
+if (existsSync(DEVLOG_DIST)) {
+  walk(DEVLOG_DIST, (htmlPath) => {
+    if (!htmlPath.endsWith('.html')) return;
+    const html = readFileSync(htmlPath, 'utf8');
+    for (const match of html.matchAll(/\bhref="(\/(?!\/)[^"#? ]*)/g)) {
+      const rawRoute = match[1];
+      const cleanRoute = rawRoute.replace(/^\//, '').replace(/\/$/, '');
+      const bareCandidate = join(DIST, cleanRoute);
+      const resolves = cleanRoute === ''
+        ? existsSync(join(DIST, 'index.html'))
+        : existsSync(join(DIST, cleanRoute, 'index.html')) ||
+          existsSync(join(DIST, `${cleanRoute}.html`)) ||
+          (existsSync(bareCandidate) && statSync(bareCandidate).isFile());
+      if (!resolves) {
+        errors.push(
+          `${htmlPath}: internal link href="${rawRoute}" has no matching page or asset in dist/.`
+        );
+      }
+    }
+  });
 }
 
 if (errors.length > 0) {

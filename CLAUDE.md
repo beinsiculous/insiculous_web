@@ -204,48 +204,6 @@ achievement exists with no profile saved, the naming dialog (`askProfileName` in
 `src/lib/profile-name-dialog.js`) opens — once ever, the settled flag riding beside the store under
 `beinsiculous.achievements.profile-prompt`.
 
-## Writing a devlog entry
-Read `src/content/devlog/six-games-one-day.md` first — every rule here describes that entry. The
-fields, the `draft:` mechanics and the NEW/OLD comment badge are `README.md`'s; this section is only
-about writing the thing. (These rules load when you read a file under `src/content/`, which drafting
-a new entry does not force — so start at the exemplar. Prose, not a gate.)
-
-**Write as yourself.** An agent's `author:` is `claude` or `kimi`, never `jesse` or `m`, and the body
-says an AI wrote it in the first paragraph, in your own words — not a disclaimer at the bottom. The
-exemplar's "I'm the AI that did the porting, so consider this a devlog from the workshop floor" is
-the register. The same rule covers `comments:`: **never write a comment in a developer's name.** You
-may comment as `claude` or `kimi` — those are welcome extras and never gate the badge
-(`src/lib/devlog-status.js`) — but the file cannot show who typed it, so a comment under a person's
-name forges that name onto writing that never happened. Same reasoning as the skip trailers below.
-
-**200–400 words of body**, frontmatter excluded, hard-wrapped at ~72–76 columns. Under 200 it is a
-changelog line; over 400 it is a doc that wandered into the devlog. The two existing entries measure
-353 and 211.
-
-**Shape.** The first sentence carries the claim — a before/after, or the thesis — with no warm-up
-paragraph. Three to five short paragraphs, at least one carrying a concrete specific with a number
-or a named failure ("ninety minutes of interrogating a black rectangle", "between 1.4 and 3 MiB").
-A closing line, then the signature: `— Name (Model), role at Be Insiculous`. Prose only: no headings,
-no bullet lists. A list is the shape an agent defaults to and the wrong one here.
-
-**Register and honesty.** The devlog is one of the four bubbles of quirk, not the studio's
-professional register (`docs/thesis.md`, "Two registers"). First person, specific, self-aware. Report
-the day that actually happened, including what went wrong — no projected benefits, no invented
-metrics. A number in an entry is one you observed. What earns an entry: a thing that shipped, a
-decision with its reason, or a failure worth the telling — not one entry per commit.
-
-**You do not publish.** An agent's entry commits with `draft: true`; a developer releases it. Know
-what that gates: the listing, the page and the feed — *not* visibility. This repository is public, so
-a held entry is readable on GitHub the moment it commits. It is a gate on presentation, not on
-confidentiality. Keep the teaching `#` comments above `author:`, `draft:` and `comments:` — both
-existing entries carry them and they are part of the convention.
-
-**Slug** is the filename minus `.md`: lowercase kebab-case, no date prefix, three or four words
-drawn from the claim rather than the title verbatim, and immutable once published.
-`scripts/screenshot-pages.mjs` walks every built page, so a renamed or re-drafted post needs no
-registration there — but re-drafting **every** entry fails the gate on purpose, because the comment
-thread and its badge would go untested.
-
 ## Work tracking
 
 Open work lives on the **Studio Board** (https://github.com/orgs/beinsiculous/projects/1)
@@ -305,8 +263,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | how an assistant reads a spreadsheet into an import document — *parked design* | `docs/import-from-spreadsheet.md` |
 | what the site actually is now — the display-only face, page by page | `docs/app.md` |
 | the studio site, games/devlog content, WASM drop-in convention, deploy | `README.md` |
-| devlog authorship (`author:`), comments in frontmatter, the NEW/OLD comment badge | `README.md`, `src/lib/devlog-status.js` |
-| how to write a devlog entry — voice, length, signature, and why an agent never publishes one | "Writing a devlog entry" above, `src/content/devlog/six-games-one-day.md` |
+| devlog posts — Jesse’s and M’s only; an agent never drafts, edits or comments on one | `README.md` § "Content" |
 | accessibility target, the three gates, the manual pass | `README.md`, `scripts/a11y-check.mjs`, `scripts/postbuild-check.mjs` |
 | the face registry (labels, skins, nav, favicons) | `src/lib/faces.js`, `src/layouts/FaceLayout.astro` |
 | achievements — the three types, the two stores, the registry | `src/lib/achievements.js`, `src/lib/games-achievements.js` |

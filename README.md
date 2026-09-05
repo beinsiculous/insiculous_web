@@ -88,80 +88,23 @@ import document live outside it, in a gitignored `source/`.
     to `playable` when the game's browser build lands.
   - `in-development` / `prototype` — earlier stages.
 - **Devlog posts** live in `src/content/devlog/*.md`. Frontmatter: `title`,
-  `description`, `pubDate`, `author`, `tags`, `comments`, optional `game` (a
-  game slug — validated at build time, so typos fail the build instead of
-  shipping 404 links), and optional `draft`.
+  `description`, `pubDate`, `author` (`Jesse` or `M` — the byline is the
+  value), `tags`, optional `game` (a game slug — validated at build time, so
+  typos fail the build instead of shipping 404 links), and optional `draft`.
+  **Only Jesse and M write here**; an agent never drafts, edits or comments on
+  a post. A publication date in the future fails the build; a `YYYY-MM-DD`
+  date is UTC midnight, so "today" is valid once it is today in UTC.
 - **`draft: true` holds a post back** — no listing entry, no page of its own,
-  no feed item. The file stays put with its author and comments; releasing it
-  is dropping that line and setting `pubDate` to the day it goes live, so it
-  gets its full week as NEW instead of surfacing already OLD. One function
-  (`src/lib/devlog-posts.js`) is what every query goes through, because a
-  partial hide would leave the listing linking a page that was never built.
-  A draft is **unlisted, not private** — this repository is public, so a held
-  post is readable on GitHub, title and body and comments. Hold a post to give
-  it a better turn on the listing, not to embargo it.
+  no feed item. The file stays put; releasing it is dropping that line (the
+  date stays the day it was written). One function (`src/lib/devlog-posts.js`)
+  is what every query goes through, because a partial hide would leave the
+  listing linking a page that was never built. A draft is **unlisted, not
+  private** — this repository is public, so a held post is readable on GitHub,
+  title and body. Hold a post to give it a better turn on the listing, not to
+  embargo it.
 
 The six game entries are real, and so is every devlog post — the scaffold's
 placeholder is gone.
-
-### Devlog comments and the NEW / OLD badge
-
-Four people write here — the coding agents **Claude** and **Kimi**, and the
-developers **Jesse** and **M** — and every post is `author:` one of
-`claude | kimi | jesse | m`. A post is not finished when it is published; it
-is finished when the people who owe it a comment have left one, and the badge
-on the listing is the nag. Who owes a comment:
-
-| the post's author | needs a comment from |
-|---|---|
-| `claude` or `kimi` | **both** Jesse and M |
-| `jesse` or `m` | the **other** developer (agent comments are welcome extras and never gate the badge) |
-
-There is no backend, so a comment is a commit: it goes in the post's own
-frontmatter, and its `date` is what the badge counts from.
-
-```yaml
-author: claude
-comments:
-  - author: jesse
-    date: 2026-08-17
-    body: |
-      Plain text. Blank lines split into paragraphs; no markdown is parsed.
-  - author: m
-    date: 2026-08-18
-    body: 'Short ones can stay on one line.'
-```
-
-The badge (`src/lib/devlog-status.js`, `src/components/DevlogStatus.astro`)
-has four looks and one number — **7 days**:
-
-| state | badge |
-|---|---|
-| still owed a comment, ≤ 7 days old | **NEW** tag, filled: Claude red, Kimi blue |
-| a developer's post, the other developer has not replied yet | **NEW** tag, black with a green outline and green letters |
-| still owed a comment, > 7 days old | the same tag, reading **OLD** |
-| every needed comment in, ≤ 7 days | **NEW** as bare green text — no tag, no box |
-| every needed comment in, > 7 days | nothing at all |
-
-The 7 days run from the publication date until the post is fully commented,
-and then from **the comment that completed it** — so landing the last needed
-comment on a months-old post makes it green *and restarts the countdown*.
-
-Two caveats worth knowing. The badge is computed at **build time**, so a
-post's age advances per deploy rather than continuously; every push to `main`
-deploys, which keeps the drift under a day. And nothing here is conveyed by
-colour alone (WCAG 1.4.1): the word carries the age, the byline beside it
-carries the author, the comment count carries whether the comments are in, and
-each badge ships a visually-hidden sentence naming who is still owed.
-`tests/test_devlog_status.py` pins every rule above.
-
-Building while **more than one post still reads NEW** prints a warning naming
-them. It is a warning and not a failure because it is a judgement call, not a
-bug: publishing onto a devlog that has not gone quiet costs the older post its
-turn on the listing before anyone has commented on it. The way out is
-`draft: true` on the newcomer until the older one goes OLD or its green
-expires. Green counts as NEW here — the word on the badge is what a reader
-sees.
 
 ## WASM builds
 
