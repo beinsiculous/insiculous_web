@@ -201,6 +201,16 @@ to expect in `dist/`, and the only one (kimi F4).
 
 ## Batch 3 — #31 + #32: `FaceNav.astro`, the Peripheral disclosure, and the six guides
 
+> **DONE 2026-09-05 — `8f91a46` (code, closing #31) and `1023a15` (the guides, closing #32), on `m`.**
+> Executor gemini (`review/focus-in-the-bar/report-3.md`); reviewed by kimi (two findings) and the
+> planner (three), all accepted (`rebuttal-5.md`): the gate list is `OPENED_ELEMENT_ROUTES` with its
+> rationale and now opens the strip in four states — sample keep, no keep, on a phone inside the ☰, and
+> every stone a focus — each asserting the partition first. Measured on the built site: promotion order
+> and counts in every state, the open strip edge to edge with no sideways scroll at 641 and 1440px,
+> Escape and tab-out closers as specified, focus never stolen from `main`. The wrap: 206px at 641 and
+> 700px with the sample keep (the pre-sprint figure), 119px with none, one row from 1152px — shipped as
+> is by M and filed as #46. **The sprint's four issues are closed; every follow-up is filed (below).**
+
 One reviewed diff, **two commits by pathspec**: the code and its tests close #31; `CLAUDE.md`,
 `README.md` and `docs/app.md` close #32 (adjacent commits, one push — the guides never describe a
 nav that is not on the branch).
@@ -474,18 +484,18 @@ stones fold back. The other-household fixture gives two focus pills. `npm run ve
    description amended if its shape changed (it should not); memory note if anything about the loop
    itself was learned.
 
-## Follow-ups to file (not this effort's work)
+## Follow-ups — all filed (2026-09-05)
 
-- `prompts/handoff-batch.md` in `insiculous_web` (and the working set's copy) carries the Rust
-  engine's gate block (`cargo test`, `../games`, `check_wasm.sh`); a repo-neutral template with a
-  per-repo gate slot, or a web twin, so the next effort does not rewrite it by hand. File on
-  `beinsiculous/insiculous` (the canonical copy lives there).
-- The axe gate now opens the Peripheral strip (batch 3) but still never opens the Aa control's
-  panel, in either layout — the same gap, one entry each in the generalised loop.
-- **Both layouts' fallback for an engine without range syntax is "no nav"** (kimi F1, accepted as a
-  regression on 2026-09-05): `faces.css` and `BaseLayout.astro` both make the folded, hidden-☰ state
-  the base and reach the flat bar only through a media query. Making the flat bar the base state and
-  folding with one narrow query would give such an engine a wrapping flat bar and remove the
-  boundary pair altogether; evaluate it for both files at once.
-- The `.nav-links` wrap height at ~641–1152px with a loaded keep — measured in batch 3's take-back
-  (kimi F3); filed with the numbers if M ships it as is.
+- **`beinsiculous/insiculous#33`** — `prompts/handoff-batch.md`'s gate and rules blocks are the Rust
+  engine's; this effort rewrote them by hand in all three handoffs. A repo-neutral template with a
+  per-repo slot, or a web twin held by the parity check. P3.
+- **`beinsiculous/insiculous_web#47`** — the Aa control's panel is never audited open in either layout;
+  two entries in `OPENED_ELEMENT_ROUTES` close it (gemini, plan round 1, F4's second half). P2.
+- **`beinsiculous/insiculous_web#45`** — both layouts' fallback for an engine without range syntax is no
+  nav (kimi, plan round 1 and batch 1, F1); the flat bar as the base state is the shape to evaluate. P3.
+- **`beinsiculous/insiculous_web#46`** — the header wraps to three rows (206px) between 641px and about
+  1000px with a four-focus keep, the same as the pre-sprint ten-pill bar; measured at batch 3's
+  take-back and shipped as is by M (kimi, plan round 2, F3). P2.
+
+Not filed: cross-tab sync of the nav (gemini, plan round 2, F6) — rebutted, not deferred; no face page
+synchronises across tabs, and the nav alone doing so would contradict the page under it.
