@@ -20,10 +20,11 @@
   --text-bright: #eef4f0;
   --text-dim: #7d8c83;
 
-  /* devlog authorship — Claude red, Kimi blue. Both are tag *fills* carrying --bg text, so they are
-     deliberately light: #ff6b5e reaches 6.9:1 and #6ec8ff 10.5:1 against this ground. */
+  /* devlog authorship — Claude red, Kimi blue, Gemini violet. All three are tag *fills* carrying --bg text, so they are
+     deliberately light: #ff6b5e reaches 6.9:1, #6ec8ff 10.5:1, and #c9a0ff 9.2:1 against this ground. */
   --claude: #ff6b5e;
   --kimi: #6ec8ff;
+  --gemini: #c9a0ff;
 
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', monospace;
   --font-body: 'Space Grotesk Variable', system-ui, sans-serif;
@@ -50,6 +51,7 @@
 
   --claude: #ff9a90;
   --kimi: #a8dcff;
+  --gemini: #dcc4ff;
 }
 
 /* ------------------------------------------------------------------ */

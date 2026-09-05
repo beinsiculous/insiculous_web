@@ -16,7 +16,8 @@ export async function getStaticPaths() {
 const { game } = Astro.props;
 const { Content } = await render(game);
 
-const relatedPosts = publishedPosts(await getCollection('devlog')).filter(
+const now = new Date();
+const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
   (post) => post.data.game?.id === game.id
 );
 ---

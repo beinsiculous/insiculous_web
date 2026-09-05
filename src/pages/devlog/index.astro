@@ -9,7 +9,7 @@ import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../../lib/site-links.js';
 
 // One clock for every badge on the page (review-2 F4).
 const now = new Date();
-const posts = publishedPosts(await getCollection('devlog'));
+const posts = publishedPosts(await getCollection('devlog'), now);
 
 // A build can only see the state, never the act of publishing — so this reports the state and
 // leaves the consequence conditional (review-1 F2). Warn rather than fail: publishing onto a

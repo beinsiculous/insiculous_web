@@ -44,10 +44,10 @@ const comments = [...post.comments].sort((a, b) => a.date.valueOf() - b.date.val
   }
 
   {
-    status.awaitingNames ? (
-      <p class="owed">Still waiting on a comment from {status.awaitingNames}.</p>
+    status.complete ? (
+      <p class="owed done">Someone other than {AUTHOR_LABELS[post.author]} has commented, so this post is complete.</p>
     ) : (
-      <p class="owed done">Everyone who owed this post a comment has left one.</p>
+      <p class="owed">Still waiting on a comment from someone other than {AUTHOR_LABELS[post.author]}.</p>
     )
   }
 </section>
@@ -98,6 +98,10 @@ const comments = [...post.comments].sort((a, b) => a.date.valueOf() - b.date.val
 
   .kimi {
     color: var(--kimi);
+  }
+
+  .gemini {
+    color: var(--gemini);
   }
 
   .jesse,

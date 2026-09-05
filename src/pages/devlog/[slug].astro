@@ -9,7 +9,8 @@ import { publishedPosts } from '../../lib/devlog-posts.js';
 
 export async function getStaticPaths() {
   // A held post gets no page — the listing and the feed drop it in the same breath.
-  const posts = publishedPosts(await getCollection('devlog'));
+  const now = new Date();
+  const posts = publishedPosts(await getCollection('devlog'), now);
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
@@ -50,6 +51,12 @@ const now = new Date();
     </header>
 
     <Content />
+
+    {
+      post.data.prompt && (
+        <p class="prompt"><span class="prompt-label">Prompt:</span> {post.data.prompt}</p>
+      )
+    }
   </article>
 
   <DevlogComments post={post.data} now={now} />
@@ -90,5 +97,17 @@ const now = new Date();
     margin-top: 3rem;
     font-family: var(--font-mono);
     font-size: 0.9rem;
+  }
+
+  .prompt {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 2rem;
+  }
+
+  .prompt-label {
+    font-weight: 700;
+    color: var(--text);
   }
 </style>

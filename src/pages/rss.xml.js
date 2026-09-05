@@ -5,7 +5,8 @@ import { getCollection } from 'astro:content';
 import { publishedPosts } from '../lib/devlog-posts.js';
 
 export async function GET(context) {
-  const posts = publishedPosts(await getCollection('devlog'));
+  const now = new Date();
+  const posts = publishedPosts(await getCollection('devlog'), now);
   return rss({
     title: 'Be Insiculous devlog',
     description: 'Development notes on games and the Insiculous 2D engine.',

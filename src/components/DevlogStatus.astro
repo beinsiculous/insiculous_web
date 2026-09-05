@@ -1,13 +1,14 @@
 ---
 // The devlog comment badge. Rules and colors live in src/lib/devlog-status.js — this file only
-// draws what that module decides. Four looks, and the two axes are legible without color:
+// draws what that module decides. Five looks, and the two axes are legible without color:
 // the word (NEW / OLD) carries the age, the byline beside it carries the author, and the comment
 // count beside it carries whether the comments are in — so nothing here is color-only (WCAG 1.4.1).
 //
-//   claude    filled red tag   — Claude's post, comments still owed
-//   kimi      filled blue tag  — Kimi's post, comments still owed
-//   developer black tag, green outline, green letters — a dev's post, the other dev has not replied
-//   complete  bare green text, no tag — every needed comment is in and the post is still fresh
+//   claude    filled red tag    — Claude's post, still waiting on a comment
+//   kimi      filled blue tag   — Kimi's post, still waiting on a comment
+//   gemini    filled violet tag — Gemini's post, still waiting on a comment
+//   developer black tag, green outline, green letters — a dev's post, still waiting on a comment
+//   complete  bare green text, no tag — commented on and the post is still fresh
 //
 // The badge is computed at build time, so a post's age advances with each deploy rather than
 // continuously. Every push to main deploys (README.md), which keeps the drift under a day.
@@ -45,9 +46,10 @@ const status = statusFor(post, now);
     white-space: nowrap;
   }
 
-  /* The three "someone still owes this post a comment" looks are tags with a box around them. */
+  /* The four "someone still owes this post a comment" looks are tags with a box around them. */
   .claude,
   .kimi,
+  .gemini,
   .developer {
     padding: 0.2rem 0.55rem;
     border-radius: 4px;
@@ -60,6 +62,11 @@ const status = statusFor(post, now);
 
   .kimi {
     background: var(--kimi);
+    color: var(--bg);
+  }
+
+  .gemini {
+    background: var(--gemini);
     color: var(--bg);
   }
 
