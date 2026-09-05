@@ -1,6 +1,6 @@
 ---
-// The face nav: Overview, Keep, the focus stones promoted by category, Peripheral holding the rest,
-// and Achievements.
+// The face nav: Keep, the focus stones promoted by category, Peripheral holding the rest, and
+// Achievements. The Overview has no pill — the brand beside this nav is its link (faces.js says why).
 //
 // Accepted side effects and boundaries (coordination/focus-in-the-bar/plan.md § Batch 3):
 // - The bar first paints all-peripheral and grows when the module script runs, as the profile dropdown
@@ -23,37 +23,25 @@ interface NavItem {
   path: string;
   label: string;
   href: string;
-  exact?: boolean;
   category?: { key: string; label: string };
 }
 
 const { face } = Astro.props;
 const pathname = Astro.url.pathname;
 
+// A prefix match is enough: no entry’s path is a prefix of another's, and the Overview — the one page
+// whose path prefixes every other — has no entry.
 function isActive(item: NavItem | undefined): boolean {
-  if (!item) return false;
-  if (item.exact) return pathname === item.href || pathname.startsWith(`${item.href}days/`); // the day pages belong to the Overview’s grid
-  return pathname.startsWith(item.href);
+  return item !== undefined && pathname.startsWith(item.href);
 }
 
 const navItems: NavItem[] = faceNav().map((item) => ({ ...item, href: facePath(face, item.path) }));
-const overview = navItems.find((item) => item.path === "");
 const keep = navItems.find((item) => item.path === "keep/");
 const achievements = navItems.find((item) => item.path === "achievements/");
 const stones = navItems.filter((item): item is NavItem & { category: { key: string; label: string } } => Boolean(item.category));
 const anyStoneActive = stones.some((item) => isActive(item));
 ---
 <nav class="nav-links">
-  {overview && (
-    <a
-      class={`nav-link${isActive(overview) ? " active" : ""}`}
-      href={overview.href}
-      aria-label={overview.label}
-      aria-current={isActive(overview) ? "page" : undefined}
-    >
-      {overview.label}
-    </a>
-  )}
   {keep && (
     <a
       class={`nav-link${isActive(keep) ? " active" : ""}`}

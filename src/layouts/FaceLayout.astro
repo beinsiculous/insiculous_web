@@ -9,8 +9,8 @@ import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, facePath, studioPath } from "../
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 
 // The layout of the site's planner face (docs/app.md): every page rendered here belongs to a face in FACES
-// (FortKnight), so `face` is required. Its menu is faceNav() in src/lib/faces.js — Overview, Keep, the seven
-// stones each carrying its category, Achievements — and every entry has a page: postbuild-check.mjs check 7
+// (FortKnight), so `face` is required. Its menu is faceNav() in src/lib/faces.js — Keep, the seven stones
+// each carrying its category, Achievements; the brand is the Overview’s link — and every entry has a page: postbuild-check.mjs check 7
 // fails the build if one does not. The face brings its own skin (FACES[face].theme). The switcher sits
 // left of the brand: the Be Insiculous logo back out to the studio site (and any further face's logo, were
 // one added).
@@ -46,8 +46,8 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
-    {/* Below 40rem the bar does not fit: the pages (Overview, Keep, up to four focus stones,
-        Peripheral, Achievements), a profile dropdown and two site links push it to three rows and
+    {/* Below 40rem the bar does not fit: the pages (Keep, up to four focus stones, Peripheral,
+        Achievements), a profile dropdown and two site links push it to three rows and
         about a sixth of a phone screen. They fold behind a ☰ instead, leaving the brand and the
         Aa control as a single row. The disclosure is native, like the studio's in BaseLayout.astro —
         no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard, and every navigation

@@ -210,6 +210,10 @@ to expect in `dist/`, and the only one (kimi F4).
 > Escape and tab-out closers as specified, focus never stolen from `main`. The wrap: 206px at 641 and
 > 700px with the sample keep (the pre-sprint figure), 119px with none, one row from 1152px — shipped as
 > is by M and filed as #46. **The sprint's four issues are closed; every follow-up is filed (below).**
+>
+> **Amended after the sprint, 2026-09-05 (`8f6e956`, M's steer):** the Overview pill is gone — the brand at
+> the left of the bar was already its link — and with it the `exact` flag; the bar is Keep · the focus
+> stones · Peripheral ▾ · Achievements. The Overview page itself is unchanged. Plan review skipped at M's call.
 
 One reviewed diff, **two commits by pathspec**: the code and its tests close #31; `CLAUDE.md`,
 `README.md` and `docs/app.md` close #32 (adjacent commits, one push — the guides never describe a
