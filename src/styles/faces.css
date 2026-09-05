@@ -99,11 +99,18 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
    ::details-content box, so both are overridden. There is deliberately no `order` here: the folded set
    must be contiguous in the markup, and an earlier version restored the old bar with `order` instead,
    which desynced the tab sequence from the visual one (WCAG 2.4.3) in a way axe does not check.
-   40rem, not the 40.0625rem the studio twin used to use: 40rem/40.0625rem leaves the widths between
-   640px and 641px matching NEITHER query — routine with fractional viewports from display scaling or
-   zoom — and in that band the ☰ is hidden and the closed <details> keeps the nav hidden too, so there
-   is no way to reach any page. Overlapping at exactly 40rem is harmless: the phone block is later. */
-@media (min-width: 40rem) {
+   Range syntax (`width >= 40rem` / `width < 40rem`) rather than a min-width/max-width pair, because
+   a pair cannot draw a clean boundary either way: on one value both queries match at exactly 640px and,
+   setting different properties, both apply (#25 measured a 495px header of the ☰ AND every pill); split
+   to 40rem/40.0625rem, a fractional viewport between 640px and 641px — routine with display scaling or
+   zoom — matches NEITHER, the ☰ is hidden and the closed <details> keeps the nav hidden too, so no page
+   is reachable. Range syntax is the one form with no overlap and no gap at any width. The studio twin
+   is BaseLayout.astro (`width >= 66rem` / `width < 66rem`). Accepted regression (M, 2026-09-05): an
+   engine without Media Queries 4 range syntax (Safari before 16.4, Chrome before 104, Firefox before 63)
+   drops both queries, and because this file’s base state is the hidden ☰ with the panel folded, such an
+   engine gets no face nav — the same trade the studio layout made; the fallback for both layouts is
+   beinsiculous/insiculous_web#45, not this change’s work. */
+@media (width >= 40rem) {
   .site-nav .menu, .site-nav .menu-panel { display: contents; }
   .site-nav .menu::details-content { content-visibility: visible; display: contents; }
 }
@@ -111,7 +118,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 /* Phone: the ☰ is the only control besides the brand and Aa, and everything else drops as a full-width
    panel under the bar. .site-nav is sticky, so it is the containing block the panel resolves against —
    the panel spans the viewport rather than the brand's box. */
-@media (max-width: 40rem) {
+@media (width < 40rem) {
   .site-nav { flex-wrap: nowrap; gap: 0.5rem; }
   .site-nav .brand { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .menu > summary {
@@ -231,7 +238,7 @@ main > * { min-width: 0; }
    built as rows of columns become stacked cards with their column captions drawn by ::before.
    The breakpoint is 40rem rather than 640px so it tracks the reader's own font size: someone browsing at a 20px
    root gets bigger text in the same column and needs these rules to come in sooner, which a px value would ignore. */
-@media (max-width: 40rem) {
+@media (width < 40rem) {
   h1 { font-size: 1.3rem; }
   /* No short-label swap here any more. The face ships a short label per pill (faces.js faceNav) and the
      markup still renders both spans, but at this width the pills are inside the ☰ panel, which is full
