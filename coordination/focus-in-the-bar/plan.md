@@ -135,6 +135,11 @@ bar visible} and the header one row tall on each side. Record the three measurem
 
 ## Batch 2 — #30: the mapping and the reader
 
+> **DONE 2026-09-05 — `41f8808` on `m`, closing #30.** Executor gemini (`review/focus-in-the-bar/report-2.md`);
+> reviewed by kimi (two findings) and the planner (two), all accepted (`rebuttal-4.md`): the mapping is
+> pinned path by path, not as a set; FaceLayout's header sentence and the test docstring were made
+> consistent; the faces.js header's "(built by #31)" is batch 3's to drop. `npm run verify` green, 307 tests.
+
 **Files:** `src/lib/faces.js`, `src/lib/keep.js`, `src/layouts/FaceLayout.astro` (one line),
 `src/styles/faces.css` (one rule and one comment), `scripts/postbuild-check.mjs` (wording),
 `tests/test_face_nav.py`.
@@ -234,7 +239,8 @@ prefix matches). Props: `face`. Server-rendered, no-keep state, in this order:
   its content from the accessibility tree, so the `aria-current` link inside is unreachable and the
   summary's `.active` colour is the only cue. The visually-hidden span above gives the summary the
   accessible name "Peripheral, current section" exactly when a link inside the panel is active;
-  `[hidden]` hides it otherwise (`faces.css:164` makes `hidden` win over any display rule). The
+  `[hidden]` hides it otherwise (`faces.css:168` after batches 1–2 — `[hidden] { display: none !important }`
+  makes `hidden` win over any display rule). The
   same code toggles `.active` and the span, server-side and in the script.
 - Header comment records the accepted side effects and boundaries: the bar first paints
   all-peripheral and grows when the module script runs (as the profile dropdown does; an inline script
@@ -314,11 +320,12 @@ Closers, all scoped to `details.nav-peripheral` (gemini F2 — the Aa control's 
 
 **FaceLayout.astro:** imports `FaceNav`, renders `<FaceNav face={face} />` where the `<nav>` was,
 drops `faceNav`/`navItems`/`isActive` from its frontmatter (keeps `facePath`, `PROFILE_PATH`,
-`STUDIO`, `studioPath`). Comments updated: `:10-13` ("Its menu is … the middle three of which have no
-page yet" — stale), `:53` ("six pills"), `:60-68` — the order argument extended: an open Peripheral
+`STUDIO`, `studioPath`). Comments updated: `:10-13` (batch 2 already rewrote the menu sentence; the
+rest stands), `:53` ("six pills"), `:60-68` — the order argument extended: an open Peripheral
 panel is painted below the bar but tabbed before Achievements, the same compromise the Aa panel makes.
 
-**faces.css:** a new block after the ☰ rules, every selector scoped to `.nav-peripheral`; the summary
+**faces.css:** a new block after the ☰ rules (`:81-108` after batches 1–2), every selector scoped to
+`.nav-peripheral`; the summary
 is `class="nav-link"` so it inherits the pill look, `themes.css:71-73`'s fort-knight nav colour
 (without it the summary is `--muted` on the plank and fails contrast), the coarse-pointer 44px rule,
 and the `.menu-panel .nav-link` full-width row inside the ☰ panel. The wide/narrow rules go inside
@@ -411,7 +418,9 @@ is peripheral; the mapping is `faceNav()`'s `category`; every entry still has a 
   Questionnaire · Assistant)" — stale since The Chain Comes Out; fixed in passing.
 - `docs/app.md:22-25` ("The face's nav is ten pills") and `:32-34` ("Every pill has a page" → entry).
 - `README.md:214-216` ("The face's nav is ten pills").
-- `src/lib/faces.js` header and `scripts/postbuild-check.mjs` — done in batch 2; the sweep confirms.
+- `src/lib/faces.js` header and `scripts/postbuild-check.mjs` — done in batch 2; the sweep confirms, and
+  **drops the header's "(built by #31)" parenthetical** so the Peripheral sentence reads as fact now that
+  it is (planner's C2, batch 2 review).
 - Stays as dated history: `docs/roadmap.md:23`, `:102` and `docs/app.md:131` ("six pills", inside the
   parked chain's record).
 Done when `git grep -n -i -E "ten pills|six pills|every pill" -- CLAUDE.md README.md docs scripts src`

@@ -21,7 +21,7 @@
 // 6. No straight apostrophe in rendered prose: the site's copy uses ’, which Markdown content gets
 //    from smartypants — without this the .astro pages drift the other way and the two spellings sit
 //    side by side on one page.
-// 7. Every pill in a face's nav (src/lib/faces.js faceNav) resolves to a real page in dist/. Nothing
+// 7. Every entry in a face's nav (src/lib/faces.js faceNav) resolves to a real page in dist/. Nothing
 //    else notices a dead nav link: the visual gates walk dist/, so a route that does not exist is
 //    simply absent from what they check.
 // 8. Every internal link in built devlog pages (dist/devlog/**/index.html) must resolve to a real
@@ -155,10 +155,10 @@ if (existsSync(DIST)) {
   });
 }
 
-// 7. Every face nav pill points at a page that exists.
+// 7. Every face nav entry points at a page that exists.
 //
 // This gate is here because its absence cost something real. The display-only removals landed the
-// six-pill nav a day before three of those pills had pages, and for that day FortKnight's primary
+// six-entry nav a day before three of those entries had pages, and for that day FortKnight's primary
 // navigation carried dead links on every face page with nothing able to notice: this file had no link
 // check, and a11y-check.mjs and screenshot-pages.mjs both walk dist/, where a route that does not exist
 // simply is not there. The only thing standing in that spot was a written "dev → main is held" note —
@@ -180,7 +180,7 @@ if (existsSync(DIST)) {
       if (!existsSync(join(DIST, route, 'index.html'))) {
         errors.push(
           `face nav "${item.label}" points at /${route}, which has no page in dist/. ` +
-          `Add the route, or take the pill out of faceNav() in src/lib/faces.js until it exists.`
+          `Add the route, or take the entry out of faceNav() in src/lib/faces.js until it exists.`
         );
       }
     }
