@@ -12,9 +12,10 @@ export const FACES = {
   fortknight: { id: "fortknight", label: "FortKnight", logo: "🏰🛡️", favicon: "🗡️", theme: "fort-knight", home: "fortknight/", blurb: "the repeating 14-day schedule: your fortnight grid, day pages, and time by category" },
 };
 export const FACE_IDS = Object.keys(FACES);
-/** The face’s menu: Overview, Keep, the seven stones each carrying its category, Achievements.
- *  The bar shows the stored keep’s focus stones by category and the rest sit behind Peripheral, all
- *  seven with no keep.
+/** The face’s menu: Keep, the seven stones each carrying its category, Achievements. The bar shows the
+ *  stored keep’s focus stones by category and the rest sit behind Peripheral, all seven with no keep.
+ *  The Overview has no entry: the brand at the left of the bar is its link, as the studio’s brand is
+ *  the studio’s, and a second control to the same page was one too many (M, 2026-09-05).
  *
  *  Every entry has a page — postbuild check 7 gates it, added after three entries 404ed when the nav
  *  ran ahead of its routes. If you add an entry here before its route exists, check 7 will fail the
@@ -24,16 +25,15 @@ export const FACE_IDS = Object.keys(FACES);
  *  and the day pages already are — an entry for it would point at the page you are on. */
 export function faceNav() {
   return [
-    { path: "", label: "Overview", exact: true },
-    { path: "keep/", label: "Keep", exact: false },
-    { path: "forkknife/", label: "Fork Knife", category: { key: "meals", label: "Meals" }, exact: false },
-    { path: "freshkeep/", label: "Fresh Keep", category: { key: "cleaning", label: "Cleaning" }, exact: false },
-    { path: "folkknowledge/", label: "Folk Knowledge", category: { key: "friends-family", label: "Friends & Family" }, exact: false },
-    { path: "fixknitt/", label: "Fix Knitt", category: { key: "operations", label: "Operations" }, exact: false },
-    { path: "foekiss/", label: "Foe Kiss", category: { key: "spirituality-development", label: "Spirituality & Development" }, exact: false },
-    { path: "funknee/", label: "Fun Knee", category: { key: "health", label: "Health" }, exact: false },
-    { path: "fretknot/", label: "Fret Knot", category: { key: "working", label: "Working" }, exact: false },
-    { path: "achievements/", label: "Achievements", exact: false },
+    { path: "keep/", label: "Keep" },
+    { path: "forkknife/", label: "Fork Knife", category: { key: "meals", label: "Meals" } },
+    { path: "freshkeep/", label: "Fresh Keep", category: { key: "cleaning", label: "Cleaning" } },
+    { path: "folkknowledge/", label: "Folk Knowledge", category: { key: "friends-family", label: "Friends & Family" } },
+    { path: "fixknitt/", label: "Fix Knitt", category: { key: "operations", label: "Operations" } },
+    { path: "foekiss/", label: "Foe Kiss", category: { key: "spirituality-development", label: "Spirituality & Development" } },
+    { path: "funknee/", label: "Fun Knee", category: { key: "health", label: "Health" } },
+    { path: "fretknot/", label: "Fret Knot", category: { key: "working", label: "Working" } },
+    { path: "achievements/", label: "Achievements" },
   ];
 }
 /** URL of a page inside a face (path without a leading slash, with a trailing slash for pages). */

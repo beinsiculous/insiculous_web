@@ -145,7 +145,6 @@ class FaceNavMappingTests(unittest.TestCase):
     def test_paths_in_order_are_unchanged(self):
         items = self.get_nav()
         expected_paths = [
-            "",
             "keep/",
             "forkknife/",
             "freshkeep/",
@@ -158,12 +157,20 @@ class FaceNavMappingTests(unittest.TestCase):
         ]
         self.assertEqual([item["path"] for item in items], expected_paths)
 
-    def test_overview_keep_and_achievements_have_no_category(self):
+    def test_keep_and_achievements_have_no_category(self):
         items = self.get_nav()
-        non_stone_paths = {"", "keep/", "achievements/"}
+        non_stone_paths = {"keep/", "achievements/"}
         for item in items:
             if item["path"] in non_stone_paths:
                 self.assertNotIn("category", item, f"{item['path']} must carry no category")
+
+    def test_the_overview_has_no_entry_and_no_entry_needs_an_exact_match(self):
+        """The brand is the Overview's link; the `exact` flag existed only for the Overview's path, which
+        prefixes every other, so both are gone together."""
+        items = self.get_nav()
+        self.assertNotIn("", [item["path"] for item in items])
+        for item in items:
+            self.assertNotIn("exact", item, f"{item['path']} must not carry exact")
 
     def test_no_entry_carries_short_label(self):
         items = self.get_nav()
