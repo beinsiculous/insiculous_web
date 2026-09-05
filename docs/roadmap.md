@@ -125,10 +125,10 @@ What that means for the items this file used to number 1–9:
   `/games/` and `/profile/` read (`/fortknight/achievements/` narrows to the site's fortnight
   achievements). What remains is engine-side and tracked over
   there: the other five games writing their keys, high scores, and gesture-gated audio.
-- **The browser editor.** The milestone behind web export: the engine's editor compiled to
-  WebAssembly and served as a playground — open a tab, build a scene, press play, export the
-  project. Tracked in the engine repository; when it lands, this site needs a route and an embed
-  shape for it (the convention in `README.md` covers a game, not an editor).
+- **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
+  WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
+  and work with projects stored in the browser’s IndexedDB. Export and import of projects, and
+  scripting, follow.
 - **The two tracks and the art policy** (`docs/thesis.md` is the source of the wording). The games
   listed on this site are free and use AI art. The games we **sell** are not on this site at all —
   each has its own repository and ships on Steam and/or Android and iOS — and they carry no AI art.

@@ -1,0 +1,197 @@
+// Behavior Demo Scene - Showcases all behavior types
+//
+// Controls: WASD/Arrow keys to move, ESC to exit
+//
+// This scene demonstrates:
+// - PlayerTopDown: Player-controlled movement in all directions
+// - ChasePlayer: Enemy that chases when you get close
+// - Patrol: Guard that walks back and forth
+// - FollowEntity: Companion that follows the player
+// - Collectible: Items to pick up (visual only - no score system yet)
+//
+SceneData(
+    name: "Behavior Demo",
+
+    // Physics with zero gravity for top-down collision detection
+    physics: Some(PhysicsSettings(
+        gravity: (0.0, 0.0),
+        pixels_per_meter: 100.0,
+        timestep: 0.016666668,
+    )),
+
+    prefabs: {
+        // Player - blue square with top-down movement and collision
+        "Player": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.5, 0.5)),
+                Sprite(texture: "#white", color: (0.2, 0.6, 1.0, 1.0), depth: 1.0),
+                RigidBody(body_type: Dynamic, linear_damping: 10.0, can_rotate: false),
+                Collider(shape: Box(half_extents: (20.0, 20.0)), friction: 0.0),
+                Behavior(PlayerTopDown(move_speed: 150.0)),
+            ],
+        ),
+
+        // Enemy - red square that chases entities tagged "player"
+        "Chaser": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.4, 0.4)),
+                Sprite(texture: "#white", color: (1.0, 0.2, 0.2, 1.0), depth: 0.5),
+                RigidBody(body_type: Dynamic, linear_damping: 10.0, can_rotate: false),
+                Collider(shape: Box(half_extents: (16.0, 16.0)), friction: 0.0),
+                Behavior(ChaseTagged(
+                    target_tag: "player",
+                    detection_range: 200.0,
+                    chase_speed: 80.0,
+                    lose_interest_range: 350.0,
+                )),
+            ],
+        ),
+
+        // Guard - orange square that patrols (kinematic so it can't be pushed)
+        "Patroller": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.45, 0.45)),
+                Sprite(texture: "#white", color: (1.0, 0.6, 0.1, 1.0), depth: 0.5),
+                RigidBody(body_type: Kinematic, can_rotate: false),
+                Collider(shape: Box(half_extents: (18.0, 18.0)), friction: 0.0),
+            ],
+        ),
+
+        // Companion - green square that follows the player
+        "Companion": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.35, 0.35)),
+                Sprite(texture: "#white", color: (0.2, 1.0, 0.4, 1.0), depth: 0.8),
+                RigidBody(body_type: Dynamic, linear_damping: 10.0, can_rotate: false),
+                Collider(shape: Box(half_extents: (14.0, 14.0)), friction: 0.0),
+                Behavior(FollowEntity(
+                    target_name: "player",
+                    follow_distance: 60.0,
+                    follow_speed: 120.0,
+                )),
+            ],
+        ),
+
+        // Collectible - yellow diamond (sensor - no physical collision)
+        "Coin": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.25, 0.25), rotation: 0.785),
+                Sprite(texture: "#white", color: (1.0, 0.9, 0.2, 1.0), depth: 0.3),
+                Behavior(Collectible(score_value: 10, despawn_on_collect: true)),
+            ],
+        ),
+
+        // Wall - dark gray static obstacle with collision
+        "Wall": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (1.0, 1.0)),
+                Sprite(texture: "#white", color: (0.25, 0.25, 0.3, 1.0), depth: 0.0),
+                RigidBody(body_type: Static),
+            ],
+        ),
+
+        // Floor marker - subtle grid tile
+        "FloorTile": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (1.0, 1.0)),
+                Sprite(texture: "#white", color: (0.15, 0.15, 0.18, 1.0), depth: -1.0),
+            ],
+        ),
+    },
+
+    entities: [
+        // === PLAYER ===
+        EntityData(
+            name: Some("player"),
+            prefab: Some("Player"),
+            overrides: [Transform2D(position: (0.0, 0.0))],
+        ),
+
+        // === COMPANION (follows player) ===
+        EntityData(
+            name: Some("companion"),
+            prefab: Some("Companion"),
+            overrides: [Transform2D(position: (-80.0, 0.0))],
+        ),
+
+        // === CHASERS (enemies) ===
+        EntityData(
+            name: Some("chaser_1"),
+            prefab: Some("Chaser"),
+            overrides: [Transform2D(position: (250.0, 200.0))],
+        ),
+        EntityData(
+            name: Some("chaser_2"),
+            prefab: Some("Chaser"),
+            overrides: [Transform2D(position: (-300.0, -150.0))],
+        ),
+
+        // === PATROLLERS (guards) ===
+        EntityData(
+            name: Some("guard_horizontal"),
+            prefab: Some("Patroller"),
+            overrides: [Transform2D(position: (-200.0, 150.0))],
+            components: [
+                Behavior(Patrol(
+                    point_a: (-200.0, 150.0),
+                    point_b: (100.0, 150.0),
+                    speed: 60.0,
+                    wait_time: 1.5,
+                )),
+            ],
+        ),
+        EntityData(
+            name: Some("guard_vertical"),
+            prefab: Some("Patroller"),
+            overrides: [Transform2D(position: (200.0, -100.0))],
+            components: [
+                Behavior(Patrol(
+                    point_a: (200.0, -200.0),
+                    point_b: (200.0, 100.0),
+                    speed: 50.0,
+                    wait_time: 2.0,
+                )),
+            ],
+        ),
+
+        // === COLLECTIBLES ===
+        EntityData(name: Some("coin_1"), prefab: Some("Coin"), overrides: [Transform2D(position: (100.0, 50.0))]),
+        EntityData(name: Some("coin_2"), prefab: Some("Coin"), overrides: [Transform2D(position: (-150.0, -80.0))]),
+        EntityData(name: Some("coin_3"), prefab: Some("Coin"), overrides: [Transform2D(position: (50.0, -180.0))]),
+        EntityData(name: Some("coin_4"), prefab: Some("Coin"), overrides: [Transform2D(position: (-250.0, 100.0))]),
+        EntityData(name: Some("coin_5"), prefab: Some("Coin"), overrides: [Transform2D(position: (300.0, -50.0))]),
+
+        // === WALLS (arena boundary) ===
+        // Top wall (800x24 pixels)
+        EntityData(
+            prefab: Some("Wall"),
+            overrides: [Transform2D(position: (0.0, 280.0), scale: (10.0, 0.3))],
+            components: [Collider(shape: Box(half_extents: (400.0, 12.0)))],
+        ),
+        // Bottom wall
+        EntityData(
+            prefab: Some("Wall"),
+            overrides: [Transform2D(position: (0.0, -280.0), scale: (10.0, 0.3))],
+            components: [Collider(shape: Box(half_extents: (400.0, 12.0)))],
+        ),
+        // Left wall
+        EntityData(
+            prefab: Some("Wall"),
+            overrides: [Transform2D(position: (-380.0, 0.0), scale: (0.3, 7.0))],
+            components: [Collider(shape: Box(half_extents: (12.0, 280.0)))],
+        ),
+        // Right wall
+        EntityData(
+            prefab: Some("Wall"),
+            overrides: [Transform2D(position: (380.0, 0.0), scale: (0.3, 7.0))],
+            components: [Collider(shape: Box(half_extents: (12.0, 280.0)))],
+        ),
+
+        // Center obstacle (120x120 pixels)
+        EntityData(
+            prefab: Some("Wall"),
+            overrides: [Transform2D(position: (-100.0, -50.0), scale: (1.5, 1.5))],
+            components: [Collider(shape: Box(half_extents: (60.0, 60.0)))],
+        ),
+    ],
+)

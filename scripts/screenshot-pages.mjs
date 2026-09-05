@@ -60,6 +60,7 @@ const shotNames = {
   "/devlog/": "studio-devlog",
   [devlogPostRoutes[0]]: "studio-devlog-post",
   "/engine/": "studio-engine",
+  "/playground/": "studio-playground",
   "/profile/": "profile",
   "/fortknight/": "fortknight-overview",
   "/fortknight/days/wed-b/": "fortknight-day",

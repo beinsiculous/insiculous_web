@@ -33,6 +33,7 @@ import { findGluedBoundaries, findStraightApostrophes } from './lib/prose-check.
 const ROOT = resolve(import.meta.dirname, '..');
 const DIST = join(ROOT, 'dist');
 const PUBLIC_GAMES = join(ROOT, 'public', 'games');
+const PUBLIC_PLAYGROUND = join(ROOT, 'public', 'playground');
 const CONTENT_GAMES = join(ROOT, 'src', 'content', 'games');
 
 const SIZE_LIMIT = 25 * 1024 * 1024; // Cloudflare Pages per-file limit
@@ -46,17 +47,22 @@ function walk(dir, onFile) {
   }
 }
 
-if (existsSync(PUBLIC_GAMES)) {
-  walk(PUBLIC_GAMES, (path) => {
-    // Case-insensitive: Index.html on a case-insensitive filesystem would
-    // still be served as the directory index.
-    if (basename(path).toLowerCase() === 'index.html') {
-      errors.push(
-        `${path}: index.html inside public/games/ would overwrite the generated game page in dist/. ` +
-        `Drop in only the wasm-bindgen output (game.js, game_bg.wasm, assets) — never index.html.`
-      );
-    }
-  });
+for (const [dir, label] of [
+  [PUBLIC_GAMES, 'public/games/'],
+  [PUBLIC_PLAYGROUND, 'public/playground/'],
+]) {
+  if (existsSync(dir)) {
+    walk(dir, (path) => {
+      // Case-insensitive: Index.html on a case-insensitive filesystem would
+      // still be served as the directory index.
+      if (basename(path).toLowerCase() === 'index.html') {
+        errors.push(
+          `${path}: index.html inside ${label} would overwrite the generated page in dist/. ` +
+          `Drop in only the wasm-bindgen output (game.js, game_bg.wasm, assets) — never index.html.`
+        );
+      }
+    });
+  }
 }
 
 if (existsSync(DIST)) {
@@ -113,6 +119,16 @@ if (existsSync(DIST)) {
 
     if (!/<html[^>]*\blang=/.test(html)) {
       errors.push(`${path}: <html> has no lang attribute — screen readers need it to pick a voice.`);
+    }
+
+    // Every embed names its wasm glue in data-wasm-src (GameEmbed from frontmatter, PlaygroundEmbed
+    // from its default); a bumped version dir that misses one leaves a page that says "Failed to
+    // start" to every visitor, so the reference must resolve like a frontmatter one does.
+    for (const match of html.matchAll(/data-wasm-src="([^"]+)"/g)) {
+      const target = join(DIST, match[1].replace(/^\//, ''));
+      if (!existsSync(target) || !statSync(target).isFile()) {
+        errors.push(`${path}: embeds '${match[1]}' but ${target} does not exist.`);
+      }
     }
 
     const h1Count = (html.match(/<h1[\s>]/g) || []).length;

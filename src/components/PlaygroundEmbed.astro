@@ -1,0 +1,544 @@
+---
+/**
+ * Embed area for the Web Playground WASM build.
+ *
+ * Renders the WebGPU gate, boot status (#game-loading), persistence banner
+ * (#playground-banner), canvas placeholder (#game-canvas), project controls,
+ * command API console, and keyboard shortcuts.
+ *
+ * Exactly ONE playground embed per page: the engine binds to fixed DOM IDs
+ * and module singletons.
+ */
+interface Props {
+  src?: string;
+  width?: number;
+  height?: number;
+}
+
+const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.props;
+---
+
+<div class="playground-embed" data-wasm-src={src}>
+  <p id="playground-banner" class="playground-banner" role="alert"></p>
+  <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
+
+  <div class="toolbar" role="group" aria-label="Playground project controls">
+    <div class="field-group">
+      <label for="project-select">Project</label>
+      <select id="project-select" name="project" disabled>
+        <option value="examples">Examples</option>
+      </select>
+    </div>
+    <div class="reset-group">
+      <button type="button" id="reset-button" class="btn-reset" disabled hidden>
+        Reset to bundled
+      </button>
+      <span id="reset-note" class="reset-note" hidden></span>
+    </div>
+  </div>
+
+  <canvas
+    id="game-canvas"
+    width={width}
+    height={height}
+    tabindex="0"
+    role="img"
+    aria-label="Web Playground — scene editor canvas; focus it to edit and play"
+  >
+    The Web Playground runs on an HTML canvas and needs a keyboard and mouse. The
+    controls are listed below the editor.
+  </canvas>
+
+  <div class="console-section">
+    <form id="command-form" class="command-form">
+      <label for="command-input">Command API</label>
+      <div class="command-row">
+        <input
+          type="text"
+          id="command-input"
+          class="command-input"
+          placeholder="e.g. list"
+          autocomplete="off"
+          spellcheck="false"
+          disabled
+        />
+        <button type="submit" id="command-submit" class="btn-send" disabled>
+          Send
+        </button>
+      </div>
+    </form>
+    <output id="command-output" class="command-output" aria-live="polite" for="command-input"></output>
+  </div>
+
+  <div class="shortcuts-panel">
+    <h2>Keyboard shortcuts</h2>
+    <ul class="shortcuts-list">
+      <li><kbd>Ctrl+P</kbd> — play / pause; <kbd>F5</kbd> — play; <kbd>Ctrl+Shift+P</kbd> — stop</li>
+      <li><kbd>Ctrl+S</kbd> — save the scene to this browser; <kbd>Ctrl+Shift+S</kbd> — save as</li>
+      <li><kbd>Q</kbd> / <kbd>W</kbd> / <kbd>E</kbd> / <kbd>R</kbd> — select / move / rotate / scale tool</li>
+      <li><kbd>Space</kbd> + drag or middle drag — pan; scroll — zoom; <kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd> — zoom in / out / reset</li>
+      <li><kbd>F</kbd> — frame the selection; <kbd>Home</kbd> — reset the camera</li>
+      <li>Click — select; <kbd>Shift</kbd> — add; <kbd>Ctrl</kbd> — toggle; <kbd>Ctrl+A</kbd> — all; <kbd>Esc</kbd> — cancel</li>
+      <li>Arrows — nudge the selection (<kbd>Shift</kbd> ×10); <kbd>F2</kbd> — rename</li>
+      <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Shift+Z</kbd> — undo / redo; <kbd>Ctrl+D</kbd> — duplicate; <kbd>Ctrl+C</kbd> / <kbd>Ctrl+X</kbd> / <kbd>Ctrl+V</kbd> — copy / cut / paste</li>
+      <li><kbd>Delete</kbd> or <kbd>Backspace</kbd> — delete the selection</li>
+      <li><kbd>G</kbd> — grid; <kbd>S</kbd> — snapping; <kbd>C</kbd> — collider outlines</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  const embed = document.querySelector('.playground-embed');
+  const src = embed?.getAttribute('data-wasm-src');
+  const status = document.getElementById('game-loading');
+  const banner = document.getElementById('playground-banner');
+  const projectSelect = document.getElementById('project-select') as HTMLSelectElement | null;
+  const resetButton = document.getElementById('reset-button') as HTMLButtonElement | null;
+  const resetNote = document.getElementById('reset-note');
+  const commandForm = document.getElementById('command-form') as HTMLFormElement | null;
+  const commandInput = document.getElementById('command-input') as HTMLInputElement | null;
+  const commandSubmit = document.getElementById('command-submit') as HTMLButtonElement | null;
+  const commandOutput = document.getElementById('command-output');
+
+  if (src) {
+    const gpu = 'gpu' in navigator ? (navigator as any).gpu : null;
+    const adapter = gpu ? await gpu.requestAdapter().catch(() => null) : null;
+    const device = adapter ? await adapter.requestDevice().catch(() => null) : null;
+    device?.destroy();
+    if (!adapter || !device) {
+      if (status) {
+        status.textContent =
+          'The playground needs WebGPU — available in Chrome and Edge. In Firefox, enable dom.webgpu.enabled in about:config and fully restart the browser.';
+      }
+    } else {
+      if (status) status.textContent = 'Loading playground…';
+      try {
+        const dynamicImport = new Function('u', 'return import(u)') as (
+          u: string
+        ) => Promise<{
+          default: () => Promise<unknown>;
+          playground_list_projects: () => Array<{
+            manifest: {
+              slug: string;
+              title: string;
+              bundle_version: string;
+              content_hash: string;
+              origin: string;
+            };
+            is_bundled: boolean;
+            has_stored_files: boolean;
+            differs_from_bundle: boolean;
+          }>;
+          playground_open_project: (slug: string) => Promise<unknown>;
+          playground_reset_project: (slug: string) => Promise<unknown>;
+          playground_dispatch: (line: string) => boolean;
+          playground_poll_responses: () => string[];
+          playground_is_dirty: () => boolean;
+        }>;
+
+        const wasm = await dynamicImport(src);
+
+        const searchParams = new URLSearchParams(window.location.search);
+        let currentSlug = searchParams.get('project') || '';
+        // A confirmed switch or reset navigates on purpose; without this flag the
+        // beforeunload handler below would ask a second time on top of the confirm.
+        let leavingByChoice = false;
+        let pollIntervalId = 0;
+
+        const pollResponses = () => {
+          const responses = wasm.playground_poll_responses();
+          if (responses && responses.length > 0 && commandOutput) {
+            for (const line of responses) {
+              const row = document.createElement('div');
+              row.className = 'response-line';
+              row.textContent = line;
+              commandOutput.appendChild(row);
+            }
+            commandOutput.scrollTop = commandOutput.scrollHeight;
+          }
+        };
+
+        // Register playground-ready listener on window BEFORE awaiting init()
+        window.addEventListener('playground-ready', () => {
+          if (status) status.textContent = '';
+          const entries = wasm.playground_list_projects();
+          if (!entries || entries.length === 0) return;
+
+          if (!currentSlug || !entries.some((entry) => entry.manifest.slug === currentSlug)) {
+            currentSlug = entries[0].manifest.slug;
+          }
+
+          if (projectSelect) {
+            projectSelect.innerHTML = '';
+            for (const entry of entries) {
+              const option = document.createElement('option');
+              option.value = entry.manifest.slug;
+              option.textContent = entry.manifest.title;
+              if (entry.manifest.slug === currentSlug) {
+                option.selected = true;
+              }
+              projectSelect.appendChild(option);
+            }
+            projectSelect.value = currentSlug;
+            projectSelect.disabled = false;
+          }
+
+          const currentEntry = entries.find((entry) => entry.manifest.slug === currentSlug);
+          if (resetButton && resetNote) {
+            if (currentEntry && currentEntry.is_bundled && currentEntry.has_stored_files) {
+              resetButton.hidden = false;
+              resetButton.disabled = false;
+              if (currentEntry.differs_from_bundle) {
+                resetNote.hidden = false;
+                resetNote.textContent =
+                  currentEntry.manifest.origin === 'imported'
+                    ? 'you imported over the bundled project'
+                    : 'the bundled project changed since you saved';
+              } else {
+                resetNote.hidden = true;
+                resetNote.textContent = '';
+              }
+            } else {
+              resetButton.hidden = true;
+              resetButton.disabled = true;
+              resetNote.hidden = true;
+              resetNote.textContent = '';
+            }
+          }
+
+          if (commandInput) commandInput.disabled = false;
+          if (commandSubmit) commandSubmit.disabled = false;
+          // Every glue export dereferences the module; before init resolves a poll throws.
+          if (!pollIntervalId) pollIntervalId = window.setInterval(pollResponses, 100);
+        });
+
+        if (projectSelect) {
+          projectSelect.addEventListener('change', async () => {
+            const targetSlug = projectSelect.value;
+            if (targetSlug === currentSlug) return;
+
+            if (wasm.playground_is_dirty()) {
+              const confirmed = window.confirm(
+                'You have unsaved changes. Discard them and switch projects?'
+              );
+              if (!confirmed) {
+                projectSelect.value = currentSlug;
+                return;
+              }
+            }
+
+            try {
+              projectSelect.disabled = true;
+              await wasm.playground_open_project(targetSlug);
+              leavingByChoice = true;
+              window.location.search = '?project=' + encodeURIComponent(targetSlug);
+            } catch (error) {
+              leavingByChoice = false;
+              projectSelect.disabled = false;
+              projectSelect.value = currentSlug;
+              if (banner) banner.textContent = String(error);
+            }
+          });
+        }
+
+        if (resetButton) {
+          resetButton.addEventListener('click', async () => {
+            const confirmed = window.confirm(
+              'Reset this project to bundled content? All stored edits in this browser will be discarded.'
+            );
+            if (!confirmed) return;
+
+            try {
+              resetButton.disabled = true;
+              await wasm.playground_reset_project(currentSlug);
+              leavingByChoice = true;
+              window.location.search = '?project=' + encodeURIComponent(currentSlug);
+            } catch (error) {
+              leavingByChoice = false;
+              resetButton.disabled = false;
+              if (banner) banner.textContent = String(error);
+            }
+          });
+        }
+
+        if (commandForm && commandInput) {
+          commandForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const line = commandInput.value.trim();
+            if (!line) return;
+
+            const echoedRow = document.createElement('div');
+            echoedRow.className = 'command-echo';
+            echoedRow.textContent = `> ${line}`;
+            commandOutput?.appendChild(echoedRow);
+
+            const accepted = wasm.playground_dispatch(line);
+            if (!accepted) {
+              const errorRow = document.createElement('div');
+              errorRow.className = 'error-line';
+              errorRow.textContent = 'busy — try again';
+              commandOutput?.appendChild(errorRow);
+            } else {
+              commandInput.value = '';
+            }
+            if (commandOutput) commandOutput.scrollTop = commandOutput.scrollHeight;
+          });
+        }
+
+        window.addEventListener('beforeunload', (event) => {
+          if (leavingByChoice) return;
+          if (wasm.playground_is_dirty()) {
+            event.preventDefault();
+            event.returnValue = 'Changes you made may not be saved.';
+            return 'Changes you made may not be saved.';
+          }
+        });
+
+        await wasm.default();
+      } catch (e) {
+        if (status) status.textContent = 'Failed to start: ' + e;
+        throw e;
+      }
+    }
+  }
+</script>
+
+<style>
+  .playground-embed {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    margin: 1.5rem 0 2rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    color: var(--text-bright);
+    text-align: center;
+    min-height: 1.2em;
+    margin: 0 0 0.6rem;
+  }
+
+  .playground-banner {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-align: center;
+    min-height: 1.2em;
+    margin: 0 0 0.6rem;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+
+  .field-group label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .field-group select {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    max-width: 100%;
+  }
+
+  .reset-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .btn-reset:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-reset:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .reset-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* :global — the engine REPLACES the placeholder canvas with winit's own
+     element, which lacks Astro’s scoping attribute. */
+  .playground-embed :global(canvas) {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    background: #000;
+    outline: none;
+    border-radius: 4px;
+  }
+
+  .console-section {
+    margin-top: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .command-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .command-form label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .command-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .command-input {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .command-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-send {
+    flex-shrink: 0;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .command-output {
+    display: block;
+    box-sizing: border-box;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    max-height: 150px;
+    overflow-y: auto;
+    overflow-x: auto;
+    word-break: break-word;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .command-echo {
+    color: var(--text-bright);
+  }
+
+  .response-line {
+    color: var(--text-dim);
+    white-space: pre-wrap;
+  }
+
+  .error-line {
+    color: var(--accent);
+  }
+
+  .shortcuts-panel {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .shortcuts-panel h2 {
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-bright);
+  }
+
+  .shortcuts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  @media (min-width: 48rem) {
+    .shortcuts-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .shortcuts-list kbd {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-bright);
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    color: var(--text-bright);
+  }
+</style>

@@ -174,14 +174,13 @@ Convention for shipping a playable game:
    `public/games/<slug>/v1/` → `game.js`, `game_bg.wasm`, assets.
 3. Set the game's frontmatter: `wasm: '/games/<slug>/v1/game.js'` and flip
    its `status` to `playable`.
-4. Wire up `src/components/GameEmbed.astro` — it currently renders a
-   placeholder; the intended loader script is included as a marked HTML
-   comment inside the component.
+4. Wire up `src/components/GameEmbed.astro` by passing `src` to the
+   component.
 
 Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
 
-- **Never put an `index.html` inside `public/games/<slug>/`** — `public/` is
-  copied over the generated routes, so it would silently replace that game's
+- **Never put an `index.html` inside `public/games/<slug>/` or `public/playground/`** —
+  `public/` is copied over the generated routes, so it would silently replace that
   page. Only drop in the wasm-bindgen output files.
 - **Keep every file under 25 MiB** — Cloudflare Pages rejects larger assets at
   deploy time. If a `.wasm` is too big: `wasm-opt -Oz`, plus a release profile
@@ -192,6 +191,21 @@ Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
 
 If a game ever needs threads/SharedArrayBuffer, uncomment the COOP/COEP block
 in `public/_headers`.
+
+### The editor bundle
+
+The Web Playground (`/playground/`) runs the engine’s editor in the browser:
+
+- Built into a versioned directory: `public/playground/<version>/`
+  (`game.js`, `game_bg.wasm`, `assets/`).
+- Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
+  lists bundled project manifests, and each project’s data lives under
+  `assets/projects/<slug>/assets/`.
+- **One embed per page**: the engine finds `#game-canvas` and uses module-level singletons,
+  so the route hosts exactly one embed.
+- **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
+  `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
+  `PlaygroundEmbed.astro`’s default changes.
 
 **Playable-game accessibility requirements** (part of the convention): keyboard controls
 listed next to the embed, remappable keys, a pause, and no timing-only inputs. The canvas

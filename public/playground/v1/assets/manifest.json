@@ -1,0 +1,15 @@
+[
+  "projects/examples/assets/fonts/BellamysMapbats-0jGv.ttf",
+  "projects/examples/assets/fonts/BlackSamsGold-ej5e.ttf",
+  "projects/examples/assets/fonts/font.ttf",
+  "projects/examples/assets/fonts/Futureworld-ZGwJ.ttf",
+  "projects/examples/assets/fonts/Wiltype.ttf",
+  "projects/examples/assets/images/wood_texture.png",
+  "projects/examples/assets/locales/en.ron",
+  "projects/examples/assets/locales/pirate.ron",
+  "projects/examples/assets/scenes/behavior_demo.scene.ron",
+  "projects/examples/assets/scenes/hello_world.scene.ron",
+  "projects/examples/assets/sounds/beep_e.wav",
+  "projects/examples/assets/sounds/snd_jump.wav",
+  "projects.json"
+]

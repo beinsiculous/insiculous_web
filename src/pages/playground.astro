@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PlaygroundEmbed from '../components/PlaygroundEmbed.astro';
+---
+
+<BaseLayout
+  title="Web Playground — Be Insiculous"
+  description="Insiculous 2D Web Playground: the scene editor running in the browser on WebGPU with local IndexedDB persistence."
+>
+  <p class="section-label">the editor</p>
+  <h1>Web Playground</h1>
+  <p class="lede">
+    The Insiculous 2D scene editor running entirely in the browser on WebGPU.
+    Build scenes, test physics and behaviors, and work with projects stored
+    in your browser’s IndexedDB.
+  </p>
+
+  <PlaygroundEmbed />
+
+  <section>
+    <h2>Browser persistence</h2>
+    <p>
+      Projects and scenes are saved into your browser’s IndexedDB storage.
+      When you press <kbd>Ctrl+S</kbd> to save a scene, modified files are
+      committed locally. The bundled samples provide a starting point; if you
+      ever wish to discard local edits, use the <em>Reset to bundled</em> button
+      to restore the original version.
+    </p>
+  </section>
+
+  <section>
+    <h2>Command API</h2>
+    <p>
+      The editor exposes its command interface to the browser through WebAssembly.
+      You can inspect entities and scene state using commands like <code>list</code> directly
+      in the console above.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  kbd {
+    background: var(--surface-raised, #222);
+    border: 1px solid var(--border-bright);
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>
