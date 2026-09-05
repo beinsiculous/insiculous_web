@@ -39,13 +39,13 @@ if (!existsSync(join(DIST, "index.html"))) {
 }
 const routes = distRoutes(DIST);
 
-// The devlog post pages are where the comment thread and its badge live, and only published
-// entries build a page — so an all-drafts devlog would silently drop that surface from the gate.
+// Only published entries build a devlog post page — so an all-drafts devlog would silently drop
+// that surface from the gate.
 // Fail loudly instead: that state is a decision to make on purpose, not a coverage hole.
 const devlogPostRoutes = routes.filter((route) => /^\/devlog\/.+\/$/.test(route));
 if (devlogPostRoutes.length === 0) {
   console.error(
-    "No devlog post page in dist/ (every entry under src/content/devlog/ is a draft?) — the comment thread and its badge would go untested. Release an entry, or change this gate on purpose."
+    "No devlog post page in dist/ (every entry under src/content/devlog/ is a draft?) — the post page would go untested. Release an entry, or change this gate on purpose."
   );
   process.exit(1);
 }

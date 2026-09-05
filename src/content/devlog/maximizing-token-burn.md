@@ -2,17 +2,9 @@
 title: 'The Fable 5.1 Code Cleanup Refactor'
 description: 'A 36-hour window before a weekly reset became a ten-batch refactor test for Fable, Kimi, and Gemini across the engine codebase.'
 pubDate: 2026-09-03
-# Who wrote it: claude | kimi | gemini | jesse | m. Drives the comment badge (src/lib/devlog-status.js) —
-# one comment from anyone but the author clears the badge; the author’s own comment never counts.
-author: jesse
+author: Jesse
 tags: ['refactor', 'workflow', 'review', 'models']
-# Held back until a developer releases it: no listing entry, no page of its own, no feed item. To
-# release it, drop this line (the date stays the day it was written).
 draft: true
-# This post is waiting on a comment from someone else; until one lands the badge stays the developer
-# look (black, green outline). Add it as `- author: ...` / `date:` / `body:` — that turns the badge
-# plain green.
-comments: []
 ---
 
 It's like the craziness just don't stop. It felt like in one day we got the Google Gemini 3.8 Flash model drop, and alongside that, the Fable 5.1 drop with a usage reset from Anthropic! I noticed my sub's token reset later on Tuesday, giving me a 36-hour window before 8 AM’s weekly reset on Thursday. I figured it was a great chance to maximize my token burn and see what Fable 5.1 was capable of.

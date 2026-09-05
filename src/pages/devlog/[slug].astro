@@ -2,9 +2,6 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SupportLink from '../../components/SupportLink.astro';
-import DevlogStatus from '../../components/DevlogStatus.astro';
-import DevlogComments from '../../components/DevlogComments.astro';
-import { AUTHOR_LABELS } from '../../lib/devlog-status.js';
 import { publishedPosts } from '../../lib/devlog-posts.js';
 
 export async function getStaticPaths() {
@@ -20,8 +17,6 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const game = post.data.game ? await getEntry(post.data.game) : undefined;
-// One clock for the badge and the thread below it (review-2 F4).
-const now = new Date();
 ---
 
 <BaseLayout title={`${post.data.title} — Be Insiculous devlog`} description={post.data.description}>
@@ -33,8 +28,7 @@ const now = new Date();
         <time datetime={post.data.pubDate.toISOString()}>
           {post.data.pubDate.toISOString().slice(0, 10)}
         </time>
-        <span class="author">by {AUTHOR_LABELS[post.data.author]}</span>
-        <DevlogStatus post={post.data} now={now} />
+        <span class="author">by {post.data.author}</span>
         {
           post.data.tags.map((tag) => (
             <span class="tag">#{tag}</span>
@@ -51,15 +45,7 @@ const now = new Date();
     </header>
 
     <Content />
-
-    {
-      post.data.prompt && (
-        <p class="prompt"><span class="prompt-label">Prompt:</span> {post.data.prompt}</p>
-      )
-    }
   </article>
-
-  <DevlogComments post={post.data} now={now} />
 
   <SupportLink />
 
@@ -97,17 +83,5 @@ const now = new Date();
     margin-top: 3rem;
     font-family: var(--font-mono);
     font-size: 0.9rem;
-  }
-
-  .prompt {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin-top: 2rem;
-  }
-
-  .prompt-label {
-    font-weight: 700;
-    color: var(--text);
   }
 </style>

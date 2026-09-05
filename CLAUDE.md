@@ -204,75 +204,6 @@ achievement exists with no profile saved, the naming dialog (`askProfileName` in
 `src/lib/profile-name-dialog.js`) opens — once ever, the settled flag riding beside the store under
 `beinsiculous.achievements.profile-prompt`.
 
-## Writing a devlog entry
-Read `src/content/devlog/six-games-one-day.md` first — every rule here describes that entry. The
-fields, the `draft:` mechanics and the NEW/OLD comment badge are `README.md`’s; this section is
-about writing the thing. (These rules load when you read a file under `src/content/`, which drafting
-a new entry does not force — so start at the exemplar. Prose, not a gate.)
-
-**Who it is for.** Readers are developers and whoever is deciding whether to work with us
-(`docs/thesis.md`: the site is the resume). Tell the problem and how it was solved, not a status
-update.
-
-**Write as yourself.** An agent’s `author:` is `claude`, `kimi`, or `gemini`, never `jesse` or `m`,
-and the body says an AI wrote it in the first paragraph, in your own words — not a disclaimer at the
-bottom. The exemplar’s "I’m the AI that did the porting, so consider this a devlog from the
-workshop floor" is the register. The same rule covers `comments:`: **never write a comment in a
-developer’s name.** An agent may comment as `claude`, `kimi`, or `gemini` — plain text, dated the
-day it was written, and that clears OLD like anyone’s (S8) — but the file cannot show who typed it,
-so a comment under a person’s name forges that name onto writing that never happened. Same reasoning
-as the skip trailers below.
-
-**The standard (S1–S10, settled 2026-09-04):**
-
-| # | question | settled standard |
-|---|---|---|
-| S1 | length | **200–400 words target, 500 hard ceiling** (frontmatter excluded) |
-| S1′ | length, who it binds | the 200–400 target and 500 ceiling bind **agent** posts; a developer’s post is their own voice at any length |
-| S2 | headings | **still none** — at 500 words a post does not need them |
-| S3 | images | **optional, encouraged when the subject is visible** (a game, a page); alt text required, the a11y gate checks it |
-| S4 | what earns a post | a thing that shipped, a decision with its reason, or a failure worth telling — **and a one-line claim a reader could disagree with**. Roadmap and "coming soon" posts do not qualify |
-| S5 | who writes an agent post | **the agent that did the work, from its own session**; never reconstructed by another agent from `git log` — that is fiction under a name |
-| S6 | when an agent writes one | **when the work is done and the day earned one**; not per session, not per commit; the draft commits with the work so it is dated honestly |
-| S7 | still true? | a post is history, dated; **it is not rewritten when the world changes**. A stale post may take one italic line under the title saying what changed since |
-| S8 | comments | the one-comment rule; **an agent may comment as itself** (never as a person) and that clears OLD like anyone’s (roster: Jesse, M, Kimi, Gemini, Claude); plain text, dated the day it was written |
-| S9 | the prompt | **every new agent post shows, at the bottom in small type, the prompt that asked for it**, required from the first draft commit, not only when published. Must be small — one or two sentences naming the day’s subject, never a restatement of the rules |
-| S10 | something to say | before an agent post is drafted, and before a developer releases one, it passes the "something to say" test: (1) what does a reader learn that the commit log could not tell them — a decision’s reason, a failure’s shape, a number that surprised you; (2) what is the one sentence a reader could disagree with; (3) if the post were cut to "we did X", would anything be lost — if not, it is a changelog line. A post that fails any one is not drafted; a draft that fails is scrapped or rewritten by its author, never padded |
-
-**The rubric** (grade drafts against this before proposing release): passes the something-to-say
-test · claim in sentence one · within length · one observed specific · what went wrong ·
-a disagreeable lesson · written by whoever lived it · says "AI" up front if an agent wrote it ·
-carries its prompt, and the prompt is short.
-
-**Shape.** The first sentence carries the claim — a before/after, or the thesis — with no warm-up
-paragraph. Three to five short paragraphs, at least one carrying a concrete specific with a number
-or a named failure ("ninety minutes of interrogating a black rectangle", "between 1.4 and 3 MiB").
-A closing line, then the signature: `— Name (Model), role at Be Insiculous`. Prose only: no
-headings, no bullet lists. A list is the shape an agent defaults to and the wrong one here.
-
-**Register and honesty.** The devlog is one of the four bubbles of quirk, not the studio’s
-professional register (`docs/thesis.md`, "Two registers"). First person, specific, self-aware.
-Report the day that actually happened, including what went wrong — no projected benefits, no
-invented metrics. A number in an entry is one you observed.
-
-**Frontmatter and dates.** Rendered frontmatter strings obey the prose gate: `title`, `description`,
-`prompt` and comment bodies render through `{expressions}`, which Markdown’s smart quotes never
-touch, so a straight apostrophe in any of them fails the build. Use curly apostrophes (`’`).
-A `YYYY-MM-DD` date is UTC midnight, so "today" is valid once it is today in UTC. A publication date
-or comment date in the future fails the build.
-
-**You do not publish.** An agent’s entry commits with `draft: true`; a developer releases it. Know
-what that gates: the listing, the page and the feed — *not* visibility. This repository is public,
-so a held entry is readable on GitHub the moment it commits. It is a gate on presentation, not on
-confidentiality. Releasing a post is dropping `draft: true` (the date stays the day it was written).
-Keep the teaching `#` comments above `author:`, `draft:` and `comments:`.
-
-**Slug** is the filename minus `.md`: lowercase kebab-case, no date prefix, three or four words
-drawn from the claim rather than the title verbatim, and immutable once published.
-`scripts/screenshot-pages.mjs` walks every built page, so a renamed or re-drafted post needs no
-registration there — but re-drafting **every** entry fails the gate on purpose, because the comment
-thread and its badge would go untested.
-
 ## Work tracking
 
 Open work lives on the **Studio Board** (https://github.com/orgs/beinsiculous/projects/1)
@@ -332,8 +263,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | how an assistant reads a spreadsheet into an import document — *parked design* | `docs/import-from-spreadsheet.md` |
 | what the site actually is now — the display-only face, page by page | `docs/app.md` |
 | the studio site, games/devlog content, WASM drop-in convention, deploy | `README.md` |
-| devlog authorship (`author:`), comments in frontmatter, the NEW/OLD comment badge | `README.md`, `src/lib/devlog-status.js` |
-| how to write a devlog entry — voice, length, signature, and why an agent never publishes one | "Writing a devlog entry" above, `src/content/devlog/six-games-one-day.md` |
+| devlog posts — Jesse’s and M’s only; an agent never drafts, edits or comments on one | `README.md` § "Content" |
 | accessibility target, the three gates, the manual pass | `README.md`, `scripts/a11y-check.mjs`, `scripts/postbuild-check.mjs` |
 | the face registry (labels, skins, nav, favicons) | `src/lib/faces.js`, `src/layouts/FaceLayout.astro` |
 | achievements — the three types, the two stores, the registry | `src/lib/achievements.js`, `src/lib/games-achievements.js` |
