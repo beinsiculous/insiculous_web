@@ -8,9 +8,9 @@ import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } 
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 
 // The layout of the site's planner face (docs/app.md): every page rendered here belongs to a face in FACES
-// (FortKnight), so `face` is required. Its menu is Overview, Keep, Fork Knife, Fresh Keep, Folk Knowledge,
-// Achievements — the middle three of which have no page yet; src/lib/faces.js carries the warning and the
-// hold that goes with it. The face brings its own skin (FACES[face].theme). The switcher sits
+// (FortKnight), so `face` is required. Its menu is faceNav() in src/lib/faces.js — Overview, Keep, the seven
+// stones each carrying its category, Achievements — and every entry has a page: postbuild-check.mjs check 7
+// fails the build if one does not. The face brings its own skin (FACES[face].theme). The switcher sits
 // left of the brand: the Be Insiculous logo back out to the studio site (and any further face's logo, were
 // one added).
 // The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
@@ -79,7 +79,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         <nav class="nav-links">
           {navItems.map((item) => (
             <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
-              <span class="nav-full">{item.label}</span>{item.shortLabel && <span class="nav-short">{item.shortLabel}</span>}
+              {item.label}
             </a>
           ))}
         </nav>

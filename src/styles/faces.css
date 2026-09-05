@@ -77,9 +77,6 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 }
 .nav-link:hover { color: var(--ink); background: var(--panel-soft); }
 .nav-link.active { color: var(--on-accent); background: var(--accent); }
-/* Each pill carries its full label and a short one; the short one only comes out where the pills share a narrow
-   no-wrap row. The link's aria-label is always the full one. */
-.nav-short { display: none; }
 
 /* ---------- the ☰ menu ---------- */
 /* Twin of the studio's disclosure in src/layouts/BaseLayout.astro: same native <details>, same ☰, same
@@ -240,10 +237,6 @@ main > * { min-width: 0; }
    root gets bigger text in the same column and needs these rules to come in sooner, which a px value would ignore. */
 @media (width < 40rem) {
   h1 { font-size: 1.3rem; }
-  /* No short-label swap here any more. The face ships a short label per pill (faces.js faceNav) and the
-     markup still renders both spans, but at this width the pills are inside the ☰ panel, which is full
-     width and has room for "Folk Knowledge" — the swap existed to stop them wrapping the bar onto four
-     rows, and the bar no longer carries them. .nav-short stays display: none from the base rule. */
   .site-nav { padding: 0.5rem 0.75rem; gap: 0.5rem; }
   .brand { margin-right: 0; }
   /* A long profile id must not push this row past the viewport: ids are names people choose, and a
