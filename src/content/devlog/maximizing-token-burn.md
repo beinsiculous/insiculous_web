@@ -4,7 +4,6 @@ description: 'A 36-hour window before a weekly reset became a ten-batch refactor
 pubDate: 2026-09-03
 author: Jesse
 tags: ['refactor', 'workflow', 'review', 'models']
-draft: true
 ---
 
 It's like the craziness just don't stop. It felt like in one day we got the Google Gemini 3.8 Flash model drop, and alongside that, the Fable 5.1 drop with a usage reset from Anthropic! I noticed my sub's token reset later on Tuesday, giving me a 36-hour window before 8 AM’s weekly reset on Thursday. I figured it was a great chance to maximize my token burn and see what Fable 5.1 was capable of.
