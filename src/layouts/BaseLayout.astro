@@ -310,7 +310,7 @@ const isActive = (href: string) =>
      links, which is the thing a fold breakpoint exists to prevent. FaceLayout.astro reaches for the same
      answer at its own width.
      Range syntax (`width >= 66rem` / `width < 66rem`) rather than the min-width/max-width pair faces.css
-     uses, because that pair cannot express a clean boundary and this layout proved it: at 40rem/40rem both
+     used until #25, because that pair cannot express a clean boundary and this layout proved it: at 40rem/40rem both
      queries match at exactly the breakpoint, and the two blocks set different properties, so both applied —
      measured at 1056px, a 294px header showing the ☰ AND all six links at once. Splitting them to
      66rem/66.0625rem only trades that for the other half of the bug faces.css already documents: a

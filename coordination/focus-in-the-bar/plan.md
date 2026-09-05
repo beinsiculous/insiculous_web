@@ -91,6 +91,13 @@ asserting the review happened.
 
 ## Batch 1 — #25: the fold boundary in `faces.css`
 
+> **DONE 2026-09-05 — `dc64670` on `m`, closing #25.** Executor gemini (`review/focus-in-the-bar/report-1.md`);
+> reviewed by kimi (three findings) and the planner (two), all accepted (`rebuttal-3.md`): the pin now
+> covers BaseLayout's 66rem fold too and strips comments first, the fold comment carries both halves of
+> the pair's failure and cites the fallback issue **beinsiculous/insiculous_web#45** (filed, P3).
+> Measured on the built site: 639px ☰ only in a 63px header; 640px and 641px the flat bar with no ☰.
+> Line numbers below are as of the plan's writing; batch 1 grew faces.css's fold comment by four lines.
+
 **Files:** `src/styles/faces.css`; new `tests/test_face_nav.py`; `src/layouts/BaseLayout.astro` (one
 comment clause).
 
@@ -165,7 +172,7 @@ bar visible} and the header one row tall on each side. Record the three measurem
   in the DOM by `data-category`).
 - `FaceLayout.astro:82`: `<span class="nav-full">{item.label}</span>{item.shortLabel && …}` becomes
   `{item.label}` — the two spans go now that nothing feeds them, so the tree never carries a property
-  the data no longer has. `faces.css:80-82` (`.nav-short`) and the comment at `:236-239` go with
+  the data no longer has. `faces.css:80-82` (`.nav-short`) and the comment at `:243-246` (was `:236-239` before batch 1) go with
   them. *(#31's text says these go with #31; they move here because a removed field must not be
   referenced in between — correction carried into the batch that acts on it.)*
 - `scripts/postbuild-check.mjs`: check 7's wording at `:24-26`, `:158-166` and the message at
