@@ -14,7 +14,7 @@ export const FACES = {
 export const FACE_IDS = Object.keys(FACES);
 /** The face’s menu: Overview, Keep, the seven stones each carrying its category, Achievements.
  *  The bar shows the stored keep’s focus stones by category and the rest sit behind Peripheral, all
- *  seven with no keep (built by #31).
+ *  seven with no keep.
  *
  *  Every entry has a page — postbuild check 7 gates it, added after three entries 404ed when the nav
  *  ran ahead of its routes. If you add an entry here before its route exists, check 7 will fail the

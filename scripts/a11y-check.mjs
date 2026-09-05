@@ -42,20 +42,44 @@ const SEEDED_PROFILE = {
 // (src/lib/achievements.js) gates on any achievement, no saved profile, flag unset.
 const SEEDED_SITE_ACHIEVEMENTS = JSON.stringify({ unlocks: { player: { unlocked_at: 1756425600 } } });
 
-// [route, localStorage records to seed, function run in the page that opens the dialog (or waits
-// for the one the page itself opens) and returns whether it managed to]
-// /profile/ carries the studio's rule set (global.css, like every BaseLayout page); a face page
-// carries faces.css. The two entries want OPPOSITE states: /profile/'s Duplicate control is hidden
-// until a profile is saved, while the face entry audits the dialog the way a face page really opens
-// it on this branch — the first-achievement prompt (maybePromptForProfile) fires at
-// /fortknight/achievements/ boot only when achievements exist and NO profile is saved.
-const DIALOG_ROUTES = [
+const keepSeed = readFileSync(new URL("../tests/fixtures/keep.sample.json", import.meta.url), "utf8");
+// A keep whose season focuses on every category, built from the sample so nothing else about it changes.
+// The seven come from data/categories.json — the shipped default and the list's one authored home — so
+// this file does not carry a copy of the closed set.
+const categories = JSON.parse(readFileSync(new URL("../data/categories.json", import.meta.url), "utf8"));
+const everyStoneFocus = categories.order.map((key) => ({ key, label: categories.categories[key].label }));
+const sampleKeep = JSON.parse(keepSeed);
+const everyStoneKeepSeed = JSON.stringify({ ...sampleKeep, season: { ...sampleKeep.season, focus: everyStoneFocus } });
+
+/** What the page sweep cannot see, opened and then audited: one entry per element and state.
+ *  { route, seed (localStorage records), label, viewport (optional; the default is desktop), open (runs
+ *  in the page: returns true once the element is open, or a string saying what it found instead — the
+ *  string fails the gate and skips the audit), waitFor (the selector that proves it opened) }.
+ *
+ *  The profile-name dialog (src/lib/profile-name-dialog.js) is built in JavaScript and exists only once
+ *  something opens it, so neither the page sweep nor postbuild-check (static HTML) can see it. It is the
+ *  site's only <dialog>, and its CSS is written twice — global.css for the studio pages, faces.css for
+ *  the face — so it is opened on one page of each. The two entries want OPPOSITE states: /profile/'s
+ *  Duplicate control is hidden until a profile is saved, while /fortknight/achievements/ opens the
+ *  first-achievement prompt at boot only when achievements exist and NO profile is saved.
+ *
+ *  The face nav's Peripheral strip (src/components/FaceNav.astro) is a closed <details>, and axe prunes
+ *  a closed details' contents, so its links are audited only here, open — in every state the bar can
+ *  take: the sample keep's four focus pills with three stones behind Peripheral, no keep with all
+ *  seven behind it, the same four-and-three inside the ☰ on a phone (the nested column has its own
+ *  rules in faces.css), and a keep focusing on every stone, where the pill is hidden and seven are
+ *  promoted. Each entry first asserts the partition it expects, so promotion — which the script does
+ *  at boot and no other gate can observe — fails the build with the counts it saw. */
+const OPENED_ELEMENT_ROUTES = [
   {
     route: "/profile/",
     seed: { "fortknight.user-settings": JSON.stringify(SEEDED_PROFILE) },
+    label: "dialog",
+    waitFor: "dialog.name-dialog[open]",
     open: () => {
+      // The Duplicate control is hidden until a profile is saved; the seed above saves one.
       const button = document.getElementById("duplicateProfileButton");
-      if (!button || button.hidden) return false;
+      if (!button || button.hidden) return "could not open the profile-name dialog — the a11y pass over it did not run";
       button.click();
       return true;
     },
@@ -63,13 +87,92 @@ const DIALOG_ROUTES = [
   {
     route: "/fortknight/achievements/",
     seed: { "beinsiculous.achievements": SEEDED_SITE_ACHIEVEMENTS },
+    label: "dialog",
+    waitFor: "dialog.name-dialog[open]",
     // The page itself opens the prompt at boot; there is nothing to click, so wait for the dialog.
     open: async () => {
       for (let attempt = 0; attempt < 50; attempt += 1) {
         if (document.querySelector("dialog.name-dialog[open]")) return true;
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
-      return false;
+      return "could not open the profile-name dialog — the a11y pass over it did not run";
+    },
+  },
+  {
+    route: "/fortknight/fixknitt/",
+    seed: { "beinsiculous.keep": keepSeed },
+    label: "peripheral",
+    waitFor: "details.nav-peripheral[open]",
+    open: () => {
+      const promoted = Array.from(document.querySelectorAll(".nav-links > a[data-category]"));
+      const inside = Array.from(document.querySelectorAll(".nav-peripheral-panel a[data-category]"));
+      const promotedKeys = promoted.map((link) => link.dataset.category);
+      const expectedKeys = ["meals", "cleaning", "working", "health"];
+      const orderMatches = promotedKeys.length === 4 && promotedKeys.every((key, index) => key === expectedKeys[index]);
+      if (!orderMatches || inside.length !== 3) {
+        return `unexpected counts: promoted ${promoted.length} [${promotedKeys.join(", ")}], inside ${inside.length}`;
+      }
+      const details = document.querySelector("details.nav-peripheral");
+      if (!details) return "details.nav-peripheral not found";
+      details.open = true;
+      return true;
+    },
+  },
+  {
+    route: "/fortknight/fixknitt/",
+    seed: {},
+    label: "peripheral",
+    waitFor: "details.nav-peripheral[open]",
+    open: () => {
+      const promoted = Array.from(document.querySelectorAll(".nav-links > a[data-category]"));
+      const inside = Array.from(document.querySelectorAll(".nav-peripheral-panel a[data-category]"));
+      if (promoted.length !== 0 || inside.length !== 7) {
+        return `unexpected counts: promoted ${promoted.length}, inside ${inside.length}`;
+      }
+      const details = document.querySelector("details.nav-peripheral");
+      if (!details) return "details.nav-peripheral not found";
+      details.open = true;
+      return true;
+    },
+  },
+  {
+    // Inside the ☰ on a phone: the strip is a nested, indented column with rules of its own
+    // (faces.css, `.menu-panel .nav-peripheral-panel`), and both disclosures must be open to see it.
+    route: "/fortknight/fixknitt/",
+    seed: { "beinsiculous.keep": keepSeed },
+    label: "peripheral, phone",
+    viewport: { width: 390, height: 844 },
+    waitFor: "details.nav-peripheral[open]",
+    open: () => {
+      const promoted = Array.from(document.querySelectorAll(".nav-links > a[data-category]"));
+      const inside = Array.from(document.querySelectorAll(".nav-peripheral-panel a[data-category]"));
+      if (promoted.length !== 4 || inside.length !== 3) {
+        return `unexpected counts: promoted ${promoted.length}, inside ${inside.length}`;
+      }
+      const menu = document.querySelector("details.menu");
+      const details = document.querySelector("details.nav-peripheral");
+      if (!menu || !details) return "details.menu or details.nav-peripheral not found";
+      menu.open = true;
+      details.open = true;
+      return true;
+    },
+  },
+  {
+    // Every stone a focus: seven promoted pills and the Peripheral pill hidden — the one branch no
+    // fixture reaches. There is nothing to open; the bar itself is what axe audits.
+    route: "/fortknight/fixknitt/",
+    seed: { "beinsiculous.keep": everyStoneKeepSeed },
+    label: "peripheral, every stone a focus",
+    waitFor: ".nav-links > a[data-category]",
+    open: () => {
+      const promoted = Array.from(document.querySelectorAll(".nav-links > a[data-category]"));
+      const inside = Array.from(document.querySelectorAll(".nav-peripheral-panel a[data-category]"));
+      const details = document.querySelector("details.nav-peripheral");
+      if (!(details instanceof HTMLDetailsElement)) return "details.nav-peripheral not found";
+      if (promoted.length !== 7 || inside.length !== 0 || !details.hidden) {
+        return `unexpected state: promoted ${promoted.length}, inside ${inside.length}, peripheral hidden ${details.hidden}`;
+      }
+      return true;
     },
   },
 ];
@@ -85,7 +188,6 @@ try {
   // Keep renders entirely from a keep in localStorage. Without this the page audited is a file picker
   // on an otherwise empty page, and the one hard requirement it has — being readable across a room — is
   // checked by a gate that never sees it. The fixture is invented, not anybody's fortnight.
-  const keepSeed = readFileSync(new URL("../tests/fixtures/keep.sample.json", import.meta.url), "utf8");
   // The /profile/ achievements board renders its headings, lists and delete button only when a game
   // has recorded unlocks — seed invented saves so axe audits the populated board, not just the
   // empty state (the value is the engine's save-file shape, games-achievements.js). There are this
@@ -169,36 +271,32 @@ try {
   }
   await otherHouseholdContext.close();
 
-  // The profile-name dialog (src/lib/profile-name-dialog.js) is built in JavaScript and only exists once
-  // something opens it, so the page sweep above can never see it — and postbuild-check, which reads
-  // static HTML, cannot either. It is the site's only <dialog>, and its CSS is written twice (once in
-  // global.css for the studio pages, once in faces.css for the faces), so both rule sets are
-  // checked here: open it on one page of each and run the same rules against it. Each entry carries
-  // its own seed because the two open paths want opposite states (the DIALOG_ROUTES comment says which).
-  for (const { route, seed, open } of DIALOG_ROUTES) {
-    const dialogContext = await browser.newContext();
-    await dialogContext.addInitScript((records) => {
+  // What the page sweep cannot see, opened first (OPENED_ELEMENT_ROUTES says what and why). Each entry
+  // gets its own context, because the entries want different storage and, for the phone, a viewport.
+  for (const { route, seed, label, viewport, open, waitFor } of OPENED_ELEMENT_ROUTES) {
+    const openedContext = await browser.newContext(viewport ? { viewport } : {});
+    await openedContext.addInitScript((records) => {
       for (const [key, value] of Object.entries(records)) localStorage.setItem(key, value);
     }, seed);
-    const dialogPage = await dialogContext.newPage();
+    const openedPage = await openedContext.newPage();
     try {
-      await dialogPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
-      const opened = await dialogPage.evaluate(open);
-      if (!opened) {
-        failures.push(`${route}  [dialog] could not open the profile-name dialog — the a11y pass over it did not run`);
+      await openedPage.goto(`http://localhost:${port}${route}`, { waitUntil: "networkidle" });
+      const openResult = await openedPage.evaluate(open);
+      if (openResult !== true) {
+        failures.push(`${route} [${label}] ${openResult}`);
         continue;
       }
-      await dialogPage.waitForSelector("dialog.name-dialog[open]", { timeout: 5000 });
-      const results = await new AxeBuilder({ page: dialogPage })
+      await openedPage.waitForSelector(waitFor, { timeout: 5000 });
+      const results = await new AxeBuilder({ page: openedPage })
         .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
         .analyze();
       analyzed++;
       for (const violation of results.violations) {
         const targets = violation.nodes.map((node) => node.target.join(" ")).join("; ");
-        failures.push(`${route} (dialog open)  [${violation.id}] ${violation.help}\n    ${targets}`);
+        failures.push(`${route} (${label} open)  [${violation.id}] ${violation.help}\n    ${targets}`);
       }
     } finally {
-      await dialogContext.close();
+      await openedContext.close();
     }
   }
 } finally {

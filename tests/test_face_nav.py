@@ -2,7 +2,7 @@
 
 This file holds the sprint *Focus in the Bar*’s pins: the fold boundary, the category mapping on
 `faceNav()` — each stone’s path to its category key, and the labels against `data/categories.json` —
-and the `focusCategoryKeys` keep reader against the keep fixtures. `FaceNav`’s own pins join in batch 3.
+and the `focusCategoryKeys` keep reader against the keep fixtures. FaceNav’s own pins are here.
 
 The fold in src/styles/faces.css between the flat bar and the ☰ menu must have no overlap and no gap
 at 40rem. The layout gate’s shots run at 390px, 641px and 1440px, never at 640px, so a boundary where
@@ -22,6 +22,9 @@ from helpers import REPOSITORY_ROOT, STDIN_PRELUDE, run_node
 
 FACES_CSS = REPOSITORY_ROOT / "src" / "styles" / "faces.css"
 BASE_LAYOUT = REPOSITORY_ROOT / "src" / "layouts" / "BaseLayout.astro"
+FACE_NAV = REPOSITORY_ROOT / "src" / "components" / "FaceNav.astro"
+FACE_LAYOUT = REPOSITORY_ROOT / "src" / "layouts" / "FaceLayout.astro"
+KEEP_PAGE = REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "keep.astro"
 
 KEEP_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep.js").as_uri()
 FACES_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "faces.js").as_uri()
@@ -193,6 +196,47 @@ class FaceNavMappingTests(unittest.TestCase):
         )
         # The seven stones cover the seven categories exactly once each.
         self.assertEqual(sorted(self.STONE_CATEGORY_KEY_BY_PATH.values()), sorted(categories_data["order"]))
+
+
+class FaceNavComponentTests(unittest.TestCase):
+    """Source-level pins for FaceNav: imports, non-destructive reads, markup, and layout integration."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.face_nav_source = FACE_NAV.read_text(encoding="utf-8")
+        cls.face_layout_source = FACE_LAYOUT.read_text(encoding="utf-8")
+        cls.keep_page_source = KEEP_PAGE.read_text(encoding="utf-8")
+
+    def test_facenav_imports_and_event_listener(self):
+        self.assertIn("loadKeep", self.face_nav_source)
+        self.assertIn("validateKeep", self.face_nav_source)
+        self.assertIn("focusCategoryKeys", self.face_nav_source)
+        self.assertIn("KEEP_CHANGED_EVENT", self.face_nav_source)
+        self.assertNotIn("readStoredKeep", self.face_nav_source)
+        self.assertNotIn("clearKeep", self.face_nav_source)
+        self.assertIn("addEventListener(KEEP_CHANGED_EVENT", self.face_nav_source)
+
+    def test_facenav_emits_data_category_from_the_entry_and_the_default_has_seven(self):
+        self.assertIn("data-category={item.category.key}", self.face_nav_source)
+        categories_data = json.loads(CATEGORIES_JSON_PATH.read_text(encoding="utf-8"))
+        self.assertEqual(len(categories_data["order"]), 7)
+
+    def test_details_nav_peripheral_carries_no_open(self):
+        self.assertIn('<details class="nav-peripheral">', self.face_nav_source)
+        self.assertNotIn('<details class="nav-peripheral" open', self.face_nav_source)
+
+    def test_summary_text_is_peripheral_with_nav_current_section_span(self):
+        self.assertIn("Peripheral", self.face_nav_source)
+        self.assertIn("nav-current-section", self.face_nav_source)
+        self.assertIn(", current section", self.face_nav_source)
+
+    def test_face_layout_renders_facenav_once_and_no_longer_maps_facenav(self):
+        self.assertEqual(self.face_layout_source.count("<FaceNav"), 1)
+        self.assertNotIn("faceNav().map", self.face_layout_source)
+
+    def test_keep_page_imports_store_keep_and_no_longer_calls_set_item(self):
+        self.assertIn("storeKeep", self.keep_page_source)
+        self.assertNotIn("localStorage.setItem", self.keep_page_source)
 
 
 if __name__ == "__main__":
