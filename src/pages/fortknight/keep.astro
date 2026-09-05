@@ -43,7 +43,7 @@ import KeepStyles from "../../components/KeepStyles.astro";
 
 <script>
   import { validateKeep, readableDays, describeExportAge } from "../../lib/keep.js";
-  import { KEEP_STORE_KEY, clearKeep } from "../../lib/keep-store.js";
+  import { storeKeep, clearKeep } from "../../lib/keep-store.js";
   import { readStoredKeep } from "../../lib/keep-access.js";
   import { renderDayPanel, renderSeasonPanel, renderYearPanel } from "../../lib/keep-view.js";
   import { localTodayIsoDate } from "../../lib/shared/clock.js";
@@ -105,7 +105,7 @@ import KeepStyles from "../../components/KeepStyles.astro";
       const parsed = JSON.parse(text);
       if (adopt(parsed)) {
         try {
-          localStorage.setItem(KEEP_STORE_KEY, text);
+          storeKeep(text);
         } catch (error) {
           // Drawn but not remembered — worth saying, because a reload would lose it.
           status.textContent += " (This browser would not store it, so it will need loading again.)";

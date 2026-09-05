@@ -19,6 +19,7 @@ from helpers import REPOSITORY_ROOT, STDIN_PRELUDE, run_node
 KEEP_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep.js").as_uri()
 KEEP_VIEW_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-view.js").as_uri()
 KEEP_ACCESS_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-access.js").as_uri()
+KEEP_STORE_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-store.js").as_uri()
 
 VALIDATE = (f'import {{ validateKeep }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
             + "process.stdout.write(JSON.stringify(inputs.map((candidate) => {"
@@ -399,6 +400,76 @@ class StoredKeepBootTests(unittest.TestCase):
             self.assertIn('"kept"', source, page)
         day_page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "days" / "[dayKey].astro").read_text(encoding="utf-8")
         self.assertIn('"kept"', day_page)
+
+
+RUN_KEEP_STORE = (
+    STDIN_PRELUDE
+    + "globalThis.localStorage = {"
+      "  store: Object.assign({}, inputs.initialStore || {}),"
+      "  getItem(key) { return this.store[key] ?? null; },"
+      "  setItem(key, value) { this.store[key] = String(value); },"
+      "  removeItem(key) { delete this.store[key]; },"
+      "};"
+      "if (inputs.withDocument) {"
+      "  globalThis.document = {"
+      "    events: [],"
+      "    dispatchEvent(event) {"
+      "      this.events.push(event.type);"
+      "      return true;"
+      "    },"
+      "  };"
+      "  globalThis.Event = class Event {"
+      "    constructor(type) { this.type = type; }"
+      "  };"
+      "}"
+      f"const {{ storeKeep, clearKeep, KEEP_STORE_KEY }} = await import({json.dumps(KEEP_STORE_MODULE)});"
+      "if (inputs.action === 'store') {"
+      "  storeKeep(inputs.text);"
+      "} else if (inputs.action === 'clear') {"
+      "  clearKeep();"
+      "}"
+      "process.stdout.write(JSON.stringify({"
+      "  stored: globalThis.localStorage.getItem(KEEP_STORE_KEY),"
+      "  events: inputs.withDocument ? globalThis.document.events : [],"
+      "}));"
+)
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class KeepStoreEventTests(unittest.TestCase):
+    """storeKeep and clearKeep notify document when present, and stay silent in node."""
+
+    def run_store(self, action, text=None, initial_store=None, with_document=True):
+        payload = {
+            "action": action,
+            "text": text,
+            "initialStore": initial_store or {},
+            "withDocument": with_document,
+        }
+        return run_node(RUN_KEEP_STORE, payload)
+
+    def test_store_keep_writes_key_and_dispatches_once(self):
+        sample_text = json.dumps(FIXTURE)
+        result = self.run_store("store", text=sample_text, with_document=True)
+        self.assertEqual(result["stored"], sample_text)
+        self.assertEqual(result["events"], ["beinsiculous:keep-changed"])
+
+    def test_clear_keep_removes_key_and_dispatches_once(self):
+        sample_text = json.dumps(FIXTURE)
+        result = self.run_store("clear", initial_store={"beinsiculous.keep": sample_text}, with_document=True)
+        self.assertIsNone(result["stored"])
+        self.assertEqual(result["events"], ["beinsiculous:keep-changed"])
+
+    def test_store_keep_without_document_does_not_throw_and_dispatches_nothing(self):
+        sample_text = json.dumps(FIXTURE)
+        result = self.run_store("store", text=sample_text, with_document=False)
+        self.assertEqual(result["stored"], sample_text)
+        self.assertEqual(result["events"], [])
+
+    def test_clear_keep_without_document_does_not_throw_and_dispatches_nothing(self):
+        result = self.run_store("clear", initial_store={"beinsiculous.keep": "test"}, with_document=False)
+        self.assertIsNone(result["stored"])
+        self.assertEqual(result["events"], [])
 
 
 DESCRIBE = (f'import {{ describeSection }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE

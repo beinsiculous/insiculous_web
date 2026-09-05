@@ -90,6 +90,12 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 .menu > summary::-webkit-details-marker { display: none; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
+.nav-peripheral { min-width: 0; }
+.nav-peripheral > summary { list-style: none; }
+.nav-peripheral > summary::-webkit-details-marker { display: none; }
+.nav-caret { display: inline-block; margin-left: 0.3rem; }
+.nav-peripheral[open] > summary .nav-caret { transform: rotate(180deg); }
+
 /* Wide: the wrapper disappears and the bar is one flat row — brand, pages, profile, site links, Aa, in
    that order, because that is the markup's order. A closed <details> hides its content two different
    ways, an old UA rule on the children and newer Chrome's content-visibility on the generated
@@ -98,7 +104,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
    which desynced the tab sequence from the visual one (WCAG 2.4.3) in a way axe does not check.
    Range syntax (`width >= 40rem` / `width < 40rem`) rather than a min-width/max-width pair, because
    a pair cannot draw a clean boundary either way: on one value both queries match at exactly 640px and,
-   setting different properties, both apply (#25 measured a 495px header of the ☰ AND every pill); split
+   setting different properties, both apply (#25 measured a 495px header of the ☰ AND every link); split
    to 40rem/40.0625rem, a fractional viewport between 640px and 641px — routine with display scaling or
    zoom — matches NEITHER, the ☰ is hidden and the closed <details> keeps the nav hidden too, so no page
    is reachable. Range syntax is the one form with no overlap and no gap at any width. The studio twin
@@ -110,6 +116,16 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
 @media (width >= 40rem) {
   .site-nav .menu, .site-nav .menu-panel { display: contents; }
   .site-nav .menu::details-content { content-visibility: visible; display: contents; }
+
+  /* A full-width strip under the bar, positioned against the sticky .site-nav like .menu-panel — never
+     anchored to the summary, so it cannot run past the viewport at 641px with four focus pills ahead
+     of it. No white-space: nowrap, for the same reason (the Aa panel has it and must not be copied). */
+  .nav-peripheral-panel {
+    position: absolute; left: 0; right: 0; top: 100%;
+    display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0.5rem 1.25rem;
+    background: var(--background); border-bottom: 1px solid var(--line); box-shadow: var(--shadow);
+    z-index: 20;   /* above main, below .a11y-panel's 30 */
+  }
 }
 
 /* Phone: the ☰ is the only control besides the brand and Aa, and everything else drops as a full-width
@@ -138,6 +154,11 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
   /* In the panel the pills are full-width rows: a thumb gets the whole width, not a 44px pill in a gap. */
   .menu-panel .nav-links { flex-direction: column; gap: 0.25rem; }   /* full-width rows, not pills in a gap */
   .menu-panel .nav-link { display: flex; align-items: center; min-height: 44px; border-radius: 8px; }
+  /* Inside the ☰ panel: a static, indented column of the 44px rows .menu-panel .nav-link already gives. */
+  .menu-panel .nav-peripheral-panel {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    margin-left: 0.75rem; padding-left: 0.5rem; border-left: 2px solid var(--line);
+  }
   /* The panel reads top to bottom as "here", "you", "elsewhere" — this face's pages, the profile, then
      the way out to the other sites. That is the markup's order, so nothing here reorders anything. The
      site links stay a row of two rather than a column: they are icons, and two emoji stacked read

@@ -1,0 +1,161 @@
+---
+// The face nav: Overview, Keep, the focus stones promoted by category, Peripheral holding the rest,
+// and Achievements.
+//
+// Accepted side effects and boundaries (coordination/focus-in-the-bar/plan.md § Batch 3):
+// - The bar first paints all-peripheral and grows when the module script runs, as the profile dropdown
+//   does; an inline script would bypass validateKeep.
+// - The nav reads storage non-destructively (loadKeep() + validateKeep()), so it
+//   deletes nothing and a keep-fed page’s own boot keeps its “cleared”/“kept” verdict and reason.
+// - The bar mirrors storage, not the page’s in-memory keep: when storage refuses storeKeep the page
+//   draws the fortnight and says it was not stored while the bar stays all-peripheral.
+// - An unknown season.focus key drops silently: the keep schema enumerates the seven, and the nav is
+//   not the keep’s validator.
+// - applyFocus is idempotent by contract: a keep-fed page’s boot-time clear of unreadable storage
+//   dispatches the change event and runs applyFocus a second, sequential time.
+import { faceNav, facePath } from "../lib/faces.js";
+
+interface Props {
+  face: string;
+}
+
+interface NavItem {
+  path: string;
+  label: string;
+  href: string;
+  exact?: boolean;
+  category?: { key: string; label: string };
+}
+
+const { face } = Astro.props;
+const pathname = Astro.url.pathname;
+
+function isActive(item: NavItem | undefined): boolean {
+  if (!item) return false;
+  if (item.exact) return pathname === item.href || pathname.startsWith(`${item.href}days/`); // the day pages belong to the Overview’s grid
+  return pathname.startsWith(item.href);
+}
+
+const navItems: NavItem[] = faceNav().map((item) => ({ ...item, href: facePath(face, item.path) }));
+const overview = navItems.find((item) => item.path === "");
+const keep = navItems.find((item) => item.path === "keep/");
+const achievements = navItems.find((item) => item.path === "achievements/");
+const stones = navItems.filter((item): item is NavItem & { category: { key: string; label: string } } => Boolean(item.category));
+const anyStoneActive = stones.some((item) => isActive(item));
+---
+<nav class="nav-links">
+  {overview && (
+    <a
+      class={`nav-link${isActive(overview) ? " active" : ""}`}
+      href={overview.href}
+      aria-label={overview.label}
+      aria-current={isActive(overview) ? "page" : undefined}
+    >
+      {overview.label}
+    </a>
+  )}
+  {keep && (
+    <a
+      class={`nav-link${isActive(keep) ? " active" : ""}`}
+      href={keep.href}
+      aria-label={keep.label}
+      aria-current={isActive(keep) ? "page" : undefined}
+    >
+      {keep.label}
+    </a>
+  )}
+  <details class="nav-peripheral">
+    <summary class={`nav-link${anyStoneActive ? " active" : ""}`}>Peripheral<span class="nav-caret" aria-hidden="true">▾</span><span class="visually-hidden nav-current-section" hidden={!anyStoneActive}>, current section</span></summary>
+    <div class="nav-peripheral-panel">
+      {stones.map((item) => {
+        const active = isActive(item);
+        return (
+          <a
+            class={`nav-link${active ? " active" : ""}`}
+            data-category={item.category.key}
+            href={item.href}
+            title={item.label}
+            aria-label={`${item.category.label}, ${item.label}`}
+            aria-current={active ? "page" : undefined}
+          >
+            {item.category.label}
+          </a>
+        );
+      })}
+    </div>
+  </details>
+  {achievements && (
+    <a
+      class={`nav-link${isActive(achievements) ? " active" : ""}`}
+      href={achievements.href}
+      aria-label={achievements.label}
+      aria-current={isActive(achievements) ? "page" : undefined}
+    >
+      {achievements.label}
+    </a>
+  )}
+</nav>
+
+<script>
+  import { KEEP_CHANGED_EVENT, loadKeep } from "../lib/keep-store.js";
+  import { focusCategoryKeys, validateKeep } from "../lib/keep.js";
+
+  // Type-checked, so every DOM read is narrowed: querySelectorAll("a[…]") is NodeListOf<Element>, and
+  // Element has no dataset.
+  const details = document.querySelector("details.nav-peripheral");
+  const panel = details?.querySelector(".nav-peripheral-panel");
+  const summary = details?.querySelector("summary");
+  const currentSection = summary?.querySelector<HTMLElement>(".nav-current-section");
+  // The seven stone links in faceNav() order, captured once: folding back is "append these, in this order".
+  const stoneLinks = panel ? [...panel.querySelectorAll<HTMLAnchorElement>("a[data-category]")] : [];
+
+  /** The stored keep’s focus keys, read without touching storage: loadKeep() returns null for an
+   *  unparseable value and never clears it — that verdict, and its reason, belong to the page’s own boot. */
+  function storedFocusKeys() {
+    const parsed = loadKeep();
+    if (parsed === null) return [];
+    const check = validateKeep(parsed);
+    return check.ok ? focusCategoryKeys(check.keep) : [];
+  }
+
+  function applyFocus() {
+    if (!(details instanceof HTMLDetailsElement) || !panel || !summary) return;
+    details.open = false;                              // a keep change never leaves the strip open (gemini F3, round 2)
+    panel.append(...stoneLinks);                       // fold everything back, in faceNav() order — idempotent
+    const byCategory = new Map(stoneLinks.map((link) => [link.dataset.category, link]));
+    const promoted = storedFocusKeys().map((key) => byCategory.get(key)).filter((link) => link !== undefined);
+    details.before(...promoted);                       // one move: focus order = DOM order = tab order = paint order
+    details.hidden = panel.querySelector("a") === null;               // every stone is a focus
+    const currentInside = panel.querySelector("a.active") !== null;
+    summary.classList.toggle("active", currentInside);
+    if (currentSection) currentSection.hidden = !currentInside;
+  }
+  applyFocus();
+  document.addEventListener(KEEP_CHANGED_EVENT, applyFocus);
+
+  details?.addEventListener("focusout", (event) => {
+    if (event instanceof FocusEvent && details instanceof HTMLDetailsElement && details.open) {
+      const outside = event.relatedTarget instanceof Node && !details.contains(event.relatedTarget);
+      if (outside) details.open = false;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (details instanceof HTMLDetailsElement && details.open) {
+      const focusWasInside = document.activeElement instanceof Node && details.contains(document.activeElement);
+      details.open = false;
+      if (focusWasInside && summary instanceof HTMLElement) {
+        summary.focus();
+      }
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (details instanceof HTMLDetailsElement && details.open) {
+      if (event.target instanceof Node && !details.contains(event.target)) {
+        details.open = false;
+      }
+    }
+  });
+</script>

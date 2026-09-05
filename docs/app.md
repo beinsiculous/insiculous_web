@@ -19,17 +19,17 @@ That removal has a consequence worth stating plainly: **nothing under `src/` rea
 more.** The committed bundle was the only path from the repository's data to a rendered page. `data/`
 is now a person-neutral vocabulary that `validate.py` checks and that ships nowhere.
 
-The face's nav is ten pills — **Overview · Keep**, one per Name Drop stone (**Fork Knife · Fresh
-Keep · Folk Knowledge · Fix Knitt · Foe Kiss · Fun Knee · Fret Knot**), then **Achievements**. Fort
-Knight itself has no pill: it is the agenda stone, and the agenda is what the Overview, Keep and the
-day pages already are.
+The face's nav shows the stored keep’s focus stones, labelled by category; the rest sit behind
+**Peripheral** (with no keep loaded, every stone is peripheral). The mapping is `faceNav()`’s
+`category`. Fort Knight itself has no entry: it is the agenda stone, and the agenda is what the
+Overview, Keep and the day pages already are.
 
 Four of those stones — Fix Knitt, Foe Kiss, Fun Knee and Fret Knot — have subjects-only slabs and no
 keep section, and Fresh Keep's cleaning deliberately never travels, so those five pages are honest
 empty states sharing one component (`src/components/StoneEmptyState.astro`). Fork Knife draws the
 menu; Folk Knowledge draws the season card and the year wheel.
 
-**Every pill has a page, and that is now checked.** `scripts/postbuild-check.mjs` fails the build
+**Every entry has a page, and that is now checked.** `scripts/postbuild-check.mjs` fails the build
 when a `faceNav()` entry has no route in `dist/`. It was added on 2026-08-31, after three pills spent
 a day pointing at pages that did not exist behind nothing but a written `dev → main` hold.
 

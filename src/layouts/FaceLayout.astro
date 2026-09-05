@@ -1,10 +1,11 @@
 ---
 import "../styles/faces.css";
+import FaceNav from "../components/FaceNav.astro";
 import ProfileSwitcher from "../components/ProfileSwitcher.astro";
 import AccessibilityBootScript from "../components/AccessibilityBootScript.astro";
 import AccessibilityControls from "../components/AccessibilityControls.astro";
 import { withBase } from "../lib/paths.js";
-import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, faceNav, facePath, studioPath } from "../lib/faces.js";
+import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, facePath, studioPath } from "../lib/faces.js";
 import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 
 // The layout of the site's planner face (docs/app.md): every page rendered here belongs to a face in FACES
@@ -19,13 +20,8 @@ import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
 const { title, face } = Astro.props;
 const currentFace = FACES[face];
 const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
-const navItems = faceNav().map((item) => ({ ...item, href: facePath(face, item.path) }));
 const profileHref = withBase(PROFILE_PATH);
 const pathname = Astro.url.pathname;
-function isActive(item) {
-  if (item.exact) return pathname === item.href || pathname.startsWith(`${item.href}days/`); // the day pages belong to the Overview’s grid
-  return pathname.startsWith(item.href);
-}
 const profileActive = pathname.startsWith(profileHref);
 const brandLabel = `${currentFace.logo} ${currentFace.label}`;
 const theme = currentFace.theme;
@@ -50,13 +46,14 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-nav">
-    {/* Below 40rem the bar does not fit: six pills, a profile dropdown and two site links push it
-        to three rows and about a sixth of a phone screen. They fold behind a ☰ instead, leaving the
-        brand and the Aa control as a single row. The disclosure is native, like the studio's in
-        BaseLayout.astro — no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard,
-        and every navigation resets it because each page is a fresh document. Escape does NOT close a
-        plain <details>, measured in Chrome with focus on the summary, on a panel link and on the body
-        — that would need script, and a disclosure is not a modal, so it does not owe you one.
+    {/* Below 40rem the bar does not fit: the pages (Overview, Keep, up to four focus stones,
+        Peripheral, Achievements), a profile dropdown and two site links push it to three rows and
+        about a sixth of a phone screen. They fold behind a ☰ instead, leaving the brand and the
+        Aa control as a single row. The disclosure is native, like the studio's in BaseLayout.astro —
+        no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard, and every navigation
+        resets it because each page is a fresh document. Escape does NOT close a plain <details>,
+        measured in Chrome with focus on the summary, on a panel link and on the body — that would
+        need script, and a disclosure is not a modal, so it does not owe you one.
         Above 40rem the wrapper is display: contents and the bar is one flat row again. The source
         order below IS the painted order at both widths, and no CSS `order` reorders any of it. A
         folded set has to be contiguous in the markup, and the first version of this kept the old bar
@@ -65,7 +62,8 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         order at all; it is WCAG 2.4.3, and it is why the bar reads brand-first now. Aa sits before the
         disclosure for the same reason, and the same way BaseLayout does it: the panel drops BELOW the
         bar, so a button after the <details> in the markup would be painted in the bar but tabbed after
-        everything in the panel.
+        everything in the panel. An open Peripheral panel in FaceNav makes the same compromise: it is
+        painted below the bar but tabbed before Achievements.
         "Site links" rather than "Switch app": the row carries the tip jar as well as the way out. */}
     <a class="brand" href={facePath(face)}>
       <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
@@ -76,13 +74,7 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
       </summary>
       <div class="menu-panel">
-        <nav class="nav-links">
-          {navItems.map((item) => (
-            <a class={`nav-link${isActive(item) ? " active" : ""}`} href={item.href} aria-label={item.label}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        <FaceNav face={face} />
         <ProfileSwitcher>
           <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
         </ProfileSwitcher>
