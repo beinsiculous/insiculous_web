@@ -127,8 +127,8 @@ What that means for the items this file used to number 1–9:
   there: the other five games writing their keys, high scores, and gesture-gated audio.
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
   WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
-  and work with projects stored in the browser’s IndexedDB. Export and import of projects, and
-  scripting, follow.
+  and work with projects stored in the browser’s IndexedDB, exported and imported as zip.
+  Scripting follows.
 - **The two tracks and the art policy** (`docs/thesis.md` is the source of the wording). The games
   listed on this site are free and use AI art. The games we **sell** are not on this site at all —
   each has its own repository and ships on Steam and/or Android and iOS — and they carry no AI art.

@@ -206,6 +206,8 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
 - **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
   `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
   `PlaygroundEmbed.astro`’s default changes.
+- **Project export and import**: projects export and import as zip, layout in the engine’s
+  `docs/WEB_PLAYGROUND.md` § "Export and import".
 
 **Playable-game accessibility requirements** (part of the convention): keyboard controls
 listed next to the embed, remappable keys, a pause, and no timing-only inputs. The canvas

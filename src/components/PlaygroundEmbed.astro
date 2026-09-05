@@ -19,7 +19,11 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
 ---
 
 <div class="playground-embed" data-wasm-src={src}>
-  <p id="playground-banner" class="playground-banner" role="alert"></p>
+  <div class="banner-region">
+    <p id="playground-banner" class="playground-banner" role="alert"></p>
+    <div id="import-rejection-actions" class="banner-actions"></div>
+    <div id="conflicted-actions" class="banner-actions"></div>
+  </div>
   <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
 
   <div class="toolbar" role="group" aria-label="Playground project controls">
@@ -34,6 +38,19 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
         Reset to bundled
       </button>
       <span id="reset-note" class="reset-note" hidden></span>
+    </div>
+    <div class="archive-group">
+      <button type="button" id="export-button" class="btn-toolbar" disabled>
+        Export project
+      </button>
+      <label for="import-input" class="label-import">Import project</label>
+      <input
+        type="file"
+        id="import-input"
+        class="input-file"
+        accept=".zip,application/zip"
+        disabled
+      />
     </div>
   </div>
 
@@ -88,219 +105,7 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
 </div>
 
 <script>
-  const embed = document.querySelector('.playground-embed');
-  const src = embed?.getAttribute('data-wasm-src');
-  const status = document.getElementById('game-loading');
-  const banner = document.getElementById('playground-banner');
-  const projectSelect = document.getElementById('project-select') as HTMLSelectElement | null;
-  const resetButton = document.getElementById('reset-button') as HTMLButtonElement | null;
-  const resetNote = document.getElementById('reset-note');
-  const commandForm = document.getElementById('command-form') as HTMLFormElement | null;
-  const commandInput = document.getElementById('command-input') as HTMLInputElement | null;
-  const commandSubmit = document.getElementById('command-submit') as HTMLButtonElement | null;
-  const commandOutput = document.getElementById('command-output');
-
-  if (src) {
-    const gpu = 'gpu' in navigator ? (navigator as any).gpu : null;
-    const adapter = gpu ? await gpu.requestAdapter().catch(() => null) : null;
-    const device = adapter ? await adapter.requestDevice().catch(() => null) : null;
-    device?.destroy();
-    if (!adapter || !device) {
-      if (status) {
-        status.textContent =
-          'The playground needs WebGPU — available in Chrome and Edge. In Firefox, enable dom.webgpu.enabled in about:config and fully restart the browser.';
-      }
-    } else {
-      if (status) status.textContent = 'Loading playground…';
-      try {
-        const dynamicImport = new Function('u', 'return import(u)') as (
-          u: string
-        ) => Promise<{
-          default: () => Promise<unknown>;
-          playground_list_projects: () => Array<{
-            manifest: {
-              slug: string;
-              title: string;
-              bundle_version: string;
-              content_hash: string;
-              origin: string;
-            };
-            is_bundled: boolean;
-            has_stored_files: boolean;
-            differs_from_bundle: boolean;
-          }>;
-          playground_open_project: (slug: string) => Promise<unknown>;
-          playground_reset_project: (slug: string) => Promise<unknown>;
-          playground_dispatch: (line: string) => boolean;
-          playground_poll_responses: () => string[];
-          playground_is_dirty: () => boolean;
-        }>;
-
-        const wasm = await dynamicImport(src);
-
-        const searchParams = new URLSearchParams(window.location.search);
-        let currentSlug = searchParams.get('project') || '';
-        // A confirmed switch or reset navigates on purpose; without this flag the
-        // beforeunload handler below would ask a second time on top of the confirm.
-        let leavingByChoice = false;
-        let pollIntervalId = 0;
-
-        const pollResponses = () => {
-          const responses = wasm.playground_poll_responses();
-          if (responses && responses.length > 0 && commandOutput) {
-            for (const line of responses) {
-              const row = document.createElement('div');
-              row.className = 'response-line';
-              row.textContent = line;
-              commandOutput.appendChild(row);
-            }
-            commandOutput.scrollTop = commandOutput.scrollHeight;
-          }
-        };
-
-        // Register playground-ready listener on window BEFORE awaiting init()
-        window.addEventListener('playground-ready', () => {
-          if (status) status.textContent = '';
-          const entries = wasm.playground_list_projects();
-          if (!entries || entries.length === 0) return;
-
-          if (!currentSlug || !entries.some((entry) => entry.manifest.slug === currentSlug)) {
-            currentSlug = entries[0].manifest.slug;
-          }
-
-          if (projectSelect) {
-            projectSelect.innerHTML = '';
-            for (const entry of entries) {
-              const option = document.createElement('option');
-              option.value = entry.manifest.slug;
-              option.textContent = entry.manifest.title;
-              if (entry.manifest.slug === currentSlug) {
-                option.selected = true;
-              }
-              projectSelect.appendChild(option);
-            }
-            projectSelect.value = currentSlug;
-            projectSelect.disabled = false;
-          }
-
-          const currentEntry = entries.find((entry) => entry.manifest.slug === currentSlug);
-          if (resetButton && resetNote) {
-            if (currentEntry && currentEntry.is_bundled && currentEntry.has_stored_files) {
-              resetButton.hidden = false;
-              resetButton.disabled = false;
-              if (currentEntry.differs_from_bundle) {
-                resetNote.hidden = false;
-                resetNote.textContent =
-                  currentEntry.manifest.origin === 'imported'
-                    ? 'you imported over the bundled project'
-                    : 'the bundled project changed since you saved';
-              } else {
-                resetNote.hidden = true;
-                resetNote.textContent = '';
-              }
-            } else {
-              resetButton.hidden = true;
-              resetButton.disabled = true;
-              resetNote.hidden = true;
-              resetNote.textContent = '';
-            }
-          }
-
-          if (commandInput) commandInput.disabled = false;
-          if (commandSubmit) commandSubmit.disabled = false;
-          // Every glue export dereferences the module; before init resolves a poll throws.
-          if (!pollIntervalId) pollIntervalId = window.setInterval(pollResponses, 100);
-        });
-
-        if (projectSelect) {
-          projectSelect.addEventListener('change', async () => {
-            const targetSlug = projectSelect.value;
-            if (targetSlug === currentSlug) return;
-
-            if (wasm.playground_is_dirty()) {
-              const confirmed = window.confirm(
-                'You have unsaved changes. Discard them and switch projects?'
-              );
-              if (!confirmed) {
-                projectSelect.value = currentSlug;
-                return;
-              }
-            }
-
-            try {
-              projectSelect.disabled = true;
-              await wasm.playground_open_project(targetSlug);
-              leavingByChoice = true;
-              window.location.search = '?project=' + encodeURIComponent(targetSlug);
-            } catch (error) {
-              leavingByChoice = false;
-              projectSelect.disabled = false;
-              projectSelect.value = currentSlug;
-              if (banner) banner.textContent = String(error);
-            }
-          });
-        }
-
-        if (resetButton) {
-          resetButton.addEventListener('click', async () => {
-            const confirmed = window.confirm(
-              'Reset this project to bundled content? All stored edits in this browser will be discarded.'
-            );
-            if (!confirmed) return;
-
-            try {
-              resetButton.disabled = true;
-              await wasm.playground_reset_project(currentSlug);
-              leavingByChoice = true;
-              window.location.search = '?project=' + encodeURIComponent(currentSlug);
-            } catch (error) {
-              leavingByChoice = false;
-              resetButton.disabled = false;
-              if (banner) banner.textContent = String(error);
-            }
-          });
-        }
-
-        if (commandForm && commandInput) {
-          commandForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const line = commandInput.value.trim();
-            if (!line) return;
-
-            const echoedRow = document.createElement('div');
-            echoedRow.className = 'command-echo';
-            echoedRow.textContent = `> ${line}`;
-            commandOutput?.appendChild(echoedRow);
-
-            const accepted = wasm.playground_dispatch(line);
-            if (!accepted) {
-              const errorRow = document.createElement('div');
-              errorRow.className = 'error-line';
-              errorRow.textContent = 'busy — try again';
-              commandOutput?.appendChild(errorRow);
-            } else {
-              commandInput.value = '';
-            }
-            if (commandOutput) commandOutput.scrollTop = commandOutput.scrollHeight;
-          });
-        }
-
-        window.addEventListener('beforeunload', (event) => {
-          if (leavingByChoice) return;
-          if (wasm.playground_is_dirty()) {
-            event.preventDefault();
-            event.returnValue = 'Changes you made may not be saved.';
-            return 'Changes you made may not be saved.';
-          }
-        });
-
-        await wasm.default();
-      } catch (e) {
-        if (status) status.textContent = 'Failed to start: ' + e;
-        throw e;
-      }
-    }
-  }
+  import '../scripts/playground-embed.ts';
 </script>
 
 <style>
@@ -402,6 +207,78 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     font-size: 0.75rem;
     color: var(--text-dim);
     font-style: italic;
+  }
+
+  .archive-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .btn-toolbar {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .btn-toolbar:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-toolbar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .label-import {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .input-file {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-bright);
+    max-width: 100%;
+  }
+
+  .input-file:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .banner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .btn-banner-action {
+    background: var(--surface-raised);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .btn-banner-action:hover {
+    background: var(--accent);
+    color: var(--bg);
   }
 
   /* :global — the engine REPLACES the placeholder canvas with winit's own
