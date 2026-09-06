@@ -191,7 +191,11 @@ export async function maybePromptForProfile() {
  * Headings read `<title> — N of M unlocked` whenever the full list is known (spine mode for site
  * types and for games with a catalog), else `<title> — N unlocked`.
  *
- * @param {{ types?: string[], includeLocked?: boolean, gameCatalogs?: import("./games-catalog.js").GameCatalog[] }} [options]
+ * The heading level is the page's to choose: on `/achievements/` it sits directly under `h1` so
+ * must be `h2` to avoid skipping a level; on `/games/` and `/profile/` it sits under an `h2` section
+ * header and defaults to `h3`.
+ *
+ * @param {{ types?: string[], includeLocked?: boolean, gameCatalogs?: import("./games-catalog.js").GameCatalog[], headingLevel?: number }} [options]
  */
 export function renderAchievementsBoard(
   container,
@@ -201,6 +205,7 @@ export function renderAchievementsBoard(
     // The cast is for the type checker reading this untyped module from a page: a bare `[]`
     // default is inferred as never[], and every page would then be refused its catalogs.
     gameCatalogs = /** @type {import("./games-catalog.js").GameCatalog[]} */ ([]),
+    headingLevel = 3,
   } = {}
 ) {
   const wanted = new Set(types);
@@ -211,7 +216,7 @@ export function renderAchievementsBoard(
 
   const renderGroup = (heading, rows, note = null, fullListKnown = false) => {
     if (!rows.length) return;
-    const headingElement = document.createElement("h3");
+    const headingElement = document.createElement(`h${headingLevel}`);
     const unlockedGroupCount = rows.filter((row) => !row.locked).length;
     headingElement.textContent = fullListKnown
       ? `${heading} — ${unlockedGroupCount} of ${rows.length} unlocked`

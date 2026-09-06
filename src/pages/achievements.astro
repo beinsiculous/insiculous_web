@@ -39,7 +39,11 @@ const catalogs = readGameCatalogs(games);
   let unlockedCount = 0;
   let totalCount = 0;
   if (board) {
-    ({ unlockedCount, totalCount } = renderAchievementsBoard(board, { includeLocked: true, gameCatalogs: catalogs }));
+    ({ unlockedCount, totalCount } = renderAchievementsBoard(board, {
+      includeLocked: true,
+      gameCatalogs: catalogs,
+      headingLevel: 2,
+    }));
   }
   if (status) {
     status.textContent = unlockedCount === 0

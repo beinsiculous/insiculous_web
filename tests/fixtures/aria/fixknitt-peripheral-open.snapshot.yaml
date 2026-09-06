@@ -1,0 +1,51 @@
+- link "Skip to content":
+  - /url: "#main"
+- banner:
+  - link "FortKnight":
+    - /url: /fortknight/
+  - group
+  - group:
+    - navigation:
+      - link "Keep":
+        - /url: /fortknight/keep/
+      - link "Meals, Fork Knife":
+        - /url: /fortknight/forkknife/
+        - text: Meals
+      - link "Cleaning, Fresh Keep":
+        - /url: /fortknight/freshkeep/
+        - text: Cleaning
+      - link "Working, Fret Knot":
+        - /url: /fortknight/fretknot/
+        - text: Working
+      - link "Health, Fun Knee":
+        - /url: /fortknight/funknee/
+        - text: Health
+      - group:
+        - text: Peripheral , current section
+        - link "Friends & Family, Folk Knowledge":
+          - /url: /fortknight/folkknowledge/
+          - text: Friends & Family
+        - link "Operations, Fix Knitt":
+          - /url: /fortknight/fixknitt/
+          - text: Operations
+        - link "Spirituality & Development, Foe Kiss":
+          - /url: /fortknight/foekiss/
+          - text: Spirituality & Development
+      - link "Achievements":
+        - /url: /fortknight/achievements/
+    - navigation "Site links":
+      - link "Be Insiculous":
+        - /url: /
+        - text: 💧
+      - link "Buy me a coffee (opens in a new tab)":
+        - /url: https://ko-fi.com/beinsiculous
+        - text: ☕
+- main:
+  - heading "Fix Knitt" [level=1]
+  - paragraph: "The fortnight’s operations: the running of the household itself."
+  - status: Your keep carries no operations data.
+  - link "Load your keep on Keep":
+    - /url: /fortknight/keep/
+- contentinfo:
+  - link "Accessibility":
+    - /url: /accessibility/

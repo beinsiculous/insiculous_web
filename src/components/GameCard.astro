@@ -11,7 +11,7 @@ const { game } = Astro.props;
 
 <a class="card" href={`/games/${game.id}/`}>
   <div class="card-head">
-    <h3>{game.data.title}</h3>
+    <h2 class="card-title">{game.data.title}</h2>
     <StatusBadge status={game.data.status} />
   </div>
   <p>{game.data.blurb}</p>
@@ -49,8 +49,13 @@ const { game } = Astro.props;
     gap: 0.75rem;
   }
 
-  h3 {
+  .card-title {
     margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .card-title::before {
+    content: none;
   }
 
   p {

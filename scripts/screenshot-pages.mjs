@@ -25,12 +25,13 @@
 //                                                      route list still comes from dist/)
 //   ONLY=mobile node scripts/screenshot-pages.mjs      (one viewport)
 //   FULL_PAGE=1 node scripts/screenshot-pages.mjs      (whole scroll height, not just the fold)
-//   LARGE_TEXT=1 node scripts/screenshot-pages.mjs     (extra pass: 125% text on a phone, overflow only)
+//   LARGE_TEXT=1 node scripts/screenshot-pages.mjs     (extra passes: 125% text on a phone, and 320 CSS px reflow)
 // Output: shots/<name>.png and shots/<name>-mobile.png (gitignored).
 import { chromium } from "playwright";
-import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { distRoutes, serveDist } from "./lib/serve-dist.mjs";
+import { addPopulatedStateInitScript } from "./lib/a11y-scenarios.mjs";
 
 const DIST = resolve(import.meta.dirname, "..", "dist");
 if (!existsSync(join(DIST, "index.html"))) {
@@ -87,13 +88,21 @@ const viewports = {
     context: { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true },
     initScript: () => localStorage.setItem("beinsiculous.a11y", JSON.stringify({ fontScale: 1.25 })),
   },
+  // LARGE_TEXT=1 only: 320 CSS px reflow pass (WCAG 1.4.10: 200% zoom on a 640px window).
+  // No shots — measures overflow across all routes at 320px width.
+  reflow: {
+    suffix: "-reflow",
+    shots: false,
+    context: { viewport: { width: 320, height: 480 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
+  },
 };
 const only = process.env.ONLY;
+const OPT_IN_VIEWPORTS = new Set(["largetext", "reflow"]);
 const chosen = only
   ? { [only]: viewports[only] }
   : Object.fromEntries(
-      // largetext is opt-in (LARGE_TEXT=1); desktop, mobile and tablet always run.
-      Object.entries(viewports).filter(([label]) => label !== "largetext" || process.env.LARGE_TEXT)
+      // largetext and reflow are opt-in (LARGE_TEXT=1); desktop, mobile and tablet always run.
+      Object.entries(viewports).filter(([label]) => !OPT_IN_VIEWPORTS.has(label) || process.env.LARGE_TEXT)
     );
 if (only && !viewports[only]) {
   console.error(`ONLY must be one of: ${Object.keys(viewports).join(", ")}`);
@@ -108,20 +117,17 @@ if (!baseUrl) {
   baseUrl = `http://localhost:${server.address().port}`;
 }
 
-// Same seeding as the a11y gate's main sweep, minus the achievement stores: a saved profile so the
-// faces render their full UI, and the invented keep fixture so the keep-fed pages measure the
-// fourteen panels rather than an empty file picker. The fixture is invented, not anybody's fortnight.
-const keepSeed = readFileSync(new URL("../tests/fixtures/keep.sample.json", import.meta.url), "utf8");
-
 mkdirSync("shots", { recursive: true });
 const browser = await chromium.launch();
 const failures = [];
 for (const [label, { suffix, context: contextOptions, initScript, shots = true }] of Object.entries(chosen)) {
   const context = await browser.newContext(contextOptions);
-  await context.addInitScript(([settings, seed]) => {
-    localStorage.setItem("fortknight.user-settings", settings);
-    localStorage.setItem("beinsiculous.keep", seed);
-  }, [JSON.stringify({ schemaVersion: 2 }), keepSeed]);
+  await addPopulatedStateInitScript(context);
+  // The shared seed carries achievements and no profile, which opens the create-profile dialog
+  // on three routes. A shot is of the page; the dialog has its own audited scenario.
+  await context.addInitScript(() => {
+    localStorage.setItem("beinsiculous.achievements.profile-prompt", "dismissed");
+  });
   if (initScript) await context.addInitScript(initScript);
   const page = await context.newPage();
   for (const route of routes) {

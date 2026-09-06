@@ -46,7 +46,8 @@ npm run dev   # dev server at http://localhost:4321
 | `npm run preview`   | Serve the production build locally                            |
 | `npm run check`     | Type-check `.astro` files and content schemas                 |
 | `npm run a11y`      | Accessibility audit of every built page (axe-core; see below) |
-| `npm run verify`    | `validate` + `test:data` + `check` + `build` + `a11y` + the layout gate (`LARGE_TEXT=1 npm run shots`) — run before pushing; CI gates deploys on the same |
+| `npm run announce`  | Screen-reader structure gate across every page (landmarks, heading levels, named controls/regions) |
+| `npm run verify`    | `validate` + `test:data` + `check` + `build` + `a11y` + `announce` + the layout gate (`LARGE_TEXT=1 npm run shots`) — run before pushing; CI gates deploys on the same |
 | `npm run deploy`    | `verify`, then `wrangler deploy` (manual release; see below)  |
 
 ## The planner's data and tooling
@@ -203,14 +204,20 @@ Gates that keep it true (a regression blocks the deploy, like a broken build):
 - `scripts/a11y-check.mjs` (`npm run verify`, and CI between Build and Deploy): serves
   `dist/`, runs axe-core (wcag2a/2aa/22aa) on **every** route, exits 1 on any violation.
   `A11Y_ONLY=<substring>` filters routes while iterating.
+- `scripts/announce-check.mjs` (`npm run announce`, and CI between Accessibility audit and Layout gate):
+  captures the browser’s accessibility tree (Playwright `ariaSnapshot`) across every route and scenario,
+  verifying landmarks, a single `<h1>` with no skipped levels, named interactive controls, and named
+  regions and dialogs. It cannot hear pronunciation, verbosity, or live-region timing; a real listen
+  is still asked for when a new interaction lands.
 - `scripts/screenshot-pages.mjs` (`npm run verify` as `LARGE_TEXT=1 npm run shots`, and CI between
-  the accessibility audit and Deploy): serves `dist/` itself, proves every page answers 200 and
-  none scrolls sideways — desktop, phone, 641px, and 125% text on a phone.
+  the announce audit and Deploy): serves `dist/` itself, proves every page answers 200 and
+  none scrolls sideways — desktop, phone, 641px, and the two extra passes under `LARGE_TEXT=1`:
+  125% text on a phone, and 320 CSS px reflow (WCAG 1.4.10).
 
 axe finds about half of real-world issues. For changes to layouts or interactive
 components, also do the manual pass: keyboard-only walkthrough (Tab/Shift-Tab, Enter,
-Escape), one screen-reader run (VoiceOver/NVDA) on the changed pages, and 200% browser
-zoom at 320px. The PR template lists this.
+Escape), one screen-reader run (VoiceOver/NVDA) for new interactions, and a look at 200% text
+size on a phone. The PR template lists this.
 
 ## Deploying to Cloudflare (Workers static assets)
 
@@ -220,7 +227,7 @@ zoom at 320px. The PR template lists this.
 
 **Deploys happen in GitHub Actions, on every push to `main` (production) or `dev` (staging)**
 (`.github/workflows/deploy.yml`): install → `python3 scripts/validate.py` → the Python suite →
-`npm run check` → `npm run build` → `npm run a11y` → `LARGE_TEXT=1 npm run shots` →
+`npm run check` → `npm run build` → `npm run a11y` → `npm run announce` → `LARGE_TEXT=1 npm run shots` →
 `npx wrangler deploy` → a request to the live
 domain to confirm it serves. The deploy step only runs if every gate passes, so a broken build, a
 broken data rule, an accessibility regression, or a page that scrolls sideways cannot reach the
