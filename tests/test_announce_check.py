@@ -113,6 +113,24 @@ class ParseAriaSnapshotTests(unittest.TestCase):
         self.assertEqual(len(nodes), 1)
         self.assertEqual(nodes[0]["name"], "Line one line two")
 
+    def test_property_lines_under_a_node_are_ignored_whatever_their_name(self):
+        # Playwright writes every element property as a `/name: value` line under its node.
+        # `/url` was the only one the parser knew until the playground's script editor put a
+        # placeholder on the page and the deploy gate threw on `/placeholder:`.
+        sample = "\n".join([
+            "- main:",
+            '  - link "Games":',
+            "    - /url: /games/",
+            '  - textbox "Script source":',
+            "    - /placeholder: Select a script above…",
+            '  - textbox "Search"',
+            "    - /description: type to filter",
+        ])
+        nodes = self.parse(sample)
+        self.assertEqual([node["role"] for node in nodes], ["main", "link", "textbox", "textbox"])
+        self.assertEqual(nodes[2]["name"], "Script source")
+        self.assertFalse(any(node["role"].startswith("/") for node in nodes))
+
     def test_errors_on_unrecognized_line_shape(self):
         sample = "- 12345 invalid line"
         with self.assertRaises(AssertionError) as ctx:

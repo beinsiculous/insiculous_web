@@ -67,8 +67,13 @@ export function parseAriaSnapshot(text) {
     const depth = leadingSpaces / 2;
     let item = content.slice(2).trim();
 
-    // /url and text lines under nodes are ignored by name
-    if (/^\/url(?::\s*.*)?$/.test(item) || /^text(?::\s*.*)?$/.test(item)) {
+    // Property lines under a node are not nodes and carry no name of their own. Playwright
+    // writes every element property it reports this way — `/url: /games/` on a link,
+    // `/placeholder: …` on a textbox — so the match is on the slash, not on a list of
+    // property names: the list was `/url` alone until the playground's script editor put a
+    // placeholder on the page and the gate threw on it. Free text lines are ignored the same
+    // way.
+    if (/^\/[a-z][a-z0-9_-]*(?::\s*.*)?$/.test(item) || /^text(?::\s*.*)?$/.test(item)) {
       lastDisposition = "ignored";
       waitingForQuoteClose = false;
       continue;
