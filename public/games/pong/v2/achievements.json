@@ -1,0 +1,74 @@
+[
+  {
+    "id": "beat_cpu_easy",
+    "name": "Training Wheels",
+    "description": "Beat the CPU on Easy.",
+    "hidden": false
+  },
+  {
+    "id": "beat_cpu_medium",
+    "name": "Holding Your Own",
+    "description": "Beat the CPU on Medium.",
+    "hidden": false
+  },
+  {
+    "id": "beat_cpu_hard",
+    "name": "Pong Master",
+    "description": "Beat the CPU on Hard.",
+    "hidden": false
+  },
+  {
+    "id": "win_normal",
+    "name": "First Victory",
+    "description": "Win a match in Normal mode.",
+    "hidden": false
+  },
+  {
+    "id": "win_insane",
+    "name": "Insanely Good",
+    "description": "Win a match in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "win_ridiculous",
+    "name": "This Is Ridiculous",
+    "description": "Win a match in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "win_insiculous",
+    "name": "Insiculous Champion",
+    "description": "Win a match in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "two_player",
+    "name": "Friendly Rivalry",
+    "description": "Finish a 2-player match.",
+    "hidden": false
+  },
+  {
+    "id": "shutout_normal",
+    "name": "Clean Sheet",
+    "description": "Win a Normal-mode match without the opponent scoring.",
+    "hidden": false
+  },
+  {
+    "id": "shutout_insane",
+    "name": "Untouchable",
+    "description": "Shut out the opponent in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "shutout_ridiculous",
+    "name": "Impossibly Clean",
+    "description": "Shut out the opponent in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "shutout_insiculous",
+    "name": "Insiculously Dominant",
+    "description": "Shut out the opponent in Insiculous mode.",
+    "hidden": false
+  }
+]
