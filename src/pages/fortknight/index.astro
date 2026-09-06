@@ -25,9 +25,9 @@ const keep = facePath("fortknight", "keep/");
 ---
 <FaceLayout title="FortKnight" face="fortknight">
   <KeepStyles />
-  <div id="keepGrid" hidden></div>
   <section class="panel">
     <h1>FortKnight</h1>
+    <div id="keepGrid" hidden></div>
     <p class="lede">
       A week is the wrong unit of life, and a calendar is the wrong shape for a plan.
       Decide the proportions; let the schedule be derived.
@@ -94,7 +94,7 @@ const keep = facePath("fortknight", "keep/");
     // Compact by design: the full panels live on Keep and on the day pages; here a cell is a label, a
     // focus and the meals, and the whole cell is the link. The classes are keep-grid-* and global for
     // the same reason as the rest of KeepStyles.astro — this DOM is built here, not stamped by Astro.
-    // The heading is an h2: the prerendered <h1>FortKnight</h1> below is the document's one h1 in every
+    // The heading is an h2: the prerendered <h1>FortKnight</h1> above is the document's one h1 in every
     // state, keeped or not.
     container.appendChild(element("h2", null, "Your fortnight"));
     const grid = element("div", "keep-grid");

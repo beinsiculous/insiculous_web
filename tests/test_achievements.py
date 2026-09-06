@@ -412,6 +412,12 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertEqual(locked_text, "Known Achievement — Desc. — Locked")
         self.assertEqual(locked_class, "achievement-locked")
 
+    def test_heading_level_is_h2_when_asked_and_h3_by_default(self):
+        default_result = self.render({"types": ["insiculous"]}, site=json.dumps({"unlocks": {"player": {"unlocked_at": 1_756_425_600}}}))
+        self.assertEqual(default_result["children"][0]["tag"], "h3")
+        h2_result = self.render({"types": ["insiculous"], "headingLevel": 2}, site=json.dumps({"unlocks": {"player": {"unlocked_at": 1_756_425_600}}}))
+        self.assertEqual(h2_result["children"][0]["tag"], "h2")
+
 
 if __name__ == "__main__":
     unittest.main()

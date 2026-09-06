@@ -45,10 +45,14 @@ export function element(tagName, className, text) {
   return node;
 }
 
-/** One day of the fortnight: heading, focus, meals, appointments, blocks — whatever the day carries. */
-export function renderDayPanel(day) {
+/** One day of the fortnight: heading, focus, meals, appointments, blocks — whatever the day carries.
+ *  headingLevel defaults to 2, the level a panel takes under a page h1 on the keep page; null renders
+ *  no heading, for the day pages whose h1 already carries the day. */
+export function renderDayPanel(day, { headingLevel = 2 } = {}) {
   const panel = element("section", "panel keep-day");
-  panel.appendChild(element("h3", null, day.label ?? day.dayKey));
+  if (headingLevel !== null) {
+    panel.appendChild(element(`h${headingLevel}`, null, day.label ?? day.dayKey));
+  }
   if (day.mainFocusLabel) panel.appendChild(element("p", "keep-focus", day.mainFocusLabel));
 
   const meals = day.meals ?? {};

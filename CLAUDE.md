@@ -68,8 +68,8 @@ to run one is stale — say so rather than reviving it.
 The edit loop is now just: change `data/` → `npm run validate` → tests. Nothing to regenerate and
 nothing to commit alongside.
 Every push to `main` (production) or `dev` (staging) deploys (`.github/workflows/deploy.yml`):
-validate → tests → `astro check` → build → axe-core over every page → the layout gate
-(`LARGE_TEXT=1 npm run shots`) → `wrangler deploy` → a request to the live domain.
+validate → tests → `astro check` → build → axe-core over every page → the announce gate
+(`npm run announce`) → the layout gate (`LARGE_TEXT=1 npm run shots`) → `wrangler deploy` → a request to the live domain.
 
 ## Coding conventions (apply to Python, JavaScript, and JSON field names)
 - **Human-readable names, no abbreviations.** `estimatedStartTime`, not `estStart`; `dayKey`, not `dk`; `durationMinutes`, not `dur`. Loop variables included (`activity`, not `a`).
@@ -115,16 +115,19 @@ switched from the nav dropdown; that part is live and is `src/lib/shared/user-se
 ## The site (Astro 7, Node 24)
 Static build, deployed to Cloudflare as a static-assets Worker. No UI framework; the face pages are
 plain untyped JavaScript, so `tsconfig.json` excludes them from `astro check` and the Python parity
-tests are what keep them honest. **Accessibility is a top priority at Be Insiculous**, and three
+tests are what keep them honest. **Accessibility is a top priority at Be Insiculous**, and four
 gates hold it in every `npm run verify` and in CI, so a regression blocks the deploy:
 `scripts/postbuild-check.mjs` (every build — structure + static a11y + prose: `scripts/lib/prose-check.mjs`
 gates a word glued to an inline tag and a straight apostrophe — Astro drops the newline between a
-word and an inline tag on the next source line, so keep the tag on the word's line),
+word and an inline tag on the next source line, so keep the tag on the word’s line),
 `scripts/a11y-check.mjs` (axe-core over
-**every** built page, WCAG 2.2 AA), and `scripts/screenshot-pages.mjs` (every page answers 200 and
-none scrolls sideways — desktop, phone, 641px, and 125% text on a phone via `LARGE_TEXT=1`). The target they hold is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
+**every** built page, WCAG 2.2 AA), `scripts/announce-check.mjs` (the browser’s accessibility tree
+over every route and scenario: landmarks, heading levels, named controls and regions), and
+`scripts/screenshot-pages.mjs` (every page answers 200 and none scrolls sideways — desktop, phone,
+641px, and the two extra passes under `LARGE_TEXT=1`: 125% text on a phone, and 320 CSS px reflow).
+The target they hold is WCAG 2.2 AA with no separate "blind mode" — one properly semantic
 codebase. After changing a layout or an interactive component, also do the manual pass the PR template
-lists (keyboard-only, one screen-reader run, 200% zoom at 320px).
+lists (keyboard-only, one screen-reader run on new interactions, 200% text size look on a phone).
 
 **The keep-fed pages are live; the creation chain is gone from `main`.** `main` is production and
 only receives merges — `dev` integrates, and a `dev → main` pull request is the deploy. Commit on
@@ -267,7 +270,7 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | what the site actually is now — the display-only face, page by page | `docs/app.md` |
 | the studio site, games/devlog content, WASM drop-in convention, deploy | `README.md` |
 | devlog posts — Jesse’s and M’s only; an agent never drafts, edits or comments on one | `README.md` § "Content" |
-| accessibility target, the three gates, the manual pass | `README.md`, `scripts/a11y-check.mjs`, `scripts/postbuild-check.mjs` |
+| accessibility target, the four gates, the manual pass | `README.md`, `scripts/a11y-check.mjs`, `scripts/announce-check.mjs`, `scripts/postbuild-check.mjs` |
 | the face registry (labels, skins, nav, favicons) | `src/lib/faces.js`, `src/layouts/FaceLayout.astro` |
 | achievements — the three types, the two stores, the registry | `src/lib/achievements.js`, `src/lib/games-achievements.js` |
 | how an assistant should propose changes | `docs/llm-guide.md` |
