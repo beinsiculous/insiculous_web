@@ -6,6 +6,12 @@
 // Its own key, deliberately separate from `fortknight.user-settings`. The two are different documents from
 // different apps, and sharing a key would let one migrate into the other the first time either changed
 // shape. /profile/ can delete it; the Keep page reads and writes it.
+//
+// The store notifies document on every write or clear: two components on one page read it (the Keep page
+// and FaceNav's focus pills), and neither may know about the other.
+
+/** Event dispatched on document when the stored keep changes or is forgotten. */
+export const KEEP_CHANGED_EVENT = "beinsiculous:keep-changed";
 
 /** The localStorage key. Namespaced to the site, like `beinsiculous.a11y`, because the keep belongs to the
  *  person rather than to either face. */
@@ -36,12 +42,23 @@ export function loadKeep() {
   }
 }
 
+/** Store serialized keep text. Lets storage refusal throw to the caller, then dispatches KEEP_CHANGED_EVENT. */
+export function storeKeep(text) {
+  localStorage.setItem(KEEP_STORE_KEY, text);
+  if (typeof document !== "undefined") {
+    document.dispatchEvent(new Event(KEEP_CHANGED_EVENT));
+  }
+}
+
 /** Forget the stored keep. Safe to call when there is none. */
 export function clearKeep() {
   try {
     localStorage.removeItem(KEEP_STORE_KEY);
   } catch {
     // A browser refusing storage has nothing to forget.
+  }
+  if (typeof document !== "undefined") {
+    document.dispatchEvent(new Event(KEEP_CHANGED_EVENT));
   }
 }
 

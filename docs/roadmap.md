@@ -94,16 +94,17 @@ What that means for the items this file used to number 1–9:
   (`beinsiculous.games.<slug>.achievements`, the engine's save file byte for byte); the site writes
   its own insiculous and fortknight unlocks into one store, `beinsiculous.achievements`, with the
   registry in `src/lib/achievements.js` — initial achievements `player` (opened `/games/`) and
-  `moved-in` (loaded a keep). The studio's `/achievements/` (nav entry after Games) lists
+  `moved-in` (loaded a keep). The studio’s `/achievements/` (nav entry after Games) lists
   every achievement the site knows: the registry entries render locked and unlocked with their
-  descriptions, unlocked above locked within each group, and game achievements render per game as
-  unlocked-only — the games own their full lists in-game, and the site does not duplicate engine
-  data. `/fortknight/achievements/` narrows to the active profile's unlocked fortnight achievements
-  and joined the face nav (six pills); `/games/` caps its grid at 75vh with scroll at multi-column
-  widths (≥40rem) and carries a game-achievements board under it; `/profile/`'s panel shows all
-  three types in a scroll box, and both scroll regions are keyboard-reachable. A visitor with
-  achievements and no profile is offered one — the naming dialog opens once ever, and `/` and
-  `/fortknight/` carry Create-a-profile buttons.
+  descriptions, unlocked above locked within each group, and each game group shows its full
+  manifest from `achievements.json` exported by the native game (hidden entries masked until
+  unlocked). `/games/` and `/profile/` stay unlocked-only, displaying real names from the
+  manifests instead of prettified ids. `/fortknight/achievements/` narrows to the active
+  profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` caps
+  its grid at 75vh with scroll at multi-column widths (≥40rem) and carries a game-achievements
+  board under it; `/profile/`’s panel shows all three types in a scroll box, and both scroll
+  regions are keyboard-reachable. A visitor with achievements and no profile is offered one — the
+  naming dialog opens once ever, and `/` and `/fortknight/` carry Create-a-profile buttons.
 - **The `sun-b` starts for `ostara` and `fimbulsumar`** in `data/seasons.json` disagree with Focus
   Key's `sun-a` ruling. Porting it touches `seasons.json`, `docs/domain.md` and the test
   expectations here — which is why it is deferred and why every keep-fed page looks up rather than
@@ -120,11 +121,11 @@ What that means for the items this file used to number 1–9:
 ## The game studio (tracked in its own repositories)
 
 - **Web export.** Shipped — all six games are playable in the browser (WebGPU) through the embeds
-  on `/games/`, and browser persistence for achievements has started: the deployed pong bundle
-  already writes `beinsiculous.games.pong.achievements`, which the boards on `/achievements/`,
-  `/games/` and `/profile/` read (`/fortknight/achievements/` narrows to the site's fortnight
+  on `/games/`. All six games write `beinsiculous.games.<slug>.achievements` and export an
+  `achievements.json` manifest read at build time, which the boards on `/achievements/`,
+  `/games/` and `/profile/` read (`/fortknight/achievements/` narrows to the site’s fortnight
   achievements). What remains is engine-side and tracked over
-  there: the other five games writing their keys, high scores, and gesture-gated audio.
+  there: high scores, and gesture-gated audio.
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
   WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
   and work with projects stored in the browser’s IndexedDB, exported and imported as zip.

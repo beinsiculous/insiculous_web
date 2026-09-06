@@ -1,39 +1,50 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { readGameCatalogs } from '../lib/games-catalog-files.js';
+
+const games = await getCollection('games');
+const catalogs = readGameCatalogs(games);
 ---
 
 <BaseLayout
   title="Achievements — Be Insiculous"
-  description="Every achievement this site can award — unlocked and locked — and what this browser has recorded in the games."
+  description="Every achievement this site can award — unlocked and locked — and each game’s full manifest."
 >
   <p class="section-label">achievements</p>
   <h1>Achievements</h1>
   <p class="intro">
-    Three kinds live here: the studio’s (insiculous), the games’, and FortKnight’s. The site’s own
-    list shows the whole registry, locked entries included; the games’ boards show what this browser
-    has unlocked, and each game keeps its own full list. Everything is recorded on this device only —
-    nothing is uploaded, and no server holds a copy.
+    Three kinds live here: the studio’s (insiculous), the games’, and FortKnight’s. Every
+    achievement is listed here — locked entries included, with each game’s full list taken from its
+    own manifest. Everything is recorded on this device only — nothing is uploaded, and no server
+    holds a copy.
   </p>
 
-  <div id="achievementsBoard"></div>
+  <div id="achievementsBoard" data-catalogs={JSON.stringify(catalogs)}></div>
   <p class="muted" id="achievementsStatus" role="status"></p>
 </BaseLayout>
 
 <script>
-  import { renderAchievementsBoard, totalAchievementCount } from "../lib/achievements.js";
+  import { renderAchievementsBoard } from "../lib/achievements.js";
+  import { readEmbeddedCatalogs } from "../lib/games-catalog.js";
 
   const board = document.getElementById("achievementsBoard");
   const status = document.getElementById("achievementsStatus");
 
+  const catalogs = readEmbeddedCatalogs(board);
+
   // The full board: every type, with the registry spine (locked entries included) for the site's
-  // own two. The null guard is the checker's idiom (GameEmbed.astro): both elements are prerendered
-  // above, so a null would mean this script drifted from its own markup.
-  if (board) renderAchievementsBoard(board, { includeLocked: true });
+  // own two and the games' manifests. The null guard is the checker's idiom (GameEmbed.astro): both
+  // elements are prerendered above, so a null would mean this script drifted from its own markup.
+  let unlockedCount = 0;
+  let totalCount = 0;
+  if (board) {
+    ({ unlockedCount, totalCount } = renderAchievementsBoard(board, { includeLocked: true, gameCatalogs: catalogs }));
+  }
   if (status) {
-    const total = totalAchievementCount();
-    status.textContent = total === 0
-      ? "Nothing unlocked on this device yet."
-      : `${total} achievement${total === 1 ? "" : "s"} unlocked on this device.`;
+    status.textContent = unlockedCount === 0
+      ? `Nothing unlocked on this device yet — ${totalCount} to find.`
+      : `${unlockedCount} of ${totalCount} achievements unlocked on this device.`;
   }
 </script>
 

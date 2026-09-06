@@ -1,0 +1,68 @@
+[
+  {
+    "id": "clear_normal",
+    "name": "Earth Defender",
+    "description": "Repel the invasion in Normal mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_insane",
+    "name": "Blitz Breaker",
+    "description": "Repel the invasion in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_ridiculous",
+    "name": "Twin Cannon Commander",
+    "description": "Repel the invasion in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_insiculous",
+    "name": "Insiculous Overkill",
+    "description": "Repel the invasion in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_normal",
+    "name": "Untouchable",
+    "description": "Clear Normal mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_insane",
+    "name": "Untouchable Under Fire",
+    "description": "Clear Insane mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_ridiculous",
+    "name": "Untouchable Overdrive",
+    "description": "Clear Ridiculous mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_insiculous",
+    "name": "Insiculously Untouchable",
+    "description": "Clear Insiculous mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "sharpshooter",
+    "name": "Sharpshooter",
+    "description": "Land 10 kill shots in a row without wasting a bullet.",
+    "hidden": false
+  },
+  {
+    "id": "last_stand",
+    "name": "Last Stand",
+    "description": "Repel the invasion on your very last life.",
+    "hidden": false
+  },
+  {
+    "id": "ufo_hunter",
+    "name": "UFO Hunter",
+    "description": "Shoot down a mystery ship.",
+    "hidden": false
+  }
+]

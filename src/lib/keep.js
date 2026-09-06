@@ -94,6 +94,23 @@ export function describeSection(keep, name) {
   return { state: "present", count: value.length, message: `This keep carries a ${name}.` };
 }
 
+/** The current season’s focus category keys, in focus order: strings only, deduped, [] when the
+ *  keep has no season or the season carries no focus. Labels are the site’s own (faceNav()), matched
+ *  by key — the keep’s focus[].label is not read. */
+export function focusCategoryKeys(keep) {
+  const focus = keep?.season?.focus;
+  if (!Array.isArray(focus)) return [];
+  const seenKeys = new Set();
+  const categoryKeys = [];
+  for (const entry of focus) {
+    if (typeof entry?.key === "string" && !seenKeys.has(entry.key)) {
+      seenKeys.add(entry.key);
+      categoryKeys.push(entry.key);
+    }
+  }
+  return categoryKeys;
+}
+
 /** How stale the season and the wheel are. The fourteen days carry no dates and never go off; `season` and
  *  `year` are snapshots of the moment the file was exported, so this is the one thing the page says about
  *  age — and it says it in days, never by resolving a date, because nothing here evaluates a calendar. */

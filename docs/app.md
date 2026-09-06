@@ -19,17 +19,17 @@ That removal has a consequence worth stating plainly: **nothing under `src/` rea
 more.** The committed bundle was the only path from the repository's data to a rendered page. `data/`
 is now a person-neutral vocabulary that `validate.py` checks and that ships nowhere.
 
-The face's nav is ten pills — **Overview · Keep**, one per Name Drop stone (**Fork Knife · Fresh
-Keep · Folk Knowledge · Fix Knitt · Foe Kiss · Fun Knee · Fret Knot**), then **Achievements**. Fort
-Knight itself has no pill: it is the agenda stone, and the agenda is what the Overview, Keep and the
-day pages already are.
+The face's nav shows the stored keep’s focus stones, labelled by category; the rest sit behind
+**Peripheral** (with no keep loaded, every stone is peripheral). The mapping is `faceNav()`’s
+`category`. Fort Knight itself has no entry: it is the agenda stone, and the agenda is what the
+Overview, Keep and the day pages already are.
 
 Four of those stones — Fix Knitt, Foe Kiss, Fun Knee and Fret Knot — have subjects-only slabs and no
 keep section, and Fresh Keep's cleaning deliberately never travels, so those five pages are honest
 empty states sharing one component (`src/components/StoneEmptyState.astro`). Fork Knife draws the
 menu; Folk Knowledge draws the season card and the year wheel.
 
-**Every pill has a page, and that is now checked.** `scripts/postbuild-check.mjs` fails the build
+**Every entry has a page, and that is now checked.** `scripts/postbuild-check.mjs` fails the build
 when a `faceNav()` entry has no route in `dist/`. It was added on 2026-08-31, after three pills spent
 a day pointing at pages that did not exist behind nothing but a written `dev → main` hold.
 
@@ -45,7 +45,7 @@ Operation Name Drop (`#24`). That is a new writer, not this chain returning.
 **Deployment status.** Live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`), the
 fourteen day pages (`/fortknight/days/<dayKey>/`) — all reading a visitor-loaded keep (next section)
 — and **Achievements** (`/fortknight/achievements/`), which reads the site's achievement store
-instead of the keep. The studio side has `/achievements/`, the every-achievement board (below).
+instead of the keep. The studio side has `/achievements/`, the every-achievement board — listing all three types, locked and unlocked, with each game’s full manifest.
 
 **Recovery, and why the tag alone is not enough.** `creation-chain-parked` lives on origin and
 preserves the functional chain, but it pins the **2026-08-26** snapshot — before the 2026-08-28/29
