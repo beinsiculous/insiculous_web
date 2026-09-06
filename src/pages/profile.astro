@@ -1,6 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { facePath } from "../lib/faces.js";
+import { readGameCatalogs } from "../lib/games-catalog-files.js";
 // This page belongs to beinsiculous.com rather than to the app, so it is a studio page like any other: BaseLayout,
 // global.css, the six-link header with its icon row and the studio footer. Only the widgets it shares with the face come from
 // elsewhere (src/styles/app-widgets.css) — the panels and the buttons.
@@ -14,6 +16,9 @@ import "../styles/app-widgets.css";
 // the header on every studio page, the way the face keeps it. Rendering a second copy here would ship
 // the component's fixed navProfile / navProfileSelect ids twice on this one page and fail the axe gate
 // on duplicate-id — so this page reads the header's switcher rather than owning one.
+
+const games = await getCollection('games');
+const catalogs = readGameCatalogs(games);
 ---
 <BaseLayout
   title="Profile — Be Insiculous"
@@ -57,7 +62,7 @@ import "../styles/app-widgets.css";
     <!-- tabindex + role/aria-labelledby: the 75vh cap (app-widgets.css .achievements-scroll) makes
          this a scrollable region once it fills, and a scrollable region must be keyboard-reachable
          and named — axe's scrollable-region-focusable rules on exactly this. -->
-    <div id="achievementsBoard" class="achievements-scroll" tabindex="0" role="group" aria-labelledby="achievementsHeading"></div>
+    <div id="achievementsBoard" class="achievements-scroll" tabindex="0" role="group" aria-labelledby="achievementsHeading" data-catalogs={JSON.stringify(catalogs)}></div>
     <p class="muted" id="achievementsStatus"></p>
     <div class="button-row" id="achievementsActions" hidden>
       <button type="button" id="deleteAchievementsButton">Delete recorded achievements from this device</button>
@@ -73,6 +78,7 @@ import "../styles/app-widgets.css";
   import { clearKeep, describeKeep } from "../lib/keep-store.js";
   import { clearGameAchievements } from "../lib/games-achievements.js";
   import { clearSiteAchievements, renderAchievementsBoard } from "../lib/achievements.js";
+  import { readEmbeddedCatalogs } from "../lib/games-catalog.js";
 
   const elements = {
     keepStatus: document.getElementById("keepStatus"),
@@ -183,9 +189,11 @@ import "../styles/app-widgets.css";
     renderKeep();
   });
 
+  const catalogs = readEmbeddedCatalogs(elements.achievementsBoard);
+
   /** All three achievement types on one board; the shared renderer owns the groups (src/lib/achievements.js). */
   function renderAchievements() {
-    const rendered = renderAchievementsBoard(elements.achievementsBoard);
+    const { rendered } = renderAchievementsBoard(elements.achievementsBoard, { gameCatalogs: catalogs });
     elements.achievementsActions.hidden = !rendered;
     elements.achievementsStatus.textContent = rendered ? "" : "No achievements recorded in this browser yet.";
   }

@@ -13,7 +13,7 @@ fair, extra ships arrive at score thresholds, and sharpshooter streaks
 reward not missing.
 
 Endless by design: the run only ends when the ships do. Two-player co-op
-shares a single rock field. Fifteen achievements, chaos modes included.
+shares a single rock field. Eleven achievements, chaos modes included.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

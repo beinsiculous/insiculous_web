@@ -13,7 +13,7 @@ control. Power-ups drop from broken bricks.
 
 Eight levels, all hand-authored in the engine's scene editor — **CLASSIC**,
 **THE VAULT**, **PINATA**, and **THE GAUNTLET**, each with a two-player
-co-op variant. Fourteen achievements, chaos modes included.
+co-op variant. Ten achievements, chaos modes included.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

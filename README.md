@@ -7,10 +7,10 @@ deliberately read as two different websites:
 - **The studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/engine/`) — the game studio. All six games are
   playable in the browser through embedded WebAssembly builds from the Insiculous 2D engine
   (Rust); desktop builds run the same code natively. `/achievements/` boards every achievement the
-  site knows — the site's own registry entries locked and unlocked, and each game's recorded
-  unlocks. The games listed on this site are free and use AI art; the
+  site knows — the site’s own registry entries and each game’s full manifest, locked and unlocked
+  (`/games/` and `/profile/` show unlocked game achievements by name). The games listed on this site are free and use AI art; the
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
-  iOS rather than here (`docs/thesis.md` is the source of that policy's wording).
+  iOS rather than here (`docs/thesis.md` is the source of that policy’s wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
   organised by Norse-wheel seasons, five daily blocks and seven life categories. Its keep-fed pages
   are live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day
@@ -114,7 +114,11 @@ Convention for shipping a playable game:
    `wasm-pack build --target web` or your engine's equivalent). Output is a JS
    glue module + `.wasm` binary.
 2. Drop the output into a **versioned folder**:
-   `public/games/<slug>/v1/` → `game.js`, `game_bg.wasm`, assets.
+   `public/games/<slug>/v1/` → `game.js`, `game_bg.wasm`, `achievements.json`, assets.
+   The engine repo’s `insiculous_2d/scripts/build_wasm.sh` writes `achievements.json` from the
+   game’s own binary (`--achievements-manifest`), which needs the host libraries `pkg-config`,
+   `libasound2-dev` and `libudev-dev`. The manifest describes the wasm beside it: regenerate the
+   two together, never one without the other.
 3. Set the game's frontmatter: `wasm: '/games/<slug>/v1/game.js'` and flip
    its `status` to `playable`.
 4. Wire up `src/components/GameEmbed.astro` — it currently renders a

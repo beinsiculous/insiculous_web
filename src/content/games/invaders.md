@@ -13,7 +13,7 @@ the last alien falls.
 
 Co-op is the real draw: two cannons on screen with independent lives and
 scores, defending the same barriers against the same descending wave.
-Fifteen achievements, chaos modes included.
+Eleven achievements, chaos modes included.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

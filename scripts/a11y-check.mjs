@@ -207,8 +207,8 @@ try {
   // populated only when their one store has unlocks — seed the two initial achievements invented,
   // in the same save-file shape the games write (games-achievements.js). The ids past those two are
   // invented and deliberately NOT in the registry: unknown ids still render, prettified, in the
-  // insiculous group (loadSiteAchievements), and they are what makes the /profile/ and /achievements/
-  // boards long enough to overflow their 75vh boxes for the rule named above.
+  // insiculous group (loadSiteAchievements), and they are what makes the /profile/ board
+  // long enough to overflow its 75vh box for the rule named above.
   const siteAchievements = JSON.stringify({
     unlocks: {
       player: { unlocked_at: 1756425600 }, "moved-in": { unlocked_at: 1757030400 },
