@@ -29,6 +29,16 @@ import PlaygroundEmbed from '../components/PlaygroundEmbed.astro';
   </section>
 
   <section>
+    <h2>Scripts</h2>
+    <p>
+      Data projects attach gameplay scripts written in <a href="https://rhai.rs">Rhai</a>.
+      Select any script from the project to view and edit its code in the Scripts panel.
+      Pressing <kbd>Ctrl+S</kbd> inside the script editor verifies syntax and saves the script
+      directly to browser storage; runtime errors surface during Play mode.
+    </p>
+  </section>
+
+  <section>
     <h2>Command API</h2>
     <p>
       The editor exposes its command interface to the browser through WebAssembly.

@@ -66,6 +66,29 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     controls are listed below the editor.
   </canvas>
 
+  <div class="scripts-section">
+    <div class="scripts-toolbar">
+      <label for="script-select" class="scripts-label">Script</label>
+      <select id="script-select" class="script-select" disabled>
+        <option value="">No scripts</option>
+      </select>
+      <button type="button" id="script-save" class="btn-script-save" disabled>
+        Save
+      </button>
+      <output id="script-status" class="script-status" aria-live="polite" for="script-source script-save"></output>
+    </div>
+    <label for="script-source" class="visually-hidden">Script source</label>
+    <textarea
+      id="script-source"
+      class="script-source"
+      placeholder="Select a script above…"
+      autocomplete="off"
+      spellcheck="false"
+      disabled
+    ></textarea>
+    <output id="script-runtime-errors" class="script-runtime-errors" aria-live="polite"></output>
+  </div>
+
   <div class="console-section">
     <form id="command-form" class="command-form">
       <label for="command-input">Command API</label>
@@ -91,7 +114,7 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     <h2>Keyboard shortcuts</h2>
     <ul class="shortcuts-list">
       <li><kbd>Ctrl+P</kbd> — play / pause; <kbd>F5</kbd> — play; <kbd>Ctrl+Shift+P</kbd> — stop</li>
-      <li><kbd>Ctrl+S</kbd> — save the scene to this browser; <kbd>Ctrl+Shift+S</kbd> — save as</li>
+      <li><kbd>Ctrl+S</kbd> — save the scene to this browser (inside the Scripts panel, saves the script); <kbd>Ctrl+Shift+S</kbd> — save as</li>
       <li><kbd>Q</kbd> / <kbd>W</kbd> / <kbd>E</kbd> / <kbd>R</kbd> — select / move / rotate / scale tool</li>
       <li><kbd>Space</kbd> + drag or middle drag — pan; scroll — zoom; <kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd> — zoom in / out / reset</li>
       <li><kbd>F</kbd> — frame the selection; <kbd>Home</kbd> — reset the camera</li>
@@ -292,8 +315,106 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     border-radius: 4px;
   }
 
+  .scripts-section {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .scripts-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .scripts-label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .script-select {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    max-width: 100%;
+  }
+
+  .script-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-script-save {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-script-save:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-script-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .script-status {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .script-source {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 160px;
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    resize: vertical;
+    white-space: pre;
+  }
+
+  .script-source:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .script-runtime-errors {
+    display: block;
+    box-sizing: border-box;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
   .console-section {
-    margin-top: 1.2rem;
+    margin-top: 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

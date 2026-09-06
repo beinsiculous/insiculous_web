@@ -5,5 +5,12 @@
     "bundle_version": "v1",
     "content_hash": "58065c2da7cdeaf93b7c92d6f13ff7f056137c01d51e3f03e5a17b6759011296",
     "origin": "bundled"
+  },
+  {
+    "slug": "pong",
+    "title": "Pong",
+    "bundle_version": "v1",
+    "content_hash": "648a1a487ab1ad61c6b3d41f5d7d608deb03ebec836c7b6988ce373b7c0ce1da",
+    "origin": "bundled"
   }
 ]

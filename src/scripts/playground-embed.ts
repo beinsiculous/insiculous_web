@@ -1,5 +1,7 @@
 export {};
 
+import { createScriptsPanel } from './playground-scripts-panel.ts';
+
 const embed = document.querySelector('.playground-embed');
 const src = embed?.getAttribute('data-wasm-src');
 const status = document.getElementById('game-loading');
@@ -93,9 +95,16 @@ if (src) {
         playground_import_zip: (bytes: Uint8Array) => Promise<string>;
         playground_read_file_bytes: (path: string) => Uint8Array;
         playground_conflicted_paths: () => string[];
+        playground_list_files: () => string[];
+        playground_read_file: (path: string) => string;
+        playground_write_file: (path: string, text: string) => void;
+        playground_script_errors: () => string[];
       }>;
 
       const wasm = await dynamicImport(src);
+
+      const scriptsPanel = createScriptsPanel(wasm);
+      const isDirty = (): boolean => wasm.playground_is_dirty() || scriptsPanel.isDirty();
 
       const searchParams = new URLSearchParams(window.location.search);
       let currentSlug = searchParams.get('project') || '';
@@ -198,6 +207,7 @@ if (src) {
         if (importInput) importInput.disabled = false;
         if (commandInput) commandInput.disabled = false;
         if (commandSubmit) commandSubmit.disabled = false;
+        scriptsPanel.enable();
         // Every glue export dereferences the module; before init resolves a poll throws.
         if (!pollIntervalId) pollIntervalId = window.setInterval(pollResponses, 100);
       });
@@ -207,7 +217,7 @@ if (src) {
           const targetSlug = projectSelect.value;
           if (targetSlug === currentSlug) return;
 
-          if (wasm.playground_is_dirty()) {
+          if (isDirty()) {
             const confirmed = window.confirm(
               'You have unsaved changes. Discard them and switch projects?'
             );
@@ -233,9 +243,10 @@ if (src) {
 
       if (resetButton) {
         resetButton.addEventListener('click', async () => {
-          const confirmed = window.confirm(
-            'Reset this project to bundled content? All stored edits in this browser will be discarded.'
-          );
+          const message = isDirty()
+            ? 'You have unsaved changes. Reset this project to bundled content? All stored edits in this browser will be discarded.'
+            : 'Reset this project to bundled content? All stored edits in this browser will be discarded.';
+          const confirmed = window.confirm(message);
           if (!confirmed) return;
 
           try {
@@ -283,7 +294,7 @@ if (src) {
           };
 
           try {
-            if (wasm.playground_is_dirty()) {
+            if (isDirty()) {
               const confirmed = window.confirm(
                 'You have unsaved changes. Discard them and import project?'
               );
@@ -338,7 +349,7 @@ if (src) {
 
       window.addEventListener('beforeunload', (event) => {
         if (leavingByChoice) return;
-        if (wasm.playground_is_dirty()) {
+        if (isDirty()) {
           event.preventDefault();
           event.returnValue = 'Changes you made may not be saved.';
           return 'Changes you made may not be saved.';

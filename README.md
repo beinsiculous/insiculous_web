@@ -151,6 +151,9 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `PlaygroundEmbed.astro`’s default changes.
 - **Project export and import**: projects export and import as zip, layout in the engine’s
   `docs/WEB_PLAYGROUND.md` § "Export and import".
+- **Script editing**: the Scripts panel under the canvas opens any of the project’s `.rhai`
+  files; Save runs the syntax check and refuses a broken file, and runtime errors from Play
+  appear beneath the textarea. `docs/SCRIPTING.md` is the author contract.
 
 **Playable-game accessibility requirements** (part of the convention): keyboard controls
 listed next to the embed, remappable keys, a pause, and no timing-only inputs. The canvas
