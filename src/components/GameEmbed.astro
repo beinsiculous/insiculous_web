@@ -23,9 +23,17 @@ interface Props {
   /** Canvas pixel size — must match the game's native window size. */
   width?: number;
   height?: number;
+  /** What the canvas is, after the title, in its accessible name. */
+  canvasLabel?: string;
 }
 
-const { src, title, width = 800, height = 600 } = Astro.props;
+const {
+  src,
+  title,
+  width = 800,
+  height = 600,
+  canvasLabel = 'game canvas; focus it to play',
+} = Astro.props;
 ---
 
 {
@@ -38,15 +46,17 @@ const { src, title, width = 800, height = 600 } = Astro.props;
         height={height}
         tabindex="0"
         role="img"
-        aria-label={`${title} — game canvas; focus it to play`}
+        aria-label={`${title} — ${canvasLabel}`}
       >
         {title} runs on an HTML canvas and needs a keyboard or gamepad. The
         controls are listed below the game.
       </canvas>
       <p class="controls-note">
-        Click the game to give it keyboard focus. Menus: W/S or arrows to
-        navigate, Space/Enter to confirm, Esc to go back — a gamepad works
-        too. All keys are remappable in the game.
+        <slot name="controls">
+          Click the game to give it keyboard focus. Menus: W/S or arrows to
+          navigate, Space/Enter to confirm, Esc to go back — a gamepad works
+          too. All keys are remappable in the game.
+        </slot>
       </p>
     </div>
   ) : (

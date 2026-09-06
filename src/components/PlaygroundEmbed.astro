@@ -8,14 +8,33 @@
  *
  * Exactly ONE playground embed per page: the engine binds to fixed DOM IDs
  * and module singletons.
+ *
+ * `editorGames` is the list of Rust games that have an editor bundle, rendered
+ * as a static optgroup in the Project select. The page passes it (it calls
+ * `getCollection`), so this component stays presentational like GameEmbed; the
+ * boot-time population code fills the data optgroup only and leaves this one
+ * alone.
  */
+import EditorShortcuts from './EditorShortcuts.astro';
+
+interface EditorGameLink {
+  slug: string;
+  title: string;
+}
+
 interface Props {
   src?: string;
   width?: number;
   height?: number;
+  editorGames?: EditorGameLink[];
 }
 
-const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.props;
+const {
+  src = '/playground/v1/game.js',
+  width = 1280,
+  height = 800,
+  editorGames = [],
+} = Astro.props;
 ---
 
 <div class="playground-embed" data-wasm-src={src}>
@@ -30,7 +49,18 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     <div class="field-group">
       <label for="project-select">Project</label>
       <select id="project-select" name="project" disabled>
-        <option value="examples">Examples</option>
+        <optgroup id="project-select-data" label="Projects">
+          <option value="examples">Examples</option>
+        </optgroup>
+        {
+          editorGames.length > 0 && (
+            <optgroup label="Rust games (layout only — rules are compiled in)">
+              {editorGames.map((game) => (
+                <option value={`/playground/${game.slug}/`}>{game.title}</option>
+              ))}
+            </optgroup>
+          )
+        }
       </select>
     </div>
     <div class="reset-group">
@@ -110,21 +140,7 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     <output id="command-output" class="command-output" aria-live="polite" for="command-input"></output>
   </div>
 
-  <div class="shortcuts-panel">
-    <h2>Keyboard shortcuts</h2>
-    <ul class="shortcuts-list">
-      <li><kbd>Ctrl+P</kbd> — play / pause; <kbd>F5</kbd> — play; <kbd>Ctrl+Shift+P</kbd> — stop</li>
-      <li><kbd>Ctrl+S</kbd> — save the scene to this browser (inside the Scripts panel, saves the script); <kbd>Ctrl+Shift+S</kbd> — save as</li>
-      <li><kbd>Q</kbd> / <kbd>W</kbd> / <kbd>E</kbd> / <kbd>R</kbd> — select / move / rotate / scale tool</li>
-      <li><kbd>Space</kbd> + drag or middle drag — pan; scroll — zoom; <kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd> — zoom in / out / reset</li>
-      <li><kbd>F</kbd> — frame the selection; <kbd>Home</kbd> — reset the camera</li>
-      <li>Click — select; <kbd>Shift</kbd> — add; <kbd>Ctrl</kbd> — toggle; <kbd>Ctrl+A</kbd> — all; <kbd>Esc</kbd> — cancel</li>
-      <li>Arrows — nudge the selection (<kbd>Shift</kbd> ×10); <kbd>F2</kbd> — rename</li>
-      <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Shift+Z</kbd> — undo / redo; <kbd>Ctrl+D</kbd> — duplicate; <kbd>Ctrl+C</kbd> / <kbd>Ctrl+X</kbd> / <kbd>Ctrl+V</kbd> — copy / cut / paste</li>
-      <li><kbd>Delete</kbd> or <kbd>Backspace</kbd> — delete the selection</li>
-      <li><kbd>G</kbd> — grid; <kbd>S</kbd> — snapping; <kbd>C</kbd> — collider outlines</li>
-    </ul>
-  </div>
+  <EditorShortcuts />
 </div>
 
 <script>
@@ -177,6 +193,12 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     align-items: center;
     gap: 0.5rem;
     max-width: 100%;
+    /* The Rust-games optgroup's label is wider than the select's other content,
+       and an unconstrained flex item is sized by that intrinsic width — at large
+       text settings it pushed the page into a sideways scroll. min-width lets the
+       select shrink to the line instead. */
+    min-width: 0;
+    flex: 1 1 auto;
   }
 
   .field-group label {
@@ -195,6 +217,7 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
     font-family: var(--font-mono);
     font-size: 0.85rem;
     max-width: 100%;
+    min-width: 0;
   }
 
   .reset-group {
@@ -500,43 +523,5 @@ const { src = '/playground/v1/game.js', width = 1280, height = 800 } = Astro.pro
 
   .error-line {
     color: var(--accent);
-  }
-
-  .shortcuts-panel {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .shortcuts-panel h2 {
-    font-size: 0.95rem;
-    margin: 0 0 0.5rem;
-    color: var(--text-bright);
-  }
-
-  .shortcuts-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.4rem 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-dim);
-  }
-
-  @media (min-width: 48rem) {
-    .shortcuts-list {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .shortcuts-list kbd {
-    background: var(--surface-raised);
-    border: 1px solid var(--border-bright);
-    border-radius: 3px;
-    padding: 0.1rem 0.3rem;
-    color: var(--text-bright);
   }
 </style>

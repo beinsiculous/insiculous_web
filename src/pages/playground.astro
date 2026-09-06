@@ -1,6 +1,14 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PlaygroundEmbed from '../components/PlaygroundEmbed.astro';
+
+// The embed stays presentational, so the page does the collection query: the
+// games with an editor bundle, in the order the games listing uses.
+const editorGames = (await getCollection('games'))
+  .filter((game) => game.data.editor)
+  .sort((first, second) => first.data.order - second.data.order)
+  .map((game) => ({ slug: game.id, title: game.data.title }));
 ---
 
 <BaseLayout
@@ -15,7 +23,7 @@ import PlaygroundEmbed from '../components/PlaygroundEmbed.astro';
     in your browser’s IndexedDB.
   </p>
 
-  <PlaygroundEmbed />
+  <PlaygroundEmbed editorGames={editorGames} />
 
   <section>
     <h2>Browser persistence</h2>
@@ -35,6 +43,16 @@ import PlaygroundEmbed from '../components/PlaygroundEmbed.astro';
       Select any script from the project to view and edit its code in the Scripts panel.
       Pressing <kbd>Ctrl+S</kbd> inside the script editor verifies syntax and saves the script
       directly to browser storage; runtime errors surface during Play mode.
+    </p>
+  </section>
+
+  <section>
+    <h2>Rust games in the editor</h2>
+    <p>
+      The six Rust games open inside this same editor, each at its own page —
+      pick one from the <em>Rust games</em> group in the Project select above.
+      Those pages are layout only: the entities are live and editable, the rules
+      are compiled into the game, and nothing you change there persists.
     </p>
   </section>
 

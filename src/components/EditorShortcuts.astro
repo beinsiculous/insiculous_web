@@ -1,0 +1,74 @@
+---
+/**
+ * The engine editor's keyboard shortcuts, as a panel.
+ *
+ * Both editor surfaces render it: the Web Playground embed and a Rust game's
+ * /playground/<slug>/ page. The list is the editor's own binding table, so it
+ * lives in one component rather than once per surface. What Ctrl+S saves TO
+ * differs by surface — the playground writes to browser storage, a Rust game's
+ * page only to this session's memory — so that line is the caller's.
+ */
+interface Props {
+  saveLine?: string;
+}
+
+const {
+  saveLine = 'save the scene to this browser (inside the Scripts panel, saves the script)',
+} = Astro.props;
+---
+
+<div class="shortcuts-panel">
+  <h2>Keyboard shortcuts</h2>
+  <ul class="shortcuts-list">
+    <li><kbd>Ctrl+P</kbd> — play / pause; <kbd>F5</kbd> — play; <kbd>Ctrl+Shift+P</kbd> — stop</li>
+    <li><kbd>Ctrl+S</kbd> — {saveLine}; <kbd>Ctrl+Shift+S</kbd> — save as</li>
+    <li><kbd>Q</kbd> / <kbd>W</kbd> / <kbd>E</kbd> / <kbd>R</kbd> — select / move / rotate / scale tool</li>
+    <li><kbd>Space</kbd> + drag or middle drag — pan; scroll — zoom; <kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd> — zoom in / out / reset</li>
+    <li><kbd>F</kbd> — frame the selection; <kbd>Home</kbd> — reset the camera</li>
+    <li>Click — select; <kbd>Shift</kbd> — add; <kbd>Ctrl</kbd> — toggle; <kbd>Ctrl+A</kbd> — all; <kbd>Esc</kbd> — cancel</li>
+    <li>Arrows — nudge the selection (<kbd>Shift</kbd> ×10); <kbd>F2</kbd> — rename</li>
+    <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Shift+Z</kbd> — undo / redo; <kbd>Ctrl+D</kbd> — duplicate; <kbd>Ctrl+C</kbd> / <kbd>Ctrl+X</kbd> / <kbd>Ctrl+V</kbd> — copy / cut / paste</li>
+    <li><kbd>Delete</kbd> or <kbd>Backspace</kbd> — delete the selection</li>
+    <li><kbd>G</kbd> — grid; <kbd>S</kbd> — snapping; <kbd>C</kbd> — collider outlines</li>
+  </ul>
+</div>
+
+<style>
+  .shortcuts-panel {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .shortcuts-panel h2 {
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-bright);
+  }
+
+  .shortcuts-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  @media (min-width: 48rem) {
+    .shortcuts-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .shortcuts-list kbd {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-bright);
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    color: var(--text-bright);
+  }
+</style>

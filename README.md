@@ -145,6 +145,14 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
 
 - Built into a versioned directory: `public/playground/<version>/`
   (`game.js`, `game_bg.wasm`, `assets/`).
+- **The six Rust games have editor bundles of their own**, each the same game compiled
+  with the engine's `editor` feature: `public/playground/<slug>/<version>/`
+  (`game.js`, `game_bg.wasm`, `assets/`, no `achievements.json` — an editor session
+  records nothing). A games entry's `editor:` path points at its glue, and that field
+  is what builds the game a `/playground/<slug>/` page. Built by the engine's
+  `scripts/build_wasm.sh ../games/<crate> <slug> --kind editor --version v1 --sync
+  ../insiculous_web/public`; the invocations of record are in the engine's
+  `docs/WEB_PLAYGROUND.md` § The game bundles.
 - Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
   lists bundled project manifests, and each project’s data lives under
   `assets/projects/<slug>/assets/`.

@@ -165,8 +165,11 @@ if (src) {
           currentSlug = entries[0].manifest.slug;
         }
 
-        if (projectSelect) {
-          projectSelect.innerHTML = '';
+        // Only the DATA optgroup is rebuilt: the Rust-games group beside it is
+        // static markup from the page, and clearing the whole select would drop it.
+        const dataGroup = document.getElementById('project-select-data');
+        if (projectSelect && dataGroup) {
+          dataGroup.innerHTML = '';
           for (const entry of entries) {
             const option = document.createElement('option');
             option.value = entry.manifest.slug;
@@ -174,7 +177,7 @@ if (src) {
             if (entry.manifest.slug === currentSlug) {
               option.selected = true;
             }
-            projectSelect.appendChild(option);
+            dataGroup.appendChild(option);
           }
           projectSelect.value = currentSlug;
           projectSelect.disabled = false;
@@ -222,9 +225,19 @@ if (src) {
               'You have unsaved changes. Discard them and switch projects?'
             );
             if (!confirmed) {
+              // The browser has already moved the value; without this reset the
+              // cancelled option can never fire `change` again.
               projectSelect.value = currentSlug;
               return;
             }
+          }
+
+          // A value that is a path is one of the Rust games' editor pages, not a
+          // project this bundle can open.
+          if (targetSlug.startsWith('/')) {
+            leavingByChoice = true;
+            window.location.href = targetSlug;
+            return;
           }
 
           try {

@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GameEmbed from '../../components/GameEmbed.astro';
+import EditorShortcuts from '../../components/EditorShortcuts.astro';
+
+export async function getStaticPaths() {
+  const games = await getCollection('games');
+  return games
+    .filter((game) => game.data.editor)
+    .map((game) => ({
+      params: { slug: game.id },
+      props: { game },
+    }));
+}
+
+const { game } = Astro.props;
+
+// The editor enlarges any window under its usable minimum (the engine's
+// crates/editor_integration/src/constants.rs, MIN_EDITOR_WINDOW_WIDTH and
+// MIN_EDITOR_WINDOW_HEIGHT), and winit sizes its canvas from that config — so
+// the placeholder must carry the CLAMPED size, not the game's own. The engine's
+// build_wasm.sh test page derives it the same way from the same constants.
+const canvasWidth = Math.max(game.data.width ?? 800, 1024);
+const canvasHeight = Math.max(game.data.height ?? 600, 720);
+---
+
+<BaseLayout
+  title={`${game.data.title} in the editor — Be Insiculous`}
+  description={`${game.data.title} running inside the Insiculous 2D scene editor, in the browser.`}
+>
+  <p class="section-label">the editor</p>
+  <h1>{game.data.title} in the editor</h1>
+  <p class="lede">
+    The real Rust game, running inside the engine’s scene editor in your browser.
+    Its entities are live and editable — select them, move them, press play — but
+    the rules are compiled in, and nothing persists: reload the page and the game
+    is itself again.
+  </p>
+
+  <GameEmbed
+    src={game.data.editor}
+    title={game.data.title}
+    canvasLabel="scene editor canvas; focus it to edit and play"
+    width={canvasWidth}
+    height={canvasHeight}
+  >
+    <Fragment slot="controls">
+      Click the canvas to focus it, then <kbd>F5</kbd> to play the real game; the
+      editor’s shortcuts are listed below.
+    </Fragment>
+  </GameEmbed>
+
+  <EditorShortcuts saveLine="save the scene for this session only — a reload brings the game’s own layout back" />
+
+  <section>
+    <h2>Elsewhere</h2>
+    <ul class="links">
+      <li><a href={`/games/${game.id}/`}>Play {game.data.title}</a></li>
+      <li><a href="/playground/">The Web Playground</a> — the editor with its own projects</li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.15rem;
+    color: var(--text-bright);
+    max-width: 40em;
+  }
+
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  kbd {
+    background: var(--surface-raised, #222);
+    border: 1px solid var(--border-bright);
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>

@@ -21,6 +21,11 @@ const games = defineCollection({
       // native window size. Omit for the 800x600 default.
       width: z.number().int().positive().optional(),
       height: z.number().int().positive().optional(),
+      // Path to the EDITOR bundle's JS glue under public/, e.g.
+      // "/playground/my-game/v1/game.js" — the same game compiled with the
+      // engine's editor feature. Its version is independent of `wasm`'s, and
+      // its presence is what builds the game a /playground/<slug>/ page.
+      editor: z.string().startsWith('/').optional(),
       screenshots: z.array(z.string().startsWith('/')).default([]),
       order: z.number().default(0),
     })
