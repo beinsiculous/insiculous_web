@@ -14,7 +14,13 @@
 // The first-achievement profile prompt rides beside the store under
 // `beinsiculous.achievements.profile-prompt`: not part of the unlocks record because it is not an
 // achievement, and not in user-settings because it must be askable before any settings exist.
-import { achievementTitleFromId, loadGameAchievements, unlocksFromSaveFile } from "./games-achievements.js";
+import {
+  GAMES,
+  achievementTitleFromId,
+  loadGameAchievements,
+  loadGameUnlocks,
+  unlocksFromSaveFile,
+} from "./games-achievements.js";
 import { askProfileName } from "./profile-name-dialog.js";
 import { unusedProfileName } from "./shared/profile-names.js";
 import { createProfile, loadSettings, profileIds, saveSettings } from "./shared/user-settings.js";
@@ -162,33 +168,54 @@ export async function maybePromptForProfile() {
 }
 
 /**
- * The shared achievements board: one h3 + ul per group with unlocks, appended to `container`
+ * The shared achievements board: one h3 + ul per group with achievements, appended to `container`
  * (which is emptied first). `types` — a subset of ACHIEVEMENT_TYPES — says which groups render:
- * "game" draws one group per game with unlocks (from the games' own saves, exactly as /profile/
- * always has), "insiculous" and "fortknight" one group each from the site store. Group order is
- * the ACHIEVEMENT_TYPES order regardless of the order `types` lists them, so every page's board
- * reads the same. All DOM is createElement + textContent — nothing here is ever innerHTML.
- * Returns whether anything rendered, so the caller can show its own empty-state copy instead.
+ * "game" draws one group per game (from the games' own saves and manifests), "insiculous" and
+ * "fortknight" one group each from the site store. Group order is the ACHIEVEMENT_TYPES order
+ * regardless of the order `types` lists them, so every page's board reads the same. All DOM is
+ * createElement + textContent — nothing here is ever innerHTML. Returns
+ * `{ rendered, unlockedCount, totalCount }` so the caller can show its own empty-state copy or
+ * status line.
  *
- * `includeLocked` (default false — the other pages show what was earned) turns on the registry
- * spine for the site types, as /achievements/ wants: every ACHIEVEMENTS entry renders, unlocked or
- * not, with its description — unlocked first (dated oldest first, undated last, the store's order),
- * then the locked entries, which carry the class `achievement-locked` and a plain-text "Locked"
- * marker (no padlock glyph: a marker everyone can read). Game groups cannot do this: the engine
- * owns each game's full achievement list, the save file carries unlocked ids only, and copying the
- * locked set into this registry would drift the first time a game added one — so with
- * `includeLocked` a game group just says, in a `p.achievement-note`, where its full list lives.
+ * `includeLocked` (default false — other pages show what was earned) turns on the spine:
+ * - For site types, every ACHIEVEMENTS entry renders, unlocked or not, with its description —
+ *   unlocked first (dated oldest first, undated last, the store's order), then the locked entries,
+ *   which carry the class `achievement-locked` and a plain-text "Locked" marker.
+ * - For game types, if a catalog is passed in `gameCatalogs`, the group renders every entry from the
+ *   manifest — unlocked rows first with real names and descriptions, then the catalog's locked
+ *   entries in catalog order (hidden entries masked as "Hidden achievement — Unlock it to see what it
+ *   is."). The group renders even with no unlocks, and without a note. If no catalog is provided for
+ *   the slug, the group falls back to showing recorded unlocks only, followed by a note explaining
+ *   where the full list lives.
+ *
+ * Headings read `<title> — N of M unlocked` whenever the full list is known (spine mode for site
+ * types and for games with a catalog), else `<title> — N unlocked`.
+ *
+ * @param {{ types?: string[], includeLocked?: boolean, gameCatalogs?: import("./games-catalog.js").GameCatalog[] }} [options]
  */
-export function renderAchievementsBoard(container, { types = [...ACHIEVEMENT_TYPES], includeLocked = false } = {}) {
+export function renderAchievementsBoard(
+  container,
+  {
+    types = [...ACHIEVEMENT_TYPES],
+    includeLocked = false,
+    // The cast is for the type checker reading this untyped module from a page: a bare `[]`
+    // default is inferred as never[], and every page would then be refused its catalogs.
+    gameCatalogs = /** @type {import("./games-catalog.js").GameCatalog[]} */ ([]),
+  } = {}
+) {
   const wanted = new Set(types);
   container.textContent = "";
   let rendered = false;
+  let unlockedCount = 0;
+  let totalCount = 0;
 
-  const renderGroup = (heading, rows, note = null) => {
+  const renderGroup = (heading, rows, note = null, fullListKnown = false) => {
     if (!rows.length) return;
     const headingElement = document.createElement("h3");
-    const unlockedCount = rows.filter((row) => !row.locked).length;
-    headingElement.textContent = `${heading} — ${unlockedCount} unlocked`;
+    const unlockedGroupCount = rows.filter((row) => !row.locked).length;
+    headingElement.textContent = fullListKnown
+      ? `${heading} — ${unlockedGroupCount} of ${rows.length} unlocked`
+      : `${heading} — ${unlockedGroupCount} unlocked`;
     const list = document.createElement("ul");
     for (const row of rows) {
       const item = document.createElement("li");
@@ -210,6 +237,8 @@ export function renderAchievementsBoard(container, { types = [...ACHIEVEMENT_TYP
       container.append(noteElement);
     }
     rendered = true;
+    unlockedCount += unlockedGroupCount;
+    totalCount += rows.length;
   };
 
   const wantsSite = wanted.has("insiculous") || wanted.has("fortknight");
@@ -217,10 +246,68 @@ export function renderAchievementsBoard(container, { types = [...ACHIEVEMENT_TYP
   for (const type of ACHIEVEMENT_TYPES) {
     if (!wanted.has(type)) continue;
     if (type === "game") {
-      for (const board of loadGameAchievements()) {
-        renderGroup(board.title,
-          board.unlocks.map((unlock) => ({ title: achievementTitleFromId(unlock.id), unlockedAt: unlock.unlockedAt })),
-          includeLocked ? "The full achievement list lives in the game — this board only sees what this browser has unlocked." : null);
+      const catalogsBySlug = new Map(gameCatalogs.map((catalog) => [catalog.slug, catalog]));
+      for (const { slug, title: defaultTitle } of GAMES) {
+        const catalog = catalogsBySlug.get(slug);
+        const unlocks = loadGameUnlocks(slug);
+        const title = catalog?.title || defaultTitle;
+
+        if (!catalog) {
+          if (!unlocks.length) continue;
+          renderGroup(
+            title,
+            unlocks.map((unlock) => ({
+              title: achievementTitleFromId(unlock.id),
+              unlockedAt: unlock.unlockedAt,
+            })),
+            includeLocked
+              ? "The full achievement list lives in the game — this board only sees what this browser has unlocked."
+              : null,
+            false
+          );
+        } else if (!includeLocked) {
+          if (!unlocks.length) continue;
+          const catalogEntriesById = new Map(
+            catalog.achievements.map((achievement) => [achievement.id, achievement])
+          );
+          renderGroup(
+            title,
+            unlocks.map((unlock) => {
+              const catalogEntry = catalogEntriesById.get(unlock.id);
+              return {
+                title: catalogEntry ? catalogEntry.name : achievementTitleFromId(unlock.id),
+                unlockedAt: unlock.unlockedAt,
+              };
+            }),
+            null,
+            false
+          );
+        } else {
+          const catalogEntriesById = new Map(
+            catalog.achievements.map((achievement) => [achievement.id, achievement])
+          );
+          const unlockedIds = new Set();
+          const unlockedRows = unlocks.map((unlock) => {
+            unlockedIds.add(unlock.id);
+            const catalogEntry = catalogEntriesById.get(unlock.id);
+            return {
+              title: catalogEntry ? catalogEntry.name : achievementTitleFromId(unlock.id),
+              description: catalogEntry ? catalogEntry.description : "",
+              unlockedAt: unlock.unlockedAt,
+            };
+          });
+
+          const lockedRows = catalog.achievements
+            .filter((achievement) => !unlockedIds.has(achievement.id))
+            .map((achievement) => ({
+              title: achievement.hidden ? "Hidden achievement" : achievement.name,
+              description: achievement.hidden ? "Unlock it to see what it is." : achievement.description,
+              locked: true,
+            }));
+
+          const rows = [...unlockedRows, ...lockedRows];
+          renderGroup(title, rows, null, true);
+        }
       }
     } else {
       const heading = type === "fortknight" ? "FortKnight" : "Be Insiculous";
@@ -228,15 +315,29 @@ export function renderAchievementsBoard(container, { types = [...ACHIEVEMENT_TYP
       if (includeLocked) {
         const unlockedIds = new Set(unlocked.map((unlock) => unlock.id));
         const rows = [
-          ...unlocked.map((unlock) => ({ title: unlock.title, description: unlock.description, unlockedAt: unlock.unlockedAt })),
-          ...ACHIEVEMENTS.filter((achievement) => achievement.type === type && !unlockedIds.has(achievement.id))
-            .map((achievement) => ({ title: achievement.title, description: achievement.description, locked: true })),
+          ...unlocked.map((unlock) => ({
+            title: unlock.title,
+            description: unlock.description,
+            unlockedAt: unlock.unlockedAt,
+          })),
+          ...ACHIEVEMENTS.filter(
+            (achievement) => achievement.type === type && !unlockedIds.has(achievement.id)
+          ).map((achievement) => ({
+            title: achievement.title,
+            description: achievement.description,
+            locked: true,
+          })),
         ];
-        renderGroup(heading, rows);
+        renderGroup(heading, rows, null, true);
       } else {
-        renderGroup(heading, unlocked.map((unlock) => ({ title: unlock.title, unlockedAt: unlock.unlockedAt })));
+        renderGroup(
+          heading,
+          unlocked.map((unlock) => ({ title: unlock.title, unlockedAt: unlock.unlockedAt })),
+          null,
+          false
+        );
       }
     }
   }
-  return rendered;
+  return { rendered, unlockedCount, totalCount };
 }

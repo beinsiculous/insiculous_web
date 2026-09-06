@@ -45,7 +45,7 @@ Operation Name Drop (`#24`). That is a new writer, not this chain returning.
 **Deployment status.** Live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`), the
 fourteen day pages (`/fortknight/days/<dayKey>/`) — all reading a visitor-loaded keep (next section)
 — and **Achievements** (`/fortknight/achievements/`), which reads the site's achievement store
-instead of the keep. The studio side has `/achievements/`, the every-achievement board (below).
+instead of the keep. The studio side has `/achievements/`, the every-achievement board — listing all three types, locked and unlocked, with each game’s full manifest.
 
 **Recovery, and why the tag alone is not enough.** `creation-chain-parked` lives on origin and
 preserves the functional chain, but it pins the **2026-08-26** snapshot — before the 2026-08-28/29

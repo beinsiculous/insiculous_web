@@ -190,12 +190,16 @@ and sharing a key with the site's own unlocks would let one migrate into the oth
 `moved-in` (fortknight — loaded a keep).
 
 `/achievements/` is the every-achievement board — a studio page (BaseLayout, a nav entry after
-Games). The insiculous and fortknight registry entries render locked **and** unlocked, with their
-descriptions, unlocked sorting above locked within each group; game achievements render per game as
-unlocked-only, because the games own their full lists in-game and the site does not duplicate
-engine data. `/fortknight/achievements/` narrows to the active profile's unlocked fortnight
-achievements, and sits in the face nav as the final entry. `/games/` caps its grid at 75vh with scroll at multi-column widths
-(≥40rem) and carries a game-achievements board under it; `/profile/`'s achievements panel shows all
+Games). Every game’s full list comes from its bundle’s `achievements.json`, the engine’s own registry
+exported by the game’s native binary (`--achievements-manifest`, written by the engine repo’s
+`scripts/build_wasm.sh`) and read
+at build time; a playable game without a manifest fails the build. `/achievements/` lists all three
+types locked **and** unlocked with descriptions, unlocked sorting above locked within each group and
+each game group displaying its full manifest (hidden entries masked until unlocked). `/games/` and
+`/profile/` stay unlocked-only, using the manifests’ names instead of prettified ids;
+`/fortknight/achievements/` narrows to the active profile’s unlocked fortnight achievements, and sits
+in the face nav as the final entry. `/games/` caps its grid at 75vh with scroll at multi-column widths
+(≥40rem) and carries a game-achievements board under it; `/profile/`’s achievements panel shows all
 three types in a scroll box. Both scroll regions — the `/profile/` box and the `/games/` grid — are
 keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
 achievements happen: `/` and `/fortknight/` carry Create-a-profile buttons, and the first time an

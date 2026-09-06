@@ -9,8 +9,8 @@
 // /profile/ board and deletes them on request. Reserved beside them, not yet written:
 // `beinsiculous.games.<slug>.scores` for high scores.
 //
-// The save file carries ids only — display names and descriptions live in each game, so the board
-// prettifies the id. Schema agreed with the engine repository (beinsiculous/insiculous_2d#17).
+// The save file carries ids only; names and descriptions come from the manifest when a page
+// passes one, and the board falls back to prettifying the id when no catalog is present.
 
 /**
  * The games this site serves, in listing order: slug (the `public/games/<slug>` directory) and
@@ -70,24 +70,26 @@ export function unlocksFromSaveFile(saveFile) {
 }
 
 /**
+ * One game's readable unlocks: [{id, unlockedAt: Date|null}], or [] for a missing key, blocked
+ * storage, or malformed JSON.
+ */
+export function loadGameUnlocks(slug) {
+  try {
+    const raw = localStorage.getItem(storageKey(slug));
+    if (!raw) return [];
+    return unlocksFromSaveFile(JSON.parse(raw));
+  } catch {
+    return [];
+  }
+}
+
+/**
  * What this browser has recorded: [{slug, title, unlocks}] for every game with at least one
  * readable unlock. A missing key, blocked storage, or malformed JSON contributes nothing.
  */
 export function loadGameAchievements() {
-  const boards = [];
-  for (const { slug, title } of GAMES) {
-    let parsed;
-    try {
-      const raw = localStorage.getItem(storageKey(slug));
-      if (!raw) continue;
-      parsed = JSON.parse(raw);
-    } catch {
-      continue;
-    }
-    const unlocks = unlocksFromSaveFile(parsed);
-    if (unlocks.length) boards.push({ slug, title, unlocks });
-  }
-  return boards;
+  return GAMES.map(({ slug, title }) => ({ slug, title, unlocks: loadGameUnlocks(slug) }))
+    .filter((board) => board.unlocks.length > 0);
 }
 
 /** Remove every game's recorded achievements from this device. */

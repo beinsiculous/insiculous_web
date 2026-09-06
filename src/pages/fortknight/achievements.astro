@@ -42,7 +42,8 @@ const studioAchievements = withBase("achievements/");
   if (profileIds(settings).length) heading.textContent = `${settings.activeWeightsId}’s fortnight achievements`;
   // The empty-state line is prerendered — it carries a link, which the renderer's createElement-only
   // board cannot — so a rendered board hides it rather than replacing it.
-  status.hidden = renderAchievementsBoard(board, { types: ["fortknight"] });
+  const { rendered } = renderAchievementsBoard(board, { types: ["fortknight"] });
+  if (status) status.hidden = rendered;
   // An achievements page is a natural place for the once-ever create-profile prompt to land:
   // anyone reading a board with unlocks on it has earned them.
   maybePromptForProfile();

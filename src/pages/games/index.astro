@@ -2,10 +2,12 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import GameCard from '../../components/GameCard.astro';
+import { readGameCatalogs } from '../../lib/games-catalog-files.js';
 
 const games = (await getCollection('games')).sort(
   (a, b) => a.data.order - b.data.order
 );
+const catalogs = readGameCatalogs(games);
 ---
 
 <BaseLayout
@@ -34,7 +36,7 @@ const games = (await getCollection('games')).sort(
 
   <section class="achievements">
     <h2 id="gameAchievementsHeading">Game achievements</h2>
-    <div id="gameAchievementsBoard"></div>
+    <div id="gameAchievementsBoard" data-catalogs={JSON.stringify(catalogs)}></div>
     <p class="muted" id="gameAchievementsStatus" role="status"></p>
   </section>
 </BaseLayout>
@@ -42,6 +44,7 @@ const games = (await getCollection('games')).sort(
 <script>
   import { maybePromptForProfile, renderAchievementsBoard, unlockAchievement } from "../../lib/achievements.js";
   import { loadSettings, profileIds } from "../../lib/shared/user-settings.js";
+  import { readEmbeddedCatalogs } from "../../lib/games-catalog.js";
 
   const board = document.getElementById("gameAchievementsBoard");
   const heading = document.getElementById("gameAchievementsHeading");
@@ -55,7 +58,8 @@ const games = (await getCollection('games')).sort(
   // The null guards are the checker's idiom (GameEmbed.astro): all three elements are prerendered
   // above, so a null would mean this script drifted from its own markup.
   if (heading && profileIds(settings).length) heading.textContent = `${settings.activeWeightsId}’s game achievements`;
-  const rendered = renderAchievementsBoard(board, { types: ["game"] });
+  const catalogs = readEmbeddedCatalogs(board);
+  const { rendered } = renderAchievementsBoard(board, { types: ["game"], gameCatalogs: catalogs });
   if (status) status.textContent = rendered ? "" : "No game achievements on this device yet — they unlock as you play.";
   // Player is the likeliest first achievement anywhere on the site, so this is where the
   // once-ever create-profile prompt most naturally lands; the module owns the once-ever logic.

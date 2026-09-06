@@ -249,8 +249,8 @@ class RenderAchievementsBoardTests(unittest.TestCase):
             f"if (inputs.site) store.set({json.dumps(SITE_KEY)}, inputs.site);"
             "if (inputs.game) store.set('beinsiculous.games.pong.achievements', inputs.game);"
             "const container = document.createElement('div');"
-            "const rendered = renderAchievementsBoard(container, inputs.options);"
-            "process.stdout.write(JSON.stringify({ rendered, children: container.children.map(serialize) }));",
+            "const result = renderAchievementsBoard(container, inputs.options);"
+            "process.stdout.write(JSON.stringify({ ...result, children: container.children.map(serialize) }));",
             "renderAchievementsBoard", storage_stub=STORAGE_STUB + DOM_STUB),
             {"options": options, "site": site, "game": game})
 
@@ -265,6 +265,8 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         result = self.render({}, site=json.dumps({"unlocks": {"player": {"unlocked_at": 1_756_425_600}}}),
                              game=json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800}}}))
         self.assertTrue(result["rendered"])
+        self.assertEqual(result["unlockedCount"], 2)
+        self.assertEqual(result["totalCount"], 2)
         texts = [item["text"] for child in result["children"] if child["tag"] == "ul" for item in child["children"]]
         self.assertEqual(len(texts), 2)
         self.assertTrue(texts[0].startswith("Player — "))
@@ -276,8 +278,10 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         result = self.render({"types": ["insiculous"], "includeLocked": True},
                              site=json.dumps({"unlocks": {"secret_thing": {"unlocked_at": 1_756_425_600}}}))
         self.assertTrue(result["rendered"])
+        self.assertEqual(result["unlockedCount"], 1)
+        self.assertEqual(result["totalCount"], 2)
         [heading, _, *_] = result["children"]
-        self.assertEqual(heading["text"], "Be Insiculous — 1 unlocked")
+        self.assertEqual(heading["text"], "Be Insiculous — 1 of 2 unlocked")
         [(unlocked_text, unlocked_class), (locked_text, locked_class)] = self.items(result["children"])
         # The unknown unlocked id renders prettified above the locked registry entry.
         self.assertTrue(unlocked_text.startswith("Secret Thing — "))
@@ -288,7 +292,9 @@ class RenderAchievementsBoardTests(unittest.TestCase):
     def test_the_spine_counts_only_unlocked_in_the_heading(self):
         result = self.render({"types": ["fortknight"], "includeLocked": True})
         self.assertTrue(result["rendered"])  # the spine always renders, fully locked included
-        self.assertEqual(result["children"][0]["text"], "FortKnight — 0 unlocked")
+        self.assertEqual(result["unlockedCount"], 0)
+        self.assertEqual(result["totalCount"], 1)
+        self.assertEqual(result["children"][0]["text"], "FortKnight — 0 of 1 unlocked")
         [(_, locked_class)] = self.items(result["children"])
         self.assertEqual(locked_class, "achievement-locked")
 
@@ -296,11 +302,115 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         """The engine owns the locked list, so the board says where it lives instead of faking it."""
         game = json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800}}})
         with_note = self.render({"types": ["game"], "includeLocked": True}, game=game)
+        self.assertTrue(with_note["rendered"])
+        self.assertEqual(with_note["unlockedCount"], 1)
+        self.assertEqual(with_note["totalCount"], 1)
+        self.assertEqual(with_note["children"][0]["text"], "Insiculous Pong — 1 unlocked")
         self.assertEqual(with_note["children"][-1]["tag"], "p")
         self.assertEqual(with_note["children"][-1]["className"], "achievement-note")
         self.assertIn("full achievement list lives in the game", with_note["children"][-1]["text"])
         without_note = self.render({"types": ["game"]}, game=game)
         self.assertNotIn("p", [child["tag"] for child in without_note["children"]])
+
+    def test_game_with_catalog_unlocked_only_shows_real_names_and_no_descriptions_or_note(self):
+        catalog = {
+            "slug": "pong",
+            "title": "Insiculous Pong",
+            "achievements": [
+                {"id": "beat_cpu_easy", "name": "Training Wheels", "description": "Beat the CPU on Easy.", "hidden": False},
+                {"id": "marathon_win", "name": "Marathon", "description": "Win a long rally.", "hidden": False},
+            ],
+        }
+        game = json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800}}})
+        result = self.render({"types": ["game"], "includeLocked": False, "gameCatalogs": [catalog]}, game=game)
+        self.assertTrue(result["rendered"])
+        self.assertEqual(result["unlockedCount"], 1)
+        self.assertEqual(result["totalCount"], 1)
+        self.assertEqual(result["children"][0]["text"], "Insiculous Pong — 1 unlocked")
+        [(item_text, item_class)] = self.items(result["children"])
+        self.assertTrue(item_text.startswith("Training Wheels — "))
+        self.assertNotIn("Beat the CPU on Easy", item_text)
+        self.assertNotIn("Locked", item_text)
+        self.assertEqual(item_class, "")
+        self.assertNotIn("p", [child["tag"] for child in result["children"]])
+
+        # With no unlocks recorded, nothing renders.
+        empty_result = self.render({"types": ["game"], "includeLocked": False, "gameCatalogs": [catalog]})
+        self.assertFalse(empty_result["rendered"])
+        self.assertEqual(empty_result["unlockedCount"], 0)
+        self.assertEqual(empty_result["totalCount"], 0)
+
+    def test_game_with_catalog_spine_mode_renders_unlocked_then_locked_with_no_note(self):
+        catalog = {
+            "slug": "pong",
+            "title": "Insiculous Pong",
+            "achievements": [
+                {"id": "beat_cpu_easy", "name": "Training Wheels", "description": "Beat the CPU on Easy.", "hidden": False},
+                {"id": "marathon_win", "name": "Marathon", "description": "Win a long rally.", "hidden": False},
+            ],
+        }
+        game = json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800}}})
+        result = self.render({"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]}, game=game)
+        self.assertTrue(result["rendered"])
+        self.assertEqual(result["unlockedCount"], 1)
+        self.assertEqual(result["totalCount"], 2)
+        self.assertEqual(result["children"][0]["text"], "Insiculous Pong — 1 of 2 unlocked")
+        [(unlocked_text, unlocked_class), (locked_text, locked_class)] = self.items(result["children"])
+        self.assertTrue(unlocked_text.startswith("Training Wheels — Beat the CPU on Easy. — "))
+        self.assertEqual(unlocked_class, "")
+        self.assertEqual(locked_text, "Marathon — Win a long rally. — Locked")
+        self.assertEqual(locked_class, "achievement-locked")
+        self.assertNotIn("p", [child["tag"] for child in result["children"]])
+
+        # Group renders even with no unlocks, and with no note.
+        zero_unlocks = self.render({"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]})
+        self.assertTrue(zero_unlocks["rendered"])
+        self.assertEqual(zero_unlocks["unlockedCount"], 0)
+        self.assertEqual(zero_unlocks["totalCount"], 2)
+        self.assertEqual(zero_unlocks["children"][0]["text"], "Insiculous Pong — 0 of 2 unlocked")
+        self.assertNotIn("p", [child["tag"] for child in zero_unlocks["children"]])
+
+    def test_game_catalog_hidden_achievement_masking(self):
+        catalog = {
+            "slug": "pong",
+            "title": "Insiculous Pong",
+            "achievements": [
+                {"id": "secret", "name": "Secret Easter Egg", "description": "Found it.", "hidden": True},
+            ],
+        }
+        # When locked, hidden achievement is masked.
+        locked_result = self.render({"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]})
+        [(locked_text, locked_class)] = self.items(locked_result["children"])
+        self.assertEqual(locked_text, "Hidden achievement — Unlock it to see what it is. — Locked")
+        self.assertEqual(locked_class, "achievement-locked")
+
+        # When unlocked, hidden achievement reveals real name and description.
+        game = json.dumps({"unlocks": {"secret": {"unlocked_at": 1_756_252_800}}})
+        unlocked_result = self.render({"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]}, game=game)
+        [(unlocked_text, unlocked_class)] = self.items(unlocked_result["children"])
+        self.assertTrue(unlocked_text.startswith("Secret Easter Egg — Found it. — "))
+        self.assertEqual(unlocked_class, "")
+
+    def test_game_catalog_unknown_id_fallback(self):
+        catalog = {
+            "slug": "pong",
+            "title": "Insiculous Pong",
+            "achievements": [
+                {"id": "known_one", "name": "Known Achievement", "description": "Desc.", "hidden": False},
+            ],
+        }
+        # An unknown unlocked id renders prettified.
+        game = json.dumps({"unlocks": {"newer_feature": {"unlocked_at": 1_756_252_800}}})
+        result = self.render({"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]}, game=game)
+        self.assertTrue(result["rendered"])
+        self.assertEqual(result["unlockedCount"], 1)
+        self.assertEqual(result["totalCount"], 2)
+        self.assertEqual(result["children"][0]["text"], "Insiculous Pong — 1 of 2 unlocked")
+        [(unlocked_text, unlocked_class), (locked_text, locked_class)] = self.items(result["children"])
+        self.assertTrue(unlocked_text.startswith("Newer Feature — "))
+        self.assertEqual(unlocked_class, "")
+        self.assertEqual(locked_text, "Known Achievement — Desc. — Locked")
+        self.assertEqual(locked_class, "achievement-locked")
 
 
 if __name__ == "__main__":
