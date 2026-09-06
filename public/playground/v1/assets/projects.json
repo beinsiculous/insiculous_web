@@ -12,5 +12,12 @@
     "bundle_version": "v1",
     "content_hash": "648a1a487ab1ad61c6b3d41f5d7d608deb03ebec836c7b6988ce373b7c0ce1da",
     "origin": "bundled"
+  },
+  {
+    "slug": "game-template",
+    "title": "Game Template",
+    "bundle_version": "v1",
+    "content_hash": "b59fe10307bed9fd9fe45133d6cb538760d873a2fc4a07022eeb22c34475245e",
+    "origin": "bundled"
   }
 ]
