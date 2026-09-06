@@ -77,9 +77,15 @@ jobs:
           npx playwright install --with-deps chromium
           npm run a11y
 
+      # Same gate as local `npm run verify`: Playwright ariaSnapshot assertions over
+      # landmarks, heading levels, and named controls and regions across every built page.
+      - name: Announce audit
+        run: npm run announce
+
       # Same gate as local `npm run verify`: every page served from dist/ (the script serves it
-      # itself) answers 200 and scrolls nowhere sideways — desktop, phone, 641px, and 125% text
-      # on a phone (LARGE_TEXT=1). Reuses the chromium the previous step installed.
+      # itself) answers 200 and scrolls nowhere sideways — desktop, phone, 641px, and the two extra
+      # passes under LARGE_TEXT=1: 125% text on a phone, and 320 CSS px reflow. Reuses the chromium
+      # the accessibility audit step installed.
       - name: Layout gate (screenshots + overflow)
         run: LARGE_TEXT=1 npm run shots
 

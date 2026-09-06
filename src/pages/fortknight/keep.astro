@@ -58,7 +58,7 @@ import KeepStyles from "../../components/KeepStyles.astro";
   function render(keep) {
     body.replaceChildren();
     const days = readableDays(keep);
-    for (const day of days) body.appendChild(renderDayPanel(day));
+    for (const day of days) body.appendChild(renderDayPanel(day, { headingLevel: 2 }));
     if (keep.season) body.appendChild(renderSeasonPanel(keep.season));
     const yearPanel = keep.year ? renderYearPanel(keep.year) : null;
     if (yearPanel) body.appendChild(yearPanel);

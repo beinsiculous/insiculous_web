@@ -77,7 +77,7 @@ const keep = facePath("fortknight", "keep/");
       body.hidden = false;
       body.replaceChildren();
       body.appendChild(element("h1", null, day.label ?? day.dayKey));
-      body.appendChild(renderDayPanel(day));
+      body.appendChild(renderDayPanel(day, { headingLevel: null }));
 
       // Previous and next walk DAY_KEY_ORDER and wrap: the fortnight is a cycle, so Saturday B's next is
       // Sunday A. Labels come from the keep where it has them, because the keep's words are what the

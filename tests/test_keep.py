@@ -764,3 +764,56 @@ class KeepSchemaTests(unittest.TestCase):
         document["days"] = [{**json.loads(json.dumps(template)), "dayKey": key} for key in DAY_KEY_ORDER]
         report = self.check(document)
         self.assertTrue(report.ok, f"the spec's own example does not match the schema: {report.render()}")
+
+
+# A minimal DOM stub for renderDayPanel: element() in keep-view.js uses createElement,
+# appendChild, textContent and className.
+RENDER_DOM_STUB = """
+globalThis.document = {
+  createElement: (tag) => ({
+    tag,
+    children: [],
+    className: "",
+    textContent: "",
+    appendChild(node) { this.children.push(node); },
+  }),
+};
+const serialize = (node) => ({
+  tag: node.tag,
+  className: node.className,
+  text: node.children.length ? "" : node.textContent,
+  children: node.children.map(serialize),
+});
+"""
+
+RENDER_DAY_PANEL_SCRIPT = (
+    STDIN_PRELUDE
+    + RENDER_DOM_STUB
+    + f"const {{ renderDayPanel }} = await import({json.dumps(KEEP_VIEW_MODULE)});"
+    + "const panel = renderDayPanel(inputs.day, inputs.options);"
+    + "process.stdout.write(JSON.stringify(serialize(panel)));"
+)
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class RenderDayPanelTests(unittest.TestCase):
+    """The day panel renderer under a stub DOM: heading level selection for keep vs day pages."""
+
+    def render(self, day, options):
+        return run_node(RENDER_DAY_PANEL_SCRIPT, {"day": day, "options": options})
+
+    def test_renders_level_2_heading_when_asked(self):
+        day = {"dayKey": "sun-a", "label": "Sunday A"}
+        panel = self.render(day, {"headingLevel": 2})
+        self.assertEqual(panel["tag"], "section")
+        first_child = panel["children"][0]
+        self.assertEqual(first_child["tag"], "h2")
+        self.assertEqual(first_child["text"], "Sunday A")
+
+    def test_renders_no_heading_when_heading_level_is_null(self):
+        day = {"dayKey": "sun-a", "label": "Sunday A"}
+        panel = self.render(day, {"headingLevel": None})
+        self.assertEqual(panel["tag"], "section")
+        heading_tags = [c["tag"] for c in panel["children"] if c["tag"].startswith("h")]
+        self.assertEqual(heading_tags, [])
+
