@@ -129,7 +129,9 @@ What that means for the items this file used to number 1–9:
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
   WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
   and work with projects stored in the browser’s IndexedDB, exported and imported as zip.
-  Scripting follows. Each of the six Rust games also opens inside that editor at
+  Scripts are Rhai, edited on the page and run on Play, and an export drops onto the game
+  template (`https://github.com/beinsiculous/game-template`) to run natively as a desktop
+  build. Each of the six Rust games also opens inside that editor at
   `/playground/<slug>/`, as a second bundle of the same game: the entities are live and
   editable, the rules stay compiled in, and nothing there persists.
 - **The two tracks and the art policy** (`docs/thesis.md` is the source of the wording). The games

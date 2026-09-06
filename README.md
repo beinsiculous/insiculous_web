@@ -162,7 +162,10 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
   `PlaygroundEmbed.astro`’s default changes.
 - **Project export and import**: projects export and import as zip, layout in the engine’s
-  `docs/WEB_PLAYGROUND.md` § "Export and import".
+  `docs/WEB_PLAYGROUND.md` § "Export and import". An export drops onto a clone of
+  `https://github.com/beinsiculous/game-template` — `rm -rf assets/scenes assets/scripts && unzip -o <slug>.zip -x README.md -d .`
+  from the clone’s root, the template’s own scene and scripts cleared first because the game
+  loads whichever scene sorts first — and `cargo run` plays it natively.
 - **Script editing**: the Scripts panel under the canvas opens any of the project’s `.rhai`
   files; Save runs the syntax check and refuses a broken file, and runtime errors from Play
   appear beneath the textarea. `docs/SCRIPTING.md` is the author contract.
