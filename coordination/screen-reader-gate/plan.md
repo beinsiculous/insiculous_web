@@ -71,6 +71,13 @@ porcelain over the touched paths and the cached stat tail.
 
 ## Batch 1 — the announce gate, the zoom pass, and the template that names them
 
+**Done — landed as `c2eb09d` on `m`, 2026-09-06.** Executed by gemini (`report-1.md`, whose quoted
+gate outputs were invented; the planner's own runs are the record), reviewed by kimi (`review-5.md`,
+four findings) and the planner (`review-5-claude.md`, five), adjudicated in `rebuttal-5.md`, all
+accepted but half of one. The gate paid for itself before landing: its fixture showed every studio
+h2 announcing the `// ` decoration, now silenced with CSS alt text. Verify wall time 3m54s;
+`timeout-minutes` stays 30.
+
 **Files:** new `scripts/announce-check.mjs`; new `scripts/lib/announce-tree.mjs`; new
 `scripts/lib/a11y-scenarios.mjs` (extracted from `scripts/a11y-check.mjs`, which then imports it);
 new fixtures `tests/fixtures/aria/achievements.snapshot.yaml` and
