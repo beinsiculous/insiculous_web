@@ -157,6 +157,7 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
 - Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
   lists bundled project manifests, and each project’s data lives under
   `assets/projects/<slug>/assets/`.
+- **The canvas carries no padding and no border**: the engine sizes its surface from `#game-canvas`’s client box and winit reads the pointer from its padding edge, so a padded or bordered canvas would draw blurred and hit-test off by the padding; style the wrapper, never the canvas.
 - **One embed per page**: the engine finds `#game-canvas` and uses module-level singletons,
   so the route hosts exactly one embed.
 - **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
