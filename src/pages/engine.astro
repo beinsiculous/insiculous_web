@@ -13,6 +13,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     11-crate workspace, shaped by building actual games with it. Six so far.
   </p>
 
+  <div class="cta">
+    <a class="button secondary" href="/playground/">play on the playground →</a>
+  </div>
+
   <section>
     <h2>Architecture</h2>
     <p>
@@ -120,6 +124,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     font-size: 1.2rem;
     color: var(--text-bright);
     max-width: 38em;
+  }
+
+  /* A wrapper, not a <p>: global.css underlines every link inside a paragraph, and this is a button.
+     The gap is on top: a bottom margin would collapse into the next heading's larger one. */
+  .cta {
+    margin-top: 1.5rem;
   }
 
   section p {
