@@ -79,7 +79,7 @@ What that means for the items this file used to number 1–9:
 - **The keep-fed pages** are live on `main`. `/fortknight/keep` renders a keep the
   visitor loads from their own device, resolving nothing and never uploading it; the Overview
   (`/fortknight/`) keeps its thesis front-door content as the no-keep state — its primary action is
-  **Load your keep** — and renders a compact fortnight grid once a keep is stored; the fourteen
+  **Open your keep** — and renders a compact fortnight grid once a keep is stored; the fourteen
   `/fortknight/days/<dayKey>/` pages render the keep's blocks, meals and appointments by day key,
   falling back to the load-your-keep message. Keep is in the face nav (`src/lib/faces.js`), and
   the rendering is factored into `src/lib/keep-view.js` with a positional season palette. All of

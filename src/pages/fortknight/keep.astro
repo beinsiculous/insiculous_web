@@ -30,8 +30,9 @@ import KeepStyles from "../../components/KeepStyles.astro";
       Load the keep the app exported — it stays on this device and is never uploaded.
     </p>
     <div class="button-row">
-      <label class="file-button">Load a keep
-        <input type="file" id="keepFileInput" accept="application/json" hidden /></label>
+      <label class="file-button">Fort Knight →
+        <span class="visually-hidden"> (choose your keep file)</span>
+        <input type="file" id="keepFileInput" accept="application/json" class="visually-hidden" /></label>
       <button type="button" id="keepForgetButton" hidden>Forget this keep</button>
     </div>
     <p class="muted" id="keepStatus" role="status" aria-live="polite"></p>

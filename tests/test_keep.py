@@ -319,7 +319,7 @@ class KeepFedPageTests(unittest.TestCase):
         source = self.OVERVIEW.read_text(encoding="utf-8")
         self.assertIn("createProfileButton", source)
         self.assertIn("user-settings", source)
-        self.assertLess(source.index("Load your keep"), source.index("createProfileButton"))
+        self.assertLess(source.index("Open your keep"), source.index("createProfileButton"))
 
     def test_the_keeped_grid_heading_is_not_a_second_h1(self):
         """The prerendered <h1>FortKnight</h1> is the document's one h1 in every state, keeped or not."""
