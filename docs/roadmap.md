@@ -136,10 +136,10 @@ What that means for the items this file used to number 1–9:
   `/playground/<slug>/`, as a second bundle of the same game: the entities are live and
   editable, the rules stay compiled in, and nothing there persists.
 - **The two tracks and the art policy** (`docs/thesis.md` is the source of the wording). The games
-  listed on this site are free and use AI art. The games we **sell** are not on this site at all —
+  listed on this site are free and may use AI art. The games we **sell** are not on this site at all —
   each has its own repository and ships on Steam and/or Android and iOS — and they carry no AI art.
-  Maintenance condition: the blanket sentence on `/games/` is true only while *every* game listed
-  there uses AI art; the first one that does not makes it false, and per-game labelling has to ship in
-  the same change.
+  The free-games half says *may* because the free track is not uniform, so no listing can falsify
+  it; what it no longer tells a visitor is *which*, and per-game labelling on `/games/` is the open
+  piece it used to stand in for.
 - **Store links.** When the first paid game ships, this site needs somewhere to point at it — the
   games page is currently built around on-site listings only.

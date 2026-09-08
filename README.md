@@ -8,7 +8,7 @@ deliberately read as two different websites:
   playable in the browser through embedded WebAssembly builds from the Insiculous 2D engine
   (Rust); desktop builds run the same code natively. `/achievements/` boards every achievement the
   site knows — the site’s own registry entries and each game’s full manifest, locked and unlocked
-  (`/games/` and `/profile/` show unlocked game achievements by name). The games listed on this site are free and use AI art; the
+  (`/games/` and `/profile/` show unlocked game achievements by name). The games listed on this site are free and may use AI art; the
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
   iOS rather than here (`docs/thesis.md` is the source of that policy’s wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,

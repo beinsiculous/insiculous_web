@@ -92,16 +92,17 @@ The studio ships along two tracks, and they are not the same product:
 |---|---|---|
 | where | listed on this site, `/games/` | their own repository each; Steam and/or Android and iOS |
 | what they are for | showcases for the engine, the 20 Games Challenge run | the commercial line |
-| art | **AI art** | **no AI art** — made by our own artists |
+| art | **AI art, game by game** — some do, some do not | **no AI art** — made by our own artists |
 
-**The policy, in the words the site uses:** *the games listed here are free and use AI art; the
+**The policy, in the words the site uses:** *the games listed here are free and may use AI art; the
 games we sell carry none — those are made by our artists, and they ship on Steam and the app stores
 rather than here.*
 
 The commitment is worth making before there is anything to buy, because it is a promise to buyers
-and it constrains what we build. It also has a maintenance condition: the blanket sentence on
-`/games/` is true only while **every** game listed there uses AI art. The first game on this site
-that does not makes it false, and per-game labelling has to ship in the same change.
+and it constrains what we build. The free-games half says *may* because the free track is not
+uniform — the sentence stays true whether or not a given listing uses AI art, so no listing can
+falsify it. What it no longer tells a visitor is *which*: per-game labelling on `/games/` is the
+open piece, and it is what the blanket sentence used to stand in for.
 
 ### What it refuses
 
