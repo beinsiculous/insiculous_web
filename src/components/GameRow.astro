@@ -1,0 +1,65 @@
+---
+/**
+ * One row of the games list on /games/: the title, the blurb and the actions. Each button
+ * carries the game's name for screen readers, so six rows do not announce six identical "play".
+ * `playgroundProject` names the Web Playground project whose rules are this game's, as scripts;
+ * a game whose rules are still compiled in has no project and no second button.
+ */
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  game: CollectionEntry<'games'>;
+}
+
+const { game } = Astro.props;
+const project = game.data.playgroundProject;
+---
+
+<li class="row">
+  <h2 class="row-title">{game.data.title}</h2>
+  <p>{game.data.blurb}</p>
+  <div class="actions">
+    <a class="button" href={`/games/${game.id}/`}>play <span class="visually-hidden">{game.data.title}</span> →</a>
+    {project && (
+      <a class="button secondary" href={`/playground/?project=${project}`}>edit <span class="visually-hidden">{game.data.title}</span> on the playground →</a>
+    )}
+  </div>
+</li>
+
+<style>
+  .row {
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .row:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .row::marker {
+    font-family: var(--font-mono);
+    color: var(--accent-dim);
+  }
+
+  /* global.css prefixes every h2 with "// " and gives it a section's top margin; a row's title is neither. */
+  .row-title {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .row-title::before {
+    content: none;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.95rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+</style>

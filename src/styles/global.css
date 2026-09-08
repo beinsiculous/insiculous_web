@@ -148,6 +148,9 @@ td a {
   background: var(--accent);
   color: var(--bg);
   font-weight: 700;
+  /* `li a` above underlines links inside list items, and the games list's buttons are exactly
+     that; the note there already promises buttons-that-are-links keep the plain look. */
+  text-decoration: none;
 }
 
 .button:hover {
@@ -160,6 +163,16 @@ td a {
   color: var(--accent);
   border: 1px solid var(--accent-dim);
   font-weight: 500;
+}
+
+/* Screen-reader-only text. One copy for every studio page: a component cannot reach a layout's
+   scoped rule, and three components each carried their own until the games list needed a fourth. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 /* ---------- the profile switcher, in the studio's chrome (src/components/ProfileSwitcher.astro) ---------- */

@@ -26,6 +26,11 @@ const games = defineCollection({
       // engine's editor feature. Its version is independent of `wasm`'s, and
       // its presence is what builds the game a /playground/<slug>/ page.
       editor: z.string().startsWith('/').optional(),
+      // Slug of a Web Playground project on /playground/ whose rules are this game's, as scripts
+      // (pong's is 'pong'). Its presence puts an "edit on the playground" button on the game's row
+      // of /games/; a game whose rules are still compiled in has none. postbuild-check.mjs holds
+      // the slug against the bundle's projects.json.
+      playgroundProject: z.string().regex(/^[a-z0-9-]+$/).optional(),
       screenshots: z.array(z.string().startsWith('/')).default([]),
       order: z.number().default(0),
     })

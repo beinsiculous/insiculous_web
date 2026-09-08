@@ -201,10 +201,11 @@ types locked **and** unlocked with descriptions, unlocked sorting above locked w
 each game group displaying its full manifest (hidden entries masked until unlocked). `/games/` and
 `/profile/` stay unlocked-only, using the manifests’ names instead of prettified ids;
 `/fortknight/achievements/` narrows to the active profile’s unlocked fortnight achievements, and sits
-in the face nav as the final entry. `/games/` caps its grid at 75vh with scroll at multi-column widths
-(≥40rem) and carries a game-achievements board under it; `/profile/`’s achievements panel shows all
-three types in a scroll box. Both scroll regions — the `/profile/` box and the `/games/` grid — are
-keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
+in the face nav as the final entry. `/games/` lists the games as a numbered list in play
+order — each row a play button and, for a game whose rules are scripts on the playground
+(`playgroundProject` in its frontmatter; Pong today), an “edit on the playground” button — and
+carries a game-achievements board under it; `/profile/`’s achievements panel shows all three types
+in a scroll box, keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
 achievements happen: `/` and `/fortknight/` carry Create-a-profile buttons, and the first time an
 achievement exists with no profile saved, the naming dialog (`askProfileName` in
 `src/lib/profile-name-dialog.js`) opens — once ever, the settled flag riding beside the store under

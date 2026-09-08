@@ -38,6 +38,8 @@ const DIST = join(ROOT, 'dist');
 const PUBLIC_GAMES = join(ROOT, 'public', 'games');
 const PUBLIC_PLAYGROUND = join(ROOT, 'public', 'playground');
 const CONTENT_GAMES = join(ROOT, 'src', 'content', 'games');
+// The default bundle PlaygroundEmbed.astro loads (`/playground/v1/game.js`): bump both together.
+const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v1', 'assets', 'projects.json');
 
 const SIZE_LIMIT = 25 * 1024 * 1024; // Cloudflare Pages per-file limit
 const errors = [];
@@ -92,6 +94,22 @@ if (existsSync(DIST) && existsSync(CONTENT_GAMES)) {
 
     const wasm = frontmatter.match(/^wasm:\s*['"]([^'"]+)['"]/m);
     if (wasm) refs.push(wasm[1]);
+
+    // An unknown slug is not an error on the playground — it opens the first project instead —
+    // so a typo here would ship a button that silently opens Examples. Quotes are optional:
+    // the collection schema already pins the slug's alphabet.
+    const project = frontmatter.match(/^playgroundProject:\s*['"]?([a-z0-9-]+)['"]?/m);
+    if (project) {
+      const slugs = existsSync(PLAYGROUND_PROJECTS)
+        ? JSON.parse(readFileSync(PLAYGROUND_PROJECTS, 'utf8')).map((entry) => entry.slug)
+        : [];
+      if (!slugs.includes(project[1])) {
+        errors.push(
+          `${path}: playgroundProject '${project[1]}' is not in ${PLAYGROUND_PROJECTS} ` +
+          `(${slugs.join(', ') || 'file missing'}).`
+        );
+      }
+    }
 
     const inline = frontmatter.match(/^screenshots:\s*\[([^\]]*)\]/m);
     const block = frontmatter.match(/^screenshots:\s*\n((?:\s+-\s+.*\n?)+)/m);

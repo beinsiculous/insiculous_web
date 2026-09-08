@@ -100,10 +100,11 @@ What that means for the items this file used to number 1–9:
   manifest from `achievements.json` exported by the native game (hidden entries masked until
   unlocked). `/games/` and `/profile/` stay unlocked-only, displaying real names from the
   manifests instead of prettified ids. `/fortknight/achievements/` narrows to the active
-  profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` caps
-  its grid at 75vh with scroll at multi-column widths (≥40rem) and carries a game-achievements
-  board under it; `/profile/`’s panel shows all three types in a scroll box, and both scroll
-  regions are keyboard-reachable. A visitor with achievements and no profile is offered one — the
+  profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` lists
+  the games as a numbered list in play order — each row a play button and, for a game whose rules
+  are scripts on the playground (`playgroundProject` in its frontmatter; Pong today), an “edit on
+  the playground” button — and carries a game-achievements board under it; `/profile/`’s panel
+  shows all three types in a scroll box, keyboard-reachable. A visitor with achievements and no profile is offered one — the
   naming dialog opens once ever, and `/` and `/fortknight/` carry Create-a-profile buttons.
 - **The `sun-b` starts for `ostara` and `fimbulsumar`** in `data/seasons.json` disagree with Focus
   Key's `sun-a` ruling. Porting it touches `seasons.json`, `docs/domain.md` and the test

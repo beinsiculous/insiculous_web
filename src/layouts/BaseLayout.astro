@@ -221,14 +221,6 @@ const isActive = (href: string) =>
     display: none;
   }
 
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
   /* 0.9rem, not the 1.4rem this carried before the switcher joined the bar. The studio's header lives
      inside .container (68rem) while the face's nav spans the viewport, so this bar has about 200px less
      to spend — and at 1.4rem the six links wrapped to three rows the moment the switcher took its 233px.

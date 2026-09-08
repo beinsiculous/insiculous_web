@@ -154,6 +154,10 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `scripts/build_wasm.sh ../games/<crate> <slug> --kind editor --version v1 --sync
   ../insiculous_web/public`; the invocations of record are in the engine's
   `docs/WEB_PLAYGROUND.md` § The game bundles.
+- A games entry’s `playgroundProject:` names a bundled *data* project (`assets/projects.json`)
+  whose rules are that game’s, as scripts; it puts an “edit on the playground” button on the
+  game’s row of `/games/`, and `postbuild-check.mjs` fails the build if the slug is not in the
+  synced bundle.
 - Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
   lists bundled project manifests, and each project’s data lives under
   `assets/projects/<slug>/assets/`.
