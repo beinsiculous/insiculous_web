@@ -18,6 +18,25 @@ Why it works: the expensive model spends its tokens on the decisions that
 compound (the plan, what a finding means, what to keep), the executor spends
 its tokens on the typing, and no model reviews its own work.
 
+## If you were given a handoff
+
+A handoff path in your prompt — `review/<subject>/handoff-<batch>.md` — makes this
+session the **executor**, not the planner, whichever model you are. The rest of this
+skill is written for the planner: sections 1, 3 and 4 are theirs, and so is the writing
+of a handoff in section 2. Your contract is `prompts/handoff-batch.md` and the handoff
+file itself, and it comes down to three rules:
+
+- Stage everything you touched, new files included. **Do not commit.**
+- Write one report, at the one path the handoff names
+  (`review/<subject>/report-<batch>.md`), and nowhere else.
+- Stop there. You do not review your own diff, adjudicate findings, file issues (your
+  report's "not done because …" lines are the filing; the planner converts them), mark
+  the batch or plan done, or report the effort finished.
+
+Reporting INCOMPLETE is a valid ending; a commit is not. Where the handoff file and this
+skill disagree for a batch already in flight, the handoff file wins — it was written
+against the template in force when the batch went out.
+
 ## 1. Plan
 
 1. Draft in your harness's plan mode with the user (`adversarial-review` §
@@ -166,6 +185,9 @@ instead of an impression, and the record the next effort reads.
 
 - The planner never writes skip trailers and never commits an unreviewed
   diff over the hook's threshold; the executor never commits at all.
+- The executor stays an executor. Whichever model reads the handoff, it does
+  not commit, review its own diff, adjudicate, or declare the batch done —
+  the loop's whole property is that no model reviews its own work.
 - A finding is adjudicated, not obeyed: both reviewers have asked for tests
   that reconstruct production logic, both have called live API dead, and one
   has asked for a gate that had already run. Verify the claim against the
