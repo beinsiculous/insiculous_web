@@ -232,11 +232,14 @@ you created, a follow-up you spotted — is filed before you report done. Never 
 doc, never left as a bare `TODO:`, never dropped. The `file-issue` skill carries the shape;
 `sprint-planning` groups issues into shippable batches.
 
-## Review convention: adversarial review (Claude Code ↔ Kimi Code CLI)
-Plans and large diffs get an adversarial review by the *other* CLI, adjudicated with the user —
-see `.claude/skills/adversarial-review/SKILL.md` (Claude side) and
-`.kimi-code/skills/adversarial-review/SKILL.md` (kimi side; same workflow, reviewer roles
-swapped). Two hooks make it the default in both harnesses — approved plans are routed through
+## Review convention: adversarial review (a different vendor's CLI reviews)
+Plans and large diffs get an adversarial review by another vendor's CLI, adjudicated with the user —
+see `.claude/skills/adversarial-review/SKILL.md` (Claude side), `.kimi-code/skills/adversarial-review/SKILL.md`
+(kimi side) and `.agents/skills/adversarial-review/SKILL.md` (Codex side; same workflow, each
+written from its own harness's point of view). The roster — Claude plans, Astra (`codex`) is the
+artist and UI reviewer for anything with a screen in it, Kimi is the quality reviewer, Gemini or
+Claude Opus builds — is the `roles` skill, and the rule above it is that a vendor never reviews its
+own vendor's work. Two hooks make it the default in Claude Code and Kimi Code — approved plans are routed through
 plan mode, and `git commit` with ≥100 changed lines is denied until code mode has run (retry
 with the `ADV_REVIEWED=1` prefix, which asserts the review *happened* — it is not a way to skip
 one). **Skipping is the developer's call**, made in the last lines of the commit message where
@@ -280,4 +283,4 @@ Hook behavior is covered by `tests/test_hooks.py`.
 | what comes next that is web-specific, and the studio | `docs/roadmap.md` |
 | Fork Knife's full chain: questions → the agent interviewing back → menu, recipes, prep, cooking, shopping (design, not built) | `docs/fork-knife-chain.md` |
 | forts, the five roles, boards, a real login — the household/community direction (design, not built) | `docs/fortress.md` |
-| adversarial review workflow | `.claude/skills/adversarial-review/SKILL.md`, `.kimi-code/skills/adversarial-review/SKILL.md`, `scripts/request-review.sh`, `prompts/` |
+| adversarial review workflow, and who reviews what | `.claude/skills/adversarial-review/SKILL.md` (and its `.kimi-code/`, `.agents/` twins), `.claude/skills/roles/SKILL.md`, `scripts/request-review.sh`, `prompts/` |

@@ -130,6 +130,11 @@ What that means for the items this file used to number 1–9:
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
   WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
   and work with projects stored in the browser’s IndexedDB, exported and imported as zip.
+  Next is the **Playground UX** sprint (milestone here and in `insiculous_2d`, from Astra’s
+  review of Sep 8 2026): the editor gets the window, Play opens a reusable game-only preview,
+  the first interaction becomes obvious, and loading, saving and failure feel finished — this
+  site’s half is the application shell, the preview window, the compatibility panel and the
+  save status.
   Scripts are Rhai, edited on the page and run on Play, and an export drops onto the game
   template (`https://github.com/beinsiculous/game-template`) to run natively as a desktop
   build. Each of the six Rust games also opens inside that editor at
