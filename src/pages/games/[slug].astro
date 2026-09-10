@@ -38,6 +38,14 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
     screenshotAlt={game.data.screenshots[0] && `${game.data.title} running in a browser`}
   />
 
+  {
+    game.data.editor && (
+      <p class="editor-link">
+        <a href={`/playground/${game.id}/`}>Open {game.data.title} in the editor — layout only: the rules are compiled in, and nothing you change there persists.</a>
+      </p>
+    )
+  }
+
   <article>
     <Content />
   </article>
@@ -146,10 +154,23 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
     border-radius: 8px;
   }
 
+  .editor-link,
   .empty {
     color: var(--text-dim);
     font-family: var(--font-mono);
     font-size: 0.9rem;
+  }
+
+  /* The whole sentence is the link, so the global accent would paint the
+     loudest line on the page; dim, with a standing underline to stay a link. */
+  .editor-link a {
+    color: var(--text-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .editor-link a:hover {
+    color: var(--text-bright);
   }
 
   .post-links {

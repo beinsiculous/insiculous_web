@@ -12,6 +12,7 @@
  * and module singletons.
  */
 import CompatibilityPanel from './CompatibilityPanel.astro';
+import PlaygroundHint from './PlaygroundHint.astro';
 
 interface Props {
   src?: string;
@@ -32,6 +33,7 @@ const {
 
 <div class="playground-embed" data-wasm-src={src}>
   <div class="head-region">
+    <PlaygroundHint />
     <div class="banner-region">
       <p id="playground-banner" class="playground-banner" role="alert"></p>
       <div id="import-rejection-actions" class="banner-actions"></div>

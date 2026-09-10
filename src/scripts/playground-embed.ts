@@ -29,6 +29,7 @@ const stage = embed?.querySelector<HTMLElement>('.stage') ?? null;
 const playButton = document.getElementById('play-button') as HTMLButtonElement | null;
 const previewBlocked = document.getElementById('preview-blocked');
 const previewRetry = document.getElementById('preview-retry') as HTMLButtonElement | null;
+const firstRunHint = document.getElementById('playground-hint');
 
 function downloadBytes(data: Uint8Array | Blob, filename: string) {
   const isZip = filename.endsWith('.zip');
@@ -115,6 +116,9 @@ function showCompatibility(message: string) {
   if (compatibilityReason) compatibilityReason.textContent = message;
   if (compatibilityPanel) compatibilityPanel.hidden = false;
   if (stage) stage.hidden = true;
+  // An instruction to use the Hierarchy above a panel saying the editor
+  // cannot run here would contradict it.
+  if (firstRunHint) firstRunHint.hidden = true;
 }
 
 /**
@@ -466,6 +470,9 @@ async function bootPlayground(source: string) {
   booting = true;
   if (compatibilityPanel) compatibilityPanel.hidden = true;
   if (stage) stage.hidden = false;
+  // A retry after a failed boot restores the hint the failure hid — unless
+  // the visitor dismissed it, which the hint's own script records on it.
+  if (firstRunHint) firstRunHint.hidden = firstRunHint.dataset.dismissed === 'true';
   try {
     const probe = await probeWebGpu();
     if (!probe.ok) {

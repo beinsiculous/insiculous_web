@@ -185,7 +185,9 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `beinsiculous.playground.preview` so a reload re-takes the running window instead of
   starting a second simulation beside it; a preview reached with no opener says so and boots
   nothing, which is what the audits see. `src/scripts/playground-preview-protocol.ts` is the
-  message contract both sides import.
+  message contract both sides import. The first-run hint above the stage
+  (`PlaygroundHint.astro`, `/playground/` only) remembers its Dismiss in `localStorage` under
+  `beinsiculous.playground.hint`.
 - **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
   `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
   `PlaygroundEmbed.astro`’s default changes.

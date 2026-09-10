@@ -1,0 +1,80 @@
+---
+/**
+ * The Web Playground's first-run hint: one line telling a new visitor the
+ * shortest path from an open editor to a change they can see running.
+ *
+ * Rendered first in PlaygroundEmbed's head region, above the stage. The copy
+ * names no entity: the page opens whichever project the URL or the Project
+ * select asked for, and the hint never re-renders. The markup
+ * is static and visible by default, so nothing has to be announced and the
+ * audits see it on a page whose editor boots; the gate's browser fails the
+ * WebGPU probe, so there the embed script hides it with the stage. The inline
+ * script hides it again before first paint for a visitor who has already
+ * dismissed it — same before-paint pattern as AccessibilityBootScript.astro.
+ * Storage key kept in sync with README's "The editor bundle".
+ */
+---
+
+<p id="playground-hint" class="playground-hint">
+  Pick an entity in the Hierarchy, change its colour in the Inspector, then press Play ↗
+  <button type="button" id="playground-hint-dismiss" class="btn-hint-dismiss">Dismiss</button>
+</p>
+
+<script is:inline>
+  (() => {
+    const HINT_KEY = "beinsiculous.playground.hint";
+    const hint = document.getElementById("playground-hint");
+    if (!hint) return;
+
+    try {
+      if (localStorage.getItem(HINT_KEY) === "dismissed") {
+        hint.hidden = true;
+        hint.dataset.dismissed = "true";
+      }
+    } catch {
+      // Storage blocked or unavailable: show the hint, which is the default.
+    }
+
+    document.getElementById("playground-hint-dismiss")?.addEventListener("click", () => {
+      hint.hidden = true;
+      // The embed script reads this when a retried boot restores the hint.
+      hint.dataset.dismissed = "true";
+      try {
+        localStorage.setItem(HINT_KEY, "dismissed");
+      } catch {
+        // Storage blocked: the hint stays gone for this page view only.
+      }
+      // The dismissed button held focus, so hand it to the workspace rather
+      // than dropping it on <body>.
+      document.getElementById("main")?.focus();
+    });
+  })();
+</script>
+
+<style>
+  .playground-hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-bright);
+  }
+
+  .btn-hint-dismiss {
+    background: var(--surface-raised);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .btn-hint-dismiss:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+</style>
