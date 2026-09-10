@@ -108,7 +108,7 @@ const anyStoneActive = stones.some((item) => isActive(item));
 
   function applyFocus() {
     if (!(details instanceof HTMLDetailsElement) || !panel || !summary) return;
-    details.open = false;                              // a keep change never leaves the strip open (gemini F3, round 2)
+    details.open = false;                              // a keep change never leaves the strip open
     panel.append(...stoneLinks);                       // fold everything back, in faceNav() order — idempotent
     const byCategory = new Map(stoneLinks.map((link) => [link.dataset.category, link]));
     const promoted = storedFocusKeys().map((key) => byCategory.get(key)).filter((link) => link !== undefined);
