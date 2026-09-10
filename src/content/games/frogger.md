@@ -3,7 +3,7 @@ title: 'Insiculous Frogger'
 blurb: 'Five lanes of traffic, five of water, diving turtles — and a crocodile in the home row.'
 status: 'playable'
 wasm: '/games/frogger/v2/game.js'
-editor: '/playground/frogger/v1/game.js'
+editor: '/playground/frogger/v2/game.js'
 width: 720
 height: 768
 screenshots: []

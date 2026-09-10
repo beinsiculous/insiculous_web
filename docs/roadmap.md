@@ -134,7 +134,9 @@ What that means for the items this file used to number 1–9:
   review of Sep 8 2026): the editor gets the window, Play opens a reusable game-only preview,
   the first interaction becomes obvious, and loading, saving and failure feel finished — this
   site’s half is the application shell, the preview window, the compatibility panel and the
-  save status.
+  save status. The application shell, the compatibility panel and Play ↗’s preview window
+  (`/playground/preview/`, on the `v2` bundles) are in; the first run and the save status are
+  what is left.
   Scripts are Rhai, edited on the page and run on Play, and an export drops onto the game
   template (`https://github.com/beinsiculous/game-template`) to run natively as a desktop
   build. Each of the six Rust games also opens inside that editor at

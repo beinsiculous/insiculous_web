@@ -2,6 +2,7 @@ export {};
 
 import { createScriptsPanel } from './playground-scripts-panel.ts';
 import { probeWebGpu, describeWebGpuFailure } from './webgpu-gate.ts';
+import { createPreviewLaunch } from './playground-preview-launch.ts';
 
 const embed = document.querySelector('.playground-embed');
 const src = embed?.getAttribute('data-wasm-src');
@@ -25,6 +26,9 @@ const compatibilityRetry = document.getElementById(
   'compatibility-retry'
 ) as HTMLButtonElement | null;
 const stage = embed?.querySelector<HTMLElement>('.stage') ?? null;
+const playButton = document.getElementById('play-button') as HTMLButtonElement | null;
+const previewBlocked = document.getElementById('preview-blocked');
+const previewRetry = document.getElementById('preview-retry') as HTMLButtonElement | null;
 
 function downloadBytes(data: Uint8Array | Blob, filename: string) {
   const isZip = filename.endsWith('.zip');
@@ -85,7 +89,9 @@ type PlaygroundModule = {
   playground_dispatch: (line: string) => boolean;
   playground_poll_responses: () => string[];
   playground_is_dirty: () => boolean;
-  playground_export_zip: () => Uint8Array;
+  playground_export_zip: () => Promise<Uint8Array>;
+  playground_snapshot: (generation: bigint) => Promise<{ sceneEntry: string; bytes: Uint8Array }>;
+  playground_set_preview_open: (open: boolean) => void;
   playground_import_zip: (bytes: Uint8Array) => Promise<string>;
   playground_read_file_bytes: (path: string) => Uint8Array;
   playground_conflicted_paths: () => string[];
@@ -123,6 +129,19 @@ function wireControls(wasm: PlaygroundModule) {
 
   const searchParams = new URLSearchParams(window.location.search);
   let currentSlug = searchParams.get('project') || '';
+
+  const previewLaunch = createPreviewLaunch({
+    wasm,
+    playButton,
+    blockedAlert: previewBlocked,
+    retryButton: previewRetry,
+    banner,
+    canvas: () => document.getElementById('game-canvas'),
+    // The select carries the titles the manifest named; before it is filled the slug
+    // is the only name the page has.
+    title: () =>
+      projectSelect?.selectedOptions[0]?.textContent?.trim() || currentSlug || 'Preview',
+  });
   // A confirmed switch or reset navigates on purpose; without this flag the
   // beforeunload handler below would ask a second time on top of the confirm.
   let leavingByChoice = false;
@@ -253,6 +272,7 @@ function wireControls(wasm: PlaygroundModule) {
     }
 
     if (exportButton) exportButton.disabled = false;
+    previewLaunch.enable();
     if (saveButton) saveButton.disabled = false;
     if (importInput) importInput.disabled = false;
     if (commandInput) commandInput.disabled = false;
@@ -340,12 +360,18 @@ function wireControls(wasm: PlaygroundModule) {
   }
 
   if (exportButton) {
-    exportButton.addEventListener('click', () => {
+    // The export is answered on a later frame, so the button stays disabled from the
+    // click until it settles: a second click would file a second archive of the same
+    // world and download both.
+    exportButton.addEventListener('click', async () => {
+      exportButton.disabled = true;
       try {
-        const bytes = wasm.playground_export_zip();
+        const bytes = await wasm.playground_export_zip();
         downloadBytes(bytes, `${currentSlug}.zip`);
       } catch (error) {
         if (banner) banner.textContent = String(error);
+      } finally {
+        exportButton.disabled = false;
       }
     });
   }

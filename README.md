@@ -151,7 +151,7 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   (`game.js`, `game_bg.wasm`, `assets/`, no `achievements.json` — an editor session
   records nothing). A games entry's `editor:` path points at its glue, and that field
   is what builds the game a `/playground/<slug>/` page. Built by the engine's
-  `scripts/build_wasm.sh ../games/<crate> <slug> --kind editor --version v1 --sync
+  `scripts/build_wasm.sh ../games/<crate> <slug> --kind editor --version v2 --sync
   ../insiculous_web/public`; the invocations of record are in the engine's
   `docs/WEB_PLAYGROUND.md` § The game bundles.
 - A games entry’s `playgroundProject:` names a bundled *data* project (`assets/projects.json`)
@@ -174,7 +174,18 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   the engine can honour only before its event loop started, a screenshot of the real thing, and
   the game template as the native way to run it.
 - **One embed per page**: the engine finds `#game-canvas` and uses module-level singletons,
-  so the route hosts exactly one embed.
+  so the route hosts exactly one embed — and that includes the preview route, which boots the
+  same bundle with a different mode rather than a second embed beside the editor.
+- **Play ↗ opens `/playground/preview/`**, a window of its own running the same playground
+  bundle with `?mode=preview`: the game alone, no editor, no store, nothing persisted. The
+  editor hands it the live scene as a zip over `postMessage`, and every message carries the
+  launch’s generation so a late answer from a window the visitor already closed is dropped.
+  Only one preview per editor tab, named `playground-preview-<tabId>`, and while one is open
+  the editor refuses its own Play. The editor remembers it in `sessionStorage` under
+  `beinsiculous.playground.preview` so a reload re-takes the running window instead of
+  starting a second simulation beside it; a preview reached with no opener says so and boots
+  nothing, which is what the audits see. `src/scripts/playground-preview-protocol.ts` is the
+  message contract both sides import.
 - **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
   `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
   `PlaygroundEmbed.astro`’s default changes.

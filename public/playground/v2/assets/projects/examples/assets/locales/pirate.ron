@@ -1,0 +1,24 @@
+// Pirate locale for the examples — proves per-locale fonts: switching to
+// this locale swaps the UI's default font to BlackSamsGold.
+LocaleFile(
+    version: 1,
+    display_name: "Pirate",
+    // Relative to the asset base path (the examples/ directory).
+    font: Some("assets/fonts/BlackSamsGold-ej5e.ttf"),
+    strings: {
+        "panel.title": "Ship's Riggin'",
+        "panel.score": "Booty",
+        "panel.coins": "doubloons",
+        "panel.state": "Bearin'",
+        "panel.volume": "Loudness:",
+        "panel.volume_bar": "Grog Gauge:",
+        "panel.music_play": "Strike Up",
+        "panel.music_pause": "Belay",
+        "panel.reset": "Heave To",
+        "panel.toggle_ui": "H: Stow the Chart",
+        "panel.font_on": "Scrawl: AYE",
+        "panel.font_off": "Scrawl: NAY",
+        "scene.title": "AHOY WORLD",
+        "scene.hint": "L swaps yer tongue",
+    },
+)

@@ -22,7 +22,7 @@ interface Props {
 }
 
 const {
-  src = '/playground/v1/game.js',
+  src = '/playground/v2/game.js',
   width = 1280,
   height = 800,
   screenshot = '/images/platformer-in-editor-2026-08.png',
@@ -36,6 +36,13 @@ const {
       <p id="playground-banner" class="playground-banner" role="alert"></p>
       <div id="import-rejection-actions" class="banner-actions"></div>
       <div id="conflicted-actions" class="banner-actions"></div>
+      {/* Static, so a blocked popup shows a live region the browser has already
+          announced the existence of rather than one built after the refusal. */}
+      <p id="preview-blocked" class="playground-banner" role="alert" hidden>
+        Your browser blocked the preview window.
+        <button type="button" id="preview-retry" class="btn-banner-action">Try again</button>
+        — or press F5 in the editor to play here.
+      </p>
     </div>
     <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
     <CompatibilityPanel screenshot={screenshot} screenshotAlt={screenshotAlt} />
