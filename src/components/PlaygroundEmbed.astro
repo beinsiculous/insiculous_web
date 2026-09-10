@@ -1,146 +1,112 @@
 ---
 /**
- * Embed area for the Web Playground WASM build.
+ * The Web Playground's workspace: the boot status, the banner, the canvas
+ * stage and the dock beneath it.
  *
- * Renders the WebGPU gate, boot status (#game-loading), persistence banner
- * (#playground-banner), canvas placeholder (#game-canvas), project controls,
- * command API console, and keyboard shortcuts.
+ * The bar controls are not here — they belong to the page, which slots
+ * PlaygroundToolbar.astro into AppLayout's bar. What stays is what fills the
+ * window: a three-row grid whose middle row is the canvas, so the editor
+ * grows with the viewport instead of sitting in a reading column.
  *
  * Exactly ONE playground embed per page: the engine binds to fixed DOM IDs
  * and module singletons.
- *
- * `editorGames` is the list of Rust games that have an editor bundle, rendered
- * as a static optgroup in the Project select. The page passes it (it calls
- * `getCollection`), so this component stays presentational like GameEmbed; the
- * boot-time population code fills the data optgroup only and leaves this one
- * alone.
  */
-import EditorShortcuts from './EditorShortcuts.astro';
-
-interface EditorGameLink {
-  slug: string;
-  title: string;
-}
+import CompatibilityPanel from './CompatibilityPanel.astro';
 
 interface Props {
   src?: string;
   width?: number;
   height?: number;
-  editorGames?: EditorGameLink[];
+  screenshot?: string;
+  screenshotAlt?: string;
 }
 
 const {
   src = '/playground/v1/game.js',
   width = 1280,
   height = 800,
-  editorGames = [],
+  screenshot = '/images/platformer-in-editor-2026-08.png',
+  screenshotAlt = 'The Insiculous 2D scene editor in a browser, a platformer scene open in it',
 } = Astro.props;
 ---
 
 <div class="playground-embed" data-wasm-src={src}>
-  <div class="banner-region">
-    <p id="playground-banner" class="playground-banner" role="alert"></p>
-    <div id="import-rejection-actions" class="banner-actions"></div>
-    <div id="conflicted-actions" class="banner-actions"></div>
-  </div>
-  <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
-
-  <div class="toolbar" role="group" aria-label="Playground project controls">
-    <div class="field-group">
-      <label for="project-select">Project</label>
-      <select id="project-select" name="project" disabled>
-        <optgroup id="project-select-data" label="Projects">
-          <option value="examples">Examples</option>
-        </optgroup>
-        {
-          editorGames.length > 0 && (
-            <optgroup label="Rust games (layout only — rules are compiled in)">
-              {editorGames.map((game) => (
-                <option value={`/playground/${game.slug}/`}>{game.title}</option>
-              ))}
-            </optgroup>
-          )
-        }
-      </select>
+  <div class="head-region">
+    <div class="banner-region">
+      <p id="playground-banner" class="playground-banner" role="alert"></p>
+      <div id="import-rejection-actions" class="banner-actions"></div>
+      <div id="conflicted-actions" class="banner-actions"></div>
     </div>
-    <div class="reset-group">
-      <button type="button" id="reset-button" class="btn-reset" disabled hidden>
-        Reset to bundled
-      </button>
-      <span id="reset-note" class="reset-note" hidden></span>
-    </div>
-    <div class="archive-group">
-      <button type="button" id="export-button" class="btn-toolbar" disabled>
-        Export project
-      </button>
-      <label for="import-input" class="label-import">Import project</label>
-      <input
-        type="file"
-        id="import-input"
-        class="input-file"
-        accept=".zip,application/zip"
-        disabled
-      />
-    </div>
+    <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
+    <CompatibilityPanel screenshot={screenshot} screenshotAlt={screenshotAlt} />
   </div>
 
-  <canvas
-    id="game-canvas"
-    width={width}
-    height={height}
-    tabindex="0"
-    role="img"
-    aria-label="Web Playground — scene editor canvas; focus it to edit and play"
-  >
-    The Web Playground runs on an HTML canvas and needs a keyboard and mouse. The
-    controls are listed below the editor.
-  </canvas>
-
-  <div class="scripts-section">
-    <div class="scripts-toolbar">
-      <label for="script-select" class="scripts-label">Script</label>
-      <select id="script-select" class="script-select" disabled>
-        <option value="">No scripts</option>
-      </select>
-      <button type="button" id="script-save" class="btn-script-save" disabled>
-        Save
-      </button>
-      <output id="script-status" class="script-status" aria-live="polite" for="script-source script-save"></output>
-    </div>
-    <label for="script-source" class="visually-hidden">Script source</label>
-    <textarea
-      id="script-source"
-      class="script-source"
-      placeholder="Select a script above…"
-      autocomplete="off"
-      spellcheck="false"
-      disabled
-    ></textarea>
-    <output id="script-runtime-errors" class="script-runtime-errors" aria-live="polite"></output>
+  <div class="stage">
+    <canvas
+      id="game-canvas"
+      width={width}
+      height={height}
+      tabindex="0"
+      role="img"
+      aria-label="Web Playground — scene editor canvas; focus it to edit and play"
+    >
+      The Web Playground runs on an HTML canvas and needs a keyboard and mouse. The
+      controls are in the dock below the editor and in Help.
+    </canvas>
   </div>
 
-  <div class="console-section">
-    <form id="command-form" class="command-form">
-      <label for="command-input">Command API</label>
-      <div class="command-row">
-        <input
-          type="text"
-          id="command-input"
-          class="command-input"
-          placeholder="e.g. list"
+  <details id="dock" class="dock">
+    <summary>Scripts and console</summary>
+    {/* The body scrolls at narrow widths, so it is focusable and named — axe's
+        scrollable-region-focusable, the same shape /profile/'s achievements box uses. */}
+    <div class="dock-body" tabindex="0" role="group" aria-label="Scripts and console">
+      <section class="scripts-section" aria-labelledby="scripts-heading">
+        <h2 id="scripts-heading">Scripts</h2>
+        <div class="scripts-toolbar">
+          <label for="script-select" class="scripts-label">Script</label>
+          <select id="script-select" class="script-select" disabled>
+            <option value="">No scripts</option>
+          </select>
+          <button type="button" id="script-save" class="btn-script-save" disabled>
+            Save
+          </button>
+          <output id="script-status" class="script-status" aria-live="polite" for="script-source script-save"></output>
+        </div>
+        <label for="script-source" class="visually-hidden">Script source</label>
+        <textarea
+          id="script-source"
+          class="script-source"
+          placeholder="Select a script above…"
           autocomplete="off"
           spellcheck="false"
           disabled
-        />
-        <button type="submit" id="command-submit" class="btn-send" disabled>
-          Send
-        </button>
-      </div>
-    </form>
-    <output id="command-output" class="command-output" aria-live="polite" for="command-input"></output>
-  </div>
+        ></textarea>
+        <output id="script-runtime-errors" class="script-runtime-errors" aria-live="polite"></output>
+      </section>
 
-  <EditorShortcuts />
+      <section class="console-section" aria-labelledby="console-heading">
+        <h2 id="console-heading">Command</h2>
+        <form id="command-form" class="command-form">
+          <label for="command-input">Command API</label>
+          <div class="command-row">
+            <input
+              type="text"
+              id="command-input"
+              class="command-input"
+              placeholder="e.g. list"
+              autocomplete="off"
+              spellcheck="false"
+              disabled
+            />
+            <button type="submit" id="command-submit" class="btn-send" disabled>
+              Send
+            </button>
+          </div>
+        </form>
+        <output id="command-output" class="command-output" aria-live="polite" for="command-input"></output>
+      </section>
+    </div>
+  </details>
 </div>
 
 <script>
@@ -149,13 +115,15 @@ const {
 
 <style>
   .playground-embed {
-    background: var(--surface);
-    border: 1px solid var(--border-bright);
-    border-radius: 10px;
-    margin: 1.5rem 0 2rem;
-    padding: 1rem;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-width: 0;
+    min-height: 0;
     box-sizing: border-box;
-    max-width: 100%;
+  }
+
+  .head-region {
+    min-width: 0;
   }
 
   .status {
@@ -176,131 +144,6 @@ const {
     text-align: center;
     min-height: 1.2em;
     margin: 0 0 0.6rem;
-  }
-
-  .toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .field-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    max-width: 100%;
-    /* The Rust-games optgroup's label is wider than the select's other content,
-       and an unconstrained flex item is sized by that intrinsic width — at large
-       text settings it pushed the page into a sideways scroll. min-width lets the
-       select shrink to the line instead. */
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .field-group label {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    flex-shrink: 0;
-  }
-
-  .field-group select {
-    background: var(--surface-raised);
-    color: var(--text-bright);
-    border: 1px solid var(--border-bright);
-    border-radius: 4px;
-    padding: 0.3rem 0.6rem;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .reset-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .btn-reset {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    padding: 0.3rem 0.6rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-
-  .btn-reset:hover:not(:disabled) {
-    background: var(--accent);
-    color: var(--bg);
-  }
-
-  .btn-reset:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .reset-note {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    font-style: italic;
-  }
-
-  .archive-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
-  .btn-toolbar {
-    background: var(--surface-raised);
-    color: var(--text-bright);
-    border: 1px solid var(--border-bright);
-    border-radius: 4px;
-    padding: 0.3rem 0.6rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-
-  .btn-toolbar:hover:not(:disabled) {
-    background: var(--accent);
-    color: var(--bg);
-  }
-
-  .btn-toolbar:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .label-import {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .input-file {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-bright);
-    max-width: 100%;
-  }
-
-  .input-file:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
   }
 
   .banner-actions {
@@ -327,22 +170,71 @@ const {
     color: var(--bg);
   }
 
-  /* :global — the engine REPLACES the placeholder canvas with winit's own
-     element, which lacks Astro’s scoping attribute. */
-  .playground-embed :global(canvas) {
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
+  .stage {
+    min-width: 0;
+    min-height: 0;
     background: #000;
-    outline: none;
     border-radius: 4px;
+    overflow: hidden;
   }
 
-  .scripts-section {
-    margin-top: 1rem;
+  /* :global because winit's canvas — which REPLACES the placeholder at boot — carries
+     no scoping attribute, and !important because winit writes width and height inline
+     once at creation and only !important beats an inline declaration. The canvas box
+     is then the stage's grid area, so a window resize, the dock opening or fullscreen
+     changes the box and the engine follows it on Resized. */
+  .playground-embed :global(canvas) {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    display: block;
+    background: #000;
+    outline: none;
+  }
+
+  .dock {
+    margin-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    min-width: 0;
+  }
+
+  .dock > summary {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0.4rem 0;
+  }
+
+  /* The dock is a row of the workspace grid, not an overlay: opening it shrinks the
+     stage rather than covering the editor's own status bar. */
+  .dock-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-height: min(40dvh, 22rem);
+    overflow: auto;
+    min-width: 0;
+  }
+
+  @media (min-width: 66rem) {
+    .dock-body {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .dock-body h2 {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--text-bright);
+  }
+
+  .scripts-section,
+  .console-section {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 0;
   }
 
   .scripts-toolbar {
@@ -434,13 +326,6 @@ const {
     color: var(--accent);
     white-space: pre-wrap;
     word-break: break-word;
-  }
-
-  .console-section {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
   .command-form {

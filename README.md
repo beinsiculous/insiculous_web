@@ -162,6 +162,17 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   lists bundled project manifests, and each project’s data lives under
   `assets/projects/<slug>/assets/`.
 - **The canvas carries no padding and no border**: the engine sizes its surface from `#game-canvas`’s client box and winit reads the pointer from its padding edge, so a padded or bordered canvas would draw blurred and hit-test off by the padding; style the wrapper, never the canvas.
+- **The editor pages are an application shell, not a document**: `/playground/` and
+  `/playground/<slug>/` render on `src/layouts/AppLayout.astro` rather than `BaseLayout.astro` — a
+  three-row body grid whose middle row is the workspace, an app bar carrying the wordmark, the
+  accessibility controls, the page’s `<h1>` and `PlaygroundToolbar.astro`, and a one-line footer.
+  The canvas fills a `.stage` grid cell (the one `!important` rule on the site, because winit
+  writes the canvas’s width and height inline at creation), the Scripts and Command panels sit in
+  the `#dock` disclosure below it, and the page’s prose lives in `PlaygroundHelp.astro`, a native
+  `<dialog>` opened from the bar. A browser that fails the WebGPU probe in
+  `src/scripts/webgpu-gate.ts` gets `CompatibilityPanel.astro` instead: what failed, a Try again
+  the engine can honour only before its event loop started, a screenshot of the real thing, and
+  the game template as the native way to run it.
 - **One embed per page**: the engine finds `#game-canvas` and uses module-level singletons,
   so the route hosts exactly one embed.
 - **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
@@ -172,7 +183,7 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `https://github.com/beinsiculous/game-template` — `rm -rf assets/scenes assets/scripts && unzip -o <slug>.zip -x README.md -d .`
   from the clone’s root, the template’s own scene and scripts cleared first because the game
   loads whichever scene sorts first — and `cargo run` plays it natively.
-- **Script editing**: the Scripts panel under the canvas opens any of the project’s `.rhai`
+- **Script editing**: the Scripts panel in the dock below the canvas opens any of the project’s `.rhai`
   files; Save runs the syntax check and refuses a broken file, and runtime errors from Play
   appear beneath the textarea. `docs/SCRIPTING.md` is the author contract.
 

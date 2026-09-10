@@ -1,0 +1,89 @@
+---
+/**
+ * What a browser without WebGPU gets instead of the editor.
+ *
+ * Static markup, hidden until the gate in src/scripts/webgpu-gate.ts fails —
+ * the embed's script fills #compatibility-reason and unhides it. Nothing in
+ * the browser can demo the engine without WebGPU, so the honest alternative
+ * is a real screenshot of the thing and the native way to run it.
+ */
+interface Props {
+  screenshot: string;
+  screenshotAlt: string;
+}
+
+const { screenshot, screenshotAlt } = Astro.props;
+---
+
+<section id="compatibility-panel" class="compatibility-panel" hidden aria-labelledby="compatibility-title">
+  <h2 id="compatibility-title">This browser can’t run it yet</h2>
+  <p id="compatibility-reason" class="compatibility-reason"></p>
+  <p>
+    This page renders with WebGPU, which Chrome and Edge ship on. In Firefox, enable <code
+    >dom.webgpu.enabled</code> in <code>about:config</code> and fully restart the browser.
+  </p>
+  <p>
+    <button type="button" id="compatibility-retry" class="btn-retry">Try again</button>
+  </p>
+  <img src={screenshot} alt={screenshotAlt} class="compatibility-shot" loading="lazy" />
+  <p>
+    To run the engine natively instead, clone the <a href="https://github.com/beinsiculous/game-template"
+    >game template</a> and run <code>cargo run</code> — the same engine, off the browser entirely.
+  </p>
+</section>
+
+<style>
+  .compatibility-panel {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    padding: 1rem;
+    max-width: 46rem;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .compatibility-panel h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+  }
+
+  .compatibility-panel p {
+    margin: 0 0 0.75rem;
+  }
+
+  .compatibility-reason {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  .compatibility-shot {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+  }
+
+  .btn-retry {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.35rem 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .btn-retry:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-retry:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

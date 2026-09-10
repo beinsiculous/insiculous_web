@@ -34,6 +34,8 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
     title={game.data.title}
     width={game.data.width}
     height={game.data.height}
+    screenshot={game.data.screenshots[0]}
+    screenshotAlt={game.data.screenshots[0] && `${game.data.title} running in a browser`}
   />
 
   <article>

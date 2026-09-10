@@ -1,0 +1,241 @@
+---
+/**
+ * The editor's bar controls, rendered into AppLayout's `bar` slot.
+ *
+ * Two shapes, because the two editor surfaces carry different work. With
+ * `projectControls` the bar is the Web Playground's: the Project select and
+ * everything that acts on a project. Without it — a Rust game's editor page,
+ * where nothing persists — the caller slots its own nav in and only
+ * Fullscreen and Help remain.
+ *
+ * The ids are the engine-facing contract: src/scripts/playground-embed.ts
+ * finds every project control by id, so they do not change with the markup.
+ */
+interface EditorGameLink {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  editorGames?: EditorGameLink[];
+  projectControls?: boolean;
+}
+
+const { editorGames = [], projectControls = true } = Astro.props;
+---
+
+<div class="bar-controls" role="group" aria-label="Editor controls">
+  <slot />
+
+  {
+    projectControls && (
+      <>
+        <div class="field-group">
+          <label for="project-select">Project</label>
+          <select id="project-select" name="project" disabled>
+            <optgroup id="project-select-data" label="Projects">
+              <option value="examples">Examples</option>
+            </optgroup>
+            {editorGames.length > 0 && (
+              <optgroup label="Rust games">
+                {editorGames.map((game) => (
+                  <option value={`/playground/${game.slug}/`}>{game.title}</option>
+                ))}
+              </optgroup>
+            )}
+          </select>
+          {editorGames.length > 0 && (
+            <span class="bar-note">Rust games are layout only — their rules are compiled in</span>
+          )}
+        </div>
+        <output id="save-status" class="bar-note" aria-live="polite" for="project-select"></output>
+        <button type="button" id="save-button" class="btn-toolbar" disabled>Save</button>
+        <button
+          type="button"
+          id="play-button"
+          class="btn-toolbar"
+          disabled
+          title="The preview window lands in the next batch">Play ↗</button>
+        <div class="archive-group">
+          <button type="button" id="export-button" class="btn-toolbar" disabled>
+            Export project
+          </button>
+          <label for="import-input" class="label-import">Import project</label>
+          <input
+            type="file"
+            id="import-input"
+            class="input-file"
+            accept=".zip,application/zip"
+            disabled
+          />
+        </div>
+        <div class="reset-group">
+          <button type="button" id="reset-button" class="btn-reset" disabled hidden>
+            Reset to bundled
+          </button>
+          <span id="reset-note" class="reset-note" hidden></span>
+        </div>
+      </>
+    )
+  }
+
+  <button type="button" id="fullscreen-button" class="btn-toolbar" aria-pressed="false" hidden>
+    Fullscreen
+  </button>
+  <button type="button" id="help-button" class="btn-toolbar" aria-haspopup="dialog">Help</button>
+</div>
+
+<script>
+  // Fullscreen takes the whole document, not the canvas: the app bar carries the
+  // accessibility controls and Help, and a canvas-only fullscreen would hide both.
+  // The name never flips to "Exit" — aria-pressed is what says which state it is in,
+  // and a label that changes under the pointer is the harder thing to hit twice.
+  const fullscreenButton = document.getElementById('fullscreen-button') as HTMLButtonElement | null;
+  if (fullscreenButton && document.fullscreenEnabled) {
+    fullscreenButton.hidden = false;
+    fullscreenButton.addEventListener('click', async () => {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch {
+        // A refused request leaves the state alone; fullscreenchange never fires.
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      fullscreenButton.setAttribute('aria-pressed', document.fullscreenElement ? 'true' : 'false');
+    });
+  }
+</script>
+
+<style>
+  .bar-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .field-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+    /* The Rust-games optgroup's label used to carry the parenthetical beside it,
+       and an unconstrained flex item is sized by that intrinsic width — at large
+       text settings it pushed the page into a sideways scroll. The note is its own
+       element now, and min-width lets the select shrink to the line as well. */
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .field-group label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .field-group select {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .bar-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+    min-width: 0;
+  }
+
+  .reset-group,
+  .archive-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .btn-reset:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-reset:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .reset-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .btn-toolbar {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .btn-toolbar:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-toolbar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .label-import {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .input-file {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-bright);
+    max-width: 100%;
+  }
+
+  .input-file:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>

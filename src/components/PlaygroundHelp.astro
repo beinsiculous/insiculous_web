@@ -1,0 +1,154 @@
+---
+/**
+ * The editor's Help, as a native modal dialog opened from the bar's Help button.
+ *
+ * showModal() brings the focus trap, Escape and focus restore, so there is no
+ * focus management to get wrong — the same rule src/lib/profile-name-dialog.js
+ * states. The markup is static: the dialog is in the page whether or not the
+ * engine ever boots, which is the point of a Help that never disables.
+ *
+ * `projectHelp` is the Web Playground's own prose. A Rust game's editor page
+ * persists nothing, so it turns that off and slots in what its surface owes
+ * the reader instead.
+ */
+import EditorShortcuts from './EditorShortcuts.astro';
+
+interface Props {
+  saveLine?: string;
+  projectHelp?: boolean;
+}
+
+const { saveLine, projectHelp = true } = Astro.props;
+---
+
+<dialog id="playground-help" class="playground-help" aria-labelledby="playground-help-title">
+  <div class="help-body">
+    <h2 id="playground-help-title">Using the editor</h2>
+
+    <slot />
+
+    {
+      projectHelp && (
+        <>
+          <h3>Saving</h3>
+          <p>
+            Projects and scenes are saved in this browser. When you press <kbd>Ctrl+S</kbd> to save a
+            scene, modified files are committed locally. The bundled samples provide a starting
+            point; if you ever wish to discard local edits, use the <em>Reset to bundled</em> button
+            to restore the original version. To keep building outside the browser, <em
+            >Export project</em> and drop the archive onto a clone of the <a
+            href="https://github.com/beinsiculous/game-template">game template</a>, a game whose
+            gameplay is exactly what you just exported.
+          </p>
+
+          <h3>Scripts</h3>
+          <p>
+            Data projects attach gameplay scripts written in <a href="https://rhai.rs">Rhai</a>.
+            Select any script from the project to view and edit its code in the Scripts panel.
+            Pressing <kbd>Ctrl+S</kbd> inside the script editor verifies syntax and saves the script
+            directly to browser storage; runtime errors surface during Play mode.
+          </p>
+
+          <h3>Rust games in the editor</h3>
+          <p>
+            The six Rust games open inside this same editor, each at its own page — pick one from
+            the <em>Rust games</em> group in the Project select. Those pages are layout only: the
+            entities are live and editable, the rules are compiled into the game, and nothing you
+            change there persists.
+          </p>
+
+          <h3>Command API</h3>
+          <p>
+            The editor exposes its command interface to the browser through WebAssembly. You can
+            inspect entities and scene state using commands like <code>list</code> in the Command
+            panel of the dock.
+          </p>
+
+          <h3>Technical notes</h3>
+          <p>
+            Browser storage is IndexedDB, held by this origin and never uploaded. Rendering is
+            WebGPU; the editor is the engine’s own editor compiled to WebAssembly.
+          </p>
+        </>
+      )
+    }
+
+    <EditorShortcuts headingLevel={3} saveLine={saveLine} />
+
+    <form method="dialog">
+      <button type="submit" class="btn-close">Close</button>
+    </form>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('playground-help') as HTMLDialogElement | null;
+  const helpButton = document.getElementById('help-button');
+  if (dialog && helpButton) {
+    helpButton.addEventListener('click', () => {
+      if (!dialog.open) dialog.showModal();
+    });
+  }
+</script>
+
+<style>
+  /* The tokens are .name-dialog's in src/styles/global.css; Help is wider because it
+     carries prose and the shortcut table, and scrolls inside itself rather than past
+     the viewport. */
+  .playground-help {
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    width: min(40rem, calc(100vw - 2rem));
+    max-width: 100%;
+    max-height: 85dvh;
+    overflow: auto;
+  }
+
+  .playground-help::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .help-body {
+    padding: 1.1rem;
+  }
+
+  .help-body h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  /* :global — a caller's slotted h3 carries the page's scope, not this component's. */
+  .help-body :global(h3) {
+    margin: 1.1rem 0 0.3rem;
+    font-size: 0.95rem;
+  }
+
+  .help-body p {
+    margin: 0;
+  }
+
+  .btn-close {
+    margin-top: 1.2rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .help-body kbd {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 3px;
+    padding: 0.1rem 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>

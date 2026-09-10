@@ -125,9 +125,9 @@ export const SEED_FED_ROUTES = new Set([
  *  string fails the gate and skips the audit), waitFor (the selector that proves it opened) }.
  *
  *  The profile-name dialog (src/lib/profile-name-dialog.js) is built in JavaScript and exists only once
- *  something opens it, so neither the page sweep nor postbuild-check (static HTML) can see it. It is the
- *  site's only <dialog>, and its CSS is written twice — global.css for the studio pages, faces.css for
- *  the face — so it is opened on one page of each. The two entries want opposite states: /profile/'s
+ *  something opens it, so neither the page sweep nor postbuild-check (static HTML) can see it. Its CSS
+ *  is written twice — global.css for the studio pages, faces.css for the face — so it is opened on one
+ *  page of each. The two entries want opposite states: /profile/'s
  *  Duplicate control is hidden until a profile is saved, while /fortknight/achievements/ opens the
  *  first-achievement prompt at boot only when achievements exist and no profile is saved.
  *
@@ -138,6 +138,15 @@ export const SEED_FED_ROUTES = new Set([
  *  rules in faces.css), and a keep focusing on every stone, where the pill is hidden and seven are
  *  promoted. Each entry first asserts the partition it expects, so promotion — which the script does
  *  at boot and no other gate can observe — fails the build with the counts it saw. */
+/** Opens the editor pages' Help: static markup, but display: none until showModal(), so the page
+ *  sweep sees none of its prose. Both editor surfaces render one, and their contents differ. */
+const openHelpDialog = () => {
+  const button = document.getElementById("help-button");
+  if (!button) return "no #help-button on the page — the a11y pass over Help did not run";
+  button.click();
+  return true;
+};
+
 export const OPENED_ELEMENT_ROUTES = [
   {
     route: "/profile/",
@@ -226,6 +235,56 @@ export const OPENED_ELEMENT_ROUTES = [
       if (!menu || !details) return "details.menu or details.nav-peripheral not found";
       menu.open = true;
       details.open = true;
+      return true;
+    },
+  },
+  {
+    route: "/playground/",
+    seed: {},
+    label: "help dialog",
+    waitFor: "dialog#playground-help[open]",
+    open: openHelpDialog,
+  },
+  {
+    // The prose-heavy dialog at the width the phone pass exists for.
+    route: "/playground/",
+    seed: {},
+    label: "help dialog, phone",
+    viewport: { width: 390, height: 844 },
+    waitFor: "dialog#playground-help[open]",
+    open: openHelpDialog,
+  },
+  {
+    route: "/playground/pong/",
+    seed: {},
+    label: "help dialog",
+    waitFor: "dialog#playground-help[open]",
+    open: openHelpDialog,
+  },
+  {
+    // axe prunes a closed <details>, so the dock's two panels are audited only open — at both
+    // widths, because the dock lays out in two columns from 66rem and one below it.
+    route: "/playground/",
+    seed: {},
+    label: "dock",
+    waitFor: "details#dock[open]",
+    open: () => {
+      const dock = document.getElementById("dock");
+      if (!(dock instanceof HTMLDetailsElement)) return "details#dock not found";
+      dock.open = true;
+      return true;
+    },
+  },
+  {
+    route: "/playground/",
+    seed: {},
+    label: "dock, phone",
+    viewport: { width: 390, height: 844 },
+    waitFor: "details#dock[open]",
+    open: () => {
+      const dock = document.getElementById("dock");
+      if (!(dock instanceof HTMLDetailsElement)) return "details#dock not found";
+      dock.open = true;
       return true;
     },
   },

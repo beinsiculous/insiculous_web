@@ -129,7 +129,7 @@ What that means for the items this file used to number 1–9:
   there: high scores, and gesture-gated audio.
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
   WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
-  and work with projects stored in the browser’s IndexedDB, exported and imported as zip.
+  and work with projects saved in this browser, exported and imported as zip.
   Next is the **Playground UX** sprint (milestone here and in `insiculous_2d`, from Astra’s
   review of Sep 8 2026): the editor gets the window, Play opens a reusable game-only preview,
   the first interaction becomes obvious, and loading, saving and failure feel finished — this

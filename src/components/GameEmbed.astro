@@ -16,7 +16,13 @@
  * fixed id `game-canvas`, so a second playable embed on the same page will
  * not initialize. Game detail pages render exactly one by construction; a
  * future multi-game page needs engine-side scoping first.
+ *
+ * With `fill` the embed is a workspace cell rather than a figure on a page:
+ * no padding, no border and no controls note, and the canvas takes the whole
+ * box it is given. That is the /playground/<slug>/ shape.
  */
+import CompatibilityPanel from './CompatibilityPanel.astro';
+
 interface Props {
   src?: string;
   title: string;
@@ -25,6 +31,11 @@ interface Props {
   height?: number;
   /** What the canvas is, after the title, in its accessible name. */
   canvasLabel?: string;
+  /** Fill the box instead of sitting in a padded, bordered card. */
+  fill?: boolean;
+  /** The still this game shows a browser that cannot run WebGPU, and its alt. */
+  screenshot?: string;
+  screenshotAlt?: string;
 }
 
 const {
@@ -33,31 +44,39 @@ const {
   width = 800,
   height = 600,
   canvasLabel = 'game canvas; focus it to play',
+  fill = false,
+  screenshot = '/images/pong-in-web.png',
+  screenshotAlt = 'Insiculous Pong running in a browser',
 } = Astro.props;
 ---
 
 {
   src ? (
-    <div class="game-embed playable" data-wasm-src={src}>
+    <div class={`game-embed playable${fill ? ' fill' : ''}`} data-wasm-src={src}>
       <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
-      <canvas
-        id="game-canvas"
-        width={width}
-        height={height}
-        tabindex="0"
-        role="img"
-        aria-label={`${title} — ${canvasLabel}`}
-      >
-        {title} runs on an HTML canvas and needs a keyboard or gamepad. The
-        controls are listed below the game.
-      </canvas>
-      <p class="controls-note">
-        <slot name="controls">
-          Click the game to give it keyboard focus. Menus: W/S or arrows to
-          navigate, Space/Enter to confirm, Esc to go back — a gamepad works
-          too. All keys are remappable in the game.
-        </slot>
-      </p>
+      <CompatibilityPanel screenshot={screenshot} screenshotAlt={screenshotAlt} />
+      <div class="stage">
+        <canvas
+          id="game-canvas"
+          width={width}
+          height={height}
+          tabindex="0"
+          role="img"
+          aria-label={`${title} — ${canvasLabel}`}
+        >
+          {title} runs on an HTML canvas and needs a keyboard or gamepad. The
+          controls are listed below the game.
+        </canvas>
+      </div>
+      {!fill && (
+        <p class="controls-note">
+          <slot name="controls">
+            Click the game to give it keyboard focus. Menus: W/S or arrows to
+            navigate, Space/Enter to confirm, Esc to go back — a gamepad works
+            too. All keys are remappable in the game.
+          </slot>
+        </p>
+      )}
     </div>
   ) : (
     <div class="game-embed">
@@ -77,44 +96,73 @@ const {
 }
 
 <script>
+  import { probeWebGpu, describeWebGpuFailure } from '../scripts/webgpu-gate.ts';
+
   const embed = document.querySelector('.game-embed.playable');
   const src = embed?.getAttribute('data-wasm-src');
   const status = document.getElementById('game-loading');
-  if (src) {
-    // Gate BEFORE the import: browsers without WebGPU (or with the API but
-    // no usable adapter) never download the wasm module. An adapter alone is
-    // not proof: the engine then asks for a device at the default limits, and
-    // an adapter that exposes the API without them fails there with a generic
-    // 'Failed to start'. So the gate asks for the same device — default
-    // limits, no features — and releases it before the wasm asks for its own.
-    const gpu = 'gpu' in navigator ? (navigator as any).gpu : null;
-    const adapter = gpu ? await gpu.requestAdapter().catch(() => null) : null;
-    const device = adapter ? await adapter.requestDevice().catch(() => null) : null;
-    device?.destroy();
-    if (!adapter || !device) {
-      if (status)
-        status.textContent =
-          'This game needs WebGPU — available in Chrome and Edge. In Firefox, enable dom.webgpu.enabled in about:config and fully restart the browser.';
-    } else {
-      if (status) status.textContent = 'Loading game…';
-      try {
-        // The Function indirection keeps this import NATIVE in every mode.
-        // A bare import() breaks under `astro dev`: esbuild strips the
-        // @vite-ignore pragma, Vite's analyzer then rewrites the request
-        // (?import) and 500s it — public/ files may not be imported through
-        // the transform pipeline. Built output never had the problem.
-        const dynamicImport = new Function('u', 'return import(u)') as (
-          u: string
-        ) => Promise<{ default: () => Promise<unknown> }>;
-        const init = (await dynamicImport(src)).default;
-        await init();
-        // The engine takes over from here: it swaps its canvas in, clears
-        // the status line, and focuses the game.
-      } catch (e) {
-        if (status) status.textContent = 'Failed to start: ' + e;
-        throw e;
+  const panel = document.getElementById('compatibility-panel');
+  const reason = document.getElementById('compatibility-reason');
+  const retry = document.getElementById('compatibility-retry') as HTMLButtonElement | null;
+  const stage = embed?.querySelector<HTMLElement>('.stage') ?? null;
+
+  // A boot that got as far as a resolved init started the engine's event loop, and a
+  // page holding one cannot boot a second; a boot that never reached it can retry.
+  let booting = false;
+  let initResolved = false;
+
+  async function bootGame(source: string) {
+    if (booting || initResolved) return;
+    booting = true;
+    if (panel) panel.hidden = true;
+    if (stage) stage.hidden = false;
+    try {
+      const probe = await probeWebGpu();
+      if (!probe.ok) {
+        // The status is the live region, so the reason is announced there; the panel
+        // repeats it beside what to do about it, in the canvas's place.
+        const why = describeWebGpuFailure(probe.reason);
+        if (status) status.textContent = `This game needs WebGPU. ${why}`;
+        if (reason) reason.textContent = why;
+        if (panel) panel.hidden = false;
+        if (stage) stage.hidden = true;
+        return;
       }
+
+      if (status) status.textContent = 'Loading game…';
+      // The Function indirection keeps this import NATIVE in every mode.
+      // A bare import() breaks under `astro dev`: esbuild strips the
+      // @vite-ignore pragma, Vite's analyzer then rewrites the request
+      // (?import) and 500s it — public/ files may not be imported through
+      // the transform pipeline. Built output never had the problem.
+      const dynamicImport = new Function('u', 'return import(u)') as (
+        u: string
+      ) => Promise<{ default: () => Promise<unknown> }>;
+      const init = (await dynamicImport(source)).default;
+      await init();
+      initResolved = true;
+      if (retry) retry.disabled = true;
+      // The engine takes over from here: it swaps its canvas in, clears
+      // the status line, and focuses the game.
+    } catch (error) {
+      if (status) status.textContent = 'Failed to start: ' + error;
+      if (reason) {
+        reason.textContent = initResolved
+          ? 'The game stopped after it started. Reload the page to try again.'
+          : String(error);
+      }
+      if (panel) panel.hidden = false;
+      if (stage) stage.hidden = true;
+    } finally {
+      booting = false;
     }
+  }
+
+  if (src) {
+    retry?.addEventListener('click', () => {
+      void bootGame(src);
+    });
+    await bootGame(src);
   }
 </script>
 
@@ -137,6 +185,28 @@ const {
     padding: 1rem;
   }
 
+  .game-embed.fill {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Only the filling embed's stage is a box of its own: on a game page the canvas
+     still sits centred in the card, and a black band either side of it would be new. */
+  .game-embed.fill .stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
   /* :global — the engine REPLACES the placeholder canvas with winit's own
      element, which lacks Astro’s scoping attribute; a scoped rule would die
      at that swap (the launch "uncentered canvas" bug). */
@@ -146,6 +216,16 @@ const {
     max-width: 100%;
     background: #000;
     outline: none;
+  }
+
+  /* :global for the same reason, and !important because winit writes width and
+     height inline once at creation — only !important beats an inline declaration.
+     The canvas box is then the stage's grid area, so a resize or a fullscreen
+     change moves the box and the engine follows it on Resized. */
+  .game-embed.fill :global(canvas) {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0;
   }
 
   .placeholder {
