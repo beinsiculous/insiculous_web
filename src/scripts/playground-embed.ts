@@ -1,6 +1,7 @@
 export {};
 
 import { createScriptsPanel } from './playground-scripts-panel.ts';
+import { createSaveStatus } from './playground-save-status.ts';
 import { probeWebGpu, describeWebGpuFailure } from './webgpu-gate.ts';
 import { createPreviewLaunch } from './playground-preview-launch.ts';
 
@@ -96,6 +97,7 @@ type PlaygroundModule = {
   playground_import_zip: (bytes: Uint8Array) => Promise<string>;
   playground_read_file_bytes: (path: string) => Uint8Array;
   playground_conflicted_paths: () => string[];
+  playground_save_state: () => string;
   playground_list_files: () => string[];
   playground_read_file: (path: string) => string;
   playground_write_file: (path: string, text: string) => void;
@@ -129,6 +131,9 @@ function showCompatibility(message: string) {
  */
 function wireControls(wasm: PlaygroundModule) {
   const scriptsPanel = createScriptsPanel(wasm);
+  const saveStatus = createSaveStatus(wasm, document.getElementById('save-status'), () =>
+    scriptsPanel.isDirty()
+  );
   const isDirty = (): boolean => wasm.playground_is_dirty() || scriptsPanel.isDirty();
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -194,6 +199,8 @@ function wireControls(wasm: PlaygroundModule) {
       }
       if (commandOutput) commandOutput.scrollTop = commandOutput.scrollHeight;
     }
+
+    saveStatus.poll();
 
     const conflicted = wasm.playground_conflicted_paths();
     const pathsChanged =
