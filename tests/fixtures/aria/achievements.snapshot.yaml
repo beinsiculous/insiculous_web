@@ -1,0 +1,123 @@
+- link "Skip to content":
+  - /url: "#main"
+- banner:
+  - navigation "Main":
+    - link "be_insiculous":
+      - /url: /
+    - group
+    - group:
+      - list:
+        - listitem:
+          - link "Home":
+            - /url: /
+        - listitem:
+          - link "Games":
+            - /url: /games/
+        - listitem:
+          - link "[Achievements]":
+            - /url: /achievements/
+        - listitem:
+          - link "Devlog":
+            - /url: /devlog/
+        - listitem:
+          - link "Engine":
+            - /url: /engine/
+        - listitem:
+          - link "FortKnight":
+            - /url: /fortknight/
+      - navigation "Site links":
+        - link "Profile":
+          - /url: /profile/
+          - text: ⚙️
+        - link "Buy me a coffee (opens in a new tab)":
+          - /url: https://ko-fi.com/beinsiculous
+          - text: ☕
+- main:
+  - paragraph: achievements
+  - heading "Achievements" [level=1]
+  - paragraph: "Three kinds live here: the studio’s (insiculous), the games’, and FortKnight’s. Every achievement is listed here — locked entries included, with each game’s full list taken from its own manifest. Everything is recorded on this device only — nothing is uploaded, and no server holds a copy."
+  - heading "Be Insiculous — 0 of 1 unlocked" [level=2]
+  - list:
+    - listitem: Player — Opened the games page. — Locked
+  - heading "Insiculous Pong — 0 of 12 unlocked" [level=2]
+  - list:
+    - listitem: Training Wheels — Beat the CPU on Easy. — Locked
+    - listitem: Holding Your Own — Beat the CPU on Medium. — Locked
+    - listitem: Pong Master — Beat the CPU on Hard. — Locked
+    - listitem: First Victory — Win a match in Normal mode. — Locked
+    - listitem: Insanely Good — Win a match in Insane mode. — Locked
+    - listitem: This Is Ridiculous — Win a match in Ridiculous mode. — Locked
+    - listitem: Insiculous Champion — Win a match in Insiculous mode. — Locked
+    - listitem: Friendly Rivalry — Finish a 2-player match. — Locked
+    - listitem: Clean Sheet — Win a Normal-mode match without the opponent scoring. — Locked
+    - listitem: Untouchable — Shut out the opponent in Insane mode. — Locked
+    - listitem: Impossibly Clean — Shut out the opponent in Ridiculous mode. — Locked
+    - listitem: Insiculously Dominant — Shut out the opponent in Insiculous mode. — Locked
+  - heading "Insiculous Breakout — 0 of 10 unlocked" [level=2]
+  - list:
+    - listitem: Demolition Crew — Clear every brick in Normal mode. — Locked
+    - listitem: Speed Wrecker — Clear every brick in Insane mode. — Locked
+    - listitem: Double Demolition — Clear every brick in Ridiculous mode. — Locked
+    - listitem: Insiculous Wrecking Ball — Clear every brick in Insiculous mode. — Locked
+    - listitem: Flawless Foundation — Clear Normal mode without losing a ball. — Locked
+    - listitem: Flawless Frenzy — Clear Insane mode without losing a ball. — Locked
+    - listitem: Flawless Juggling — Clear Ridiculous mode without losing a ball. — Locked
+    - listitem: Insiculously Flawless — Clear Insiculous mode without losing a ball. — Locked
+    - listitem: Wrecking Volley — Destroy 5 bricks in a single volley (no paddle touch). — Locked
+    - listitem: Clutch Clear — Clear the board on your very last life. — Locked
+  - heading "Insiculous Invaders — 0 of 11 unlocked" [level=2]
+  - list:
+    - listitem: Earth Defender — Repel the invasion in Normal mode. — Locked
+    - listitem: Blitz Breaker — Repel the invasion in Insane mode. — Locked
+    - listitem: Twin Cannon Commander — Repel the invasion in Ridiculous mode. — Locked
+    - listitem: Insiculous Overkill — Repel the invasion in Insiculous mode. — Locked
+    - listitem: Untouchable — Clear Normal mode without losing a life. — Locked
+    - listitem: Untouchable Under Fire — Clear Insane mode without losing a life. — Locked
+    - listitem: Untouchable Overdrive — Clear Ridiculous mode without losing a life. — Locked
+    - listitem: Insiculously Untouchable — Clear Insiculous mode without losing a life. — Locked
+    - listitem: Sharpshooter — Land 10 kill shots in a row without wasting a bullet. — Locked
+    - listitem: Last Stand — Repel the invasion on your very last life. — Locked
+    - listitem: UFO Hunter — Shoot down a mystery ship. — Locked
+  - heading "Insiculous Snake — 0 of 9 unlocked" [level=2]
+  - list:
+    - listitem: Garden Snake — Reach length 10. — Locked
+    - listitem: Long Boi — Reach length 20. — Locked
+    - listitem: Absolute Unit — Reach length 35. — Locked
+    - listitem: Classic Feast — Reach length 15 in Normal mode. — Locked
+    - listitem: Speed Eater — Reach length 15 in Insane mode. — Locked
+    - listitem: Portal Gourmand — Reach length 15 in Ridiculous mode. — Locked
+    - listitem: Insiculous Devourer — Reach length 15 in Insiculous mode. — Locked
+    - listitem: Ouroboros — Bite your own tail. — Locked
+    - listitem: Quick Snack — Eat a food within 1.5 seconds of the previous one. — Locked
+  - heading "Insiculous Asteroids — 0 of 11 unlocked" [level=2]
+  - list:
+    - listitem: Rock Steady — Reach wave 5 in Normal mode. — Locked
+    - listitem: Belt at Full Speed — Reach wave 5 in Insane mode. — Locked
+    - listitem: Triple Trouble — Reach wave 5 in Ridiculous mode. — Locked
+    - listitem: Insiculous Belt Runner — Reach wave 5 in Insiculous mode. — Locked
+    - listitem: Ten Grand — Score 10,000 points. — Locked
+    - listitem: Asteroid Legend — Score 30,000 points. — Locked
+    - listitem: Sharpshooter — Land 10 hits in a row without a shot expiring. — Locked
+    - listitem: Close Call — Shatter a rock within 60 pixels of your ship. — Locked
+    - listitem: Untouchable — Clear 3 waves in a row without dying. — Locked
+    - listitem: Double Tap — Shatter two rocks within half a second. — Locked
+    - listitem: Living on the Edge — Reach wave 5 on your last ship. — Locked
+  - heading "Insiculous Frogger — 0 of 8 unlocked" [level=2]
+  - list:
+    - listitem: Pond Pioneer — Guide a frog into its first home. — Locked
+    - listitem: Full House — Fill all five homes in one round. — Locked
+    - listitem: Homecoming Hero — Fill 25 homes in one session. — Locked
+    - listitem: Untouched Crossing — Clear a round without losing a single life. — Locked
+    - listitem: Swift Swimmer — Reach home with 15 or more seconds to spare. — Locked
+    - listitem: High Hopper — Score 5,000 points. — Locked
+    - listitem: Insiculous Crossing — Clear a round in Insiculous mode. — Locked
+    - listitem: Tag Team — In co-op, both players fill a home in the same round. — Locked
+  - heading "FortKnight — 0 of 1 unlocked" [level=2]
+  - list:
+    - listitem: Moved In — Loaded a keep. — Locked
+  - status: Nothing unlocked on this device yet — 63 to find.
+- contentinfo:
+  - paragraph:
+    - text: © 2026 Be Insiculous — built with AI, for AI, and the humans in the loop. ·
+    - link "Accessibility":
+      - /url: /accessibility/

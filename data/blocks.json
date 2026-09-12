@@ -1,0 +1,62 @@
+{
+  "$schema": "./schema/blocks.schema.json",
+  "order": [
+    "too-early",
+    "early",
+    "midday",
+    "late",
+    "too-late"
+  ],
+  "blocks": {
+    "too-early": {
+      "label": "Too Early",
+      "start": "00:00",
+      "end": "08:00",
+      "durationMinutes": 480,
+      "mealPrimary": "leftovers-dessert",
+      "mealSecondary": "breakfast",
+      "carriesFocus": false,
+      "sourceRow": 2
+    },
+    "early": {
+      "label": "Early",
+      "start": "08:00",
+      "end": "11:00",
+      "durationMinutes": 180,
+      "mealPrimary": "breakfast",
+      "mealSecondary": "brunch",
+      "carriesFocus": true,
+      "sourceRow": 3
+    },
+    "midday": {
+      "label": "Midday",
+      "start": "11:00",
+      "end": "15:00",
+      "durationMinutes": 240,
+      "mealPrimary": "brunch",
+      "mealSecondary": "snack",
+      "carriesFocus": true,
+      "sourceRow": 4
+    },
+    "late": {
+      "label": "Late",
+      "start": "15:00",
+      "end": "18:00",
+      "durationMinutes": 180,
+      "mealPrimary": "snack",
+      "mealSecondary": "dinner",
+      "carriesFocus": true,
+      "sourceRow": 5
+    },
+    "too-late": {
+      "label": "Too Late",
+      "start": "18:00",
+      "end": "24:00",
+      "durationMinutes": 360,
+      "mealPrimary": "dinner",
+      "mealSecondary": "leftovers-dessert",
+      "carriesFocus": false,
+      "sourceRow": 6
+    }
+  }
+}

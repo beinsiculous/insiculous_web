@@ -1,0 +1,274 @@
+---
+/**
+ * Embed area for a WASM game build.
+ *
+ * `src` is the path to the wasm-bindgen JS glue under public/, following the
+ * drop-in convention: public/games/<slug>/v<N>/game.js
+ * (see README "WASM builds" for the full convention).
+ *
+ * With `src` set this renders a real playable embed: a WebGPU gate
+ * (browsers without a usable adapter never run the module), a status line,
+ * and the `#game-canvas` placeholder the engine swaps its own canvas into
+ * (the engine copies id/width/height/tabindex/role/aria-label over and
+ * focuses it). Without `src` it stays the dashed "coming soon" placeholder.
+ *
+ * ONE playable embed per page: the engine finds its placeholder by the
+ * fixed id `game-canvas`, so a second playable embed on the same page will
+ * not initialize. Game detail pages render exactly one by construction; a
+ * future multi-game page needs engine-side scoping first.
+ *
+ * With `fill` the embed is a workspace cell rather than a figure on a page:
+ * no padding, no border and no controls note, and the canvas takes the whole
+ * box it is given. That is the /playground/<slug>/ shape.
+ */
+import CompatibilityPanel from './CompatibilityPanel.astro';
+
+interface Props {
+  src?: string;
+  title: string;
+  /** Canvas pixel size — must match the game's native window size. */
+  width?: number;
+  height?: number;
+  /** What the canvas is, after the title, in its accessible name. */
+  canvasLabel?: string;
+  /** Fill the box instead of sitting in a padded, bordered card. */
+  fill?: boolean;
+  /** The still this game shows a browser that cannot run WebGPU, and its alt. */
+  screenshot?: string;
+  screenshotAlt?: string;
+}
+
+const {
+  src,
+  title,
+  width = 800,
+  height = 600,
+  canvasLabel = 'game canvas; focus it to play',
+  fill = false,
+  screenshot = '/images/pong-in-web.png',
+  screenshotAlt = 'Insiculous Pong running in a browser',
+} = Astro.props;
+---
+
+{
+  src ? (
+    <div class={`game-embed playable${fill ? ' fill' : ''}`} data-wasm-src={src}>
+      <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
+      <CompatibilityPanel screenshot={screenshot} screenshotAlt={screenshotAlt} />
+      <div class="stage">
+        <canvas
+          id="game-canvas"
+          width={width}
+          height={height}
+          tabindex="0"
+          role="img"
+          aria-label={`${title} — ${canvasLabel}`}
+        >
+          {title} runs on an HTML canvas and needs a keyboard or gamepad. The
+          controls are listed below the game.
+        </canvas>
+      </div>
+      {!fill && (
+        <p class="controls-note">
+          <slot name="controls">
+            Click the game to give it keyboard focus. Menus: W/S or arrows to
+            navigate, Space/Enter to confirm, Esc to go back — a gamepad works
+            too. All keys are remappable in the game.
+          </slot>
+        </p>
+      )}
+    </div>
+  ) : (
+    <div class="game-embed">
+      <div class="placeholder">
+        <span class="glyph" aria-hidden="true">▚▞</span>
+        <p class="status">browser build coming</p>
+        <p class="hint">
+          this one is desktop-only for now — its browser build hasn’t
+          landed here yet
+        </p>
+      </div>
+      <span class="visually-hidden">
+        Placeholder game embed for {title} — browser build coming
+      </span>
+    </div>
+  )
+}
+
+<script>
+  import { probeWebGpu, describeWebGpuFailure } from '../scripts/webgpu-gate.ts';
+
+  const embed = document.querySelector('.game-embed.playable');
+  const src = embed?.getAttribute('data-wasm-src');
+  const status = document.getElementById('game-loading');
+  const panel = document.getElementById('compatibility-panel');
+  const reason = document.getElementById('compatibility-reason');
+  const retry = document.getElementById('compatibility-retry') as HTMLButtonElement | null;
+  const stage = embed?.querySelector<HTMLElement>('.stage') ?? null;
+
+  // A boot that got as far as a resolved init started the engine's event loop, and a
+  // page holding one cannot boot a second; a boot that never reached it can retry.
+  let booting = false;
+  let initResolved = false;
+
+  async function bootGame(source: string) {
+    if (booting || initResolved) return;
+    booting = true;
+    if (panel) panel.hidden = true;
+    if (stage) stage.hidden = false;
+    try {
+      const probe = await probeWebGpu();
+      if (!probe.ok) {
+        // The status is the live region, so the reason is announced there; the panel
+        // repeats it beside what to do about it, in the canvas's place.
+        const why = describeWebGpuFailure(probe.reason);
+        if (status) status.textContent = `This game needs WebGPU. ${why}`;
+        if (reason) reason.textContent = why;
+        if (panel) panel.hidden = false;
+        if (stage) stage.hidden = true;
+        return;
+      }
+
+      if (status) status.textContent = 'Loading game…';
+      // The Function indirection keeps this import NATIVE in every mode.
+      // A bare import() breaks under `astro dev`: esbuild strips the
+      // @vite-ignore pragma, Vite's analyzer then rewrites the request
+      // (?import) and 500s it — public/ files may not be imported through
+      // the transform pipeline. Built output never had the problem.
+      const dynamicImport = new Function('u', 'return import(u)') as (
+        u: string
+      ) => Promise<{ default: () => Promise<unknown> }>;
+      const init = (await dynamicImport(source)).default;
+      await init();
+      initResolved = true;
+      if (retry) retry.disabled = true;
+      // The engine takes over from here: it swaps its canvas in, clears
+      // the status line, and focuses the game.
+    } catch (error) {
+      if (status) status.textContent = 'Failed to start: ' + error;
+      if (reason) {
+        reason.textContent = initResolved
+          ? 'The game stopped after it started. Reload the page to try again.'
+          : String(error);
+      }
+      if (panel) panel.hidden = false;
+      if (stage) stage.hidden = true;
+    } finally {
+      booting = false;
+    }
+  }
+
+  if (src) {
+    retry?.addEventListener('click', () => {
+      void bootGame(src);
+    });
+    await bootGame(src);
+  }
+</script>
+
+<style>
+  .game-embed {
+    background: var(--surface);
+    border: 1px dashed var(--border-bright);
+    border-radius: 10px;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .game-embed:not(.playable) {
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+  }
+
+  .game-embed.playable {
+    border-style: solid;
+    padding: 1rem;
+  }
+
+  .game-embed.fill {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Only the filling embed's stage is a box of its own: on a game page the canvas
+     still sits centred in the card, and a black band either side of it would be new. */
+  .game-embed.fill .stage {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* :global — the engine REPLACES the placeholder canvas with winit's own
+     element, which lacks Astro’s scoping attribute; a scoped rule would die
+     at that swap (the launch "uncentered canvas" bug). */
+  .game-embed.playable :global(canvas) {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    background: #000;
+    outline: none;
+  }
+
+  /* :global for the same reason, and !important because winit writes width and
+     height inline once at creation — only !important beats an inline declaration.
+     The canvas box is then the stage's grid area, so a resize or a fullscreen
+     change moves the box and the engine follows it on Resized. */
+  .game-embed.fill :global(canvas) {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0;
+  }
+
+  .placeholder {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .glyph {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 2.2rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    color: var(--text-bright);
+    margin: 0 0 0.3rem;
+  }
+
+  .game-embed.playable .status {
+    text-align: center;
+    min-height: 1.2em;
+    margin-bottom: 0.6rem;
+  }
+
+  .controls-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin: 0.8rem 0 0;
+  }
+
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+</style>

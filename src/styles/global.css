@@ -1,0 +1,421 @@
+/* ------------------------------------------------------------------ */
+/* Be Insiculous — design tokens                                       */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* near-black with a faint green cast */
+  --bg: #0a0f0c;
+  --surface: #10170f;
+  --surface-raised: #16211a;
+  --border: #223026;
+  --border-bright: #2f4434;
+
+  /* phosphor green accent */
+  --accent: #3dfa7e;
+  --accent-dim: #27b158;
+  --accent-glow: rgba(61, 250, 126, 0.12);
+
+  /* text */
+  --text: #c6d2cb;
+  --text-bright: #eef4f0;
+  --text-dim: #7d8c83;
+
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', monospace;
+  --font-body: 'Space Grotesk Variable', system-ui, sans-serif;
+
+  --max-width: 68rem;
+}
+
+/* High-contrast variant (the header's Aa control sets data-contrast on <html>). Pure black ground,
+   white text, brighter accent and borders — every combination stays well above 7:1. */
+:root[data-contrast='high'] {
+  --bg: #000000;
+  --surface: #000000;
+  --surface-raised: #101410;
+  --border: #6b7f70;
+  --border-bright: #9db5a3;
+
+  --accent: #7dffab;
+  --accent-dim: #4dfb8b;
+  --accent-glow: rgba(125, 255, 171, 0.18);
+
+  --text: #f2f7f4;
+  --text-bright: #ffffff;
+  --text-dim: #b6c4ba;
+
+}
+
+/* ------------------------------------------------------------------ */
+/* reset + base                                                        */
+/* ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+canvas,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Display rules on classes must never beat the hidden attribute. The UA's `[hidden] { display: none }`
+   is an author-vs-UA loss for any author `display:` at all, whatever its specificity — so a component
+   that hides itself with `el.hidden = true` stays on screen. src/styles/faces.css and
+   src/styles/app-widgets.css have carried this same line for the same reason; global.css did not need
+   one until the profile switcher put a `display: flex` on a class the component toggles `hidden`, and
+   without it the studio bar showed an empty Profile dropdown to a visitor with no profile saved. */
+[hidden] {
+  display: none !important;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-mono);
+  color: var(--text-bright);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+}
+
+h2 {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  margin-top: 2.2em;
+}
+
+h2::before {
+  content: '// ' / '';
+  color: var(--accent-dim);
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Links inside prose must be distinguishable without relying on color (WCAG 1.4.1): underline
+   them. Chrome around the prose — nav, cards, buttons-that-are-links — keeps the plain look. */
+p a,
+li a,
+td a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The studio's button-shaped link. Lived in src/pages/index.astro's scoped <style> until the
+   devlog needed one too; a rule copied into a second file is a rule that drifts. Note the two
+   faces have their own unrelated .button in src/styles/faces.css — no page loads both, because
+   global.css is imported only by BaseLayout.astro and faces.css only by FaceLayout.astro. */
+.button {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+  /* `li a` above underlines links inside list items, and the games list's buttons are exactly
+     that; the note there already promises buttons-that-are-links keep the plain look. */
+  text-decoration: none;
+}
+
+.button:hover {
+  text-decoration: none;
+  filter: brightness(1.1);
+}
+
+.button.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  font-weight: 500;
+}
+
+/* Screen-reader-only text. One copy for every studio page: a component cannot reach a layout's
+   scoped rule, and three components each carried their own until the games list needed a fourth. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* ---------- the profile switcher, in the studio's chrome (src/components/ProfileSwitcher.astro) ---------- */
+/* Here rather than in BaseLayout's <style> because Astro scopes a component's styles to its own markup:
+   a rule written there carries BaseLayout's data-astro-cid and never matches the switcher's elements,
+   which carry ProfileSwitcher's. faces.css does the same job for the face by being a plain global file.
+   Scoped to `header` on purpose: app-widgets.css styles the same class names for a page panel with a
+   block margin, and /profile/, /achievements/ and /games/ load it — element + class beats its bare class
+   whichever order the two happen to be bundled in, so the bar never inherits the panel's margins. */
+header .nav-profile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  min-width: 0;
+}
+
+header .nav-profile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* 11rem, not the 14rem the panel copy allows: the select is content-sized by the active profile's id,
+   and in the bar its width is what decides whether the six links still fit on one row. 11rem shows a
+   generated id like "lucky-garden-poet" whole (measured 170px) and caps what a longer one can take,
+   so the fold breakpoint in BaseLayout.astro stays where it was measured instead of drifting with
+   whatever the visitor named their profile. A longer id truncates, which is a select's own behaviour. */
+header .nav-profile select {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text);
+  max-width: min(11rem, 100%);
+  min-width: 0;
+}
+
+/* In the folded panel it is a full-width row like the links above it, not a chip in a bar. 66rem is
+   BaseLayout.astro's fold breakpoint, not the 40rem the rest of this file uses for phones — the panel
+   and these rules have to change over at the same width or the switcher styles the wrong shape. */
+@media (width < 66rem) {
+  header .nav-profile {
+    width: 100%;
+    margin-top: 0.2rem;
+  }
+
+  header .nav-profile-label {
+    flex: 1 1 auto;
+    max-width: 100%;
+  }
+
+  header .nav-profile select {
+    max-width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
+/* Built in JS and appended to <body>, so it inherits nothing from the page — and this file styles
+   no bare buttons or inputs, so the block scopes everything the dialog emits (form, field, input,
+   button row, both button looks, error line), not just the frame. The face pages carry their own
+   independent copy under the same class names in src/styles/faces.css: the two files are
+   deliberately not shared, because faces.css's bare element rules would fight this file. The a11y
+   gate (scripts/a11y-check.mjs) opens the dialog on a page of each world and audits both. This
+   copy used to live in app-widgets.css, reachable only from /profile/ — the first-achievement
+   prompt (src/lib/achievements.js) opens the dialog on any studio page, which is why it moved here. */
+.name-dialog {
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text-bright);
+  width: min(28rem, calc(100vw - 2rem));
+  max-width: 100%;
+}
+.name-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+.name-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.1rem;
+}
+.name-dialog h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.name-dialog .inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.name-dialog input {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-bright);
+}
+.name-dialog .button-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.name-dialog button {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+.name-dialog button[type="button"] {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  font-weight: 500;
+}
+.name-dialog button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.name-dialog-error:empty {
+  display: none;
+}
+.name-dialog-error {
+  color: var(--text-bright);
+  margin: 0;
+}
+
+/* Keyboard focus must be obvious everywhere. The browser default outline was the only indicator
+   before, and it vanished against this palette. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  /* File names and paths are single unbreakable tokens; on a phone one of them would push the line out of the
+     viewport. `pre` has its own scroller below and is left alone. */
+  overflow-wrap: anywhere;
+}
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Motion is decorative on this site; switch it all off for users who ask for that at OS level. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* layout helpers                                                      */
+/* ------------------------------------------------------------------ */
+
+/* First focusable element on the page; invisible until focused, then drops over the header. */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 6px 6px;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Phones: hand a little of the gutter back to the content. */
+@media (max-width: 40rem) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}

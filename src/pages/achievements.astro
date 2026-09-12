@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { readGameCatalogs } from '../lib/games-catalog-files.js';
+
+const games = await getCollection('games');
+const catalogs = readGameCatalogs(games);
+---
+
+<BaseLayout
+  title="Achievements — Be Insiculous"
+  description="Every achievement this site can award — unlocked and locked — and each game’s full manifest."
+>
+  <p class="section-label">achievements</p>
+  <h1>Achievements</h1>
+  <p class="intro">
+    Three kinds live here: the studio’s (insiculous), the games’, and FortKnight’s. Every
+    achievement is listed here — locked entries included, with each game’s full list taken from its
+    own manifest. Everything is recorded on this device only — nothing is uploaded, and no server
+    holds a copy.
+  </p>
+
+  <div id="achievementsBoard" data-catalogs={JSON.stringify(catalogs)}></div>
+  <p class="muted" id="achievementsStatus" role="status"></p>
+</BaseLayout>
+
+<script>
+  import { renderAchievementsBoard } from "../lib/achievements.js";
+  import { readEmbeddedCatalogs } from "../lib/games-catalog.js";
+
+  const board = document.getElementById("achievementsBoard");
+  const status = document.getElementById("achievementsStatus");
+
+  const catalogs = readEmbeddedCatalogs(board);
+
+  // The full board: every type, with the registry spine (locked entries included) for the site's
+  // own two and the games' manifests. The null guard is the checker's idiom (GameEmbed.astro): both
+  // elements are prerendered above, so a null would mean this script drifted from its own markup.
+  let unlockedCount = 0;
+  let totalCount = 0;
+  if (board) {
+    ({ unlockedCount, totalCount } = renderAchievementsBoard(board, {
+      includeLocked: true,
+      gameCatalogs: catalogs,
+      headingLevel: 2,
+    }));
+  }
+  if (status) {
+    status.textContent = unlockedCount === 0
+      ? `Nothing unlocked on this device yet — ${totalCount} to find.`
+      : `${unlockedCount} of ${totalCount} achievements unlocked on this device.`;
+  }
+</script>
+
+<style>
+  .intro {
+    max-width: 42em;
+    margin-bottom: 2rem;
+  }
+
+  /* global.css has no .muted (that class is app-widgets.css's); this page styles its own. */
+  .muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  /* The board's DOM is built in script (src/lib/achievements.js), so a scoped selector cannot reach
+     it — these two are :global on purpose. */
+  :global(.achievement-locked) {
+    color: var(--text-dim);
+  }
+
+  :global(.achievement-note) {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+  }
+</style>

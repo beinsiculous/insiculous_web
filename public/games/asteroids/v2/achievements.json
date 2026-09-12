@@ -1,0 +1,68 @@
+[
+  {
+    "id": "wave5_normal",
+    "name": "Rock Steady",
+    "description": "Reach wave 5 in Normal mode.",
+    "hidden": false
+  },
+  {
+    "id": "wave5_insane",
+    "name": "Belt at Full Speed",
+    "description": "Reach wave 5 in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "wave5_ridiculous",
+    "name": "Triple Trouble",
+    "description": "Reach wave 5 in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "wave5_insiculous",
+    "name": "Insiculous Belt Runner",
+    "description": "Reach wave 5 in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "score_10k",
+    "name": "Ten Grand",
+    "description": "Score 10,000 points.",
+    "hidden": false
+  },
+  {
+    "id": "score_30k",
+    "name": "Asteroid Legend",
+    "description": "Score 30,000 points.",
+    "hidden": false
+  },
+  {
+    "id": "sharpshooter",
+    "name": "Sharpshooter",
+    "description": "Land 10 hits in a row without a shot expiring.",
+    "hidden": false
+  },
+  {
+    "id": "close_call",
+    "name": "Close Call",
+    "description": "Shatter a rock within 60 pixels of your ship.",
+    "hidden": false
+  },
+  {
+    "id": "untouchable",
+    "name": "Untouchable",
+    "description": "Clear 3 waves in a row without dying.",
+    "hidden": false
+  },
+  {
+    "id": "double_tap",
+    "name": "Double Tap",
+    "description": "Shatter two rocks within half a second.",
+    "hidden": false
+  },
+  {
+    "id": "living_on_edge",
+    "name": "Living on the Edge",
+    "description": "Reach wave 5 on your last ship.",
+    "hidden": false
+  }
+]

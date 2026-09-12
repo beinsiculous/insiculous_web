@@ -1,0 +1,99 @@
+/* The planner face's skin (the Be Insiculous studio site it lives inside has its own layout and never loads
+   this file):
+     fort-knight — the treehouse and the knight's watch; Trebuchet MS, planks, ember amber.
+   Canonical here; the site mirrors it to public/app/shared/. Loaded after the app chrome CSS
+   (faces.css), which owns the base :root palette. data-theme comes from the page's face
+   (FACES[face].theme in src/lib/faces.js), set by the layout's boot script before first paint. */
+
+/* Native controls (date inputs, calendar pickers) follow the dark panels. */
+:root[data-theme="fort-knight"] { color-scheme: dark; }
+
+/* Composite photograph (app/images/fort-knight.jpg, generated): Miryam León's treehouse on the
+   left, Evija Martina's knight by the campfire on the right (both Unsplash License), feathered
+   into a dark center that the content column sits on. Wood fort's plank skin and Bungee brand,
+   the campfire's ember-amber accent. */
+:root[data-theme="fort-knight"] {
+  --background: #16120e;
+  --panel: rgba(56, 48, 40, 0.93);
+  --panel-soft: rgba(76, 66, 54, 0.95);
+  --ink: #faf7ef;
+  --muted: #ddd5c2;
+  --line: #463b2e;
+  --accent: #e09a40;
+  --on-accent: #241c10;
+  --flexible: rgba(255, 255, 255, 0.08);
+  --plank: rgba(52, 44, 36, 0.94);
+  --card: rgba(44, 37, 30, 0.94);
+  --nav-ink: #e8e1d1;
+  --grain: rgba(0, 0, 0, 0.16);
+  --shadow: 0 2px 4px rgba(0, 0, 0, 0.45), 0 10px 26px rgba(0, 0, 0, 0.5);
+  --meals: #c98a3a; --cleaning: #6c8fa8; --working: #7f9a5c; --spirituality-development: #9a7fb0;
+  --friends-family: #b86a6a; --health: #5f9a8b; --operations: #a09582;
+}
+
+[data-theme="fort-knight"] body {
+  font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+  color: var(--ink);
+  background-color: var(--background);
+}
+/* The photograph lives on a fixed pseudo-element so it can be darkened with a
+   filter (a background-image on body can't take one). The negative z-index paints it
+   above body's background-color but below all content. */
+[data-theme="fort-knight"] body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background-image:
+    linear-gradient(180deg, rgba(20, 16, 12, 0.3), rgba(20, 16, 12, 0.45) 60%, rgba(12, 9, 7, 0.7)),
+    url("../images/fort-knight.jpg");
+  background-size: cover, cover;
+  background-position: center, center top;
+  background-repeat: no-repeat;
+  filter: brightness(0.7);
+}
+[data-theme="fort-knight"] h1, [data-theme="fort-knight"] h2 {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+[data-theme="fort-knight"] .brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+[data-theme="fort-knight"] .site-nav, [data-theme="fort-knight"] .top-bar {
+  /* a plank across the top: horizontal grain, dark seam below */
+  border-bottom: 3px solid var(--line);
+  background-color: var(--plank);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px 9px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 30%, rgba(0, 0, 0, 0.06));
+  backdrop-filter: blur(4px);
+}
+[data-theme="fort-knight"] .site-nav .nav-link { color: var(--nav-ink); }
+[data-theme="fort-knight"] .site-nav .nav-link:hover { color: var(--ink); background: rgba(255, 255, 255, 0.12); }
+[data-theme="fort-knight"] .site-nav .nav-link.active { color: var(--on-accent); background: var(--accent); }
+[data-theme="fort-knight"] .panel {
+  /* planks: vertical boards with grain, a seam every board */
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background-color: var(--panel);
+  background-image:
+    repeating-linear-gradient(90deg, var(--grain) 0 2px, transparent 2px 84px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 7px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), var(--shadow);
+}
+[data-theme="fort-knight"] .day-card {
+  border: 2px solid var(--line);
+  border-radius: 5px;
+  background: var(--card);
+  background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px 11px);
+}
+[data-theme="fort-knight"] .appointment-tag { background: var(--accent); color: var(--on-accent); }
+[data-theme="fort-knight"] button, [data-theme="fort-knight"] .file-button, [data-theme="fort-knight"] .button { border-radius: 5px; border-color: var(--line); }
+[data-theme="fort-knight"] .site-footer {
+  /* the footer sits on the photograph: give the text a small plaque to sit on */
+  color: var(--muted);
+  width: fit-content; margin: 0 auto; padding: 0.35rem 1rem 0.45rem; border-radius: 999px;
+  background: rgba(20, 16, 12, 0.75);
+}
+[data-theme="fort-knight"] .allocation-bar, [data-theme="fort-knight"] .block-bar { border: 1px solid var(--line); }
+

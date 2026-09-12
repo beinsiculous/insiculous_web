@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import AppLayout from '../layouts/AppLayout.astro';
+import PlaygroundToolbar from '../components/PlaygroundToolbar.astro';
+import PlaygroundHelp from '../components/PlaygroundHelp.astro';
+import PlaygroundEmbed from '../components/PlaygroundEmbed.astro';
+
+// The embed stays presentational, so the page does the collection query: the
+// games with an editor bundle, in the order the games listing uses.
+const editorGames = (await getCollection('games'))
+  .filter((game) => game.data.editor)
+  .sort((first, second) => first.data.order - second.data.order)
+  .map((game) => ({ slug: game.id, title: game.data.title }));
+---
+
+<AppLayout
+  title="Web Playground — Be Insiculous"
+  description="Insiculous 2D Web Playground: the scene editor running in the browser on WebGPU, with projects saved in this browser."
+>
+  <Fragment slot="heading">Web Playground</Fragment>
+  <PlaygroundToolbar slot="bar" editorGames={editorGames} />
+
+  <PlaygroundHelp />
+  <PlaygroundEmbed />
+</AppLayout>

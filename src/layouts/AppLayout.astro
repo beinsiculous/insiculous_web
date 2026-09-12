@@ -1,0 +1,157 @@
+---
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/space-grotesk';
+import '../styles/global.css';
+import AccessibilityBootScript from '../components/AccessibilityBootScript.astro';
+import AccessibilityControls from '../components/AccessibilityControls.astro';
+
+/**
+ * The layout for a page that IS an application rather than a document: the
+ * editor surfaces under /playground/. BaseLayout.astro centres a reading
+ * column and lets the page grow; here the tool wants the window, so the body
+ * is a three-row grid and the middle row is the workspace.
+ *
+ * The heading is a slot, not a prop, but it is still server-rendered markup:
+ * an h1 filled in by JavaScript ships unnamed in every audit that reads the
+ * static page.
+ *
+ * The bar is `position: relative` and not sticky. AccessibilityControls' panel
+ * is `position: absolute; top: calc(100% + 0.5rem)` against its nearest
+ * positioned ancestor, so without this it would drop against the viewport.
+ */
+interface Props {
+  title: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = 'Be Insiculous — an Artificial Intelligence Development Studio: a Rust game engine and the games that run on it, and planning software driven by your own AI assistant.',
+  noindex = false,
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/jpeg" href="/beinsiculous.jpg" />
+    <link rel="apple-touch-icon" href="/beinsiculous.jpg" />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <AccessibilityBootScript />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(currentPath, Astro.site)} />
+    <link rel="canonical" href={new URL(currentPath, Astro.site)} />
+    <meta property="og:image" content={new URL('/beinsiculous.jpg', Astro.site)} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Be Insiculous devlog" href="/rss.xml" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="app-bar">
+      <nav aria-label="Studio">
+        <a href="/" class="wordmark">be_insiculous<span class="cursor" aria-hidden="true">▌</span></a>
+      </nav>
+      <AccessibilityControls />
+      <h1 class="app-title"><slot name="heading" /></h1>
+      <slot name="bar" />
+    </header>
+
+    <main id="main" class="workspace" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="app-footer">
+      <p>© {new Date().getFullYear()} Be Insiculous · <a href="/accessibility/">Accessibility</a></p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  body {
+    display: grid;
+    /* min-height, not height: a short viewport scrolls vertically, which is
+       ungated, rather than clipping the workspace. */
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 100dvh;
+    min-width: 0;
+  }
+
+  .app-bar {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    min-width: 0;
+  }
+
+  .wordmark {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text-bright);
+    font-size: 1rem;
+  }
+
+  .wordmark:hover {
+    text-decoration: none;
+    color: var(--accent);
+  }
+
+  .cursor {
+    color: var(--accent);
+    animation: blink 1.2s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      animation: none;
+    }
+  }
+
+  .app-title {
+    font-size: 1rem;
+    margin: 0;
+    /* No nowrap: a long page name ("Space Invaders in the editor") would push a 320 px
+       viewport into a sideways scroll, which the layout gate refuses. */
+    min-width: 0;
+    color: var(--text-bright);
+  }
+
+  .workspace {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    min-width: 0;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+  }
+
+  .app-footer {
+    border-top: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+  }
+
+  .app-footer p {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+</style>

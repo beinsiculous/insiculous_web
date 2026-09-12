@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SupportLink from '../../components/SupportLink.astro';
+import { publishedPosts } from '../../lib/devlog-posts.js';
+import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from '../../lib/site-links.js';
+
+const now = new Date();
+const posts = publishedPosts(await getCollection('devlog'), now);
+---
+
+<BaseLayout
+  title="Devlog — Be Insiculous"
+  description="Development notes on games and the Insiculous 2D engine."
+>
+  <p class="section-label">devlog</p>
+  <div class="title-row">
+    <h1>Devlog</h1>
+    <a
+      class="coffee-link"
+      href={KOFI_URL}
+      title={KOFI_TITLE}
+      aria-label={KOFI_LABEL}
+      target="_blank"
+      rel="noopener noreferrer">☕</a>
+  </div>
+  <p class="intro">
+    Notes from the trenches — engine internals and game progress. <a href="/rss.xml">RSS</a>
+  </p>
+
+  <ul class="posts">
+    {
+      posts.map((post) => (
+        <li>
+          <span class="date">{post.data.pubDate.toISOString().slice(0, 10)}</span>
+          <div>
+            <p class="title-line">
+              <a class="title" href={`/devlog/${post.id}/`}>
+                {post.data.title}
+              </a>
+            </p>
+            <p>{post.data.description}</p>
+            <p class="byline">by {post.data.author}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <SupportLink blurb="These notes are free and always will be. If they have been useful, there is a tip jar." />
+</BaseLayout>
+
+<style>
+  /* The ☕ sits beside the heading, not inside it: an emoji inside <h1> would be folded into the
+     heading’s accessible name and read out as part of "Devlog" in a heading list. Wrapping keeps
+     125% text at 390px from pushing the page sideways. */
+  .title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .title-row h1 {
+    margin-bottom: 0;
+  }
+
+  /* global.css sets no emoji stack the way faces.css does for .face-link. */
+  .coffee-link {
+    font-size: 1.35rem;
+    line-height: 1;
+    text-decoration: none;
+    opacity: 0.8;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  }
+
+  .coffee-link:hover {
+    opacity: 1;
+    text-decoration: none;
+  }
+
+  .intro {
+    max-width: 42em;
+    margin-bottom: 2.5rem;
+  }
+
+  .posts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  .posts li {
+    display: flex;
+    gap: 1.5rem;
+    align-items: baseline;
+  }
+
+  .date {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-dim);
+    white-space: nowrap;
+  }
+
+  .title-line {
+    margin: 0;
+  }
+
+  .title {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    color: var(--text-bright);
+  }
+
+  .byline {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .title:hover {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .posts p {
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  @media (max-width: 40rem) {
+    .posts li {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "theme": "fort-knight",
+  "epochOverride": null,
+  "timezone": null,
+  "activeSeasonId": null,
+  "weights": {"id": "my-weights", "questionnaire": {"answers": {"startup": {"groupSize": 2}}}},
+  "hidden": [],
+  "overrides": {},
+  "added": [],
+  "dayNotes": {}
+}

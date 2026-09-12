@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# build output (the Astro site)
+dist/
+
+# astro generated types/cache
+.astro/
+
+# wrangler local state
+.wrangler/
+
+# python
+__pycache__/
+*.pyc
+
+# the archived workbook and the owner's own import document: personal data, deliberately
+# outside this public repository. Kept here so a stray copy can never be committed.
+source/
+
+# adversarial-review transient artifacts (see .claude/skills/adversarial-review/)
+review/*
+!review/.gitkeep
+
+# local-only claude settings
+.claude/settings.local.json
+
+# misc
+npm-debug.log*
+.DS_Store
+
+# screenshot output (scripts/screenshot-pages.mjs)
+shots/

@@ -1,0 +1,7 @@
+---
+// Settings became the shared Profile page (/profile/) — keep the URL working.
+import { withBase } from "../../lib/paths.js";
+import { PROFILE_PATH } from "../../lib/faces.js";
+const target = withBase(PROFILE_PATH);
+---
+<html lang="en"><head><meta charset="utf-8" /><meta http-equiv="refresh" content={`0; url=${target}`} /><title>Moved to Profile</title></head><body><h1>Moved to Profile</h1><p>This page moved to the <a href={target}>Profile</a>.</p></body></html>

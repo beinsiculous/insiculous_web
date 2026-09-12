@@ -1,0 +1,56 @@
+[
+  {
+    "id": "length_10",
+    "name": "Garden Snake",
+    "description": "Reach length 10.",
+    "hidden": false
+  },
+  {
+    "id": "length_20",
+    "name": "Long Boi",
+    "description": "Reach length 20.",
+    "hidden": false
+  },
+  {
+    "id": "length_35",
+    "name": "Absolute Unit",
+    "description": "Reach length 35.",
+    "hidden": false
+  },
+  {
+    "id": "feast_normal",
+    "name": "Classic Feast",
+    "description": "Reach length 15 in Normal mode.",
+    "hidden": false
+  },
+  {
+    "id": "feast_insane",
+    "name": "Speed Eater",
+    "description": "Reach length 15 in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "feast_ridiculous",
+    "name": "Portal Gourmand",
+    "description": "Reach length 15 in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "feast_insiculous",
+    "name": "Insiculous Devourer",
+    "description": "Reach length 15 in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "ouroboros",
+    "name": "Ouroboros",
+    "description": "Bite your own tail.",
+    "hidden": false
+  },
+  {
+    "id": "quick_snack",
+    "name": "Quick Snack",
+    "description": "Eat a food within 1.5 seconds of the previous one.",
+    "hidden": false
+  }
+]

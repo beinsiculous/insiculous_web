@@ -1,0 +1,297 @@
+:root {
+  --background: #f5f2ea;
+  --panel: #ffffff;
+  --panel-soft: #fbfaf6;
+  --ink: #23231f;
+  --muted: #6d6a5f;
+  --line: #d9d4c7;
+  --accent: #8b4a2b;
+  --on-accent: #ffffff;
+  --meals: #d98c3f; --cleaning: #5b8fb9; --working: #6f8f4f; --spirituality-development: #8c6bb1;
+  --friends-family: #d16d7c; --health: #3ea88f; --operations: #8a8a8a; --flexible: #e2ddd0;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(35, 35, 31, 0.06), 0 4px 14px rgba(35, 35, 31, 0.06);
+  /* The mouse, Fort Knight's: a large wooden arrow; a sword where a pointer would show; a shield where the
+     "no" symbol would. */
+  --cursor-default: url("./cursors/wooden-arrow.svg") 3 3, auto;
+  --cursor-pointer: url("./cursors/sword.svg") 2 2, pointer;
+  --cursor-forbidden: url("./cursors/shield.svg") 24 24, not-allowed;
+}
+
+/* ---------- theme ---------- */
+/* :root above is the base palette (a fallback seen only if themes.css fails to load). Each face's
+   identity (palette, textures, fonts) lives in public/app/shared/themes.css, loaded after this file;
+   their *layout* rules and cursors are at the bottom of this file. */
+
+/* ---------- base ---------- */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif; background: var(--background); color: var(--ink); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
+/* 100vh is the viewport with the mobile URL bar expanded, so it overshoots while the bar is collapsed — visible
+   here because the face paints a fixed, full-viewport photograph behind the panels. The line above stays as the
+   fallback for anything without dvh. */
+body { min-height: 100dvh; }
+h1, h2 { font-weight: 600; margin: 0 0 0.5rem; }
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.1rem; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* First focusable element on the page; invisible until focused, then drops over the header. */
+.skip-link { position: absolute; top: -100%; left: 1rem; z-index: 100; background: var(--accent); color: var(--on-accent); font-weight: 600; padding: 0.6rem 1rem; border-radius: 0 0 6px 6px; }
+.skip-link:focus { top: 0; }
+
+/* Links inside prose must be distinguishable without relying on color (WCAG 1.4.1). Chrome and
+   button-styled links keep their look. */
+main p a:not(.button), main li a:not(.button) { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Motion is decorative; switch it all off for users who ask for that at OS level. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.muted { color: var(--muted); font-size: 0.9rem; }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.8; }
+
+/* ---------- chrome ---------- */
+.site-nav {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
+  padding: 0.6rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+.face-switch { display: flex; gap: 0.25rem; }
+.face-link { text-decoration: none; font-size: 1.15rem; padding: 0.15rem 0.4rem; border-radius: 999px; opacity: 0.75; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.face-link:hover { opacity: 1; background: var(--panel-soft); }
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--ink); text-decoration: none; margin-right: 0.5rem; }
+.brand .logo { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; letter-spacing: 0; text-shadow: none; }
+.nav-links { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.nav-link {
+  color: var(--muted); text-decoration: none; font-size: 0.92rem;
+  padding: 0.3rem 0.85rem; border-radius: 999px;
+}
+.nav-link:hover { color: var(--ink); background: var(--panel-soft); }
+.nav-link.active { color: var(--on-accent); background: var(--accent); }
+
+/* ---------- the ☰ menu ---------- */
+/* Twin of the studio's disclosure in src/layouts/BaseLayout.astro: same native <details>, same ☰, same
+   full-width panel under the bar, same 40rem breakpoint. The rules are written twice because the two
+   live in different token vocabularies — this file's --panel/--ink/--line against global.css's
+   --surface/--text/--border — which is the same reason app-widgets.css exists. Change one, look at the
+   other. Every selector below is scoped to `.menu`, never bare `summary`: the Aa control is a <details>
+   in this same bar and a bare rule would close over its button too. */
+.menu { min-width: 0; }              /* without this the folded links set an unshrinkable min-content floor */
+.menu > summary { display: none; list-style: none; cursor: var(--cursor-pointer); }
+.menu > summary::-webkit-details-marker { display: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+.nav-peripheral { min-width: 0; }
+.nav-peripheral > summary { list-style: none; }
+.nav-peripheral > summary::-webkit-details-marker { display: none; }
+.nav-caret { display: inline-block; margin-left: 0.3rem; }
+.nav-peripheral[open] > summary .nav-caret { transform: rotate(180deg); }
+
+/* Wide: the wrapper disappears and the bar is one flat row — brand, pages, profile, site links, Aa, in
+   that order, because that is the markup's order. A closed <details> hides its content two different
+   ways, an old UA rule on the children and newer Chrome's content-visibility on the generated
+   ::details-content box, so both are overridden. There is deliberately no `order` here: the folded set
+   must be contiguous in the markup, and an earlier version restored the old bar with `order` instead,
+   which desynced the tab sequence from the visual one (WCAG 2.4.3) in a way axe does not check.
+   Range syntax (`width >= 40rem` / `width < 40rem`) rather than a min-width/max-width pair, because
+   a pair cannot draw a clean boundary either way: on one value both queries match at exactly 640px and,
+   setting different properties, both apply (#25 measured a 495px header of the ☰ AND every link); split
+   to 40rem/40.0625rem, a fractional viewport between 640px and 641px — routine with display scaling or
+   zoom — matches NEITHER, the ☰ is hidden and the closed <details> keeps the nav hidden too, so no page
+   is reachable. Range syntax is the one form with no overlap and no gap at any width. The studio twin
+   is BaseLayout.astro (`width >= 66rem` / `width < 66rem`). Accepted regression (M, 2026-09-05): an
+   engine without Media Queries 4 range syntax (Safari before 16.4, Chrome before 104, Firefox before 63)
+   drops both queries, and because this file’s base state is the hidden ☰ with the panel folded, such an
+   engine gets no face nav — the same trade the studio layout made; the fallback for both layouts is
+   beinsiculous/insiculous_web#45, not this change’s work. */
+@media (width >= 40rem) {
+  .site-nav .menu, .site-nav .menu-panel { display: contents; }
+  .site-nav .menu::details-content { content-visibility: visible; display: contents; }
+
+  /* A full-width strip under the bar, positioned against the sticky .site-nav like .menu-panel — never
+     anchored to the summary, so it cannot run past the viewport at 641px with four focus pills ahead
+     of it. No white-space: nowrap, for the same reason (the Aa panel has it and must not be copied). */
+  .nav-peripheral-panel {
+    position: absolute; left: 0; right: 0; top: 100%;
+    display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0.5rem 1.25rem;
+    background: var(--background); border-bottom: 1px solid var(--line); box-shadow: var(--shadow);
+    z-index: 20;   /* above main, below .a11y-panel's 30 */
+  }
+}
+
+/* Phone: the ☰ is the only control besides the brand and Aa, and everything else drops as a full-width
+   panel under the bar. .site-nav is sticky, so it is the containing block the panel resolves against —
+   the panel spans the viewport rather than the brand's box. */
+@media (width < 40rem) {
+  .site-nav { flex-wrap: nowrap; gap: 0.5rem; }
+  .site-nav .brand { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu > summary {
+    display: grid; place-items: center;
+    min-width: 44px; min-height: 44px;
+    font-size: 1.35rem; color: var(--ink);
+    border-radius: 999px;
+  }
+  .menu[open] > summary { color: var(--on-accent); background: var(--accent); }
+  .menu > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .menu-panel {
+    position: absolute; left: 0; right: 0; top: 100%;
+    display: flex; flex-direction: column; gap: 0.35rem;
+    padding: 0.6rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
+    background: var(--background);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    max-height: calc(100vh - 100%); overflow-y: auto;   /* a long panel scrolls rather than running off screen */
+  }
+  /* In the panel the pills are full-width rows: a thumb gets the whole width, not a 44px pill in a gap. */
+  .menu-panel .nav-links { flex-direction: column; gap: 0.25rem; }   /* full-width rows, not pills in a gap */
+  .menu-panel .nav-link { display: flex; align-items: center; min-height: 44px; border-radius: 8px; }
+  /* Inside the ☰ panel: a static, indented column of the 44px rows .menu-panel .nav-link already gives. */
+  .menu-panel .nav-peripheral-panel {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    margin-left: 0.75rem; padding-left: 0.5rem; border-left: 2px solid var(--line);
+  }
+  /* The panel reads top to bottom as "here", "you", "elsewhere" — this face's pages, the profile, then
+     the way out to the other sites. That is the markup's order, so nothing here reorders anything. The
+     site links stay a row of two rather than a column: they are icons, and two emoji stacked read
+     as a list of nothing. The rule separates them from this face's own pages. */
+  .menu-panel .nav-profile { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  .menu-panel .face-switch { justify-content: flex-start; gap: 0.5rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
+  /* One of these two goes somewhere in the site — the studio — and the other asks for
+     money. In the bar they are one small pair, but the panel has a whole row, so here the one that
+     navigates is big enough to hit without looking, and the tip jar is pushed to the far end where it
+     reads as an aside rather than a second destination. An auto margin does this without touching source
+     order, so the tab sequence still matches the paint. */
+  .menu-panel .face-link:not(.face-kofi) { font-size: 1.75rem; padding: 0.15rem 0.5rem; }
+  .menu-panel .face-kofi { margin-left: auto; }
+}
+main { padding: 1.25rem; display: grid; gap: 1.25rem; max-width: 76rem; margin: 0 auto; width: 100%; flex: 1; align-content: start; }
+.site-footer { padding: 1rem 1.25rem 2rem; text-align: center; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
+
+/* ---------- settings ---------- */
+.button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+button, .file-button, .button { font: inherit; padding: 0.4rem 0.9rem; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); border-radius: 6px; cursor: var(--cursor-pointer); }
+.button { display: inline-block; text-decoration: none; }
+button[type=button], .file-button { background: var(--panel-soft); color: var(--accent); }
+/* The picker's input is visually hidden, so its focus ring is drawn on the label — for keyboard focus only, as everywhere else. */
+.file-button:has(:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.5; cursor: var(--cursor-forbidden); }
+input:disabled, select:disabled { opacity: 0.55; }
+
+[hidden] { display: none !important; }   /* display rules on classes (flex/grid) must never beat the hidden attribute */
+/* Cursor: wooden by default; sword on anything clickable; shield on anything disabled. */
+html, body { cursor: var(--cursor-default); }
+a, area, button, select, summary, label, input[type=checkbox], input[type=radio], input[type=file], input[type=range], [role=button], [role=link] { cursor: var(--cursor-pointer); }
+button:disabled, select:disabled, input:disabled, fieldset:disabled *, [aria-disabled=true] { cursor: var(--cursor-forbidden); }
+
+/* ---------- theme layout (Astro app only) ---------- */
+/* themes.css owns the skin (palette/fonts/textures); geometry lives here. This file loads after themes.css. */
+
+/* ==== one content column, centered ====
+   62rem, not a rounder 60, and the reason is worth keeping even though what demanded it is gone: the
+   parked chain's .fortnight-grid asked for 7 × 120px + 6 × 8px = 888px, and a 60rem column leaves only
+   876-878px inside the panel's padding and border, so it overflowed by 12px. 62rem leaves 908-910px.
+   The width stays — the keep's own panels (src/components/KeepStyles.astro) are sized to be read from
+   across a room and want every pixel of it. */
+[data-theme="fort-knight"] main { max-width: 62rem; }
+
+/* `main` is a grid, so every panel is a grid item and its default `min-width: auto` resolves to
+   min-content — the column, and with it the page, can then be wider than the viewport. These two
+   neutraliser used to live in the 40rem block, which left every width above 640px pinned to the
+   widest panel's min-content and made 641-758px scroll sideways. It belongs at every width. The
+   structures that made the demand were the builder's wide tables, removed 2026-08-30 with the
+   creation chain; the rule stays because the demand is a property of the grid, not of those tables. */
+main > * { min-width: 0; }
+
+/* The profile row: which saved profile is active, and its name.
+   The name box and the nav dropdown are sized for a whole profile id rather than a placeholder: generated
+   names ([Adjective]-[Noun]-[Title], src/lib/shared/profile-names.js) run to 35 characters, which measures
+   20.4rem of text in the input and 18.4rem in the smaller select font. Both keep a max-width so the phone
+   rules below can still shrink them. */
+.profile-name-form { align-items: center; margin: 0.4rem 0; }
+.profile-name-form .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.profile-name-form input { padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--panel-soft); color: var(--ink); width: 22rem; min-width: 0; max-width: 100%; }
+.nav-profile { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.nav-profile-label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--muted); }
+.nav-profile select { padding: 0.25rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 0.85rem; background: var(--panel-soft); color: var(--ink); max-width: 20rem; min-width: 0; }
+
+/* ---------- the profile-name dialog (src/lib/profile-name-dialog.js) ---------- */
+/* Built in JS and appended to <body>: the face skin's tokens still reach it, but no page rule does.
+   Mirrors the rule set in global.css under the same class names (the two files are not shared —
+   global.css covers the studio pages, this file the face pages). */
+.name-dialog {
+  padding: 0; border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--ink); box-shadow: var(--shadow);
+  /* --panel is translucent on purpose: panels are frosted glass over the page behind them. A modal is
+     not — it floats over whatever the page happens to be, so a translucent one makes its own text's
+     contrast depend on the content underneath it, which is not a property a dialog may have. axe caught
+     exactly that: identical colours passed over a long page and failed over a short one. So the panel
+     colour is laid over an opaque base of the theme's own background: same appearance, fixed contrast. */
+  background-color: var(--background);
+  background-image: linear-gradient(var(--panel), var(--panel));
+  width: min(28rem, calc(100vw - 2rem)); max-width: 100%;
+}
+.name-dialog::backdrop { background: rgba(35, 35, 31, 0.55); }
+.name-dialog-form { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.1rem; }
+.name-dialog h2 { margin: 0; font-size: 1.05rem; }
+.name-dialog .inline-field { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.name-dialog input {
+  width: 100%; min-width: 0; padding: 0.35rem 0.5rem; border: 1px solid var(--line);
+  border-radius: 6px; font: inherit; background: var(--panel-soft); color: var(--ink);
+}
+.name-dialog button { cursor: var(--cursor-pointer); }
+.name-dialog-error:empty { display: none; }
+.name-dialog-error { color: var(--ink); margin: 0; }
+
+/* ---------- mobile (phones) ---------- */
+/* Everything below only narrows geometry; the wide layout above is untouched. Tables that were
+   built as rows of columns become stacked cards with their column captions drawn by ::before.
+   The breakpoint is 40rem rather than 640px so it tracks the reader's own font size: someone browsing at a 20px
+   root gets bigger text in the same column and needs these rules to come in sooner, which a px value would ignore. */
+@media (width < 40rem) {
+  h1 { font-size: 1.3rem; }
+  .site-nav { padding: 0.5rem 0.75rem; gap: 0.5rem; }
+  .brand { margin-right: 0; }
+  /* A long profile id must not push this row past the viewport: ids are names people choose, and a
+     generated one runs to 35 characters against the old placeholder's 8. The row wraps, and the select
+     gives up its 20rem cap and its content-based minimum so it can shrink beside the ⚙ Profile link. */
+  .nav-profile { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  .nav-profile-label { max-width: 100%; flex: 1 1 auto; }
+  .nav-profile select { max-width: 100%; }
+  main { padding: 0.75rem; gap: 0.75rem; }
+  .panel { padding: 0.9rem; }
+  .button-row button, .button-row .file-button { flex: 1 1 auto; text-align: center; }
+
+}
+
+/* ---------- touch ---------- */
+/* Keyed to the pointer, not the viewport: a touchscreen laptop needs these and a narrow desktop window does not.
+   Nothing here changes a mouse-driven page. */
+@media (pointer: coarse) {
+  .nav-link, .face-link {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+  }
+  .face-link { min-width: 44px; }
+}
+
+/* ---------- high contrast ---------- */
+/* The header's Aa control sets data-contrast="high" on <html> (AccessibilityControls.astro).
+   public/app/shared/themes.css loads AFTER this file — so each selector below carries one more
+   attribute than its :root[data-theme="…"] rules to out-specify it in the cascade. Solid black panels, white ink, no photograph. */
+:root[data-theme="fort-knight"][data-contrast="high"] {
+  --background: #000000; --panel: #000000; --panel-soft: #161310; --plank: #000000; --card: #000000;
+  --ink: #ffffff; --muted: #e8e1d1; --nav-ink: #ffffff; --line: #a08a68;
+  --accent: #ffbe6b; --on-accent: #000000; --flexible: rgba(255, 255, 255, 0.16);
+}
+[data-contrast="high"] body::before { background-image: none !important; filter: none !important; }
+[data-contrast="high"] .panel { backdrop-filter: none; -webkit-backdrop-filter: none; }

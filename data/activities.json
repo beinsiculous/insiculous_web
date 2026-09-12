@@ -1,0 +1,4 @@
+{
+  "$schema": "./schema/activities.schema.json",
+  "activities": []
+}

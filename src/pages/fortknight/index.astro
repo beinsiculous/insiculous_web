@@ -1,0 +1,161 @@
+---
+// FortKnight's Overview: the thesis front door, and — once the visitor has a keep — their fortnight grid.
+//
+// The claims below are condensed from docs/thesis.md — this page says what the face argues. That argument
+// is also the no-keep state and the no-JS fallback, on purpose: a crawler, a build artefact and a stranger
+// all see the front door, because everything personal comes from the visitor's own keep in
+// localStorage. When a keep is there, the script draws a compact grid of the fourteen days ABOVE the front
+// door — the keep is the overview, the thesis is the footnote.
+//
+// It resolves nothing. The keep arrives pre-joined by day key, so the grid shows the keep's own words in
+// the keep's own order and links each cell to the day page; keep.astro's header says why running this
+// repository's date evaluator over a keep would be wrong for half the year.
+//
+// Two actions live under "What is here now", and the order is the argument. The primary one is loading a
+// keep: it is what makes this page an Overview. The secondary one is creating a profile — a permanent home
+// for it, not a stopgap. The creation chain that would have owned it left main on 2026-08-30 (preserved at
+// the tag `creation-chain-parked`), so a profile is made where achievements happen: here and on the studio
+// home page. It writes a real, saved profile rather than only making one active, which is also why the nav
+// offers no "New profile…" (src/components/ProfileSwitcher.astro).
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import KeepStyles from "../../components/KeepStyles.astro";
+import { facePath } from "../../lib/faces.js";
+
+const keep = facePath("fortknight", "keep/");
+---
+<FaceLayout title="FortKnight" face="fortknight">
+  <KeepStyles />
+  <section class="panel">
+    <h1>FortKnight</h1>
+    <div id="keepGrid" hidden></div>
+    <p class="lede">
+      A week is the wrong unit of life, and a calendar is the wrong shape for a plan.
+      Decide the proportions; let the schedule be derived.
+    </p>
+
+    <h2>What it argues</h2>
+    <ul>
+      <li>
+        <strong>Fourteen days, not seven.</strong> The variant letter alternates every day, so week two is
+        the mirror of week one. That is the smallest cycle that can hold both “every day” and “every other
+        day” things without one of them lying.
+      </li>
+      <li>
+        <strong>Allocation precedes schedule.</strong> A calendar can answer “what is at 3pm Thursday”. It
+        cannot answer “am I spending my life the way I said I would”.
+      </li>
+      <li>
+        <strong>Open time is declared, not left over.</strong> Naming the unclaimed part of the fortnight is
+        what stops it being quietly eaten.
+      </li>
+      <li>
+        <strong>The year moves, so the rules move with it.</strong> Season starts are computed — equinox,
+        nth weekday, Easter — never typed in. A plan that cannot be recomputed for next year has an expiry
+        date.
+      </li>
+      <li>
+        <strong>Your schedule is the most sensitive file you own.</strong> No backend, no accounts, no
+        server holding it. This site holds nobody’s schedule.
+      </li>
+    </ul>
+
+    <h2>What is here now</h2>
+    <p>
+      <a href={keep}>Keep</a> shows a fortnight exported from the Fort Knight app: what is being eaten,
+      what is booked, and the shape of each day. The keep stays on this device and is never uploaded.
+      The planner itself runs on a profile kept on this device, and one can be created here.
+    </p>
+    <div class="button-row">
+      <a class="button" href={keep}>Open your keep →</a>
+      <button type="button" id="createProfileButton" hidden>Create a profile →</button>
+    </div>
+    <p class="muted" id="profileStatus"></p>
+    <p class="muted" id="keepOverviewStatus" role="status" aria-live="polite"></p>
+  </section>
+</FaceLayout>
+
+<script>
+  import { readStoredKeep } from "../../lib/keep-access.js";
+  import { readableDays } from "../../lib/keep.js";
+  import { element } from "../../lib/keep-view.js";
+  import { facePath } from "../../lib/faces.js";
+
+  // Boot is readStoredKeep()'s decision, like every keep-fed page. "none" renders nothing extra —
+  // the front door below is already the right thing to show. "cleared" and "kept" both only report, in
+  // the same spot beside the load link: one says the wreckage was forgotten, the other that an intact but
+  // undrawable keep was NOT deleted. Only "keep" draws.
+  const container = document.getElementById("keepGrid");
+  const status = document.getElementById("keepOverviewStatus");
+
+  const stored = readStoredKeep();
+  if (stored.status === "cleared" || stored.status === "kept") {
+    status.textContent = stored.reason;
+  } else if (stored.status === "keep") {
+    // Compact by design: the full panels live on Keep and on the day pages; here a cell is a label, a
+    // focus and the meals, and the whole cell is the link. The classes are keep-grid-* and global for
+    // the same reason as the rest of KeepStyles.astro — this DOM is built here, not stamped by Astro.
+    // The heading is an h2: the prerendered <h1>FortKnight</h1> above is the document's one h1 in every
+    // state, keeped or not.
+    container.appendChild(element("h2", null, "Your fortnight"));
+    const grid = element("div", "keep-grid");
+    for (const day of readableDays(stored.keep)) {
+      const cell = element("a", "panel keep-grid-cell");
+      cell.href = facePath("fortknight", `days/${day.dayKey}/`);
+      cell.appendChild(element("span", "keep-grid-day", day.label ?? day.dayKey));
+      if (day.mainFocusLabel) cell.appendChild(element("span", "keep-grid-focus muted", day.mainFocusLabel));
+      const meals = day.meals ?? {};
+      const named = [["Brunch", meals.brunch], ["Snack", meals.snack], ["Dinner", meals.dinner]]
+        .filter(([, dish]) => typeof dish === "string" && dish.length > 0);
+      if (named.length) {
+        const list = element("ul", "keep-grid-meals");
+        for (const [name, dish] of named) list.appendChild(element("li", null, `${name}: ${dish}`));
+        cell.appendChild(list);
+      }
+      grid.appendChild(cell);
+    }
+    container.appendChild(grid);
+    container.hidden = false;
+  }
+</script>
+
+<script>
+  import { loadSettings, newProfileId, profileIds, saveSettings, setActiveWeights } from "../../lib/shared/user-settings.js";
+  import { unusedProfileName } from "../../lib/shared/profile-names.js";
+  import { PROFILE_PATH } from "../../lib/faces.js";
+  import { withBase } from "../../lib/paths.js";
+
+  // Creating a profile lives here for good. It writes a real, saved profile rather than only making one
+  // active: `createProfile` sets the active id and leaves the saving to its caller, and the creation chain
+  // that used to do that is gone — which is the whole reason the nav's "New profile…" is not offered
+  // (src/components/ProfileSwitcher.astro). The name is rolled for you; you can change it on the Profile
+  // page, which is where this lands.
+  //
+  // The button starts hidden and is only revealed here: it is the one control on the page that does
+  // nothing without JavaScript, and a dead button is worse than no button.
+  const createButton = document.getElementById("createProfileButton");
+  const status = document.getElementById("profileStatus");
+
+  function render() {
+    const saved = profileIds(loadSettings());
+    createButton.hidden = false;
+    status.textContent = saved.length
+      ? `${saved.length} profile${saved.length === 1 ? "" : "s"} saved on this device.`
+      : "No profile on this device yet.";
+  }
+
+  createButton.addEventListener("click", () => {
+    const settings = loadSettings(); // re-read: another tab may have saved since this page loaded
+    try {
+      const id = newProfileId(settings, unusedProfileName([...profileIds(settings), settings.activeWeightsId]));
+      setActiveWeights(settings, { id, questionnaire: { answers: {} } });
+      saveSettings(settings);
+      // withBase, not the bare PROFILE_PATH: it is site-root relative, and from /fortknight/ the bare
+      // form would resolve to /fortknight/profile/. FaceLayout builds the nav's link the same way.
+      location.href = withBase(PROFILE_PATH);
+    } catch (error) {
+      status.textContent = error.message;
+    }
+  });
+
+  render();
+</script>

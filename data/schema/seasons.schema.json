@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/seasons.schema.json",
+  "title": "FortKnight seasons",
+  "description": "Five Norse-wheel seasons with rule-based start dates, outdoor/indoor mode, and focus priorities.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "seasons": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "gregorianRange": {
+            "type": "string"
+          },
+          "durationWeeks": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "min": {
+                "type": "integer"
+              },
+              "max": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "additionalProperties": false
+          },
+          "startRule": {
+            "type": "object",
+            "description": "A computable start (docs/questionnaire.md 'Section start rules'; evaluated by fk_core/dates.py start_date_for_rule and its JavaScript twin): the kind's base date for the year, + offsetDays, then snapped to a weekday or not. Kind-specific fields: fixed-date month+day; nth-weekday month+weekday+occurrence (1-4, -1 = last); solar term; new-moon index (1-13, the nth new moon of the year); easter and manual need nothing (manual reads knownStarts[year]).",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "fixed-date",
+                  "nth-weekday",
+                  "easter",
+                  "solar",
+                  "new-moon",
+                  "manual"
+                ]
+              },
+              "month": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12
+              },
+              "day": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 31
+              },
+              "weekday": {
+                "type": "string",
+                "enum": [
+                  "sunday",
+                  "monday",
+                  "tuesday",
+                  "wednesday",
+                  "thursday",
+                  "friday",
+                  "saturday"
+                ]
+              },
+              "occurrence": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  -1
+                ]
+              },
+              "term": {
+                "type": "string",
+                "enum": [
+                  "spring-equinox",
+                  "summer-solstice",
+                  "autumn-equinox",
+                  "winter-solstice"
+                ]
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 13
+              },
+              "offsetDays": {
+                "type": "integer",
+                "minimum": -366,
+                "maximum": 366
+              },
+              "snap": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "weekday": {
+                    "type": "string",
+                    "enum": [
+                      "sunday",
+                      "monday",
+                      "tuesday",
+                      "wednesday",
+                      "thursday",
+                      "friday",
+                      "saturday"
+                    ]
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "on-or-after",
+                      "on-or-before"
+                    ]
+                  }
+                },
+                "required": [
+                  "weekday",
+                  "direction"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "kind",
+              "offsetDays",
+              "snap"
+            ],
+            "additionalProperties": false
+          },
+          "startDescription": {
+            "type": "string",
+            "description": "The rule in words (the workbook's 'Season Start - Sunday' text)."
+          },
+          "startDayKey": {
+            "type": "string",
+            "pattern": "^(sun|mon|tue|wed|thu|fri|sat)-[ab]$"
+          },
+          "seasonMode": {
+            "type": "string",
+            "enum": [
+              "outdoor",
+              "indoor",
+              "mixed"
+            ],
+            "description": "Norse-wheel outside-time vs inside-time, flipped for Arizona (Fimbulsumar is indoor)."
+          },
+          "outdoorWindow": {
+            "type": "object",
+            "properties": {
+              "uvAbove4": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                    "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+                  },
+                  "end": {
+                    "type": "string",
+                    "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+                    "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false,
+                "description": "Daily window when the UV index is above 4; the guide for outside-time vs inside-time. Null until measured."
+              }
+            },
+            "required": [
+              "uvAbove4"
+            ],
+            "additionalProperties": false
+          },
+          "focus": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "meals",
+                "cleaning",
+                "working",
+                "spirituality-development",
+                "friends-family",
+                "health",
+                "operations"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 4,
+            "description": "Category priorities, most important first."
+          },
+          "menuId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "knownStarts": {
+            "type": "object",
+            "description": "Year -> ISO date. Read by manual rules (the typed start of that year); for computed rules a documented check value (validate.py verifies it equals the computed date).",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          "raw": {
+            "type": "object",
+            "description": "Original spreadsheet cell text, keyed by column header. Never edited."
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "startRule",
+          "startDescription",
+          "startDayKey",
+          "seasonMode",
+          "outdoorWindow",
+          "focus",
+          "menuId"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "seasons"
+  ],
+  "additionalProperties": false
+}

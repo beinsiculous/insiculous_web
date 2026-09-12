@@ -1,0 +1,50 @@
+[
+  {
+    "id": "first_home",
+    "name": "Pond Pioneer",
+    "description": "Guide a frog into its first home.",
+    "hidden": false
+  },
+  {
+    "id": "round_clear",
+    "name": "Full House",
+    "description": "Fill all five homes in one round.",
+    "hidden": false
+  },
+  {
+    "id": "homes_25",
+    "name": "Homecoming Hero",
+    "description": "Fill 25 homes in one session.",
+    "hidden": false
+  },
+  {
+    "id": "deathless_round",
+    "name": "Untouched Crossing",
+    "description": "Clear a round without losing a single life.",
+    "hidden": false
+  },
+  {
+    "id": "speedy",
+    "name": "Swift Swimmer",
+    "description": "Reach home with 15 or more seconds to spare.",
+    "hidden": false
+  },
+  {
+    "id": "score_5k",
+    "name": "High Hopper",
+    "description": "Score 5,000 points.",
+    "hidden": false
+  },
+  {
+    "id": "insiculous_clear",
+    "name": "Insiculous Crossing",
+    "description": "Clear a round in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "coop_round",
+    "name": "Tag Team",
+    "description": "In co-op, both players fill a home in the same round.",
+    "hidden": false
+  }
+]

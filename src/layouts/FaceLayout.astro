@@ -1,0 +1,100 @@
+---
+import "../styles/faces.css";
+import FaceNav from "../components/FaceNav.astro";
+import ProfileSwitcher from "../components/ProfileSwitcher.astro";
+import AccessibilityBootScript from "../components/AccessibilityBootScript.astro";
+import AccessibilityControls from "../components/AccessibilityControls.astro";
+import { withBase } from "../lib/paths.js";
+import { FACES, FACE_IDS, PROFILE_PATH, STUDIO, facePath, studioPath } from "../lib/faces.js";
+import { KOFI_URL, KOFI_LABEL, KOFI_TITLE } from "../lib/site-links.js";
+
+// The layout of the site's planner face (docs/app.md): every page rendered here belongs to a face in FACES
+// (FortKnight), so `face` is required. Its menu is faceNav() in src/lib/faces.js — Keep, the seven stones
+// each carrying its category, Achievements; the brand is the Overview’s link — and every entry has a page: postbuild-check.mjs check 7
+// fails the build if one does not. The face brings its own skin (FACES[face].theme). The switcher sits
+// left of the brand: the Be Insiculous logo back out to the studio site (and any further face's logo, were
+// one added).
+// The profile dropdown and ⚙ Profile only show once a profile is saved on this device.
+// The Profile page the face shares with the studio is NOT here — it belongs to beinsiculous.com and is a
+// studio page on BaseLayout (src/pages/profile.astro).
+const { title, face } = Astro.props;
+const currentFace = FACES[face];
+const otherFaces = FACE_IDS.filter((faceId) => faceId !== face).map((faceId) => FACES[faceId]);
+const profileHref = withBase(PROFILE_PATH);
+const pathname = Astro.url.pathname;
+const profileActive = pathname.startsWith(profileHref);
+const brandLabel = `${currentFace.logo} ${currentFace.label}`;
+const theme = currentFace.theme;
+// Each face gets its own tab icon — an emoji drawn into an inline SVG, so there is no file to ship.
+const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${currentFace.favicon}</text></svg>`;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} · {brandLabel}</title>
+  <link rel="icon" href={favicon} />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="stylesheet" href={withBase("app/shared/themes.css")} />
+  <script is:inline define:vars={{ theme }}>
+    // The page's face decides its skin; set before first paint so the base palette never shows.
+    document.documentElement.dataset.theme = theme;
+  </script>
+  <AccessibilityBootScript />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-nav">
+    {/* Below 40rem the bar does not fit: the pages (Keep, up to four focus stones, Peripheral,
+        Achievements), a profile dropdown and two site links push it to three rows and
+        about a sixth of a phone screen. They fold behind a ☰ instead, leaving the brand and the
+        Aa control as a single row. The disclosure is native, like the studio's in BaseLayout.astro —
+        no JavaScript: ☰ toggles it, Enter and Space toggle it from the keyboard, and every navigation
+        resets it because each page is a fresh document. Escape does NOT close a plain <details>,
+        measured in Chrome with focus on the summary, on a panel link and on the body — that would
+        need script, and a disclosure is not a modal, so it does not owe you one.
+        Above 40rem the wrapper is display: contents and the bar is one flat row again. The source
+        order below IS the painted order at both widths, and no CSS `order` reorders any of it. A
+        folded set has to be contiguous in the markup, and the first version of this kept the old bar
+        with `order` instead — which left the tab sequence running switch, nav, profile, brand, Aa
+        while the eye read switch, brand, nav, Aa, profile. axe cannot see that, because it checks no
+        order at all; it is WCAG 2.4.3, and it is why the bar reads brand-first now. Aa sits before the
+        disclosure for the same reason, and the same way BaseLayout does it: the panel drops BELOW the
+        bar, so a button after the <details> in the markup would be painted in the bar but tabbed after
+        everything in the panel. An open Peripheral panel in FaceNav makes the same compromise: it is
+        painted below the bar but tabbed before Achievements.
+        "Site links" rather than "Switch app": the row carries the tip jar as well as the way out. */}
+    <a class="brand" href={facePath(face)}>
+      <span class="logo" aria-hidden="true">{currentFace.logo}</span> {currentFace.label}
+    </a>
+    <AccessibilityControls />
+    <details class="menu">
+      <summary>
+        <span aria-hidden="true">☰</span><span class="visually-hidden">Menu</span>
+      </summary>
+      <div class="menu-panel">
+        <FaceNav face={face} />
+        <ProfileSwitcher>
+          <a class={`nav-link${profileActive ? " active" : ""}`} href={profileHref}>⚙ Profile</a>
+        </ProfileSwitcher>
+        <nav class="face-switch" aria-label="Site links">
+          <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
+          {otherFaces.map((other) => (
+            <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
+          ))}
+          <a class="face-link face-kofi" href={KOFI_URL} title={KOFI_TITLE} aria-label={KOFI_LABEL} target="_blank" rel="noopener noreferrer">☕</a>
+        </nav>
+      </div>
+    </details>
+  </header>
+  <main id="main" tabindex="-1">
+    <slot />
+  </main>
+  {/* No timezone claim here any more: it came from the built bundle, and a keep carries its own local
+      time strings. The footer states what the site owes a visitor and nothing else. */}
+  <footer class="site-footer muted">
+    <a href={withBase("accessibility/")}>Accessibility</a>
+  </footer>
+</body>
+</html>

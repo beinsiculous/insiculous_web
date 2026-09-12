@@ -1,0 +1,92 @@
+---
+// Fork Knife: the menu, from the visitor's own keep.
+//
+// One of Name Drop's eight stones (docs/megaseed/name-drop.md in the working set), and the landing the
+// roadmap has promised since Fork Knife's own /forkknife/ routes came off the site on 2026-08-28. Two
+// views of the same rows, because they answer different questions: BY DISH is where Fork Knife's whole
+// argument becomes visible — a handful of dishes covering fourteen days, most cooked once and eaten
+// twice — and BY DAY is what you check on a Tuesday.
+//
+// The keep has carried the menu grouped by slot since 2026-08-29. This page reads it and draws; the
+// builders are in src/lib/keep-view.js with the rest, so nothing about drawing a keep lives on a page.
+//
+// Like every keep-fed page the server renders an empty shell, and it resolves nothing — keep.astro's
+// header carries both arguments in full.
+import FaceLayout from "../../layouts/FaceLayout.astro";
+import KeepStyles from "../../components/KeepStyles.astro";
+import { facePath } from "../../lib/faces.js";
+
+const keep = facePath("fortknight", "keep/");
+---
+<FaceLayout title="Fork Knife" face="fortknight">
+  <KeepStyles />
+  <section class="panel" id="menuPrompt">
+    <h1>Fork Knife</h1>
+    <p class="muted">
+      The fortnight’s meals: every dish with the day it is cooked and the day it comes back, and the
+      same rows laid out day by day.
+    </p>
+    <p class="muted" id="menuStatus" role="status" aria-live="polite">
+      Load your keep to see the menu.
+    </p>
+    <div class="button-row">
+      <a class="button" href={keep}>Load your keep on Keep</a>
+    </div>
+    <noscript><p class="muted">This page needs JavaScript to read your keep.</p></noscript>
+  </section>
+
+  <div id="menuBody" hidden></div>
+</FaceLayout>
+
+<script>
+  import { readStoredKeep } from "../../lib/keep-access.js";
+  import { describeSection } from "../../lib/keep.js";
+  import { element, renderMenuByDish, renderMenuByDay } from "../../lib/keep-view.js";
+  import { DAY_KEY_ORDER } from "../../lib/shared/fortknight-rules.js";
+
+  const prompt = document.getElementById("menuPrompt");
+  const status = document.getElementById("menuStatus");
+  const body = document.getElementById("menuBody");
+
+  function showLoadPrompt(message) {
+    body.hidden = true;
+    body.replaceChildren();
+    prompt.hidden = false;
+    if (message) status.textContent = message;
+  }
+
+  // Boot is readStoredKeep()'s decision, like every keep-fed page.
+  const stored = readStoredKeep();
+  if (stored.status === "cleared" || stored.status === "kept") {
+    showLoadPrompt(stored.reason);
+  } else if (stored.status !== "keep") {
+    showLoadPrompt();
+  } else {
+    // describeSection is what separates "exported before menus travelled" from "this household keeps no
+    // menu" — the format is additive, so an absent section and an empty one mean different things, and
+    // telling the first person their household has no menu would send them looking for a bug that is not
+    // there. Everything else here collapses the two with `?? []`; this page must not.
+    const section = describeSection(stored.keep, "menu");
+    if (section.state !== "present") {
+      showLoadPrompt(section.message);
+    } else {
+      const labels = new Map((Array.isArray(stored.keep.days) ? stored.keep.days : [])
+        .filter((day) => typeof day?.dayKey === "string")
+        .map((day) => [day.dayKey, day.label ?? day.dayKey]));
+      const byDish = renderMenuByDish(stored.keep.menu);
+      const byDay = renderMenuByDay(stored.keep.menu, DAY_KEY_ORDER, (key) => labels.get(key) ?? key);
+      // A menu section that is present but holds only empty slots draws neither view. Saying so beats
+      // showing two headings over nothing.
+      if (!byDish && !byDay) {
+        showLoadPrompt("This keep carries a menu, and every meal in it is empty.");
+      } else {
+        prompt.hidden = true;
+        body.hidden = false;
+        body.replaceChildren();
+        body.appendChild(element("h1", null, "Fork Knife"));
+        if (byDish) body.appendChild(byDish);
+        if (byDay) body.appendChild(byDay);
+      }
+    }
+  }
+</script>

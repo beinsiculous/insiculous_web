@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GameRow from '../../components/GameRow.astro';
+import { readGameCatalogs } from '../../lib/games-catalog-files.js';
+
+const games = (await getCollection('games')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+const catalogs = readGameCatalogs(games);
+---
+
+<BaseLayout
+  title="Games — Be Insiculous"
+  description="Games built with the Insiculous 2D engine."
+>
+  <p class="section-label">games</p>
+  <h1>Games</h1>
+  <p class="intro">
+    Everything below runs on <a href="/engine/">Insiculous 2D</a>. All are in
+    alpha — full gameplay loops, polish ongoing. Every one is playable in the browser on
+    WebGPU, and the desktop builds run the same code natively.
+  </p>
+  <p class="intro art-policy">
+    The games listed here are free and may use AI art. The games we sell carry
+    none — those are made by our own artists, and they ship on Steam and the
+    app stores rather than here.
+  </p>
+
+  <ol class="games">
+    {games.map((game) => <GameRow game={game} />)}
+  </ol>
+
+  <section class="achievements">
+    <h2 id="gameAchievementsHeading">Game achievements</h2>
+    <div id="gameAchievementsBoard" data-catalogs={JSON.stringify(catalogs)}></div>
+    <p class="muted" id="gameAchievementsStatus" role="status"></p>
+  </section>
+</BaseLayout>
+
+<script>
+  import { maybePromptForProfile, renderAchievementsBoard, unlockAchievement } from "../../lib/achievements.js";
+  import { loadSettings, profileIds } from "../../lib/shared/user-settings.js";
+  import { readEmbeddedCatalogs } from "../../lib/games-catalog.js";
+
+  const board = document.getElementById("gameAchievementsBoard");
+  const heading = document.getElementById("gameAchievementsHeading");
+  const status = document.getElementById("gameAchievementsStatus");
+
+  // Opening this page is the "Player" achievement; idempotent, so only the first visit counts.
+  // The board belongs to the person, so the heading names the active profile once one is saved —
+  // the prerendered heading stays generic because a no-JS browser has no profile to name.
+  unlockAchievement("player");
+  const settings = loadSettings();
+  // The null guards are the checker's idiom (GameEmbed.astro): all three elements are prerendered
+  // above, so a null would mean this script drifted from its own markup.
+  if (heading && profileIds(settings).length) heading.textContent = `${settings.activeWeightsId}’s game achievements`;
+  const catalogs = readEmbeddedCatalogs(board);
+  const { rendered } = renderAchievementsBoard(board, { types: ["game"], gameCatalogs: catalogs });
+  if (status) status.textContent = rendered ? "" : "No game achievements on this device yet — they unlock as you play.";
+  // Player is the likeliest first achievement anywhere on the site, so this is where the
+  // once-ever create-profile prompt most naturally lands; the module owns the once-ever logic.
+  maybePromptForProfile();
+</script>
+
+<style>
+  .intro {
+    max-width: 42em;
+    margin-bottom: 2rem;
+  }
+
+  /* The art policy — wording comes from docs/thesis.md; edit it there first. "may" is deliberate:
+     the free track is not uniform, so no listing here can falsify the sentence. */
+  .art-policy {
+    color: var(--text-bright);
+    border-left: 2px solid var(--accent);
+    padding-left: 1rem;
+  }
+
+  /* A numbered list in play order — the numbers are the challenge's own (pong.md opens "Game 1 of
+     the 20 Games Challenge"). Rows are divided by rules, not boxed; the page scrolls, not the list. */
+  .games {
+    margin: 0 0 2rem;
+    padding-left: 1.75rem;
+  }
+
+  .achievements {
+    margin-top: 2rem;
+  }
+
+  /* global.css has no .muted (that class is app-widgets.css's); this page styles its own. */
+  .muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+</style>

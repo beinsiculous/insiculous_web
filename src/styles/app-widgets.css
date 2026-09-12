@@ -1,0 +1,104 @@
+/* The handful of app widgets the studio's own pages need — currently just the shared Profile page
+   (src/pages/profile.astro), which is a beinsiculous.com page that happens to edit FortKnight's
+   on-device profile.
+
+   The same widgets exist for the face in src/styles/faces.css, but that file cannot be shared here: it is a
+   global stylesheet for the face apps, and its bare element rules (`body { font-family: "Trebuchet MS"; display:
+   flex }`, `html, body { cursor: … }`, `h1 { font-size: 1.5rem }`) would fight global.css. So these are written
+   against the studio's own tokens instead of adapted from the faces' — this file has no coupling to faces.css and
+   needs no keeping in step with it. It is imported by the page, not by BaseLayout, so the marketing pages do not
+   carry CSS they never use.
+
+   Class names match faces.css because the markup is shared (ProfileSwitcher.astro). The
+   profile-name dialog's styles are NOT here: they live in global.css
+   (every studio page can open the dialog via the first-achievement prompt) and faces.css — that pair
+   names each other. */
+
+[hidden] { display: none !important; }   /* display rules on classes must never beat the hidden attribute */
+
+/* ---------- panels ---------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+.panel + .panel { margin-top: 1.25rem; }
+.panel > h1:first-child, .panel > h2:first-child { margin-top: 0; }
+/* global.css gives h2 a 2.2em run-up, which is right between prose sections and far too much for a subtitle
+   sitting directly under the panel's h1 (the profile's name under "Profile"). */
+.panel > h1 + h2 { margin-top: 0.2em; }
+
+.muted { color: var(--text-dim); font-size: 0.9rem; }
+
+/* ---------- controls ---------- */
+/* Buttons as the studio draws them: the primary filled green with dark text, the rest outlined. */
+button {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+button[type="button"] {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  font-weight: 500;
+}
+button:hover:not(:disabled) { filter: brightness(1.1); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+input {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-bright);
+}
+select {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-raised);
+  color: var(--text-bright);
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.button-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.inline-field { display: inline-flex; align-items: center; gap: 0.5rem; }
+.profile-name-form { margin: 0.4rem 0; }
+.profile-name-form .inline-field { min-width: 0; }   /* else the field pins the row at the input's width */
+.profile-name-form input { width: 22rem; min-width: 0; max-width: 100%; }  /* fits the longest generated id */
+
+/* ---------- the profile switcher, as a page panel ---------- */
+/* Both layouts keep the switcher in their chrome now (global.css for the studio, faces.css for the
+   face), so nothing renders it inside a panel any more — /profile/ gave up its own copy on
+   2026-08-31. This block is what a panel copy would need if one comes back; the chrome rules in
+   those two files out-specify it with a leading element, so it cannot reach a header. */
+.nav-profile { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.75rem 0 0.25rem; }
+.nav-profile-label {
+  display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; max-width: 100%;
+  font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);
+}
+.nav-profile select { max-width: min(20rem, 100%); min-width: 0; }
+/* 20rem shows a whole generated id and its arrow; the min() lets a narrow screen take it back without a
+   media query, which this file needs because /profile/ is a studio page and never loads faces.css. */
+
+/* ---------- the achievements board ---------- */
+/* The 75% rule, same as the /games/ grid: the achievements board never takes more than 75% of the
+   viewport height — past that it scrolls inside its own box instead of pushing the panels below it
+   (the delete buttons included) out of reach. */
+.achievements-scroll { max-height: 75vh; overflow-y: auto; }
+
+@media (max-width: 40rem) {
+  .panel { padding: 0.9rem; }
+  .button-row button { flex: 1 1 auto; text-align: center; }
+}

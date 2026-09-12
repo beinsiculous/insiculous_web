@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/blocks.schema.json",
+  "title": "FortKnight blocks",
+  "description": "The five daily time blocks with boundaries and meal hints.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "order": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "too-early",
+          "early",
+          "midday",
+          "late",
+          "too-late"
+        ]
+      },
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "blocks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+            "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+          },
+          "end": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-4]):[0-5]\\d$",
+            "description": "24h clock, HH:MM; 24:00 only as an end-of-day boundary"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "mealPrimary": {
+            "type": "string",
+            "enum": [
+              "leftovers-dessert",
+              "breakfast",
+              "brunch",
+              "snack",
+              "dinner"
+            ]
+          },
+          "mealSecondary": {
+            "type": "string",
+            "enum": [
+              "leftovers-dessert",
+              "breakfast",
+              "brunch",
+              "snack",
+              "dinner"
+            ]
+          },
+          "carriesFocus": {
+            "type": "boolean"
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "label",
+          "start",
+          "end",
+          "durationMinutes",
+          "mealPrimary",
+          "mealSecondary",
+          "carriesFocus"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "order",
+    "blocks"
+  ],
+  "additionalProperties": false
+}

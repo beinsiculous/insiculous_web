@@ -1,0 +1,171 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Insiculous 2D — the engine — Be Insiculous"
+  description="Insiculous 2D: a 2D game engine written in Rust — wgpu rendering, hand-written ECS, a dockable editor — also a proving ground for agentic coding tools."
+>
+  <p class="section-label">the engine</p>
+  <h1>Insiculous 2D</h1>
+  <p class="lede">
+    A 2D game engine written in Rust — roughly 57,000 lines across an
+    11-crate workspace, shaped by building actual games with it. Six so far.
+  </p>
+
+  <div class="cta">
+    <a class="button secondary" href="/playground/">play on the playground →</a>
+  </div>
+
+  <section>
+    <h2>Architecture</h2>
+    <p>
+      The workspace splits into focused crates — <code>ecs</code>, <code>renderer</code>, <code>physics</code>, <code>input</code>, <code>audio</code>, <code>ui</code>, <code>editor</code> — tied together by <code>engine_core</code>.
+      The ECS is hand-written and deliberately simple: per-type storage with generational
+      entity IDs, events, resources, and systems. No archetype indirection — it is built for
+      debuggability and testability over raw throughput, and every game so far has run
+      comfortably on it.
+    </p>
+    <p>
+      A game is one trait: implement <code>update()</code>, opt into the
+      hooks you need, call <code>run_game()</code>. Swap that single call
+      for <code>run_game_with_editor()</code> and the same game boots inside
+      a dockable scene editor — inspector with undo/redo, gizmos, entity
+      picking, play/pause/stop with full world-snapshot restore. Scenes and
+      prefabs are RON files, which is how Breakout’s levels are authored.
+    </p>
+    <p>
+      That editor is now in the browser as the <a href="/playground/">Web Playground</a>.
+      The games already run there, on WebGPU; the editor is compiled
+      the same way — open a tab, build a scene, press play, and keep
+      working with projects saved directly in your browser. Building with the
+      engine, not just playing what it built, with nothing installed.
+    </p>
+    <a href="/images/platformer-in-editor-2026-08.png" class="shot-link">
+      <img
+        src="/images/platformer-in-editor-2026-08.png"
+        alt="The platformer demo open in the Insiculous 2D scene editor: hierarchy of named entities, the scene view, and the inspector editing the player's components"
+        width="1308"
+        height="786"
+        loading="lazy"
+      />
+    </a>
+    <p class="caption">
+      The platformer demo in the scene editor — hierarchy, live scene view, and the inspector on the player entity. <span class="caption-hint">Tap to open it full size.</span>
+    </p>
+  </section>
+
+  <section>
+    <h2>Rendering</h2>
+    <p>
+      wgpu with WGSL shaders. Sprites are instanced and CPU-batched per
+      texture with depth sorting; everything renders into an HDR
+      (<code>Rgba16Float</code>) target and passes through a configurable
+      bloom chain — extract, half-res separable Gaussian ping-pong,
+      tonemapped composite. Emissive sprites and particles glow for free.
+    </p>
+    <p>
+      The sprite shader evaluates SDF shapes directly — rounded rects,
+      circles, borders — with zoom-independent antialiasing, and a separate
+      line pipeline feeds the same HDR target, which is what makes the
+      signature spring-mass deformable grid ripple and bloom under the
+      gameplay. Text is CPU-rasterized with per-glyph GPU texture caching
+      and per-locale fonts; tilemaps batch through the same sprite pipeline.
+    </p>
+  </section>
+
+  <section>
+    <h2>Tech stack</h2>
+    <p>
+      Rust throughout: <code>wgpu</code> for graphics, <code>winit</code> windowing, <code>rapier2d</code> physics, <code>rodio</code> audio, <code>gilrs</code> gamepads, <code>glam</code> math, <code>fontdue</code> text, RON + serde for scenes and data.
+      Desktop and browser today — Vulkan, Metal, DX12, and WebGPU.
+    </p>
+    <p>
+      The design rule from day one: <em>everything must be CLI-testable</em>.
+      Over a thousand tests run headless without a GPU, which is also what
+      makes the codebase workable for coding agents. Browser export (WebAssembly) landed in
+      August 2026: the feasibility spike passed that July, the refactor it called for is done,
+      and all six games now run on WebGPU — which is why the embed slots on this site are play
+      buttons rather than placeholders.
+    </p>
+  </section>
+
+  <section>
+    <h2>Agentic-coding proving ground</h2>
+    <p>
+      The engine is co-developed with AI coding agents under a documented,
+      fairly strict process: per-crate instruction files and live tech-debt
+      ledgers, a coordination protocol so parallel agents work disjoint
+      crates without collisions, and hard guardrails — never claim a test
+      passed without running it, never weaken a test to get green, stop
+      after two failed attempts instead of thrashing.
+    </p>
+    <p>
+      The distinctive piece is <strong>adversarial cross-model review</strong>:
+      one model authors a plan or a diff, a different vendor’s model attacks
+      it headlessly, and every numbered finding gets an explicit accept or
+      rebut. Findings must name a concrete failure scenario — "this might
+      have issues" doesn’t count as a finding.
+    </p>
+    <p>
+      There’s no leaderboard and no pass-rate percentage, deliberately. The
+      evaluation is whether an agent’s work survives review, the test suite,
+      and actual play — judged by whoever has to maintain the codebase
+      afterward. What provenance there is lives in the git history
+      rather than in a scoreboard — commit trailers recording which models
+      worked on a change, and per-agent branches that make approaches
+      comparable on identical tasks.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.2rem;
+    color: var(--text-bright);
+    max-width: 38em;
+  }
+
+  /* A wrapper, not a <p>: global.css underlines every link inside a paragraph, and this is a button.
+     The gap is on top: a bottom margin would collapse into the next heading's larger one. */
+  .cta {
+    margin-top: 1.5rem;
+  }
+
+  section p {
+    max-width: 46em;
+  }
+
+  section img {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+  }
+
+  /* A 1308px screenshot of a dockable editor is unreadable scaled into a phone, so the image links to itself. */
+  .shot-link {
+    display: block;
+  }
+
+  .shot-link:hover {
+    text-decoration: none;
+  }
+
+  /* Only worth saying where the image is actually too small to read. */
+  .caption-hint {
+    display: none;
+  }
+
+  @media (max-width: 40rem) {
+    .caption-hint {
+      display: inline;
+    }
+  }
+
+  .caption {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+  }
+</style>

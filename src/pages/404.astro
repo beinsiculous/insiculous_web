@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="404 — Be Insiculous"
+  description="That page could not be found on beinsiculous.com."
+>
+  <div class="wrap">
+    <p class="code">404</p>
+    <h1>Page not found</h1>
+    <p>The page you asked for isn’t here. It may have moved, or the link may be wrong.</p>
+    <p><a href="/">← Back to the homepage</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .wrap {
+    text-align: center;
+    padding: 4rem 0;
+  }
+
+  .code {
+    font-family: var(--font-mono);
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0;
+    line-height: 1;
+    text-shadow: 0 0 40px var(--accent-glow);
+  }
+</style>

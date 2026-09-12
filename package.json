@@ -1,0 +1,33 @@
+{
+  "name": "be-insiculous",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "validate": "python3 scripts/validate.py",
+    "build": "astro build && node scripts/postbuild-check.mjs",
+    "preview": "astro preview",
+    "check": "astro check",
+    "verify": "npm run validate && npm run test:data && npm run check && npm run build && npm run a11y && npm run announce && LARGE_TEXT=1 npm run shots",
+    "a11y": "node scripts/a11y-check.mjs",
+    "announce": "node scripts/announce-check.mjs",
+    "shots": "node scripts/screenshot-pages.mjs",
+    "test:data": "python3 -m unittest discover tests",
+    "deploy": "npm run verify && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/jetbrains-mono": "^5.2.5",
+    "@fontsource-variable/space-grotesk": "^5.2.5",
+    "astro": "^7.2.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@axe-core/playwright": "^4.13.0",
+    "playwright": "^1.55.0",
+    "typescript": "^5.8.0",
+    "wrangler": "4.123.0"
+  }
+}

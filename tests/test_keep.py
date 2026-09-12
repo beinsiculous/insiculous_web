@@ -1,0 +1,819 @@
+"""The keep reader: what this page accepts, and what it says when it does not.
+
+`src/lib/keep.js` is not one of the fk_core twins — it has no Python counterpart, because it implements
+no rule that exists twice. It is driven through node the same way the twins are, which is what keeps it
+tested at all: tsconfig.json excludes `src/lib` from `astro check`, so these tests are its only safety net.
+
+The two that matter most are the tolerance pair. Fort Knight and this website ship on different cadences, and the
+person holding the phone cannot redeploy the site — so an unknown field must not be refused, and a keep
+from a newer format must be refused with a message that names the real remedy.
+"""
+import json
+import re
+import shutil
+import unittest
+from pathlib import Path
+
+from helpers import REPOSITORY_ROOT, STDIN_PRELUDE, run_node
+
+KEEP_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep.js").as_uri()
+KEEP_VIEW_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-view.js").as_uri()
+KEEP_ACCESS_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-access.js").as_uri()
+KEEP_STORE_MODULE = (REPOSITORY_ROOT / "src" / "lib" / "keep-store.js").as_uri()
+
+VALIDATE = (f'import {{ validateKeep }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
+            + "process.stdout.write(JSON.stringify(inputs.map((candidate) => {"
+              "const result = validateKeep(candidate);"
+              "return result.ok ? { ok: true } : { ok: false, reason: result.reason };"
+              "})));")
+
+# Boot, driven with a stub localStorage: `inputs.stored` is what getItem returns (null = nothing stored),
+# and the stub records whether removeItem was called, because the cleared/kept split IS whether storage
+# was touched. The dynamic import runs after the stub exists, so the module never sees a real localStorage.
+READ_STORED = (STDIN_PRELUDE
+               + "globalThis.localStorage = {"
+                 "  cleared: false,"
+                 "  getItem() { return inputs.stored; },"
+                 "  setItem() {},"
+                 "  removeItem() { this.cleared = true; },"
+                 "};"
+                 f"const {{ readStoredKeep }} = await import({json.dumps(KEEP_ACCESS_MODULE)});"
+                 "const result = readStoredKeep();"
+                 "process.stdout.write(JSON.stringify({ status: result.status, reason: result.reason ?? null,"
+                 "  hasKeep: Boolean(result.keep), cleared: globalThis.localStorage.cleared }));")
+
+FIXTURE = json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / "keep.sample.json").read_text(encoding="utf-8"))
+OTHER_HOUSEHOLD_FIXTURE = json.loads(
+    (REPOSITORY_ROOT / "tests" / "fixtures" / "keep.other-household.json").read_text(encoding="utf-8"))
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class ValidateKeepTests(unittest.TestCase):
+    def validate(self, candidates):
+        return run_node(VALIDATE, candidates)
+
+    def test_the_fixture_the_accessibility_gate_renders_is_acceptable(self):
+        self.assertEqual(self.validate([FIXTURE]), [{"ok": True}])
+
+    def test_the_other_household_fixture_is_acceptable(self):
+        """The second invented household: different season ids, same contract. Its exemption in
+        no_schedules.py is warranted by these tests reading it."""
+        self.assertEqual(self.validate([OTHER_HOUSEHOLD_FIXTURE]), [{"ok": True}])
+
+    def test_it_accepts_an_additive_version_carrying_fields_it_does_not_know(self):
+        """The tolerance the two release cadences depend on: Fort Knight can add a field and the deployed page
+        keeps working, because a bump is reserved for a breaking change."""
+        newer = json.loads(json.dumps(FIXTURE))
+        newer["meta"]["somethingNew"] = "added later"
+        newer["days"][0]["alsoNew"] = ["whatever"]
+        newer["inventedSection"] = {"x": 1}
+        self.assertEqual(self.validate([newer]), [{"ok": True}])
+
+    def test_a_newer_format_is_refused_with_the_remedy_on_the_right_device(self):
+        newer = json.loads(json.dumps(FIXTURE))
+        newer["meta"]["version"] = 99
+        [result] = self.validate([newer])
+        self.assertFalse(result["ok"])
+        self.assertIn("99", result["reason"])
+        # The fix is a redeploy of the site, which the person holding the phone cannot do. Telling them to
+        # re-export would send them round a loop that cannot help.
+        self.assertIn("website needs updating", result["reason"])
+        self.assertIn("the file is fine", result["reason"])
+
+    def test_keeps_own_keep_is_refused_and_named(self):
+        """The likeliest wrong file: the app's full keep rather than the small one it exports for the web."""
+        [result] = self.validate([{"meta": {"schemaVersion": 5}, "calendar": [], "days": [], "tasks": []}])
+        self.assertFalse(result["ok"])
+        self.assertIn("Fort Knight's own champion keep", result["reason"])
+
+    def test_a_fortknight_profile_is_refused(self):
+        [result] = self.validate([{"schemaVersion": 2, "activeWeightsId": "x", "weightsProfiles": {}}])
+        self.assertFalse(result["ok"])
+        self.assertIn("not a keep", result["reason"])
+
+    def test_anything_that_is_not_a_document_is_refused(self):
+        for result in self.validate([None, 7, "a string", ["an", "array"]]):
+            self.assertFalse(result["ok"])
+            self.assertIn("not a keep", result["reason"])
+
+    def test_a_keep_with_no_version_is_refused_rather_than_guessed_at(self):
+        [result] = self.validate([{"meta": {"format": "keep"}, "days": [{"dayKey": "sun-a"}]}])
+        self.assertFalse(result["ok"])
+        self.assertIn("does not say which format", result["reason"])
+
+    def test_a_keep_with_no_days_has_no_fortnight_to_show(self):
+        for empty in ({"meta": {"format": "keep", "version": 1}, "days": []},
+                      {"meta": {"format": "keep", "version": 1}, "days": [{"label": "no key"}]},
+                      {"meta": {"format": "keep", "version": 1}}):
+            with self.subTest(document=sorted(empty)):
+                [result] = self.validate([empty])
+                self.assertFalse(result["ok"])
+                self.assertIn("no days", result["reason"])
+
+    def test_a_sparse_day_is_still_a_day(self):
+        """A day needs a key to be a panel. Everything else on it degrades to nothing rather than refusing
+        the whole fortnight — the line is what can be drawn, not what is complete."""
+        sparse = {"meta": {"format": "keep", "version": 1},
+                  "days": [{"dayKey": "sun-a"}, {"dayKey": "mon-b", "meals": None, "blocks": None}]}
+        self.assertEqual(self.validate([sparse]), [{"ok": True}])
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class ExportAgeTests(unittest.TestCase):
+    def describe(self, keep, today):
+        script = (f'import {{ describeExportAge }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
+                  + "process.stdout.write(JSON.stringify(describeExportAge(inputs.keep, inputs.today)));")
+        return run_node(script, {"keep": keep, "today": today})
+
+    def test_a_keep_exported_today_is_not_stale(self):
+        keep = {"meta": {"exportedAt": "2026-08-27T18:00:00+00:00"}}
+        self.assertEqual(self.describe(keep, "2026-08-27"), {"exportedDay": "2026-08-27", "stale": False})
+
+    def test_an_older_keep_is_stale_without_counting_the_days(self):
+        """Stale or not, never how many days — counting them is date arithmetic, and this page does none."""
+        keep = {"meta": {"exportedAt": "2026-06-01T00:00:00+00:00"}}
+        self.assertEqual(self.describe(keep, "2026-08-27"), {"exportedDay": "2026-06-01", "stale": True})
+
+    def test_a_keep_without_a_timestamp_says_nothing(self):
+        for keep in ({"meta": {}}, {"meta": {"exportedAt": "not a date"}}, {}):
+            with self.subTest(keep=keep):
+                self.assertIsNone(self.describe(keep, "2026-08-27"))
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class SliceColourTests(unittest.TestCase):
+    """The year wheel's palette: positional, not keyed to one household's season ids.
+
+    The map this replaced ({ostara: …, fimbulsumar: …, …}) made every other household's wheel grey, and
+    keep-view.js is driven through node because tsconfig.json excludes src/lib from astro check — these
+    tests are its safety net, same as the validator's above.
+    """
+
+    def colours(self, slices):
+        script = (f'import {{ sliceColours }} from {json.dumps(KEEP_VIEW_MODULE)};' + STDIN_PRELUDE
+                  + "process.stdout.write(JSON.stringify(sliceColours(inputs)));")
+        return run_node(script, slices)
+
+    def test_the_palette_is_the_five_values_the_accessibility_gate_certified(self):
+        """These are the old household map's values, kept verbatim: axe certified their contrast on the
+        rendered page, so a palette change is an accessibility change."""
+        script = (f'import {{ SEASON_PALETTE, NEUTRAL_SLICE_COLOUR }} from {json.dumps(KEEP_VIEW_MODULE)};'
+                  + "process.stdout.write(JSON.stringify({ SEASON_PALETTE, NEUTRAL_SLICE_COLOUR }));")
+        result = run_node(script, None)
+        self.assertEqual(result["SEASON_PALETTE"],
+                         ["#4d7c0f", "#c2410c", "#6d28d9", "#9f1239", "#1d4ed8"])
+        self.assertEqual(result["NEUTRAL_SLICE_COLOUR"], "#78716c")
+
+    def test_colours_follow_position_of_first_appearance_not_season_id(self):
+        """The other household's season ids are none of the original map's keys, so a keyed map would paint
+        all five grey. Positional assignment gives them the palette in slice order."""
+        self.assertEqual(self.colours(OTHER_HOUSEHOLD_FIXTURE["year"]["slices"]),
+                         ["#4d7c0f", "#c2410c", "#6d28d9", "#9f1239", "#1d4ed8"])
+
+    def test_beyond_the_palette_is_the_neutral_colour(self):
+        slices = [{"key": f"season-{position}", "name": f"Season {position}"} for position in range(7)]
+        self.assertEqual(self.colours(slices),
+                         ["#4d7c0f", "#c2410c", "#6d28d9", "#9f1239", "#1d4ed8", "#78716c", "#78716c"])
+
+    def test_a_repeated_slice_keeps_its_first_colour(self):
+        """First appearance, not each appearance: a slice that shows up twice does not spend a new colour."""
+        slices = [{"key": "one", "name": "One"}, {"key": "two", "name": "Two"}, {"key": "one", "name": "One"}]
+        self.assertEqual(self.colours(slices), ["#4d7c0f", "#c2410c", "#4d7c0f"])
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class MenuGroupingTests(unittest.TestCase):
+    """Fork Knife's two views (/fortknight/forkknife/), at the only layer that can be tested without a browser.
+
+    The renderers themselves need a document — every builder in keep-view.js does — so the rules they run
+    on are exported separately and checked here, the same warrant as SliceColourTests above. What is a rule
+    and what is drawing: the slot order and the day regrouping are rules; turning them into elements is not.
+    """
+
+    DAY_KEY_ORDER = ["sun-a", "mon-b", "tue-a", "wed-b", "thu-a", "fri-b", "sat-a",
+                     "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b"]
+
+    def ordered(self, menu):
+        script = (f'import {{ orderedSlots }} from {json.dumps(KEEP_VIEW_MODULE)};' + STDIN_PRELUDE
+                  + "process.stdout.write(JSON.stringify(orderedSlots(inputs).map((slot) => slot.slot)));")
+        return run_node(script, menu)
+
+    def by_day(self, menu, day_order=None):
+        script = (f'import {{ menuByDayKey }} from {json.dumps(KEEP_VIEW_MODULE)};' + STDIN_PRELUDE
+                  + "process.stdout.write(JSON.stringify(menuByDayKey(inputs.menu, inputs.dayOrder)));")
+        return run_node(script, {"menu": menu, "dayOrder": self.DAY_KEY_ORDER if day_order is None else day_order})
+
+    def test_slots_run_in_the_order_a_day_does(self):
+        """Ordered by KEY, printed by LABEL: the other household calls brunch 'First Meal', and a menu
+        sorted by its own labels would run First Meal, Last Meal, Nibble."""
+        self.assertEqual(self.ordered(FIXTURE["menu"]), ["brunch", "snack", "dinner"])
+        shuffled = list(reversed(OTHER_HOUSEHOLD_FIXTURE["menu"]))
+        self.assertEqual(self.ordered(shuffled), ["brunch", "snack", "dinner"])
+
+    def test_an_unknown_slot_draws_after_the_known_ones_in_file_order(self):
+        """The keep is additive, so a slot this page has never heard of is data, not an error."""
+        menu = [{"slot": "supper", "label": "Supper", "entries": [{"menu": "x", "cookDay": "sun-a"}]},
+                {"slot": "dinner", "label": "Dinner", "entries": [{"menu": "y", "cookDay": "sun-a"}]},
+                {"slot": "elevenses", "label": "Elevenses", "entries": [{"menu": "z", "cookDay": "sun-a"}]}]
+        self.assertEqual(self.ordered(menu), ["dinner", "supper", "elevenses"])
+
+    def test_an_empty_slot_is_not_a_slot(self):
+        self.assertEqual(self.ordered([{"slot": "dinner", "label": "Dinner", "entries": []}]), [])
+        self.assertEqual(self.ordered([]), [])
+        self.assertEqual(self.ordered(None), [])
+
+    def test_one_dish_lands_on_both_its_cook_day_and_its_leftovers_day(self):
+        """This is Fork Knife's whole argument made checkable: eight dishes cover fourteen days because
+        most of them are eaten twice, so one entry must produce two rows."""
+        days = dict(self.by_day(FIXTURE["menu"]))
+        self.assertEqual([row["kind"] for row in days["sun-a"]], ["cooked", "cooked", "cooked"])
+        self.assertEqual(days["tue-a"], [{"slotLabel": "Brunch", "dish": "Example eggs on toast", "kind": "leftovers"}])
+        self.assertEqual(days["thu-a"], [{"slotLabel": "Dinner", "dish": "Example garden soup", "kind": "leftovers"}])
+
+    def test_days_come_back_in_canonical_order_and_only_when_the_menu_names_them(self):
+        """A fortnight the menu half-covers draws the days it covers, in fortnight order — not the order
+        the slots happen to list them, and not fourteen cells with gaps."""
+        self.assertEqual([day for day, _ in self.by_day(FIXTURE["menu"])],
+                         ["sun-a", "mon-b", "tue-a", "wed-b", "thu-a"])
+
+    def test_a_day_key_the_order_does_not_know_is_kept_not_dropped(self):
+        menu = [{"slot": "dinner", "label": "Dinner",
+                 "entries": [{"menu": "x", "cookDay": "someday"}, {"menu": "y", "cookDay": "sun-a"}]}]
+        self.assertEqual([day for day, _ in self.by_day(menu)], ["sun-a", "someday"])
+
+    def test_a_dish_with_no_leftovers_day_lands_once(self):
+        days = dict(self.by_day(FIXTURE["menu"]))
+        porridge = [row for rows in days.values() for row in rows if row["dish"] == "Example porridge"]
+        self.assertEqual(porridge, [{"slotLabel": "Brunch", "dish": "Example porridge", "kind": "cooked"}])
+
+
+class PageStyleScopingTests(unittest.TestCase):
+    """The one thing about these pages that no gate can see.
+
+    Astro scopes a plain <style> by stamping the template's elements with a data-astro-cid attribute.
+    Everything src/lib/keep-view.js builds is made with document.createElement, so it never carries that
+    attribute and no scoped rule matches it: the year wheel renders 876x0 — invisible — and every size falls
+    back to the browser's, which is the opposite of "readable across a room". The accessibility gate passes
+    regardless, because axe checks the contrast of rendered text, not font sizes or zero-area divs. So this
+    is asserted at the source, because there is nowhere else to assert it.
+
+    The styles live in src/components/KeepStyles.astro so every keep-fed page can carry them; the page is
+    pinned to the component so a future edit cannot drop the styles while keeping the builders.
+    """
+
+    STYLES = REPOSITORY_ROOT / "src" / "components" / "KeepStyles.astro"
+
+    def test_the_pages_styles_are_global_because_their_dom_is_built_in_script(self):
+        component = self.STYLES.read_text(encoding="utf-8")
+        # Opening tags only, and only at the start of a line: the prose inside the block explains the trap
+        # and names `<style>` while doing it.
+        openings = re.findall(r"^\s*<style[^>]*>", component, flags=re.MULTILINE)
+        self.assertTrue(openings, "the component should have a style block")
+        for opening in openings:
+            self.assertIn("is:global", opening, f"{opening.strip()} is scoped; its rules cannot reach the built DOM")
+
+    def test_every_selector_it_makes_global_is_namespaced(self):
+        """The cost of is:global is that these leak site-wide, so they all carry one prefix."""
+        component = self.STYLES.read_text(encoding="utf-8")
+        style = component.split("<style is:global>", 1)[1].split("</style>", 1)[0]
+        selectors = [line.split("{", 1)[0].strip() for line in style.splitlines() if "{" in line]
+        for selector in selectors:
+            for part in selector.replace(",", " ").split():
+                if part.startswith("."):
+                    self.assertTrue(part.startswith(".keep-"), f"{part} is global but not namespaced")
+
+    def test_every_keep_fed_page_carries_the_shared_styles(self):
+        """Each page includes the component, or its script-built DOM renders unstyled — the year wheel at
+        876x0, the menu grid as bare lists. Named one by one so adding a stone page that forgets it fails."""
+        pages = REPOSITORY_ROOT / "src" / "pages" / "fortknight"
+        for name in ("keep.astro", "index.astro", "folkknowledge.astro", "forkknife.astro",
+                     "days/[dayKey].astro"):
+            with self.subTest(page=name):
+                self.assertIn("KeepStyles", (pages / name).read_text(encoding="utf-8"))
+
+
+class KeepFedPageTests(unittest.TestCase):
+    """The keep-fed FortKnight pages, pinned at the source for what no gate can see.
+
+    Same warrant as PageStyleScopingTests: axe audits the rendered pages, but nothing rendered shows WHY an
+    import must never appear — a date-resolution import would look up fine, build fine and audit fine, and
+    still be wrong for half the keep's year (this repository's evaluator resolves Ostara and Fimbulsumar on
+    sun-b; a keep arrives pre-joined by day key). So the rule "lookup only" is asserted here.
+    """
+
+    OVERVIEW = REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "index.astro"
+    DAY_PAGE = REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "days" / "[dayKey].astro"
+
+    def import_lines(self, path):
+        return [line.strip() for line in path.read_text(encoding="utf-8").splitlines()
+                if line.strip().startswith("import")]
+
+    def test_the_overview_boots_from_the_stored_keep(self):
+        source = self.OVERVIEW.read_text(encoding="utf-8")
+        self.assertIn("readStoredKeep", source)
+        self.assertIn("KeepStyles", source)  # the grid is script-built; scoped styles cannot reach it
+
+    def test_the_overview_offers_profile_creation_as_the_secondary_action(self):
+        """Loading a keep is the primary action, but creating a profile is the only creation path on
+        production while the questionnaires are placeholders — so it stays, after the keep's button-link."""
+        source = self.OVERVIEW.read_text(encoding="utf-8")
+        self.assertIn("createProfileButton", source)
+        self.assertIn("user-settings", source)
+        self.assertLess(source.index("Open your keep"), source.index("createProfileButton"))
+
+    def test_the_keeped_grid_heading_is_not_a_second_h1(self):
+        """The prerendered <h1>FortKnight</h1> is the document's one h1 in every state, keeped or not."""
+        source = self.OVERVIEW.read_text(encoding="utf-8")
+        self.assertIn('element("h2", null, "Your fortnight")', source)
+        self.assertNotIn('element("h1"', source)
+
+    def test_the_day_page_draws_with_the_shared_builders(self):
+        source = self.DAY_PAGE.read_text(encoding="utf-8")
+        self.assertIn("renderDayPanel", source)
+        self.assertIn("readStoredKeep", source)
+        self.assertIn("KeepStyles", source)
+
+    def test_the_day_page_still_emits_the_fourteen_static_shells(self):
+        source = self.DAY_PAGE.read_text(encoding="utf-8")
+        self.assertIn("getStaticPaths", source)
+        self.assertIn("DAY_KEY_ORDER", source)
+
+    def test_neither_page_resolves_a_date(self):
+        """Lookup only. DAY_KEY_ORDER is an ordering, not a calendar — it is allowed; anything that turns a
+        date into a day key is not."""
+        for page in (self.OVERVIEW, self.DAY_PAGE):
+            for line in self.import_lines(page):
+                self.assertNotIn("resolve", line.lower(), f"{page.name}: {line}")
+            source = page.read_text(encoding="utf-8")
+            for symbol in ("cycleIndexForDate", "seasonForDate", "dayKeyForDate", "seasonAnchorDate"):
+                self.assertNotIn(symbol, source, f"{page.name} names {symbol}")
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class StoredKeepBootTests(unittest.TestCase):
+    """readStoredKeep(): the two ways a stored keep cannot be drawn, and why only one deletes.
+
+    Unreadable storage is wreckage and is forgotten, or it sits there failing on every reload of a wall
+    display. A readable keep the validator refuses is intact data — the sharpest case being a newer Focus
+    Key export, whose remedy is a website deploy the person holding the phone cannot do — so it is KEPT,
+    and the reason must say nothing was deleted, because the person cannot see storage to check.
+    """
+
+    def boot(self, stored):
+        return run_node(READ_STORED, {"stored": stored})
+
+    def test_nothing_stored_is_none_and_untouched(self):
+        outcome = self.boot(None)
+        self.assertEqual(outcome, {"status": "none", "reason": None, "hasKeep": False, "cleared": False})
+
+    def test_a_valid_stored_keep_is_drawn_and_untouched(self):
+        outcome = self.boot(json.dumps(FIXTURE))
+        self.assertEqual(outcome["status"], "keep")
+        self.assertTrue(outcome["hasKeep"])
+        self.assertFalse(outcome["cleared"])
+
+    def test_unreadable_storage_is_cleared(self):
+        for stored in ("{not json", "null"):
+            with self.subTest(stored=stored):
+                outcome = self.boot(stored)
+                self.assertEqual(outcome["status"], "cleared")
+                self.assertTrue(outcome["cleared"])
+                self.assertIn("forgotten", outcome["reason"])
+
+    def test_a_keep_the_validator_refuses_is_kept_not_cleared(self):
+        newer = json.loads(json.dumps(FIXTURE))
+        newer["meta"]["version"] = 99
+        for stored, fragment in ((json.dumps({"not": "a keep"}), "not a keep"),
+                                 (json.dumps(newer), "the file is fine")):
+            with self.subTest(fragment=fragment):
+                outcome = self.boot(stored)
+                self.assertEqual(outcome["status"], "kept")
+                self.assertFalse(outcome["cleared"])
+                self.assertIn(fragment, outcome["reason"])
+                self.assertIn("nothing was deleted", outcome["reason"])
+
+    def test_every_keep_fed_page_reports_the_kept_case(self):
+        """The split only exists if the pages show it: each consumer must name "kept" alongside "cleared",
+        or a kept keep would fall through to whatever the page's default does."""
+        for page in ("index.astro", "keep.astro"):
+            source = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / page).read_text(encoding="utf-8")
+            self.assertIn('"kept"', source, page)
+        day_page = (REPOSITORY_ROOT / "src" / "pages" / "fortknight" / "days" / "[dayKey].astro").read_text(encoding="utf-8")
+        self.assertIn('"kept"', day_page)
+
+
+RUN_KEEP_STORE = (
+    STDIN_PRELUDE
+    + "globalThis.localStorage = {"
+      "  store: Object.assign({}, inputs.initialStore || {}),"
+      "  getItem(key) { return this.store[key] ?? null; },"
+      "  setItem(key, value) { this.store[key] = String(value); },"
+      "  removeItem(key) { delete this.store[key]; },"
+      "};"
+      "if (inputs.withDocument) {"
+      "  globalThis.document = {"
+      "    events: [],"
+      "    dispatchEvent(event) {"
+      "      this.events.push(event.type);"
+      "      return true;"
+      "    },"
+      "  };"
+      "  globalThis.Event = class Event {"
+      "    constructor(type) { this.type = type; }"
+      "  };"
+      "}"
+      f"const {{ storeKeep, clearKeep, KEEP_STORE_KEY }} = await import({json.dumps(KEEP_STORE_MODULE)});"
+      "if (inputs.action === 'store') {"
+      "  storeKeep(inputs.text);"
+      "} else if (inputs.action === 'clear') {"
+      "  clearKeep();"
+      "}"
+      "process.stdout.write(JSON.stringify({"
+      "  stored: globalThis.localStorage.getItem(KEEP_STORE_KEY),"
+      "  events: inputs.withDocument ? globalThis.document.events : [],"
+      "}));"
+)
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class KeepStoreEventTests(unittest.TestCase):
+    """storeKeep and clearKeep notify document when present, and stay silent in node."""
+
+    def run_store(self, action, text=None, initial_store=None, with_document=True):
+        payload = {
+            "action": action,
+            "text": text,
+            "initialStore": initial_store or {},
+            "withDocument": with_document,
+        }
+        return run_node(RUN_KEEP_STORE, payload)
+
+    def test_store_keep_writes_key_and_dispatches_once(self):
+        sample_text = json.dumps(FIXTURE)
+        result = self.run_store("store", text=sample_text, with_document=True)
+        self.assertEqual(result["stored"], sample_text)
+        self.assertEqual(result["events"], ["beinsiculous:keep-changed"])
+
+    def test_clear_keep_removes_key_and_dispatches_once(self):
+        sample_text = json.dumps(FIXTURE)
+        result = self.run_store("clear", initial_store={"beinsiculous.keep": sample_text}, with_document=True)
+        self.assertIsNone(result["stored"])
+        self.assertEqual(result["events"], ["beinsiculous:keep-changed"])
+
+    def test_store_keep_without_document_does_not_throw_and_dispatches_nothing(self):
+        sample_text = json.dumps(FIXTURE)
+        result = self.run_store("store", text=sample_text, with_document=False)
+        self.assertEqual(result["stored"], sample_text)
+        self.assertEqual(result["events"], [])
+
+    def test_clear_keep_without_document_does_not_throw_and_dispatches_nothing(self):
+        result = self.run_store("clear", initial_store={"beinsiculous.keep": "test"}, with_document=False)
+        self.assertIsNone(result["stored"])
+        self.assertEqual(result["events"], [])
+
+
+DESCRIBE = (f'import {{ describeSection }} from {json.dumps(KEEP_MODULE)};' + STDIN_PRELUDE
+            + "process.stdout.write(JSON.stringify(inputs.map(([keep, name]) => describeSection(keep, name))));")
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class DescribeSectionTests(unittest.TestCase):
+    """Absent is not empty, and the format has said so in writing since 2026-08-29 with nothing
+    implementing it. This is the implementation: the one place a reader can tell the two apart.
+
+    It matters because the convention is additive — a section can arrive at any time without a
+    version bump, so "no menu" and "an empty menu" are permanently both possible, and they mean
+    opposite things about the export that produced them.
+    """
+
+    def describe(self, cases):
+        return run_node(DESCRIBE, cases)
+
+    def test_it_tells_the_three_states_apart(self):
+        absent, empty, present = self.describe([
+            [{"meta": {"format": "keep", "version": 1}}, "menu"],
+            [{"menu": []}, "menu"],
+            [{"menu": [{"slot": "dinner"}, {"slot": "snack"}]}, "menu"],
+        ])
+        self.assertEqual(absent["state"], "absent")
+        self.assertEqual(empty["state"], "empty")
+        self.assertEqual((present["state"], present["count"]), ("present", 2))
+
+    def test_the_absent_message_says_the_export_predates_the_section(self):
+        """The sentence a person needs: their file is not broken, it is older than the feature."""
+        [absent] = self.describe([[{}, "menu"]])
+        self.assertIn("came later than this export", absent["message"])
+        self.assertIn("menu", absent["message"])
+
+    def test_the_empty_message_does_not_say_the_export_is_old(self):
+        """The whole point. An empty menu is a current export of a household with no menu, and telling
+        that person their file predates menus sends them to re-export for nothing."""
+        [empty] = self.describe([[{"menu": []}, "menu"]])
+        self.assertNotIn("came later than this export", empty["message"])
+
+    def test_null_reads_as_absent_not_as_a_value(self):
+        """`season` and `year` are legitimately null, so a null section is the writer saying nothing is
+        there — the same thing as not writing the key."""
+        [nulled] = self.describe([[{"menu": None}, "menu"]])
+        self.assertEqual(nulled["state"], "absent")
+
+    def test_a_section_that_is_not_a_list_is_named_rather_than_guessed_at(self):
+        [wrong] = self.describe([[{"menu": {"dinner": []}}, "menu"]])
+        self.assertEqual(wrong["state"], "wrong-shape")
+
+    def test_it_survives_a_keep_that_is_not_there(self):
+        """Callers get this from storage, which can hold anything."""
+        for keep in (None, {}):
+            with self.subTest(keep=keep):
+                [result] = self.describe([[keep, "menu"]])
+                self.assertEqual(result["state"], "absent")
+
+    def test_a_version_one_section_that_is_null_is_not_called_late(self):
+        """`season` and `year` are legitimately null on a current export — no season resolved. Telling
+        that person the format "came later than this export" would send them to re-export a file that
+        was never the problem, which is the failure absent-versus-empty exists to prevent."""
+        [season] = self.describe([[{"season": None}, "season"]])
+        self.assertEqual(season["state"], "absent")
+        self.assertNotIn("came later", season["message"])
+        self.assertIn("none to write", season["message"])
+
+    def test_an_empty_menu_from_the_real_writer_reads_as_empty(self):
+        """The two halves of the format, tied together. The writer's projection always returns its three
+        slots, so before this was fixed a household with no menu exported three empty slots and this
+        function called it "present, count 3" — the empty state unreachable from the only writer there
+        is. Testing it with a hand-written `[]` no writer emits proved nothing."""
+        [result] = self.describe([[{"menu": []}, "menu"]])
+        self.assertEqual((result["state"], result["count"]), ("empty", 0))
+
+    def test_the_published_fixtures_carry_a_menu(self):
+        fixture = json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / "keep.sample.json").read_text(encoding="utf-8"))
+        [result] = self.describe([[fixture, "menu"]])
+        self.assertEqual((result["state"], result["count"]), ("present", 3))
+
+
+class KeepSchemaTests(unittest.TestCase):
+    """The conforming bar: what `data/schema/keep.schema.json` certifies.
+
+    Two bars, and they are not the same bar. `validateKeep` above decides whether a page can DRAW a
+    file, and is tolerant on purpose — one day is enough. This class is the higher bar: a complete,
+    well-formed keep. Every conforming keep is readable; a readable keep need not be conforming, and
+    a hand-maker mid-draft sits between the two. `docs/keep-format.md` says so in those words.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import sys
+        sys.path.insert(0, str(REPOSITORY_ROOT / "scripts"))
+        cls.schema = json.loads((REPOSITORY_ROOT / "data" / "schema" / "keep.schema.json")
+                                .read_text(encoding="utf-8"))
+        cls.fixtures = {name: json.loads((REPOSITORY_ROOT / "tests" / "fixtures" / name)
+                                         .read_text(encoding="utf-8"))
+                        for name in ("keep.sample.json", "keep.other-household.json")}
+
+    def check(self, document):
+        from fk_core.validate import ValidationReport, check_schema
+        report = ValidationReport()
+        check_schema(document, self.schema, "keep", report)
+        return report
+
+    def test_both_published_fixtures_conform(self):
+        """The fixtures are what the a11y gate and the rendering tests draw; if the schema and they
+        disagree, one of them is lying about the format."""
+        for name, document in self.fixtures.items():
+            with self.subTest(fixture=name):
+                report = self.check(document)
+                self.assertTrue(report.ok, f"{name}: {report.render()}")
+
+    def test_every_day_key_enum_is_the_canonical_order(self):
+        """The fourteen keys live in several places now. `tests/test_dates.py::RuleSchemaTests` is the
+        precedent: validate.py has no $ref, so every copied fragment is pinned by a test instead.
+
+        This walks the whole schema rather than naming one path, because it used to name exactly one —
+        and then the menu section added two more copies that nothing checked. A test that pins the
+        copy you remembered is the DRY hazard, not the guard against it."""
+        from fk_core.keys import DAY_KEY_ORDER
+
+        def day_key_enums(node, path):
+            if isinstance(node, dict):
+                enum = node.get("enum")
+                # A day-key enum is any enum that mentions one; `null` rides along on nullable ones.
+                if isinstance(enum, list) and "sun-a" in enum:
+                    yield path, [value for value in enum if value is not None]
+                for key, value in node.items():
+                    yield from day_key_enums(value, f"{path}.{key}")
+            elif isinstance(node, list):
+                for index, value in enumerate(node):
+                    yield from day_key_enums(value, f"{path}[{index}]")
+
+        found = list(day_key_enums(self.schema, ""))
+        self.assertGreaterEqual(len(found), 3, "expected the days enum plus the menu's cook/leftovers days")
+        for path, keys in found:
+            with self.subTest(path=path):
+                self.assertEqual(keys, DAY_KEY_ORDER)
+
+    def test_each_fixture_carries_the_fourteen_keys_once_each_in_order(self):
+        """The rule the schema provably CANNOT express: minItems/maxItems pin the count and the enum
+        pins the vocabulary, but JSON Schema cannot say "each of these exactly once, in sequence".
+        Fourteen copies of sun-a satisfy the schema. So the rule is enforced here instead, and
+        docs/keep-format.md warns a generator not to rely on the schema for it."""
+        from fk_core.keys import DAY_KEY_ORDER
+        for name, document in self.fixtures.items():
+            with self.subTest(fixture=name):
+                self.assertEqual([day["dayKey"] for day in document["days"]], DAY_KEY_ORDER)
+
+    def test_each_fixture_gives_a_day_only_one_label(self):
+        """The format is pre-joined, so a day's label travels with everything that names that day. A
+        fixture whose menu calls sun-a "Restday" while its own days call it "Sunday A" demonstrates
+        something the format says cannot happen — and these fixtures are what a reader author copies."""
+        for name, document in self.fixtures.items():
+            labels = {day["dayKey"]: day.get("label") for day in document["days"]}
+            for group in document.get("menu", []):
+                for entry in group["entries"]:
+                    with self.subTest(fixture=name, dayKey=entry["cookDay"]):
+                        self.assertEqual(entry["cookDayLabel"], labels[entry["cookDay"]])
+                    if entry["leftoversDay"]:
+                        with self.subTest(fixture=name, dayKey=entry["leftoversDay"]):
+                            self.assertEqual(entry["leftoversDayLabel"], labels[entry["leftoversDay"]])
+
+    def test_composition_keywords_are_checked_not_documentation(self):
+        """Review round 1, F2 and F3: the checker learned uniqueItems and dependentRequired with the
+        composition fields, so a keep saying foci without stones, or a stone twice, is refused by
+        the conformance gate rather than certified."""
+        from fk_core.validate import ValidationReport, check_schema
+
+        def checked(meta):
+            document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+            document["meta"].update(meta)
+            report = ValidationReport()
+            check_schema(document, self.schema, "keep", report)
+            return report
+
+        self.assertTrue(checked({"stones": ["fort-knight", "fork-knife"], "foci": ["fork-knife"]}).ok)
+        self.assertIn("'foci' requires 'stones'", checked({"foci": ["fork-knife"]}).render())
+        self.assertIn("not unique", checked({"stones": ["fort-knight", "fort-knight"]}).render())
+        self.assertIn("more than 4 items", checked({"stones": ["fort-knight"], "foci": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "fun-knee"]}).render())
+
+    def test_the_schema_is_open_everywhere(self):
+        """Forward tolerance, made a check. Closing any object here would certify the opposite of the
+        contract the two halves ship on: adding a field is not a version bump, so a reader must
+        ignore what it does not know."""
+        def closed_paths(node, path):
+            if isinstance(node, dict):
+                if node.get("additionalProperties") is False:
+                    yield path
+                for key, value in node.items():
+                    yield from closed_paths(value, f"{path}.{key}")
+            elif isinstance(node, list):
+                for index, value in enumerate(node):
+                    yield from closed_paths(value, f"{path}[{index}]")
+
+        self.assertEqual(list(closed_paths(self.schema, "")), [])
+
+    def test_every_pattern_is_anchored(self):
+        """fk_core/validate.py applies re.search, not re.fullmatch, so an unanchored "HH:MM" pattern
+        certifies "9:00-10:00" and "garbage 12:30 more". Anchoring is the difference between pinning
+        a field's shape and pinning that the shape occurs somewhere inside it."""
+        def patterns(node):
+            if isinstance(node, dict):
+                if isinstance(node.get("pattern"), str):
+                    yield node["pattern"]
+                for value in node.values():
+                    yield from patterns(value)
+            elif isinstance(node, list):
+                for value in node:
+                    yield from patterns(value)
+
+        found = list(patterns(self.schema))
+        self.assertTrue(found, "the schema should carry patterns")
+        for pattern in found:
+            with self.subTest(pattern=pattern):
+                self.assertTrue(pattern.startswith("^") and pattern.endswith("$"), pattern)
+
+    def test_the_version_enum_carries_what_this_page_reads(self):
+        """The schema is a third place a version number is written. Without this, a future bump
+        leaves enum [1] stale while both fixtures still carry version 1 and every suite stays green."""
+        source = (REPOSITORY_ROOT / "src" / "lib" / "keep.js").read_text(encoding="utf-8")
+        readable = int(re.search(r"READABLE_VERSION\s*=\s*(\d+)", source).group(1))
+        self.assertIn(readable, self.schema["properties"]["meta"]["properties"]["version"]["enum"])
+
+    def test_a_keep_carrying_unknown_fields_still_conforms(self):
+        """The schema-level twin of test_it_accepts_an_additive_version_carrying_fields_it_does_not_know."""
+        document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+        document["meta"]["somethingNew"] = "later"
+        document["days"][0]["alsoNew"] = True
+        document["inventedSection"] = {"whole": "section"}
+        self.assertTrue(self.check(document).ok, self.check(document).render())
+
+    def test_a_null_exported_at_conforms(self):
+        """buildKeep takes exportedAt as an argument and defaults it to null, so a keep made without
+        a clock carries the key as null. Typing it "string" would refuse real writer output."""
+        document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+        document["meta"]["exportedAt"] = None
+        self.assertTrue(self.check(document).ok, self.check(document).render())
+
+    def test_it_refuses_what_the_format_forbids(self):
+        """A gate that only ever says yes is decoration. Each case is a mistake a hand-maker or a
+        changed writer could really make; `meal` as a bare string is the one the first draft of the
+        schema got wrong."""
+        def with_change(mutate):
+            document = json.loads(json.dumps(self.fixtures["keep.sample.json"]))
+            mutate(document)
+            return document
+
+        def string_meal(document):
+            for day in document["days"]:
+                for block in day["blocks"]:
+                    if block["meal"] is not None:
+                        block["meal"] = "Garden soup"
+                        return
+
+        cases = {
+            "a block meal written as a bare string": string_meal,
+            "a time with anything around it": lambda d: d["days"][0]["blocks"][0].__setitem__("start", "9:00-10:00"),
+            "a malformed date": lambda d: d["year"].__setitem__("firstDate", "not-a-date"),
+            "a fifteenth day": lambda d: d["days"].append(d["days"][0]),
+            "a day key nobody uses": lambda d: d["days"][3].__setitem__("dayKey", "funday-c"),
+            "a version this page cannot read": lambda d: d["meta"].__setitem__("version", 2),
+            "the retired format name": lambda d: d["meta"].__setitem__("format", "myfort"),
+            "the year as an integer": lambda d: d["year"].__setitem__("year", 2026),
+            "a menu slot nobody eats": lambda d: d["menu"][0].__setitem__("slot", "elevenses"),
+            "a menu cooked on a day that is not in the fortnight":
+                lambda d: d["menu"][0]["entries"][0].__setitem__("cookDay", "funday-c"),
+            "a cookExtra flag that is not a boolean":
+                lambda d: d["menu"][0]["entries"][0].__setitem__("cookExtra", "yes"),
+        }
+        for description, mutate in cases.items():
+            with self.subTest(case=description):
+                self.assertFalse(self.check(with_change(mutate)).ok, description)
+
+    def test_the_specs_worked_example_is_the_format_it_describes(self):
+        """The example in docs/keep-format.md is what a hand-maker copies first. It shows one day of
+        the fourteen, so it cannot conform as written — but every field shape in it must be right,
+        which is what padding it to the fourteen keys checks."""
+        from fk_core.keys import DAY_KEY_ORDER
+        # Anchored to the worked example's own section rather than to "the first fence in the file",
+        # so that adding a small snippet earlier in the spec cannot fail this test with a
+        # schema-mismatch message that sends the reader hunting for a format bug.
+        spec = (REPOSITORY_ROOT / "docs" / "keep-format.md").read_text(encoding="utf-8")
+        worked_example = spec[spec.index("## The document"):]
+        document = json.loads(re.search(r"```json\n(.*?)\n```", worked_example, re.DOTALL).group(1))
+        shown = [day["dayKey"] for day in document["days"]]
+        self.assertEqual(shown, DAY_KEY_ORDER[:len(shown)],
+                         "the example's days must be a prefix of the canonical order")
+        template = document["days"][0]
+        document["days"] = [{**json.loads(json.dumps(template)), "dayKey": key} for key in DAY_KEY_ORDER]
+        report = self.check(document)
+        self.assertTrue(report.ok, f"the spec's own example does not match the schema: {report.render()}")
+
+
+# A minimal DOM stub for renderDayPanel: element() in keep-view.js uses createElement,
+# appendChild, textContent and className.
+RENDER_DOM_STUB = """
+globalThis.document = {
+  createElement: (tag) => ({
+    tag,
+    children: [],
+    className: "",
+    textContent: "",
+    appendChild(node) { this.children.push(node); },
+  }),
+};
+const serialize = (node) => ({
+  tag: node.tag,
+  className: node.className,
+  text: node.children.length ? "" : node.textContent,
+  children: node.children.map(serialize),
+});
+"""
+
+RENDER_DAY_PANEL_SCRIPT = (
+    STDIN_PRELUDE
+    + RENDER_DOM_STUB
+    + f"const {{ renderDayPanel }} = await import({json.dumps(KEEP_VIEW_MODULE)});"
+    + "const panel = renderDayPanel(inputs.day, inputs.options);"
+    + "process.stdout.write(JSON.stringify(serialize(panel)));"
+)
+
+
+@unittest.skipIf(shutil.which("node") is None, "node not installed")
+class RenderDayPanelTests(unittest.TestCase):
+    """The day panel renderer under a stub DOM: heading level selection for keep vs day pages."""
+
+    def render(self, day, options):
+        return run_node(RENDER_DAY_PANEL_SCRIPT, {"day": day, "options": options})
+
+    def test_renders_level_2_heading_when_asked(self):
+        day = {"dayKey": "sun-a", "label": "Sunday A"}
+        panel = self.render(day, {"headingLevel": 2})
+        self.assertEqual(panel["tag"], "section")
+        first_child = panel["children"][0]
+        self.assertEqual(first_child["tag"], "h2")
+        self.assertEqual(first_child["text"], "Sunday A")
+
+    def test_renders_no_heading_when_heading_level_is_null(self):
+        day = {"dayKey": "sun-a", "label": "Sunday A"}
+        panel = self.render(day, {"headingLevel": None})
+        self.assertEqual(panel["tag"], "section")
+        heading_tags = [c["tag"] for c in panel["children"] if c["tag"].startswith("h")]
+        self.assertEqual(heading_tags, [])
+

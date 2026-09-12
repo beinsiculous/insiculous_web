@@ -1,0 +1,153 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Be Insiculous — Artificial Intelligence Development Studio"
+  description="Be Insiculous — an Artificial Intelligence Development Studio: a Rust game engine and six games, and planning software driven by your own AI assistant."
+>
+  <section class="hero">
+    <p class="section-label">artificial intelligence development studio</p>
+    <h1>Be Insiculous</h1>
+    <p class="lede">
+      We develop with agentic workflows and build the tools that use them — a
+      Rust game engine and six games, and planning software driven by your own
+      AI assistant. Engine, games, and site are all public repositories.
+    </p>
+  </section>
+
+  <!-- The art-policy paragraph is quoted from docs/thesis.md, which is where that wording is
+       maintained; it matches the sentence on /games/. Change it there first. -->
+  <section>
+    <h2>The games</h2>
+    <p>
+      All six are in alpha, and all of them run on <strong>Insiculous 2D</strong> — our own
+      2D engine, written in Rust. Each one is two-player, and each has
+      escalating <em>chaos modes</em> that bend the rules of the original. They are a run
+      at the 20 Games Challenge: playable in the browser today, with desktop builds running
+      the same code natively.
+    </p>
+    <p>
+      The games listed on this site are free and may use AI art. The games we sell
+      carry none — those are made by our own artists, and they ship on Steam
+      and the app stores rather than here.
+    </p>
+    <p>
+      The engine pulls double duty: it runs the games, and it is
+      a <a href="/engine/">proving ground for agentic coding tools</a> — real
+      tasks on a live Rust codebase.
+    </p>
+    <p>
+      Current focus: taking the tools where the games already went. The six
+      games run in the browser, and the engine’s editor is there too — the <a href="/playground/">Web Playground</a>,
+      where you build with the engine in a tab and keep projects saved directly in your browser.
+    </p>
+    <!-- PLACEHOLDER: a paragraph on the art direction (Deion the Insiculous) goes here when it's public. -->
+  </section>
+
+  <section>
+    <h2>The planner</h2>
+    <p>
+      <a href="/fortknight/">FortKnight</a> is the planner: a repeating fourteen-day
+      cycle with a page per day, and where your time actually goes by category. The
+      menu is part of that same schedule — the meals, the dish for each day, and the
+      prep and cooking tasks that come with them.
+    </p>
+    <p>
+      It runs in your browser with no account and no server — your profile
+      stays on your device. There is no AI in the app either: if you want help
+      from an assistant, you download your files and take them to your own.
+    </p>
+    <div class="button-row">
+      <button type="button" class="button secondary" id="createProfileButton" hidden>Create a profile →</button>
+    </div>
+    <p class="muted" id="createProfileStatus" role="status"></p>
+  </section>
+
+  <section class="cta">
+    <a class="button" href="/fortknight/keep/">open your keep →</a>
+    <a class="button" href="/games/">browse the games →</a>
+    <a class="button secondary" href="/playground/">play on the playground →</a>
+    <a class="button secondary" href="/devlog/">read the devlog →</a>
+  </section>
+</BaseLayout>
+
+<script>
+  import { askProfileName } from "../lib/profile-name-dialog.js";
+  import { PROFILE_PATH } from "../lib/faces.js";
+  import { withBase } from "../lib/paths.js";
+  import { unusedProfileName } from "../lib/shared/profile-names.js";
+  import { createProfile, loadSettings, profileIds, saveSettings } from "../lib/shared/user-settings.js";
+
+  // The button starts hidden and is revealed here: it does nothing without JavaScript, and a dead
+  // button is worse than no button (the FortKnight overview's create-profile button sets the rule).
+  // The null guards are the checker's idiom (GameEmbed.astro), not real armour — both elements are
+  // prerendered above, so a null would mean this script drifted from its own markup.
+  const createButton = document.getElementById("createProfileButton");
+  const status = document.getElementById("createProfileStatus");
+  if (createButton) createButton.hidden = false;
+
+  createButton?.addEventListener("click", async () => {
+    const current = loadSettings();
+    /** @type {string[]} */
+    const takenIds = [...profileIds(current), current.activeWeightsId];
+    const created = await askProfileName({
+      title: "Create a profile",
+      name: unusedProfileName(takenIds),
+      takenIds,
+      confirmLabel: "Create profile",
+      canCancel: true,
+      commit(typedName) {
+        const settings = loadSettings(); // re-read here: the dialog may have been open a while
+        createProfile(settings, typedName);
+        saveSettings(settings);
+        return settings.activeWeightsId;
+      },
+    });
+    if (!created || !status) return; // dismissed — the status line keeps whatever it said
+    status.textContent = `Profile ${created} is now active on this device. `;
+    const link = document.createElement("a");
+    link.href = withBase(PROFILE_PATH);
+    link.textContent = "See it on the Profile page.";
+    status.appendChild(link);
+  });
+</script>
+
+<style>
+  .hero {
+    padding: 2rem 0 1rem;
+  }
+
+  .lede {
+    font-size: 1.25rem;
+    color: var(--text-bright);
+    max-width: 34em;
+  }
+
+  section p {
+    max-width: 42em;
+  }
+
+  .cta {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* .button / .button.secondary now live in src/styles/global.css — the devlog uses them too. They
+     were written for links; on a real <button> the cursor and the dimmed status line are this
+     page's own additions (global.css has no button-element or .muted rules). */
+  button.button {
+    cursor: pointer;
+  }
+
+  .button-row {
+    margin-top: 1rem;
+  }
+
+  .muted {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+</style>

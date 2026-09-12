@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fortknight.local/schema/categories.schema.json",
+  "title": "FortKnight categories and subjects",
+  "description": "Seven top-level categories (the units of time-weighting) and the subjects that roll up into them.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "order": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "meals",
+          "cleaning",
+          "working",
+          "spirituality-development",
+          "friends-family",
+          "health",
+          "operations"
+        ]
+      },
+      "minItems": 7,
+      "maxItems": 7
+    },
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            }
+          }
+        },
+        "required": [
+          "label",
+          "subjects"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "flexibleFocus": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "const": "flexible"
+        },
+        "label": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "subjects": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "meals",
+              "cleaning",
+              "working",
+              "spirituality-development",
+              "friends-family",
+              "health",
+              "operations"
+            ]
+          },
+          "sourceRow": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "What the subject covers, for people and assistants (e.g. PR includes social media)."
+          }
+        },
+        "required": [
+          "label",
+          "category"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "order",
+    "categories",
+    "subjects"
+  ],
+  "additionalProperties": false
+}

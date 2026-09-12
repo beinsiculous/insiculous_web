@@ -1,0 +1,87 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SupportLink from '../../components/SupportLink.astro';
+import { publishedPosts } from '../../lib/devlog-posts.js';
+
+export async function getStaticPaths() {
+  // A held post gets no page — the listing and the feed drop it in the same breath.
+  const now = new Date();
+  const posts = publishedPosts(await getCollection('devlog'), now);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const game = post.data.game ? await getEntry(post.data.game) : undefined;
+---
+
+<BaseLayout title={`${post.data.title} — Be Insiculous devlog`} description={post.data.description}>
+  <article>
+    <header>
+      <p class="section-label">devlog</p>
+      <h1>{post.data.title}</h1>
+      <p class="meta">
+        <time datetime={post.data.pubDate.toISOString()}>
+          {post.data.pubDate.toISOString().slice(0, 10)}
+        </time>
+        <span class="author">by {post.data.author}</span>
+        {
+          post.data.tags.map((tag) => (
+            <span class="tag">#{tag}</span>
+          ))
+        }
+        {
+          game && (
+            <span class="game-link">
+              → about <a href={`/games/${game.id}/`}>{game.data.title}</a>
+            </span>
+          )
+        }
+      </p>
+    </header>
+
+    <Content />
+  </article>
+
+  <SupportLink />
+
+  <p class="back"><a href="/devlog/">← all posts</a></p>
+</BaseLayout>
+
+<style>
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+
+  time {
+    color: var(--accent-dim);
+  }
+
+  .tag {
+    color: var(--text-dim);
+  }
+
+  .author {
+    color: var(--text);
+  }
+
+  article {
+    max-width: 44em;
+  }
+
+  .back {
+    margin-top: 3rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+  }
+</style>

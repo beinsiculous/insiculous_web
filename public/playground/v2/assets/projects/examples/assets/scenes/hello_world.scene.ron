@@ -1,0 +1,330 @@
+// Hello World Scene - Physics Platformer Demo with Scene Graph Hierarchy
+//
+// Controls: WASD to move, SPACE to jump, R to reset, ESC to exit
+//
+// This scene demonstrates:
+// - Physics simulation with rapier2d
+// - Prefabs for reusable entity templates
+// - Parent-child entity relationships (player has an indicator child)
+// - Texture loading (wood texture on obstacle boxes)
+// - CameraFollow: a main-camera entity trails the tagged player across a
+//   level wider than the window (dead zone keeps small hops from panning,
+//   look-ahead leans the view the way the player is pressing)
+// - Collectible coins scored through the world event bus
+//
+SceneData(
+    name: "Hello World",
+
+    // Physics settings for platformer gameplay
+    physics: Some(PhysicsSettings(
+        gravity: (0.0, -980.0),
+        pixels_per_meter: 100.0,
+        timestep: 0.016666668,
+    )),
+
+    // Prefab definitions - reusable entity templates
+    prefabs: {
+        // Player prefab - blue dynamic body with platformer physics and behavior
+        "Player": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (1.0, 1.0)),
+                Sprite(
+                    texture: "#white",
+                    color: (0.2, 0.4, 1.0, 1.0),
+                ),
+                RigidBody(
+                    body_type: Dynamic,
+                    linear_damping: 5.0,
+                    can_rotate: false,
+                    ccd_enabled: true,
+                ),
+                Collider(
+                    shape: Box(half_extents: (40.0, 40.0)),
+                    friction: 0.8,
+                ),
+                // Player behavior - WASD movement + SPACE to jump
+                Behavior(PlayerPlatformer(
+                    move_speed: 120.0,
+                    jump_impulse: 420.0,
+                    jump_cooldown: 0.3,
+                )),
+                // The camera follows this tag (also used by coin collection)
+                EntityTag(tag: "player"),
+            ],
+        ),
+
+        // Ground/platform prefab - static gray body
+        "Platform": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (1.0, 1.0)),
+                Sprite(
+                    texture: "#white",
+                    color: (0.3, 0.3, 0.3, 1.0),
+                ),
+                RigidBody(body_type: Static),
+            ],
+        ),
+
+        // Pushable obstacle prefab - wood textured dynamic box
+        "Obstacle": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (1.0, 1.0)),
+                Sprite(
+                    texture: "assets/images/wood_texture.png",
+                    color: (1.0, 1.0, 1.0, 1.0),
+                ),
+                RigidBody(
+                    body_type: Dynamic,
+                    linear_damping: 5.0,
+                    ccd_enabled: true,
+                ),
+                Collider(
+                    shape: Box(half_extents: (40.0, 40.0)),
+                    friction: 0.3,
+                    restitution: 0.2,
+                ),
+            ],
+        ),
+
+        // Decoration marker prefab (no physics) - used as child entities
+        "Marker": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.25, 0.25)),
+                Sprite(
+                    texture: "#white",
+                    color: (1.0, 1.0, 0.0, 1.0),
+                    depth: 1.0,
+                ),
+            ],
+        ),
+
+        // Collectible coin - gold diamond, scored via the event bus
+        "Coin": PrefabData(
+            components: [
+                Transform2D(position: (0.0, 0.0), scale: (0.3, 0.3), rotation: 0.785),
+                Sprite(texture: "#white", color: (1.0, 0.85, 0.2, 1.0), depth: 0.3, emissive: 0.4),
+                Behavior(Collectible(score_value: 10, despawn_on_collect: true, collector_tag: "player")),
+            ],
+        ),
+    },
+
+    // Entity instances in the scene
+    entities: [
+        // Spring-grid backdrop (#46): the engine simulates and draws it under
+        // everything else; `GridBackdrop()` is the arcade playfield preset.
+        EntityData(
+            name: Some("backdrop"),
+            components: [
+                Transform2D(position: (0.0, 0.0)),
+                GridBackdrop(),
+            ],
+        ),
+        // Player - starts above ground, with a marker child
+        EntityData(
+            name: Some("player"),
+            prefab: Some("Player"),
+            overrides: [
+                Transform2D(position: (-200.0, 100.0)),
+            ],
+            // Child entities using inline children syntax (demonstrates hierarchy)
+            children: [
+                // Player indicator - marker above the player that follows it
+                EntityData(
+                    name: Some("player_indicator"),
+                    prefab: Some("Marker"),
+                    overrides: [
+                        // Position 80 units above player center, scale 0.5x (40 pixels)
+                        Transform2D(position: (0.0, 80.0), scale: (0.5, 0.5)),
+                        // Bright green color for visibility
+                        Sprite(texture: "#white", color: (0.0, 1.0, 0.0, 1.0), depth: 2.0),
+                    ],
+                ),
+            ],
+        ),
+
+        // Camera - the main camera entity trails the player. The engine's
+        // render camera copies this entity's position every frame
+        // (RenderManager::sync_main_camera); the CameraFollow behavior does
+        // the smoothing. No RigidBody: CameraFollow writes positions directly.
+        // look_ahead leans the camera the way the player presses (DKC-style);
+        // x exceeds the 80 px dead-zone half-width so a standing lean is
+        // still visible, and look_ahead_lerp glides instead of snapping.
+        EntityData(
+            name: Some("camera"),
+            components: [
+                Transform2D(position: (-200.0, 100.0)),
+                Camera2D(is_main_camera: true, viewport_size: (800.0, 600.0)),
+                Behavior(CameraFollow(
+                    target_tag: "player",
+                    lerp_speed: 0.12,
+                    offset: (0.0, 60.0),
+                    dead_zone: Some((160.0, 100.0)),
+                    look_ahead: (220.0, 140.0),
+                    look_ahead_lerp: 0.08,
+                )),
+            ],
+        ),
+
+        // ── West half: the original playground ─────────────────────────
+        // Main ground platform
+        EntityData(
+            name: Some("ground"),
+            prefab: Some("Platform"),
+            overrides: [
+                Transform2D(position: (0.0, -250.0), scale: (10.0, 0.5)),
+            ],
+            components: [
+                Collider(
+                    shape: Box(half_extents: (400.0, 20.0)),
+                    friction: 0.8,
+                ),
+            ],
+        ),
+
+        // Floating platform
+        EntityData(
+            name: Some("floating_platform"),
+            prefab: Some("Platform"),
+            overrides: [
+                Transform2D(position: (100.0, -50.0), scale: (3.0, 0.5)),
+                Sprite(texture: "#white", color: (0.4, 0.4, 0.4, 1.0)),
+            ],
+            components: [
+                Collider(
+                    shape: Box(half_extents: (120.0, 20.0)),
+                    friction: 0.8,
+                ),
+            ],
+        ),
+
+        // Obstacle boxes
+        EntityData(
+            name: Some("obstacle_1"),
+            prefab: Some("Obstacle"),
+            overrides: [ Transform2D(position: (-100.0, 0.0)) ],
+        ),
+        EntityData(
+            name: Some("obstacle_2"),
+            prefab: Some("Obstacle"),
+            overrides: [ Transform2D(position: (20.0, 0.0)) ],
+        ),
+        EntityData(
+            name: Some("obstacle_3"),
+            prefab: Some("Obstacle"),
+            overrides: [ Transform2D(position: (140.0, 0.0)) ],
+        ),
+
+        // ── East half: walk right and the camera follows ───────────────
+        // Second ground slab across a small jumpable gap
+        EntityData(
+            name: Some("ground_east"),
+            prefab: Some("Platform"),
+            overrides: [
+                Transform2D(position: (900.0, -250.0), scale: (10.0, 0.5)),
+            ],
+            components: [
+                Collider(
+                    shape: Box(half_extents: (400.0, 20.0)),
+                    friction: 0.8,
+                ),
+            ],
+        ),
+
+        // Rising steps toward the east
+        EntityData(
+            name: Some("step_1"),
+            prefab: Some("Platform"),
+            overrides: [
+                Transform2D(position: (560.0, -150.0), scale: (2.0, 0.5)),
+                Sprite(texture: "#white", color: (0.4, 0.4, 0.4, 1.0)),
+            ],
+            components: [
+                Collider(shape: Box(half_extents: (80.0, 20.0)), friction: 0.8),
+            ],
+        ),
+        EntityData(
+            name: Some("step_2"),
+            prefab: Some("Platform"),
+            overrides: [
+                Transform2D(position: (820.0, -60.0), scale: (2.0, 0.5)),
+                Sprite(texture: "#white", color: (0.4, 0.4, 0.4, 1.0)),
+            ],
+            components: [
+                Collider(shape: Box(half_extents: (80.0, 20.0)), friction: 0.8),
+            ],
+        ),
+        EntityData(
+            name: Some("step_3"),
+            prefab: Some("Platform"),
+            overrides: [
+                Transform2D(position: (1080.0, 20.0), scale: (2.0, 0.5)),
+                Sprite(texture: "#white", color: (0.45, 0.45, 0.45, 1.0)),
+            ],
+            components: [
+                Collider(shape: Box(half_extents: (80.0, 20.0)), friction: 0.8),
+            ],
+        ),
+
+        // A pushable crate waiting at the top of the steps
+        EntityData(
+            name: Some("obstacle_east"),
+            prefab: Some("Obstacle"),
+            overrides: [ Transform2D(position: (1000.0, -180.0)) ],
+        ),
+
+        // Coins along the route (collected on touch, +10 score each)
+        EntityData(
+            name: Some("coin_1"),
+            prefab: Some("Coin"),
+            overrides: [ Transform2D(position: (100.0, 20.0), scale: (0.3, 0.3), rotation: 0.785) ],
+        ),
+        EntityData(
+            name: Some("coin_2"),
+            prefab: Some("Coin"),
+            overrides: [ Transform2D(position: (450.0, -160.0), scale: (0.3, 0.3), rotation: 0.785) ],
+        ),
+        EntityData(
+            name: Some("coin_3"),
+            prefab: Some("Coin"),
+            overrides: [ Transform2D(position: (560.0, -80.0), scale: (0.3, 0.3), rotation: 0.785) ],
+        ),
+        EntityData(
+            name: Some("coin_4"),
+            prefab: Some("Coin"),
+            overrides: [ Transform2D(position: (820.0, 10.0), scale: (0.3, 0.3), rotation: 0.785) ],
+        ),
+        EntityData(
+            name: Some("coin_5"),
+            prefab: Some("Coin"),
+            overrides: [ Transform2D(position: (1080.0, 90.0), scale: (0.3, 0.3), rotation: 0.785) ],
+        ),
+
+        // Scene-defined UI elements: screen-space (anchor + offset, no
+        // Transform2D). "@key" text resolves through the locale tables, so
+        // these labels localize with the L key / editor locale picker.
+        EntityData(
+            name: Some("ui_title"),
+            components: [
+                UiLabel(
+                    text: "@scene.title",
+                    anchor: TopCenter,
+                    offset: (0.0, 10.0),
+                    font_size: 24.0,
+                    color: (1.0, 0.85, 0.3, 1.0),
+                ),
+            ],
+        ),
+        EntityData(
+            name: Some("ui_locale_hint"),
+            components: [
+                UiLabel(
+                    text: "@scene.hint",
+                    anchor: BottomRight,
+                    offset: (-12.0, -12.0),
+                    font_size: 14.0,
+                    color: (0.7, 0.7, 0.8, 1.0),
+                ),
+            ],
+        ),
+    ],
+)

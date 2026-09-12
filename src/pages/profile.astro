@@ -1,0 +1,211 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { facePath } from "../lib/faces.js";
+import { readGameCatalogs } from "../lib/games-catalog-files.js";
+// This page belongs to beinsiculous.com rather than to the app, so it is a studio page like any other: BaseLayout,
+// global.css, the six-link header with its icon row and the studio footer. Only the widgets it shares with the face come from
+// elsewhere (src/styles/app-widgets.css) — the panels and the buttons.
+import "../styles/app-widgets.css";
+
+// Profile (FortKnight's, held by the studio): the active profile (switch, name, Duplicate, Delete), the stored
+// keep and the achievements board. The assistant-workspace downloads and the pages that edited a profile's
+// answers belong to the creation chain, removed from main on 2026-08-30 and preserved at the tag
+// `creation-chain-parked` — this page holds everything a profile still has.
+// The switcher is NOT here any more. BaseLayout grew chrome to hold one on 2026-08-31, so it lives in
+// the header on every studio page, the way the face keeps it. Rendering a second copy here would ship
+// the component's fixed navProfile / navProfileSelect ids twice on this one page and fail the axe gate
+// on duplicate-id — so this page reads the header's switcher rather than owning one.
+
+const games = await getCollection('games');
+const catalogs = readGameCatalogs(games);
+---
+<BaseLayout
+  title="Profile — Be Insiculous"
+  description="Your FortKnight profile: switch, rename or duplicate it, and manage your stored keep and achievements."
+>
+  <section class="panel">
+    <h1>Profile</h1>
+    <h2 id="profileHeading"></h2>
+    <form class="button-row profile-name-form" id="profileNameForm">
+      <label class="inline-field">Name <input type="text" id="profileNameInput" autocomplete="off" required /></label>
+      <button type="button" id="regenerateNameButton">Regenerate</button>
+      <button type="submit" id="renameProfileButton">Rename</button>
+      <span class="muted" id="renameStatus"></span>
+    </form>
+    <p class="muted" id="profileStatus"></p>
+    <div class="button-row" id="profileActions">
+      <button type="button" id="duplicateProfileButton">Duplicate as…</button>
+      <button type="button" id="deleteProfileButton">Delete</button>
+    </div>
+    <p class="muted">The name becomes the profile’s id — <code>family</code> gives the weights file <code>weights.family.json</code>. Renaming moves the saved answers under the new id. Profiles are switched from the dropdown in the header menu. Your fortnight is on FortKnight’s <a href={facePath("fortknight")}>Overview</a>, rendered from the keep you load.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Keep</h2>
+    <p class="muted">
+      Your keep — the fortnight exported from the Fort Knight app and loaded on the Keep page. It stays on this device only —
+      it was never uploaded and this site holds no copy of it.
+    </p>
+    <p class="muted" id="keepStatus">Checking…</p>
+    <div class="button-row" id="keepActions" hidden>
+      <button type="button" id="deleteKeepButton">Delete the keep from this device</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 id="achievementsHeading">Achievements</h2>
+    <p class="muted">
+      Everything this browser has unlocked — the site’s and the games’ — stays on the device you
+      earned it on; this board shows what this browser has recorded, and nothing is uploaded.
+    </p>
+    <!-- tabindex + role/aria-labelledby: the 75vh cap (app-widgets.css .achievements-scroll) makes
+         this a scrollable region once it fills, and a scrollable region must be keyboard-reachable
+         and named — axe's scrollable-region-focusable rules on exactly this. -->
+    <div id="achievementsBoard" class="achievements-scroll" tabindex="0" role="group" aria-labelledby="achievementsHeading" data-catalogs={JSON.stringify(catalogs)}></div>
+    <p class="muted" id="achievementsStatus"></p>
+    <div class="button-row" id="achievementsActions" hidden>
+      <button type="button" id="deleteAchievementsButton">Delete recorded achievements from this device</button>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script>
+  import { activeWeights, deleteProfile, duplicateProfile, loadSettings, profileIds, renameProfile, saveSettings } from "../lib/shared/user-settings.js";
+  import { unusedProfileName } from "../lib/shared/profile-names.js";
+  import { askProfileName } from "../lib/profile-name-dialog.js";
+  import { clearKeep, describeKeep } from "../lib/keep-store.js";
+  import { clearGameAchievements } from "../lib/games-achievements.js";
+  import { clearSiteAchievements, renderAchievementsBoard } from "../lib/achievements.js";
+  import { readEmbeddedCatalogs } from "../lib/games-catalog.js";
+
+  const elements = {
+    keepStatus: document.getElementById("keepStatus"),
+    keepActions: document.getElementById("keepActions"),
+    deleteKeepButton: document.getElementById("deleteKeepButton"),
+    profileHeading: document.getElementById("profileHeading"),
+    profileNameForm: document.getElementById("profileNameForm"),
+    profileNameInput: document.getElementById("profileNameInput"),
+    renameStatus: document.getElementById("renameStatus"),
+    profileStatus: document.getElementById("profileStatus"),
+    profileActions: document.getElementById("profileActions"),
+    regenerateNameButton: document.getElementById("regenerateNameButton"),
+    duplicateProfileButton: document.getElementById("duplicateProfileButton"),
+    deleteProfileButton: document.getElementById("deleteProfileButton"),
+    achievementsBoard: document.getElementById("achievementsBoard"),
+    achievementsStatus: document.getElementById("achievementsStatus"),
+    achievementsActions: document.getElementById("achievementsActions"),
+    deleteAchievementsButton: document.getElementById("deleteAchievementsButton"),
+  };
+
+  function renderProfile() {
+    const settings = loadSettings();
+    const active = activeWeights(settings);
+    const savedCount = profileIds(settings).length;
+    elements.profileHeading.textContent = settings.activeWeightsId;
+    elements.profileNameInput.value = settings.activeWeightsId;
+    // Duplicate/Delete need a saved profile.
+    elements.duplicateProfileButton.hidden = !active;
+    elements.deleteProfileButton.hidden = !active;
+    if (active) {
+      elements.profileStatus.textContent = `Saved on this device${active.questionnaire?.answeredAt ? ` (answers from ${active.questionnaire.answeredAt})` : ""}${savedCount > 1 ? `; ${savedCount} profiles saved` : ""}.`;
+    } else if (savedCount) {
+      elements.profileStatus.textContent = `Not saved yet. ${savedCount} other profile${savedCount === 1 ? " is" : "s are"} saved on this device; switch with the dropdown in the header menu.`;
+    } else {
+      elements.profileStatus.textContent = "No profile saved yet — create one from the Be Insiculous home page or FortKnight’s Overview.";
+    }
+  }
+
+  /** Re-read the device's settings (another tab may have saved), run the operation, save; errors go to the status line. */
+  function withProfiles(operation, statusElement = elements.profileStatus) {
+    const settings = loadSettings();
+    try {
+      operation(settings);
+      saveSettings(settings);
+      return true;
+    } catch (error) {
+      statusElement.textContent = error.message;
+      return false;
+    }
+  }
+
+  elements.regenerateNameButton.addEventListener("click", () => {
+    const current = loadSettings();
+    // Every id newProfileId would reject, the active one included even when it is not saved yet —
+    // otherwise a roll can hand back the name already in force and Rename silently does nothing.
+    elements.profileNameInput.value = unusedProfileName([...profileIds(current), current.activeWeightsId]);
+    elements.renameStatus.textContent = "";
+  });
+
+  elements.profileNameForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const current = loadSettings();
+    const name = elements.profileNameInput.value;
+    elements.renameStatus.textContent = "";
+    if (!name.trim() || name.trim() === current.activeWeightsId) return;
+    // The name is the id (weights.<id>.json): everything saved under the old id moves; the nav dropdown follows on reload.
+    if (withProfiles((settings) => renameProfile(settings, settings.activeWeightsId, name), elements.renameStatus)) location.reload();
+  });
+  elements.duplicateProfileButton.addEventListener("click", async () => {
+    const current = loadSettings();
+    const takenIds = [...profileIds(current), current.activeWeightsId];
+    const copied = await askProfileName({
+      title: `Name the copy of ${current.activeWeightsId}`,
+      name: unusedProfileName(takenIds),
+      takenIds,
+      confirmLabel: "Duplicate",
+      canCancel: true,
+      commit(typed) {
+        const settings = loadSettings(); // re-read here: the dialog may have been open a while
+        duplicateProfile(settings, settings.activeWeightsId, typed);
+        saveSettings(settings);
+        return settings.activeWeightsId;
+      },
+    });
+    if (copied) location.reload();
+  });
+  elements.deleteProfileButton.addEventListener("click", () => {
+    const current = loadSettings();
+    if (!confirm(`Delete profile ${current.activeWeightsId} from this device? Its saved answers are removed.`)) return;
+    if (withProfiles((settings) => deleteProfile(settings, settings.activeWeightsId))) {
+      // Reload either way: with no profile left, this page's own empty state is the honest answer and it
+      // names the two places that make one.
+      location.reload();
+    }
+  });
+  /** What is on this device, never what is in it: whether a keep is here and when it was exported. */
+  function renderKeep() {
+    const { present, exportedAt } = describeKeep();
+    elements.keepActions.hidden = !present;
+    elements.keepStatus.textContent = present
+      ? `A keep is stored on this device${exportedAt ? `, exported ${exportedAt}` : ""}.`
+      : "No keep on this device yet. Export one from Fort Knight and load it on the Keep page.";
+  }
+
+  elements.deleteKeepButton.addEventListener("click", () => {
+    if (!confirm("Delete the keep from this device? Load it again to bring it back.")) return;
+    clearKeep();
+    renderKeep();
+  });
+
+  const catalogs = readEmbeddedCatalogs(elements.achievementsBoard);
+
+  /** All three achievement types on one board; the shared renderer owns the groups (src/lib/achievements.js). */
+  function renderAchievements() {
+    const { rendered } = renderAchievementsBoard(elements.achievementsBoard, { gameCatalogs: catalogs });
+    elements.achievementsActions.hidden = !rendered;
+    elements.achievementsStatus.textContent = rendered ? "" : "No achievements recorded in this browser yet.";
+  }
+
+  elements.deleteAchievementsButton.addEventListener("click", () => {
+    if (!confirm("Delete every recorded achievement from this device, the site’s and the games’? Unlock them again to bring them back.")) return;
+    clearSiteAchievements();
+    clearGameAchievements();
+    renderAchievements();
+  });
+
+  renderProfile();
+  renderKeep();
+  renderAchievements();
+</script>

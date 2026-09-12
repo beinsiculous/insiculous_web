@@ -1,0 +1,306 @@
+# Be Insiculous
+
+Everything behind [beinsiculous.com](https://beinsiculous.com), in one repository. Built with
+[Astro](https://astro.build), deployed to Cloudflare as a static-assets Worker. Two surfaces that
+deliberately read as two different websites:
+
+- **The studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/engine/`) — the game studio. All six games are
+  playable in the browser through embedded WebAssembly builds from the Insiculous 2D engine
+  (Rust); desktop builds run the same code natively. `/achievements/` boards every achievement the
+  site knows — the site’s own registry entries and each game’s full manifest, locked and unlocked
+  (`/games/` and `/profile/` show unlocked game achievements by name). The games listed on this site are free and may use AI art; the
+  games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
+  iOS rather than here (`docs/thesis.md` is the source of that policy’s wording).
+- **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
+  organised by Norse-wheel seasons, five daily blocks and seven life categories. Its keep-fed pages
+  are live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day
+  pages (`/fortknight/days/<dayKey>/`) all read a **keep** the visitor loads from their own
+  device, and **Achievements** (`/fortknight/achievements/`) shows the active profile's unlocked
+  fortnight achievements (the studio's `/achievements/` is the every-achievement board). Build,
+  Questionnaire and Assistant still answer with a "still being built" page (see Deploying below).
+
+The planner is data-first — JSON files are the source of truth, Markdown docs are the assistant's
+context, and light Python scripts stand in for a backend. The on-device profile at `/profile/` is
+live. Users bring their own AI provider; nothing is stored server-side. **Fork Knife**, the second
+face (the fortnight menu), was removed from the live site on 2026-08-28; its chain stays as design
+documents under `docs/`, and its menu views will land under `/fortknight/` when the keep carries
+menu rows. See `CLAUDE.md` for the map and `docs/` for the contracts.
+
+## Setup
+
+Requires Node 24 (see `.nvmrc`) and Python 3 (stdlib only — nothing to install for the data tooling).
+
+```sh
+npm ci        # reproducible install from package-lock.json
+npm run dev   # dev server at http://localhost:4321
+```
+
+## Commands
+
+| Command             | Action                                                        |
+| ------------------- | ------------------------------------------------------------- |
+| `npm run dev`       | Dev server with hot reload                                    |
+| `npm run validate`  | `validate.py` — run after any change under `data/`             |
+| `npm run test:data` | The Python suite, including the JavaScript parity tests       |
+| `npm run build`     | Build to `dist/` + postbuild checks (see below)               |
+| `npm run preview`   | Serve the production build locally                            |
+| `npm run check`     | Type-check `.astro` files and content schemas                 |
+| `npm run a11y`      | Accessibility audit of every built page (axe-core; see below) |
+| `npm run announce`  | Screen-reader structure gate across every page (landmarks, heading levels, named controls/regions) |
+| `npm run verify`    | `validate` + `test:data` + `check` + `build` + `a11y` + `announce` + the layout gate (`LARGE_TEXT=1 npm run shots`) — run before pushing; CI gates deploys on the same |
+| `npm run deploy`    | `verify`, then `wrangler deploy` (manual release; see below)  |
+
+## The planner's data and tooling
+
+```
+data/       canonical, person-neutral JSON (+ schema/) — the vocabulary and nobody's schedule
+examples/workbook/   the original workbook as a sample data set (an overlay)
+build/      the generated bundle, committed — the site imports it directly
+scripts/    *.py tooling (fk_core/ is the shared library) beside the site's own .mjs gates
+tests/      the Python suite; several tests drive src/lib/shared/*.js through node
+docs/       domain, data model, weights, generator, questionnaire, importers, app, roadmap
+src/lib/shared/   the surviving browser modules (three have a Python twin in scripts/fk_core/)
+```
+
+The edit loop is: change `data/` → `npm run validate` → `npm run test:data`. Nothing to regenerate
+and nothing to commit alongside. The committed bundle and its `/bundle.json` endpoint were deleted
+on 2026-08-30 with the creation chain, and with them the only path from `data/` to a rendered page —
+nothing under `src/` reads `data/` now, so a data edit changes what `validate.py` checks and nothing
+a visitor sees.
+
+**Three twin pairs survive:** `clock.js`/`timeconv.py`, `astronomy.js`/`astronomy.py` and
+`fortknight-rules.js`/`dates.py`. The file headers name each pair; change one, change the other. The
+clock pair is no longer exercised by any test — its test went with the chain (issue #10). The other
+twins named in older docs (weights, the generator, the meal plan, import documents, allocations) are
+gone, preserved at `creation-chain-parked`.
+
+This repository is public and holds nobody's schedule. The archived workbook and the owner's own
+import document live outside it, in a gitignored `source/`.
+
+## Content
+
+- **Games** live in `src/content/games/*.md`. The filename (minus `.md`) is the
+  URL slug. Frontmatter: `title`, `blurb`, `status`, optional `wasm` path,
+  `screenshots` (paths under `public/`), `order`.
+- **Status values**:
+  - `playable` — runs in the browser on this site. Requires a `wasm` path
+    (enforced at build time).
+  - `alpha` — full gameplay loop in a desktop build, polish ongoing. Switch
+    to `playable` when the game's browser build lands.
+  - `in-development` / `prototype` — earlier stages.
+- **Devlog posts** live in `src/content/devlog/*.md`. Frontmatter: `title`,
+  `description`, `pubDate`, `author` (`Jesse` or `M` — the byline is the
+  value), `tags`, optional `game` (a game slug — validated at build time, so
+  typos fail the build instead of shipping 404 links), and optional `draft`.
+  **Only Jesse and M write here**; an agent never drafts, edits or comments on
+  a post. A publication date in the future fails the build; a `YYYY-MM-DD`
+  date is UTC midnight, so "today" is valid once it is today in UTC.
+- **`draft: true` holds a post back** — no listing entry, no page of its own,
+  no feed item. The file stays put; releasing it is dropping that line (the
+  date stays the day it was written). One function (`src/lib/devlog-posts.js`)
+  is what every query goes through, because a partial hide would leave the
+  listing linking a page that was never built. A draft is **unlisted, not
+  private** — this repository is public, so a held post is readable on GitHub,
+  title and body. Hold a post to give it a better turn on the listing, not to
+  embargo it.
+
+The six game entries are real, and so is every devlog post — the scaffold's
+placeholder is gone.
+
+## WASM builds
+
+Convention for shipping a playable game:
+
+1. Build with wasm-bindgen for the web target (e.g.
+   `wasm-pack build --target web` or your engine's equivalent). Output is a JS
+   glue module + `.wasm` binary.
+2. Drop the output into a **versioned folder**:
+   `public/games/<slug>/v1/` → `game.js`, `game_bg.wasm`, `achievements.json`, assets.
+   The engine repo’s `insiculous_2d/scripts/build_wasm.sh` writes `achievements.json` from the
+   game’s own binary (`--achievements-manifest`), which needs the host libraries `pkg-config`,
+   `libasound2-dev` and `libudev-dev`. The manifest describes the wasm beside it: regenerate the
+   two together, never one without the other.
+3. Set the game's frontmatter: `wasm: '/games/<slug>/v1/game.js'` and flip
+   its `status` to `playable`.
+4. Wire up `src/components/GameEmbed.astro` by passing `src` to the
+   component.
+
+Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
+
+- **Never put an `index.html` inside `public/games/<slug>/` or `public/playground/`** —
+  `public/` is copied over the generated routes, so it would silently replace that
+  page. Only drop in the wasm-bindgen output files.
+- **Keep every file under 25 MiB** — Cloudflare Pages rejects larger assets at
+  deploy time. If a `.wasm` is too big: `wasm-opt -Oz`, plus a release profile
+  with `opt-level = "z"`, `lto = true`, `strip = true`.
+- **Don't overwrite builds in place** — bump the version folder
+  (`v1/` → `v2/`) and update the `wasm` frontmatter path, so CDN and browser
+  caches can't serve a stale `.wasm` against new JS glue.
+
+If a game ever needs threads/SharedArrayBuffer, uncomment the COOP/COEP block
+in `public/_headers`.
+
+### The editor bundle
+
+The Web Playground (`/playground/`) runs the engine’s editor in the browser:
+
+- Built into a versioned directory: `public/playground/<version>/`
+  (`game.js`, `game_bg.wasm`, `assets/`).
+- **The six Rust games have editor bundles of their own**, each the same game compiled
+  with the engine's `editor` feature: `public/playground/<slug>/<version>/`
+  (`game.js`, `game_bg.wasm`, `assets/`, no `achievements.json` — an editor session
+  records nothing). A games entry's `editor:` path points at its glue, and that field
+  is what builds the game a `/playground/<slug>/` page. Built by the engine's
+  `scripts/build_wasm.sh ../games/<crate> <slug> --kind editor --version v2 --sync
+  ../insiculous_web/public`; the invocations of record are in the engine's
+  `docs/WEB_PLAYGROUND.md` § The game bundles.
+- A games entry’s `playgroundProject:` names a bundled *data* project (`assets/projects.json`)
+  whose rules are that game’s, as scripts; it puts an “edit on the playground” button on the
+  game’s row of `/games/`, and `postbuild-check.mjs` fails the build if the slug is not in the
+  synced bundle.
+- Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
+  lists bundled project manifests, and each project’s data lives under
+  `assets/projects/<slug>/assets/`.
+- **The canvas carries no padding and no border**: the engine sizes its surface from `#game-canvas`’s client box and winit reads the pointer from its padding edge, so a padded or bordered canvas would draw blurred and hit-test off by the padding; style the wrapper, never the canvas.
+- **The editor pages are an application shell, not a document**: `/playground/` and
+  `/playground/<slug>/` render on `src/layouts/AppLayout.astro` rather than `BaseLayout.astro` — a
+  three-row body grid whose middle row is the workspace, an app bar carrying the wordmark, the
+  accessibility controls, the page’s `<h1>` and `PlaygroundToolbar.astro`, and a one-line footer.
+  The canvas fills a `.stage` grid cell (the one `!important` rule on the site, because winit
+  writes the canvas’s width and height inline at creation), the Scripts and Command panels sit in
+  the `#dock` disclosure below it, and the page’s prose lives in `PlaygroundHelp.astro`, a native
+  `<dialog>` opened from the bar. A browser that fails the WebGPU probe in
+  `src/scripts/webgpu-gate.ts` gets `CompatibilityPanel.astro` instead: what failed, a Try again
+  the engine can honour only before its event loop started, a screenshot of the real thing, and
+  the game template as the native way to run it.
+- **One embed per page**: the engine finds `#game-canvas` and uses module-level singletons,
+  so the route hosts exactly one embed — and that includes the preview route, which boots the
+  same bundle with a different mode rather than a second embed beside the editor.
+- **Play ↗ opens `/playground/preview/`**, a window of its own running the same playground
+  bundle with `?mode=preview`: the game alone, no editor, no store, nothing persisted. The
+  editor hands it the live scene as a zip over `postMessage`, and every message carries the
+  launch’s generation so a late answer from a window the visitor already closed is dropped.
+  Only one preview per editor tab, named `playground-preview-<tabId>`, and while one is open
+  the editor refuses its own Play. The editor remembers it in `sessionStorage` under
+  `beinsiculous.playground.preview` so a reload re-takes the running window instead of
+  starting a second simulation beside it; a preview reached with no opener says so and boots
+  nothing, which is what the audits see. `src/scripts/playground-preview-protocol.ts` is the
+  message contract both sides import. The first-run hint above the stage
+  (`PlaygroundHint.astro`, `/playground/` only) remembers its Dismiss in `localStorage` under
+  `beinsiculous.playground.hint`.
+- **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
+  `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
+  `PlaygroundEmbed.astro`’s default changes.
+- **Project export and import**: projects export and import as zip, layout in the engine’s
+  `docs/WEB_PLAYGROUND.md` § "Export and import". An export drops onto a clone of
+  `https://github.com/beinsiculous/game-template` — `rm -rf assets/scenes assets/scripts && unzip -o <slug>.zip -x README.md -d .`
+  from the clone’s root, the template’s own scene and scripts cleared first because the game
+  loads whichever scene sorts first — and `cargo run` plays it natively.
+- **Script editing**: the Scripts panel in the dock below the canvas opens any of the project’s `.rhai`
+  files; Save runs the syntax check and refuses a broken file, and runtime errors from Play
+  appear beneath the textarea. `docs/SCRIPTING.md` is the author contract.
+
+**Playable-game accessibility requirements** (part of the convention): keyboard controls
+listed next to the embed, remappable keys, a pause, and no timing-only inputs. The canvas
+itself ships with an accessible name, focusability and fallback text — the marked-up example
+in `src/components/GameEmbed.astro` is the baseline to copy.
+
+## Accessibility
+
+Target: **WCAG 2.2 AA** (statement for visitors: `/accessibility/`). The principles, then
+the machinery:
+
+- **No separate "blind mode".** One codebase, properly semantic — landmarks, one `<h1>` per
+  page, ordered headings, labelled controls, alt text — so screen readers work natively. A
+  parallel accessible site would rot.
+- **Text size & contrast**: the `Aa` header control (both layouts) scales the root font
+  (87.5%–125%) and toggles a high-contrast palette; persisted in `localStorage` under
+  `beinsiculous.a11y` and applied before first paint by
+  `src/components/AccessibilityBootScript.astro`. All CSS is `rem`/`clamp`-based so large
+  text reflows; breakpoints that must track the reader's font size are in `rem` (see the
+  40rem/24rem blocks in `src/styles/faces.css`).
+- **Face themes**: each face's identity (palette, textures, fonts) lives in
+  `public/app/shared/themes.css`, which `FaceLayout.astro` links *after* `src/styles/faces.css`.
+  Accessibility overrides therefore live in `faces.css`, where the high-contrast block carries one
+  extra attribute per selector to out-specify the skin on purpose.
+
+Gates that keep it true (a regression blocks the deploy, like a broken build):
+
+- `scripts/postbuild-check.mjs` (every build): `<html lang>`, exactly one `<h1>`, `alt` on
+  every `<img>`, no positive `tabindex`, no duplicate ids. It also gates the prose
+  (`scripts/lib/prose-check.mjs`): no word glued to an inline tag, and no straight apostrophe
+  in rendered text.
+- `scripts/a11y-check.mjs` (`npm run verify`, and CI between Build and Deploy): serves
+  `dist/`, runs axe-core (wcag2a/2aa/22aa) on **every** route, exits 1 on any violation.
+  `A11Y_ONLY=<substring>` filters routes while iterating.
+- `scripts/announce-check.mjs` (`npm run announce`, and CI between Accessibility audit and Layout gate):
+  captures the browser’s accessibility tree (Playwright `ariaSnapshot`) across every route and scenario,
+  verifying landmarks, a single `<h1>` with no skipped levels, named interactive controls, and named
+  regions and dialogs. It cannot hear pronunciation, verbosity, or live-region timing; a real listen
+  is still asked for when a new interaction lands.
+- `scripts/screenshot-pages.mjs` (`npm run verify` as `LARGE_TEXT=1 npm run shots`, and CI between
+  the announce audit and Deploy): serves `dist/` itself, proves every page answers 200 and
+  none scrolls sideways — desktop, phone, 641px, and the two extra passes under `LARGE_TEXT=1`:
+  125% text on a phone, and 320 CSS px reflow (WCAG 1.4.10).
+
+axe finds about half of real-world issues. For changes to layouts or interactive
+components, also do the manual pass: keyboard-only walkthrough (Tab/Shift-Tab, Enter,
+Escape), one screen-reader run (VoiceOver/NVDA) for new interactions, and a look at 200% text
+size on a phone. The PR template lists this.
+
+## Deploying to Cloudflare (Workers static assets)
+
+`wrangler.toml` declares a static-assets Worker serving `dist/` at
+`beinsiculous.com`; `404-page` handling serves the Astro 404 page, and
+`public/_headers` rules apply to the served assets.
+
+**Deploys happen in GitHub Actions, on every push to `main` (production) or `dev` (staging)**
+(`.github/workflows/deploy.yml`): install → `python3 scripts/validate.py` → the Python suite →
+`npm run check` → `npm run build` → `npm run a11y` → `npm run announce` → `LARGE_TEXT=1 npm run shots` →
+`npx wrangler deploy` → a request to the live
+domain to confirm it serves. The deploy step only runs if every gate passes, so a broken build, a
+broken data rule, an accessibility regression, or a page that scrolls sideways cannot reach the
+site. The workflow can also be run by hand from the Actions
+tab (`workflow_dispatch`) to deploy the current branch.
+
+The branch model behind that: `main` is production and only ever receives merges — `dev` is the
+integration branch, and a `dev → main` pull request **is** the production deploy. The creation chain
+the face apps were built around (questionnaire → weights → generator → import) was re-ruled on
+2026-08-28: its branches, `fortknightdev` and `forknifedev`, are playgrounds that never merge, and
+keep-fed pages are built fresh in the `main` lineage (the ruling is in `docs/roadmap.md`). Both
+branches are local-only as of 2026-08-29: deleted from origin and kept off it by a `pre-push` hook,
+they exist on the maintainer's machine alone. The annotated tag `creation-chain-parked` names the
+same commit on origin, so the parked work survives a fresh clone even though the branches do not.
+Ten files were deleted from `main` with the chain — `ApplyFromAssistant.astro`,
+`MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each
+is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's keep-fed pages
+are live — the Overview, Keep and the fourteen day pages — alongside the achievements boards (the
+studio's `/achievements/` and the face's `/fortknight/achievements/`), while
+`/fortknight/{build,questionnaire,assistant,ask}/` were deleted outright on 2026-08-30 and hard-404
+by ruling — a redirect stub records a move, and these were removals. Fork Knife's routes
+(`/forkknife/*`) were removed from the live site on 2026-08-28; its menu rendering lands at
+`/fortknight/forkknife/` when that page is built (issue #18).
+
+The face's nav shows the stored keep’s focus stones, labelled by category, and the rest sit behind
+Peripheral (with no keep loaded, every stone is peripheral); the mapping is `faceNav()`’s `category`.
+Every entry still has a page, and `scripts/postbuild-check.mjs` fails the build if that stops being true.
+
+It needs two repository secrets (Settings → Secrets and variables → Actions):
+
+| secret | what |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | an "Edit Cloudflare Workers" token, scoped to the account **and** to the `beinsiculous.com` zone (it owns the custom-domain route) |
+| `CLOUDFLARE_ACCOUNT_ID` | the account the `insiculous-web` Worker lives in |
+
+The Cloudflare dashboard's own Workers Builds Git integration must stay
+disconnected — with both wired up, one commit would deploy twice from two
+places. (It was connected once and stopped firing; Actions replaced it.)
+
+Deploying by hand, from a machine with wrangler auth (`npx wrangler login`):
+
+```sh
+npm run deploy   # the full verify chain, then wrangler deploy
+```
+
+Never `wrangler deploy` on its own — that ships whatever happens to be in
+`dist/`, checked or not.

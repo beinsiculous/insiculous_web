@@ -1,0 +1,62 @@
+---
+// The profile dropdown: shows once a profile is saved on this device; switching makes that profile active and
+// reloads the page so every page re-renders from it. Rename/Duplicate/Delete live on the Profile page, and a
+// profile is created from the buttons on / and /fortknight/ (src/lib/profile-name-dialog.js).
+//
+// It offers no "New profile…" option. That option redirected to a face's questionnaire to fill in and save,
+// and the creation chain left main on 2026-08-30 (preserved at the tag `creation-chain-parked`) — so there is
+// nowhere for it to go and nothing to finish. Creating a profile lives where achievements happen instead.
+//
+// Rendered in exactly one place per page, never two. The ids below are fixed, so a second copy on one page
+// ships duplicate navProfile / navProfileSelect ids and fails the axe gate on duplicate-id. Both layouts now
+// put it in the header — FaceLayout for the face pages, BaseLayout for the studio's — which is why /profile/
+// stopped rendering its own on 2026-08-31: BaseLayout used to have no chrome to hold one, and now it does.
+//
+// The slot takes whatever belongs beside the dropdown. FaceLayout passes its ⚙ Profile link, so that link is
+// hidden until a profile is saved too. BaseLayout passes nothing: its icon row already leads with the gear to
+// /profile/, and the face only needs the slot because its own icon row is spent on the way back out.
+---
+<div class="nav-profile" id="navProfile" hidden>
+  <label class="nav-profile-label">Profile <select id="navProfileSelect" aria-label="Profile"></select></label>
+  <slot />
+</div>
+<script>
+  import { loadSettings, profileIds, saveSettings, switchProfile } from "../lib/shared/user-settings.js";
+
+  const container = document.getElementById("navProfile");
+  const select = document.getElementById("navProfileSelect");
+
+  /** (Re)draw the dropdown from the device's settings; hidden until a profile is saved. */
+  function renderNavProfile() {
+    const settings = loadSettings();
+    const savedIds = profileIds(settings);
+    container.hidden = savedIds.length === 0;
+    select.replaceChildren();
+    if (!savedIds.length) return;
+    const activeId = settings.activeWeightsId;
+    const options = savedIds.map((id) => ({ value: id, label: id }));
+    if (activeId && !savedIds.includes(activeId)) options.push({ value: activeId, label: `${activeId} (not saved yet)` });
+    for (const { value, label } of options) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    }
+    select.value = activeId && options.some((option) => option.value === activeId) ? activeId : savedIds[0];
+  }
+
+  select.addEventListener("change", () => {
+    const current = loadSettings(); // another tab may have saved meanwhile
+    // Captured first, so a failed switch can put the dropdown back where it was.
+    const previousId = current.activeWeightsId;
+    try {
+      switchProfile(current, select.value);
+      saveSettings(current);
+      location.reload();
+    } catch (error) {
+      alert(error.message);
+      select.value = previousId;
+    }
+  });
+  renderNavProfile();
+</script>

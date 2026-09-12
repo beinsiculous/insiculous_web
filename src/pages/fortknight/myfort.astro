@@ -1,0 +1,7 @@
+---
+// My Fort became Keep (2026-08-28) — keep the URL working. The phone's share text and a person's
+// bookmarks say /fortknight/myfort; both should land on the page that reads the keep.
+import { withBase } from "../../lib/paths.js";
+const target = withBase("fortknight/keep/");
+---
+<html lang="en"><head><meta charset="utf-8" /><meta http-equiv="refresh" content={`0; url=${target}`} /><title>Moved to Keep</title></head><body><h1>Moved to Keep</h1><p>This page moved to <a href={target}>Keep</a>.</p></body></html>
