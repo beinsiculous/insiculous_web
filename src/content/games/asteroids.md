@@ -3,7 +3,7 @@ title: 'Insiculous Asteroids'
 blurb: 'Vector-wireframe Asteroids with splitting rocks, i-frames, and sharpshooter streaks.'
 status: 'playable'
 wasm: '/games/asteroids/v2/game.js'
-editor: '/playground/asteroids/v1/game.js'
+editor: '/playground/asteroids/v2/game.js'
 screenshots: []
 order: 5
 ---

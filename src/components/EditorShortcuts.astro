@@ -7,18 +7,25 @@
  * lives in one component rather than once per surface. What Ctrl+S saves TO
  * differs by surface — the playground writes to browser storage, a Rust game's
  * page only to this session's memory — so that line is the caller's.
+ *
+ * `headingLevel` is the caller's too: inside the Help dialog the panel sits under
+ * the dialog's own h2, so its heading has to be an h3 for the page to read in order.
  */
 interface Props {
   saveLine?: string;
+  headingLevel?: 2 | 3;
 }
 
 const {
   saveLine = 'save the scene to this browser (inside the Scripts panel, saves the script)',
+  headingLevel = 2,
 } = Astro.props;
+
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
 ---
 
 <div class="shortcuts-panel">
-  <h2>Keyboard shortcuts</h2>
+  <Heading>Keyboard shortcuts</Heading>
   <ul class="shortcuts-list">
     <li><kbd>Ctrl+P</kbd> — play / pause; <kbd>F5</kbd> — play; <kbd>Ctrl+Shift+P</kbd> — stop</li>
     <li><kbd>Ctrl+S</kbd> — {saveLine}; <kbd>Ctrl+Shift+S</kbd> — save as</li>
@@ -40,7 +47,8 @@ const {
     border-top: 1px solid var(--border);
   }
 
-  .shortcuts-panel h2 {
+  .shortcuts-panel h2,
+  .shortcuts-panel h3 {
     font-size: 0.95rem;
     margin: 0 0 0.5rem;
     color: var(--text-bright);

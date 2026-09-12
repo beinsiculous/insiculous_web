@@ -129,8 +129,18 @@ What that means for the items this file used to number 1–9:
   there: high scores, and gesture-gated audio.
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to
   WebAssembly on WebGPU and served as a playground — open a tab, build a scene, press play,
-  and work with projects stored in the browser’s IndexedDB, exported and imported as zip.
-  Scripts are Rhai, edited on the page and run on Play, and an export drops onto the game
+  and work with projects saved in this browser, exported and imported as zip.
+  The **Playground UX** sprint (milestone here and in `insiculous_2d`, from Astra’s
+  review of Sep 8 2026) shipped Sep 12 2026: the editor got the window, Play opens a reusable
+  game-only preview, the first interaction is obvious, and loading, saving and failure feel
+  finished — this site’s half was the application shell, the preview window, the compatibility
+  panel and the save status; the sprint’s last batches (inspector polish, tooltips and
+  resizing, save state, browser usability and a performance budget) were engine-side and
+  carry no site changes. The application shell, the compatibility panel, Play ↗’s preview
+  window (`/playground/preview/`, on the `v2` bundles), the first run and the save status are
+  all in. Follow-up: insiculous_2d#144 (keyboard-only entry into the inspector, scroll-into-view
+  for an off-panel traversal target — engine-side, no site work). Scripts are Rhai, edited on
+  the page and run on Play, and an export drops onto the game
   template (`https://github.com/beinsiculous/game-template`) to run natively as a desktop
   build. Each of the six Rust games also opens inside that editor at
   `/playground/<slug>/`, as a second bundle of the same game: the entities are live and

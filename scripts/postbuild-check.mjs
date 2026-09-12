@@ -38,8 +38,8 @@ const DIST = join(ROOT, 'dist');
 const PUBLIC_GAMES = join(ROOT, 'public', 'games');
 const PUBLIC_PLAYGROUND = join(ROOT, 'public', 'playground');
 const CONTENT_GAMES = join(ROOT, 'src', 'content', 'games');
-// The default bundle PlaygroundEmbed.astro loads (`/playground/v1/game.js`): bump both together.
-const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v1', 'assets', 'projects.json');
+// The default bundle PlaygroundEmbed.astro loads (`/playground/v2/game.js`): bump both together.
+const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v2', 'assets', 'projects.json');
 
 const SIZE_LIMIT = 25 * 1024 * 1024; // Cloudflare Pages per-file limit
 const errors = [];

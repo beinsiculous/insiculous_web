@@ -1,0 +1,157 @@
+---
+/**
+ * The window Play ↗ opens: the playground bundle booted with `?mode=preview`, which
+ * runs the game alone — no editor, no store, no persistence — and waits for the
+ * editor's page to hand it a scene.
+ *
+ * It is only ever reached from the editor, so a document with no opener is a dead end
+ * and says so instead of sitting on a boot status forever. That is also what the
+ * audits see, since they load every built page with no opener and no WebGPU.
+ *
+ * `?mode=preview` rides on the PAGE url, which is what the engine's `query_param`
+ * reads; the glue path in `data-wasm-src` stays bare, because postbuild-check.mjs
+ * resolves it verbatim against `dist/`.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+import CompatibilityPanel from '../../components/CompatibilityPanel.astro';
+---
+
+<AppLayout title="Game preview — Be Insiculous" description="The Web Playground’s preview window." noindex>
+  <Fragment slot="heading">Game preview</Fragment>
+
+  <div class="bar-controls" role="group" aria-label="Preview controls" slot="bar">
+    <output id="preview-project" class="bar-note" aria-live="polite"></output>
+    <button type="button" id="preview-pause" class="btn-toolbar" aria-pressed="false" disabled>
+      Pause
+    </button>
+    <button type="button" id="preview-restart" class="btn-toolbar" disabled>Restart</button>
+    <button type="button" id="preview-close" class="btn-toolbar">Close</button>
+  </div>
+
+  <div class="preview-embed" data-wasm-src="/playground/v2/game.js">
+    <div class="head-region">
+      <p id="playground-banner" class="playground-banner" role="alert"></p>
+      <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
+      <p id="preview-orphan" class="orphan" hidden>
+        This window is opened by Play ↗ on the <a href="/playground/">Web Playground</a>.
+      </p>
+      <CompatibilityPanel
+        screenshot="/images/platformer-in-editor-2026-08.png"
+        screenshotAlt="The Insiculous 2D scene editor in a browser, a platformer scene open in it"
+      />
+    </div>
+
+    <div class="stage">
+      <canvas
+        id="game-canvas"
+        width={1280}
+        height={800}
+        tabindex="0"
+        role="img"
+        aria-label="Game preview canvas; focus it to play"
+      >
+        The preview runs on an HTML canvas and needs a keyboard. Close this window and
+        edit the scene in the Web Playground instead.
+      </canvas>
+    </div>
+  </div>
+</AppLayout>
+
+<script>
+  import '../../scripts/playground-preview.ts';
+</script>
+
+<style>
+  /* The bar controls and the canvas rule repeat PlaygroundToolbar.astro's and
+     PlaygroundEmbed.astro's, because Astro scopes a component's styles to that
+     component and this page is neither of them. */
+  .bar-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .btn-toolbar {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .btn-toolbar:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-toolbar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .bar-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+    min-width: 0;
+  }
+
+  .preview-embed {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+
+  .head-region {
+    min-width: 0;
+  }
+
+  .status,
+  .orphan {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-bright);
+    text-align: center;
+    min-height: 1.2em;
+    margin: 0 0 0.6rem;
+  }
+
+  .playground-banner {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-align: center;
+    min-height: 1.2em;
+    margin: 0 0 0.6rem;
+  }
+
+  .stage {
+    min-width: 0;
+    min-height: 0;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* :global and !important for the same reason PlaygroundEmbed.astro gives: winit
+     REPLACES the placeholder with a canvas that carries no scoping attribute and an
+     inline width and height, and only !important beats an inline declaration. */
+  .preview-embed :global(canvas) {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    display: block;
+    background: #000;
+    outline: none;
+  }
+</style>
