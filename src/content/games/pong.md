@@ -1,18 +1,23 @@
 ---
 title: 'Insiculous Pong'
-blurb: 'Neon Pong with power-ups, a rippling spring-mass grid, and four escalating chaos modes.'
+blurb: 'Tongs for paddles, a meatball for a ball, grills for goals — pong re-skinned in the Deion world.'
 status: 'playable'
-wasm: '/games/pong/v2/game.js'
-editor: '/playground/pong/v2/game.js'
+wasm: '/games/pong/v3/game.js'
+editor: '/playground/pong/v3/game.js'
 playgroundProject: 'pong'
-screenshots: ['/images/pong-rally-2026-08.png']
+screenshots: ['/images/tong-rally-2026-09.png']
 order: 1
 ---
 
-Game 1 of the 20 Games Challenge run. Play against the CPU on three
-difficulties or grab a second player locally. Power-ups drop mid-rally, and
-the whole match plays out over a spring-mass grid background that deforms
-with the action — bloom-heavy, Geometry-Wars-adjacent presentation.
+Game 1 of the 20 Games Challenge run, and the first of the Deion re-skins:
+the paddles are **living tongs**, the ball is a **meatball with eyes**, the
+goals are **grills** behind them, the floor is countertop tile and the walls
+are rails. In-game this one is *Tong*.
+
+Play against the CPU on three difficulties or grab a second player locally.
+Power-ups drop mid-rally — a flame toasts the meatball, a knife splits it in
+two — and the whole match plays out over a spring-mass grid background that
+deforms with the action.
 
 Like every game in the series, it ships with the engine's signature **chaos
 modes**: Normal, Insane, Ridiculous, and *Insiculous* — all of it at once.
