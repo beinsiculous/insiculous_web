@@ -1,9 +1,9 @@
 ---
 title: 'Insiculous Pong'
-blurb: 'Tongs for paddles, a meatball for a ball, grills for goals — pong re-skinned in the Deion world.'
+blurb: 'Tongs for paddles, a meatball for a ball, grills for goals — pong re-skinned in the Deion world, and you work the jaws yourself.'
 status: 'playable'
-wasm: '/games/pong/v3/game.js'
-editor: '/playground/pong/v3/game.js'
+wasm: '/games/pong/v4/game.js'
+editor: '/playground/pong/v4/game.js'
 playgroundProject: 'pong'
 screenshots: ['/images/tong-rally-2026-09.png']
 order: 1
@@ -15,6 +15,9 @@ goals are **grills** behind them, the floor is countertop tile and the walls
 are rails. In-game this one is *Tong*.
 
 Play against the CPU on three difficulties or grab a second player locally.
+Up and down move a tong, and left and right work its jaw — pushing it toward
+the court shuts it and pulling it away opens it. A meatball off an open arm
+leaves at an angle, off a shut face flat, and the CPU works its jaw too.
 Power-ups drop mid-rally — a flame toasts the meatball, a knife splits it in
 two — and the whole match plays out over a spring-mass grid background that
 deforms with the action.
