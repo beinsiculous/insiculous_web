@@ -1,24 +1,26 @@
 ---
 title: 'Insiculous Frogger'
-blurb: 'Five lanes of traffic, five of water, diving turtles — and a crocodile in the home row.'
+blurb: 'Five conveyor lanes of carts, a soup river of rafts and sinking crackers, and a bun in a nest.'
 status: 'playable'
-wasm: '/games/frogger/v2/game.js'
-editor: '/playground/frogger/v2/game.js'
+wasm: '/games/frogger/v3/game.js'
+editor: '/playground/frogger/v3/game.js'
 width: 720
 height: 768
-screenshots: []
+screenshots: ['/images/chicken-coop-2026-09.png']
 order: 6
 ---
 
-A 13-row gauntlet: five traffic lanes, a median, five water lanes, five home
-slots. Ride logs and turtles, beat the timer, fill all five homes to clear
-the round — then everything speeds up. In Ridiculous mode, the turtles dive
-on staggered cycles and a crocodile periodically guards a home slot; enter
-while it's surfaced and you're lunch.
+A 13-row gauntlet: five conveyor lanes of carts, a sidewalk median, five soup
+lanes ridden on celery and baguette rafts and crackers, and five nests.
+Crackers sink after a warning; beat the timer, fill all five nests to clear
+the round, then a one-second beat and everything speeds up. In Ridiculous mode the crackers sink
+on staggered cycles and a bun periodically waits in a nest; enter while it's
+there and you're lunch.
 
 Game 6 of the series and the first built on the engine's tilemap component
-— the entire board is a single tilemap entity. Two-frog co-op, localized in
-English and Pirate, chaos modes included.
+— the board is four tilemap entities, one per tile sheet: the floor, the coop
+wall, the soup and the conveyor belt. Two-chicken co-op, localized in English
+and Pirate, chaos modes included.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
