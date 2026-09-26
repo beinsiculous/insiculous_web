@@ -2,8 +2,8 @@
 title: 'Insiculous Breakout'
 blurb: 'A tong that bites, Deion as the ball, and six tiers of food bricks on the kitchen counter.'
 status: 'playable'
-wasm: '/games/breakout/v3/game.js'
-editor: '/playground/breakout/v3/game.js'
+wasm: '/games/breakout/v4/game.js'
+editor: '/playground/breakout/v4/game.js'
 screenshots: ['/images/food-pyramid-2026-09.png']
 order: 2
 ---

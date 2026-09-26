@@ -2,8 +2,8 @@
 title: 'Insiculous Pong'
 blurb: 'Tongs for paddles, a meatball for a ball, grills for goals — pong re-skinned in the Deion world, and you work the jaws yourself.'
 status: 'playable'
-wasm: '/games/pong/v4/game.js'
-editor: '/playground/pong/v4/game.js'
+wasm: '/games/pong/v5/game.js'
+editor: '/playground/pong/v5/game.js'
 playgroundProject: 'pong'
 screenshots: ['/images/tong-rally-2026-09.png']
 order: 1

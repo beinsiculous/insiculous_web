@@ -2,8 +2,8 @@
 title: 'Insiculous Frogger'
 blurb: 'Five conveyor lanes of carts, a soup river of rafts and sinking crackers, and a bun in a nest.'
 status: 'playable'
-wasm: '/games/frogger/v3/game.js'
-editor: '/playground/frogger/v3/game.js'
+wasm: '/games/frogger/v4/game.js'
+editor: '/playground/frogger/v4/game.js'
 width: 720
 height: 768
 screenshots: ['/images/chicken-coop-2026-09.png']

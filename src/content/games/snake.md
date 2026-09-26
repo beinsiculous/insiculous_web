@@ -2,8 +2,8 @@
 title: 'Insiculous Snake'
 blurb: 'Grid snake with buffered turns — and a versus mode where head-on collisions have rules.'
 status: 'playable'
-wasm: '/games/snake/v2/game.js'
-editor: '/playground/snake/v2/game.js'
+wasm: '/games/snake/v3/game.js'
+editor: '/playground/snake/v3/game.js'
 screenshots: []
 order: 4
 ---
