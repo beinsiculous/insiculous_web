@@ -1,0 +1,62 @@
+[
+  {
+    "id": "clear_normal",
+    "name": "Demolition Crew",
+    "description": "Clear every brick in Normal mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_insane",
+    "name": "Speed Wrecker",
+    "description": "Clear every brick in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_ridiculous",
+    "name": "Double Demolition",
+    "description": "Clear every brick in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_insiculous",
+    "name": "Insiculous Wrecking Ball",
+    "description": "Clear every brick in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_normal",
+    "name": "Flawless Foundation",
+    "description": "Clear Normal mode without losing a ball.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_insane",
+    "name": "Flawless Frenzy",
+    "description": "Clear Insane mode without losing a ball.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_ridiculous",
+    "name": "Flawless Juggling",
+    "description": "Clear Ridiculous mode without losing a ball.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_insiculous",
+    "name": "Insiculously Flawless",
+    "description": "Clear Insiculous mode without losing a ball.",
+    "hidden": false
+  },
+  {
+    "id": "combo_volley",
+    "name": "Wrecking Volley",
+    "description": "Destroy 5 bricks in a single volley (no paddle touch).",
+    "hidden": false
+  },
+  {
+    "id": "last_life",
+    "name": "Clutch Clear",
+    "description": "Clear the board on your very last life.",
+    "hidden": false
+  }
+]
