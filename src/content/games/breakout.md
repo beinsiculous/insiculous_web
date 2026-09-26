@@ -1,16 +1,23 @@
 ---
 title: 'Insiculous Breakout'
-blurb: 'Brick-breaker with eight hand-authored levels, paddle-edge aiming, and co-op variants.'
+blurb: 'A tong that bites, Deion as the ball, and six tiers of food bricks on the kitchen counter.'
 status: 'playable'
-wasm: '/games/breakout/v2/game.js'
-editor: '/playground/breakout/v2/game.js'
-screenshots: []
+wasm: '/games/breakout/v3/game.js'
+editor: '/playground/breakout/v3/game.js'
+screenshots: ['/images/food-pyramid-2026-09.png']
 order: 2
 ---
 
-A rainbow brick wall, three balls, and aiming that actually matters: where
-the ball meets the paddle deflects it up to 60°, with mouse or keyboard
-control. Power-ups drop from broken bricks.
+The paddle is a tong lying on the kitchen counter and the ball is Deion, a
+water ball the size of a meatball. Where he meets the tong aims him, up to
+60°, with mouse or keyboard control — and the tong bites: push toward the
+wall (W or ↑, or hold the right mouse button) to close it, pull back to open.
+Bite just as he lands and it's a chomp shot: he leaves steeper and faster.
+
+The wall is six tiers of food, watermelon at the base up to donuts at the
+top. Armored bricks come foil-wrapped and tear a little with each hit, and
+some bricks drop wrapped candies: an extra Deion, a frozen Deion who breaks
+any brick in one hit for ten seconds, or both.
 
 Eight levels, all hand-authored in the engine's scene editor — **CLASSIC**,
 **THE VAULT**, **PINATA**, and **THE GAUNTLET**, each with a two-player
