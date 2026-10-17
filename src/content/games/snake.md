@@ -2,8 +2,8 @@
 title: 'Insiculous Snake'
 blurb: 'Frank the bratwurst dachshund loose in the kitchen, growing longer with every snack — and a versus mode where two dogs share the floor.'
 status: 'playable'
-wasm: '/games/snake/v4/game.js'
-editor: '/playground/snake/v4/game.js'
+wasm: '/games/snake/v5/game.js'
+editor: '/playground/snake/v5/game.js'
 screenshots: ['/images/bratdog-2026-09.png']
 order: 4
 ---

@@ -2,8 +2,8 @@
 title: 'Insiculous Invaders'
 blurb: 'Toast Busters — Deion and Cubert hold the kitchen counter against four rows of haunted toast, behind butter bunkers that melt as they are chipped.'
 status: 'playable'
-wasm: '/games/invaders/v4/game.js'
-editor: '/playground/invaders/v4/game.js'
+wasm: '/games/invaders/v5/game.js'
+editor: '/playground/invaders/v5/game.js'
 screenshots: ['/images/toast-busters-2026-10.png']
 order: 3
 ---
