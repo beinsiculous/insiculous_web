@@ -1,0 +1,68 @@
+[
+  {
+    "id": "clear_normal",
+    "name": "Counter Defender",
+    "description": "Bust every Toasted in Normal mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_insane",
+    "name": "Speed Toaster",
+    "description": "Bust every Toasted in Insane mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_ridiculous",
+    "name": "Twin Icicle Commander",
+    "description": "Bust every Toasted in Ridiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "clear_insiculous",
+    "name": "Insiculously Toasted",
+    "description": "Bust every Toasted in Insiculous mode.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_normal",
+    "name": "Not a Crumb",
+    "description": "Clear Normal mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_insane",
+    "name": "Not a Crumb Under Fire",
+    "description": "Clear Insane mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_ridiculous",
+    "name": "Not a Crumb Overdrive",
+    "description": "Clear Ridiculous mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "perfect_insiculous",
+    "name": "Insiculously Uncrumbed",
+    "description": "Clear Insiculous mode without losing a life.",
+    "hidden": false
+  },
+  {
+    "id": "sharpshooter",
+    "name": "Sharpshooter",
+    "description": "Bust 10 in a row without wasting a shot.",
+    "hidden": false
+  },
+  {
+    "id": "last_stand",
+    "name": "Last Slice",
+    "description": "Bust the last Toasted on your very last life.",
+    "hidden": false
+  },
+  {
+    "id": "ufo_hunter",
+    "name": "Saucer Hunter",
+    "description": "Shoot down Maxwell's cake saucer.",
+    "hidden": false
+  }
+]
