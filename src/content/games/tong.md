@@ -1,8 +1,9 @@
 ---
-title: 'Insiculous Pong'
-blurb: 'Tongs for paddles, a meatball for a ball, grills for goals — pong re-skinned in the Deion world, and you work the jaws yourself.'
+title: 'Tong'
+formerSlug: 'pong'
+blurb: 'Tongs for paddles, a meatball for a ball, grills for goals, all of it from the Deion world — and you work the jaws yourself.'
 status: 'playable'
-wasm: '/games/pong/v5/game.js'
+wasm: '/games/tong/v6/game.js'
 editor: '/playground/pong/v5/game.js'
 playgroundProject: 'pong'
 screenshots: ['/images/tong-rally-2026-09.png']
@@ -12,7 +13,7 @@ order: 1
 Game 1 of the 20 Games Challenge run, and the first of the Deion re-skins:
 the paddles are **living tongs**, the ball is a **meatball with eyes**, the
 goals are **grills** behind them, the floor is countertop tile and the walls
-are rails. In-game this one is *Tong*.
+are rails.
 
 Play against the CPU on three difficulties or grab a second player locally.
 Up and down move a tong, and left and right work its jaw — pushing it toward

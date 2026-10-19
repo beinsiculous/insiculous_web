@@ -27,10 +27,15 @@ const games = defineCollection({
       // its presence is what builds the game a /playground/<slug>/ page.
       editor: z.string().startsWith('/').optional(),
       // Slug of a Web Playground project on /playground/ whose rules are this game's, as scripts
-      // (pong's is 'pong'). Its presence puts an "edit on the playground" button on the game's row
-      // of /games/; a game whose rules are still compiled in has none. postbuild-check.mjs holds
-      // the slug against the bundle's projects.json.
+      // (tong's is 'pong', the playground project's own slug). Its presence puts an "edit on the
+      // playground" button on the game's row of /games/; a game whose rules are still compiled in
+      // has none. postbuild-check.mjs holds the slug against the bundle's projects.json.
       playgroundProject: z.string().regex(/^[a-z0-9-]+$/).optional(),
+      // The slug this entry was published under before it was renamed. Two readers depend on it:
+      // scripts/postbuild-check.mjs check 9 holds its four redirect lines in _redirects, and
+      // src/lib/games-achievements.js reads its old save key beside the new one. A slug is
+      // retired to formerSlug, never dropped.
+      formerSlug: z.string().regex(/^[a-z0-9-]+$/).optional(),
       screenshots: z.array(z.string().startsWith('/')).default([]),
       order: z.number().default(0),
     })

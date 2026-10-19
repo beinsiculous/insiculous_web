@@ -27,10 +27,17 @@
 // 8. Every internal link in built devlog pages (dist/devlog/**/index.html) must resolve to a real
 //    page or asset in dist/. Post bodies link to games, stones, other posts and faces; a dead link
 //    otherwise ships as a silent 404.
+// 9. dist/_redirects (copied from public/_redirects) holds, for every games entry that carries
+//    `formerSlug`, its redirect lines (two for its page, two more for its playground page when it
+//    has an editor bundle) with the one expected code, no splat under its former slug, and every rule in the file
+//    sends its visitors to a page or file that exists in dist/. A renamed game's old links are
+//    otherwise a silent 404, and a typo'd destination a redirect to one. The rule lives in
+//    scripts/lib/redirects-check.mjs, pinned by tests/test_postbuild_check.py.
 
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { findGluedBoundaries, findStraightApostrophes } from './lib/prose-check.mjs';
+import { findRedirectProblems } from './lib/redirects-check.mjs';
 
 // Anchor to the project root regardless of cwd.
 const ROOT = resolve(import.meta.dirname, '..');
@@ -40,9 +47,16 @@ const PUBLIC_PLAYGROUND = join(ROOT, 'public', 'playground');
 const CONTENT_GAMES = join(ROOT, 'src', 'content', 'games');
 // The default bundle PlaygroundEmbed.astro loads (`/playground/v2/game.js`): bump both together.
 const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v2', 'assets', 'projects.json');
+const REDIRECTS = join(DIST, '_redirects');
+// Every renamed game's redirect lines carry this code. Temporary while a rename may still be
+// rolled back; flip it to 301 together with the lines in public/_redirects once the rename has
+// lived on main unreverted.
+const REDIRECT_CODE = 302;
 
 const SIZE_LIMIT = 25 * 1024 * 1024; // Cloudflare Pages per-file limit
 const errors = [];
+// Filled by check 3's walk of the games entries, read by check 9.
+const renamedGames = [];
 
 function walk(dir, onFile) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -94,6 +108,14 @@ if (existsSync(DIST) && existsSync(CONTENT_GAMES)) {
 
     const wasm = frontmatter.match(/^wasm:\s*['"]([^'"]+)['"]/m);
     if (wasm) refs.push(wasm[1]);
+
+    const formerSlug = frontmatter.match(/^formerSlug:\s*['"]?([a-z0-9-]+)['"]?/m);
+    if (formerSlug) {
+      // The playground page exists only for an entry whose `editor` is a path, so only that entry
+      // owes the playground redirect lines; a blank `editor:` builds no page and owes none.
+      const sections = /^editor:\s*['"]?\/[^\s'"]+/m.test(frontmatter) ? ['games', 'playground'] : ['games'];
+      renamedGames.push({ entry: path, slug: basename(path, '.md'), formerSlug: formerSlug[1], sections });
+    }
 
     // An unknown slug is not an error on the playground — it opens the first project instead —
     // so a typo here would ship a button that silently opens Examples. Quotes are optional:
@@ -250,6 +272,24 @@ if (existsSync(DEVLOG_DIST)) {
       }
     }
   });
+}
+
+// 9. The redirects hold every renamed game's old paths, and every destination exists.
+if (existsSync(DIST)) {
+  if (!existsSync(REDIRECTS)) {
+    errors.push(`${REDIRECTS} is missing: public/_redirects did not reach dist/, so no old game path redirects.`);
+  } else {
+    const problems = findRedirectProblems({
+      text: readFileSync(REDIRECTS, 'utf8'),
+      renamedGames,
+      expectedCode: REDIRECT_CODE,
+      isFile: (relativePath) => {
+        const target = join(DIST, relativePath);
+        return existsSync(target) && statSync(target).isFile();
+      },
+    });
+    for (const problem of problems) errors.push(`${REDIRECTS}: ${problem}`);
+  }
 }
 
 if (errors.length > 0) {

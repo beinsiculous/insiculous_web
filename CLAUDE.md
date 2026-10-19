@@ -183,7 +183,12 @@ exemption was added — an exemption of that shape is exactly what the guard's s
 
 Three types, two stores. **Game** achievements are written by the games' browser builds — one
 localStorage key per game, `beinsiculous.games.<slug>.achievements`, holding the engine's native
-save file byte for byte; `src/lib/games-achievements.js` reads them. **Insiculous** (site-wide) and
+save file byte for byte; `src/lib/games-achievements.js` reads them. A renamed game's unlocks may
+also sit under its **former key**, `beinsiculous.games.<formerSlug>.achievements` (the entry's
+`formerSlug`), which its old bundles wrote: the engine reads that former slot at boot, folds it into
+memory and never writes it — the next save lands in the new key only — and the boards show the
+**union** of the two keys (an id in both keeps its earliest date), so progress shows before the
+renamed game is opened; clearing removes both. The site only reads. **Insiculous** (site-wide) and
 **FortKnight** achievements are written by the site itself into one store,
 `beinsiculous.achievements`, with the same `{"unlocks": {"<id>": {"unlocked_at": <unix seconds>}}}`
 shape; the registry of ids, titles, descriptions and types lives in `src/lib/achievements.js`. Two stores because
@@ -203,7 +208,7 @@ each game group displaying its full manifest (hidden entries masked until unlock
 `/fortknight/achievements/` narrows to the active profile’s unlocked fortnight achievements, and sits
 in the face nav as the final entry. `/games/` lists the games as a numbered list in play
 order — each row a play button and, for a game whose rules are scripts on the playground
-(`playgroundProject` in its frontmatter; Pong today), an “edit on the playground” button — and
+(`playgroundProject` in its frontmatter; Tong today), an “edit on the playground” button — and
 carries a game-achievements board under it; `/profile/`’s achievements panel shows all three types
 in a scroll box, keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
 achievements happen: `/` and `/fortknight/` carry Create-a-profile buttons, and the first time an

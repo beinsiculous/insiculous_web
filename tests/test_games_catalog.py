@@ -127,7 +127,7 @@ class ReadEmbeddedCatalogsTests(unittest.TestCase):
         return run_node(script, {"element": element_json})
 
     def test_parses_the_attribute(self):
-        catalogs = [{"slug": "pong", "title": "Insiculous Pong", "achievements": []}]
+        catalogs = [{"slug": "tong", "title": "Tong", "achievements": []}]
         outcome = self.read({"dataset": {"catalogs": json.dumps(catalogs)}})
         self.assertEqual(outcome, {"catalogs": catalogs, "warnings": []})
 
@@ -180,13 +180,13 @@ class ReadGameCatalogsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             games = [
-                {"id": "pong", "data": {"title": "Pong", "order": 1, "wasm": "/games/pong/v2/game.js"}},
+                {"id": "tong", "data": {"title": "Tong", "order": 1, "wasm": "/games/tong/v2/game.js"}},
             ]
             outcome = read_catalogs_node(games, temp_path)
             self.assertFalse(outcome["ok"])
             error_message = outcome["error"]
-            self.assertIn("pong", error_message)
-            self.assertIn(str(temp_path / "games" / "pong" / "v2" / "achievements.json"), error_message)
+            self.assertIn("tong", error_message)
+            self.assertIn(str(temp_path / "games" / "tong" / "v2" / "achievements.json"), error_message)
             self.assertIn("--achievements-manifest", error_message)
             self.assertIn("build_wasm.sh", error_message)
 

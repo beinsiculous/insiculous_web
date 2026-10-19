@@ -1,0 +1,28 @@
+# Renamed games: each former slug's pages answer with a temporary redirect to the new name.
+# Temporary until the rename has stuck, because a browser caches a permanent redirect past the
+# rollback that would have to outlive it. Check 9 of scripts/postbuild-check.mjs holds these
+# lines against every games entry's formerSlug, and every destination against dist/.
+/games/pong/ /games/tong/ 302
+/games/pong /games/tong/ 302
+/playground/pong/ /playground/tong/ 302
+/playground/pong /playground/tong/ 302
+/games/breakout/ /games/food-pyramid/ 302
+/games/breakout /games/food-pyramid/ 302
+/playground/breakout/ /playground/food-pyramid/ 302
+/playground/breakout /playground/food-pyramid/ 302
+/games/invaders/ /games/toast-busters/ 302
+/games/invaders /games/toast-busters/ 302
+/playground/invaders/ /playground/toast-busters/ 302
+/playground/invaders /playground/toast-busters/ 302
+/games/snake/ /games/bratdog/ 302
+/games/snake /games/bratdog/ 302
+/playground/snake/ /playground/bratdog/ 302
+/playground/snake /playground/bratdog/ 302
+/games/asteroids/ /games/meatieroids/ 302
+/games/asteroids /games/meatieroids/ 302
+/playground/asteroids/ /playground/meatieroids/ 302
+/playground/asteroids /playground/meatieroids/ 302
+/games/frogger/ /games/chicken-coop/ 302
+/games/frogger /games/chicken-coop/ 302
+/playground/frogger/ /playground/chicken-coop/ 302
+/playground/frogger /playground/chicken-coop/ 302

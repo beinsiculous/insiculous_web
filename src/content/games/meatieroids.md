@@ -1,8 +1,9 @@
 ---
-title: 'Insiculous Asteroids'
-blurb: 'Meatieroids — Deion flies the Flying Funk through a belt of roided-out meatballs that flex, tumble, and burst into smaller, angrier ones.'
+title: 'Meatieroids'
+formerSlug: 'asteroids'
+blurb: 'Deion flies the Flying Funk through a belt of roided-out meatballs that flex, tumble, and burst into smaller, angrier ones.'
 status: 'playable'
-wasm: '/games/asteroids/v4/game.js'
+wasm: '/games/meatieroids/v5/game.js'
 editor: '/playground/asteroids/v4/game.js'
 screenshots: ['/images/meatieroids-2026-10.png']
 order: 5

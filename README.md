@@ -136,6 +136,15 @@ Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
 - **Don't overwrite builds in place** — bump the version folder
   (`v1/` → `v2/`) and update the `wasm` frontmatter path, so CDN and browser
   caches can't serve a stale `.wasm` against new JS glue.
+- **A renamed game keeps its old bundle directories** — `public/games/<old>/v<N>/`
+  stay, immutable, beside the new slug's. Its entry (renamed to `<new>.md`) sets
+  `formerSlug: '<old>'`, and `public/_redirects` carries its lines —
+  `/games/<old>/` and `/games/<old>`, plus `/playground/<old>/` and `/playground/<old>`
+  when the entry has an `editor` bundle — each to the new page with the temporary
+  code. Check 9 holds them: a missing line, the wrong code, a destination with no page
+  in `dist/`, or a splat under the old slug fails the build. No splat, because the
+  editor bundle under `/playground/<old>/` is still what the new playground page
+  loads.
 
 If a game ever needs threads/SharedArrayBuffer, uncomment the COOP/COEP block
 in `public/_headers`.

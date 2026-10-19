@@ -220,19 +220,19 @@ class MissingSentinelsTests(unittest.TestCase):
         return run_node(script, {"route": route, "text": text, "sentinels": sentinels})
 
     def test_reports_missing_heading_for_route_in_map(self):
-        sentinels = {"/profile/": ["Insiculous Pong — 8 unlocked", "Missing Heading"]}
-        sample = '- heading "Insiculous Pong — 8 unlocked" [level=3]'
+        sentinels = {"/profile/": ["Tong — 8 unlocked", "Missing Heading"]}
+        sample = '- heading "Tong — 8 unlocked" [level=3]'
         missing = self.check("/profile/", sample, sentinels)
         self.assertEqual(missing, ["Missing Heading"])
 
     def test_reports_nothing_when_all_headings_present(self):
-        sentinels = {"/profile/": ["Insiculous Pong — 8 unlocked"]}
-        sample = '- heading "Insiculous Pong — 8 unlocked" [level=3]'
+        sentinels = {"/profile/": ["Tong — 8 unlocked"]}
+        sample = '- heading "Tong — 8 unlocked" [level=3]'
         missing = self.check("/profile/", sample, sentinels)
         self.assertEqual(missing, [])
 
     def test_reports_nothing_for_route_not_in_map(self):
-        sentinels = {"/profile/": ["Insiculous Pong — 8 unlocked"]}
+        sentinels = {"/profile/": ["Tong — 8 unlocked"]}
         sample = '- heading "Something Else" [level=1]'
         missing = self.check("/other/", sample, sentinels)
         self.assertEqual(missing, [])

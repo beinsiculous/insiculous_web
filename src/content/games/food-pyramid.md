@@ -1,8 +1,9 @@
 ---
-title: 'Insiculous Breakout'
+title: 'The Food Pyramid'
+formerSlug: 'breakout'
 blurb: 'A tong that bites, Deion as the ball, and six tiers of food bricks on the kitchen counter.'
 status: 'playable'
-wasm: '/games/breakout/v4/game.js'
+wasm: '/games/food-pyramid/v5/game.js'
 editor: '/playground/breakout/v4/game.js'
 screenshots: ['/images/food-pyramid-2026-09.png']
 order: 2
