@@ -81,8 +81,9 @@ const game = post.data.game ? await getEntry(post.data.game) : undefined;
 
   /* A bare URL in a post renders as a link whose text is the URL, one unbreakable token; on a
      phone it would push the line past the viewport, as a file name in `code` would without
-     global.css's same rule. */
-  article a {
+     global.css's same rule. The links come from the rendered Markdown, outside this page's style
+     scope, so the selector is global. */
+  article :global(a) {
     overflow-wrap: anywhere;
   }
 
