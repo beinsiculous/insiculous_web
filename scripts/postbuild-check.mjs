@@ -6,7 +6,7 @@
 //    generated /games/<slug>/ page in dist/.
 // 2. Cloudflare Pages rejects any single asset over 25 MiB. Catch oversized
 //    files (usually .wasm) locally instead of at deploy time.
-// 3. Every `wasm`/`capsule`/`screenshots` path referenced in games frontmatter must
+// 3. Every `wasm`/`capsule`/`namePlate`/`screenshots` path referenced in games frontmatter must
 //    exist as a file in dist/ — a typo'd path should fail the build, not
 //    surface when a visitor hits Play.
 // 4. Static accessibility checks on every built page: <html lang>, exactly one <h1>, alt on
@@ -110,8 +110,10 @@ if (existsSync(DIST) && existsSync(CONTENT_GAMES)) {
     const wasm = frontmatter.match(/^wasm:\s*['"]([^'"]+)['"]/m);
     if (wasm) refs.push(wasm[1]);
 
-    const capsule = frontmatter.match(/^capsule:\s*['"]([^'"]+)['"]/m);
-    if (capsule) refs.push(capsule[1]);
+    for (const field of ['capsule', 'namePlate']) {
+      const image = frontmatter.match(new RegExp(`^${field}:\\s*['"]([^'"]+)['"]`, 'm'));
+      if (image) refs.push(image[1]);
+    }
 
     const formerSlug = frontmatter.match(/^formerSlug:\s*['"]?([a-z0-9-]+)['"]?/m);
     if (formerSlug) {

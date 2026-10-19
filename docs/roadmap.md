@@ -101,8 +101,8 @@ What that means for the items this file used to number 1–9:
   unlocked). `/games/` and `/profile/` stay unlocked-only, displaying real names from the
   manifests instead of prettified ids. `/fortknight/achievements/` narrows to the active
   profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` shows
-  the games as a grid in play order — one square tile per game, its capsule art and its name, the
-  whole tile one link to the game’s play page; the “edit on the playground” button is on the play
+  the games as a grid in play order — one tile per game, its name plate, drawn in its title’s lettering, over
+  its capsule art, the whole tile one link to the game’s play page; the “edit on the playground” button is on the play
   page of a game whose rules are scripts on the playground (`playgroundProject` in its frontmatter;
   Tong today) — and carries a game-achievements board under it; `/profile/`’s panel
   shows all three types in a scroll box, keyboard-reachable. A visitor with achievements and no profile is offered one — the

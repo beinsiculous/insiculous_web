@@ -42,6 +42,10 @@ const games = defineCollection({
       // the build here at the schema; postbuild-check.mjs check 3 resolves the path in dist/, so a
       // typo fails too.
       capsule: z.string().startsWith('/'),
+      // The game's name as drawn lettering, 256 by 64 and transparent, synced beside the capsule and
+      // hung above it on the shelf, because the titles' lettering is art, not a font. Required for
+      // the same reason capsule is.
+      namePlate: z.string().startsWith('/'),
       order: z.number().default(0),
     })
     .refine((game) => game.status !== 'playable' || game.wasm !== undefined, {

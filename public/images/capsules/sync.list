@@ -1,6 +1,7 @@
-# The six capsule tiles the /games/ shelf shows, copied from deion_assets by its
-# scripts/sync_sprites.py — the only way art enters this folder. Run it from the
-# working-set root, because the site has no deion_assets symlink:
+# The six capsule tiles the /games/ shelf shows and their six name plates, copied
+# from deion_assets by its scripts/sync_sprites.py — the only way art enters this
+# folder. Run it from the working-set root, because the site has no deion_assets
+# symlink:
 #
 #     python3 deion_assets/scripts/sync_sprites.py --list insiculous_web/public/images/capsules/sync.list
 #
@@ -13,10 +14,16 @@
 # files. The .sheet.ron sidecars beside the PNGs are the sync's contract; the site
 # never reads them. The quarantined `ai_` prefix stays on the copies.
 #
-# deion_assets bf294bdf638a01a7b53b1423620239371b8e3532
+# deion_assets a1ff3631b724b8bcaf7ceca4d2381e582b8a1076
 ai/capsules/tong/ai_tong_capsule_256x256.png
 ai/capsules/food_pyramid/ai_food_pyramid_capsule_256x256.png
 ai/capsules/toast_busters/ai_toast_busters_capsule_256x256.png
 ai/capsules/bratdog/ai_bratdog_capsule_256x256.png
 ai/capsules/meatieroids/ai_meatieroids_capsule_256x256.png
 ai/capsules/chicken_coop/ai_chicken_coop_capsule_256x256.png
+ai/capsules/tong/ai_tong_name_256x64.png
+ai/capsules/food_pyramid/ai_food_pyramid_name_256x64.png
+ai/capsules/toast_busters/ai_toast_busters_name_256x64.png
+ai/capsules/bratdog/ai_bratdog_name_256x64.png
+ai/capsules/meatieroids/ai_meatieroids_name_256x64.png
+ai/capsules/chicken_coop/ai_chicken_coop_name_256x64.png

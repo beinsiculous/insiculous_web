@@ -7,6 +7,7 @@ wasm: '/games/bratdog/v6/game.js'
 editor: '/playground/snake/v5/game.js'
 screenshots: ['/images/bratdog-2026-09.png']
 capsule: '/images/capsules/ai_bratdog_capsule_256x256.png'
+namePlate: '/images/capsules/ai_bratdog_name_256x64.png'
 order: 4
 ---
 

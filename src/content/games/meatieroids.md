@@ -7,6 +7,7 @@ wasm: '/games/meatieroids/v5/game.js'
 editor: '/playground/asteroids/v4/game.js'
 screenshots: ['/images/meatieroids-2026-10.png']
 capsule: '/images/capsules/ai_meatieroids_capsule_256x256.png'
+namePlate: '/images/capsules/ai_meatieroids_name_256x64.png'
 order: 5
 ---
 

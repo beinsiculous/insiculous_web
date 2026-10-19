@@ -9,6 +9,7 @@ width: 720
 height: 768
 screenshots: ['/images/chicken-coop-2026-09.png']
 capsule: '/images/capsules/ai_chicken_coop_capsule_256x256.png'
+namePlate: '/images/capsules/ai_chicken_coop_name_256x64.png'
 order: 6
 ---
 

@@ -1,9 +1,14 @@
 ---
 /**
- * One tile of the /games/ shelf: the game's capsule art and its name, the whole tile one link to the
- * game's play page. One link, because a second link inside the tile would split the accessible name
- * and the tap target — so the "edit on the playground" button lives on the play page instead. The
- * art's alt is empty: the name under it is the link's text, announced once.
+ * One tile of the /games/ shelf: the game's name plate over its capsule art, the whole tile one link
+ * to the game's play page. One link, because a second link inside the tile would split the accessible
+ * name and the tap target — so the "edit on the playground" button lives on the play page instead.
+ *
+ * The name is an image because it is shown in its title screen's lettering, and that lettering is
+ * drawn pixel art, not a font: a logotype is the one case WCAG 1.4.5 allows an image of text. The
+ * trade is that the plate does not grow with the visitor's text size. The plate's alt is the name: it
+ * is the link's one accessible name, announced once, and when the plate fails to load or images are
+ * off, the browser renders that alt as the visible name in the plate's place. The art's alt is empty.
  */
 import type { CollectionEntry } from 'astro:content';
 
@@ -16,8 +21,8 @@ const { game } = Astro.props;
 
 <li class="tile">
   <a href={`/games/${game.id}/`}>
-    <img src={game.data.capsule} alt="" width="256" height="256" decoding="async" />
-    <span class="name">{game.data.title}</span>
+    <img class="plate" src={game.data.namePlate} alt={game.data.title} width="256" height="64" decoding="async" />
+    <img class="art" src={game.data.capsule} alt="" width="256" height="256" decoding="async" />
   </a>
 </li>
 
@@ -26,23 +31,21 @@ const { game } = Astro.props;
     display: block;
   }
 
-  /* 256 CSS px is the art's own size, so a 2× screen doubles each pixel; smoothing would blur them. */
+  /* Both images are drawn at their own size, so a 2× screen doubles each pixel; smoothing would blur them. */
   img {
     display: block;
-    width: 256px;
-    height: 256px;
     image-rendering: pixelated;
   }
 
-  .name {
-    display: block;
-    margin-top: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 1.05rem;
+  .plate {
+    width: 256px;
+    height: 64px;
+    margin-bottom: 0.5rem;
   }
 
-  a:hover .name {
-    color: var(--text-bright);
+  .art {
+    width: 256px;
+    height: 256px;
   }
 
   /* global.css's ring is 2 px; the tile's is 3 px on the whole box, inside the shelf's gutter. */
