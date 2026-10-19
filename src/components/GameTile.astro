@@ -1,0 +1,53 @@
+---
+/**
+ * One tile of the /games/ shelf: the game's capsule art and its name, the whole tile one link to the
+ * game's play page. One link, because a second link inside the tile would split the accessible name
+ * and the tap target — so the "edit on the playground" button lives on the play page instead. The
+ * art's alt is empty: the name under it is the link's text, announced once.
+ */
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  game: CollectionEntry<'games'>;
+}
+
+const { game } = Astro.props;
+---
+
+<li class="tile">
+  <a href={`/games/${game.id}/`}>
+    <img src={game.data.capsule} alt="" width="256" height="256" decoding="async" />
+    <span class="name">{game.data.title}</span>
+  </a>
+</li>
+
+<style>
+  a {
+    display: block;
+  }
+
+  /* 256 CSS px is the art's own size, so a 2× screen doubles each pixel; smoothing would blur them. */
+  img {
+    display: block;
+    width: 256px;
+    height: 256px;
+    image-rendering: pixelated;
+  }
+
+  .name {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+  }
+
+  a:hover .name {
+    color: var(--text-bright);
+  }
+
+  /* global.css's ring is 2 px; the tile's is 3 px on the whole box, inside the shelf's gutter. */
+  a:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>

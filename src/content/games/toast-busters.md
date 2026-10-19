@@ -6,6 +6,7 @@ status: 'playable'
 wasm: '/games/toast-busters/v6/game.js'
 editor: '/playground/invaders/v5/game.js'
 screenshots: ['/images/toast-busters-2026-10.png']
+capsule: '/images/capsules/ai_toast_busters_capsule_256x256.png'
 order: 3
 ---
 

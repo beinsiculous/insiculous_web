@@ -28,7 +28,7 @@ const games = defineCollection({
       editor: z.string().startsWith('/').optional(),
       // Slug of a Web Playground project on /playground/ whose rules are this game's, as scripts
       // (tong's is 'pong', the playground project's own slug). Its presence puts an "edit on the
-      // playground" button on the game's row of /games/; a game whose rules are still compiled in
+      // playground" button on the game's play page; a game whose rules are still compiled in
       // has none. postbuild-check.mjs holds the slug against the bundle's projects.json.
       playgroundProject: z.string().regex(/^[a-z0-9-]+$/).optional(),
       // The slug this entry was published under before it was renamed. Two readers depend on it:
@@ -37,6 +37,11 @@ const games = defineCollection({
       // retired to formerSlug, never dropped.
       formerSlug: z.string().regex(/^[a-z0-9-]+$/).optional(),
       screenshots: z.array(z.string().startsWith('/')).default([]),
+      // The square tile art the /games/ shelf shows for this game, under public/images/capsules/,
+      // synced from deion_assets by that folder's sync.list. Required so a game without one fails
+      // the build here at the schema; postbuild-check.mjs check 3 resolves the path in dist/, so a
+      // typo fails too.
+      capsule: z.string().startsWith('/'),
       order: z.number().default(0),
     })
     .refine((game) => game.status !== 'playable' || game.wasm !== undefined, {

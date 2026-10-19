@@ -141,14 +141,14 @@ RENAMED_WITHOUT_EDITOR = {**RENAMED, "sections": ["games"]}
 BUILT_PAGES = ["games/new-name/index.html", "playground/new-name/index.html"]
 RENAMED_LINES = """# a comment, then a blank line
 
-/games/old-name/ /games/new-name/ 302
-/games/old-name /games/new-name/ 302
-/playground/old-name/ /playground/new-name/ 302
-/playground/old-name /playground/new-name/ 302
+/games/old-name/ /games/new-name/ 301
+/games/old-name /games/new-name/ 301
+/playground/old-name/ /playground/new-name/ 301
+/playground/old-name /playground/new-name/ 301
 """
 
 
-def redirect_problems(text, renamed_games=(RENAMED,), files=BUILT_PAGES, expected_code=302):
+def redirect_problems(text, renamed_games=(RENAMED,), files=BUILT_PAGES, expected_code=301):
     return run_node(REDIRECTS_SCRIPT, {"text": text, "renamedGames": list(renamed_games),
                                        "files": list(files), "expectedCode": expected_code})
 
@@ -160,17 +160,17 @@ class RedirectRule(unittest.TestCase):
         self.assertEqual(redirect_problems(RENAMED_LINES), [])
 
     def test_a_missing_line_is_reported(self):
-        text = RENAMED_LINES.replace("/playground/old-name /playground/new-name/ 302\n", "")
+        text = RENAMED_LINES.replace("/playground/old-name /playground/new-name/ 301\n", "")
         [problem] = redirect_problems(text)
-        self.assertIn('needs the line "/playground/old-name /playground/new-name/ 302"', problem)
+        self.assertIn('needs the line "/playground/old-name /playground/new-name/ 301"', problem)
 
-    def test_a_permanent_code_fails_while_the_expected_code_is_temporary(self):
-        [problem] = redirect_problems(RENAMED_LINES.replace("/games/old-name/ /games/new-name/ 302", "/games/old-name/ /games/new-name/ 301"))
-        self.assertIn('should read "/games/old-name/ /games/new-name/ 302"', problem)
+    def test_a_temporary_code_fails_while_the_expected_code_is_permanent(self):
+        [problem] = redirect_problems(RENAMED_LINES.replace("/games/old-name/ /games/new-name/ 301", "/games/old-name/ /games/new-name/ 302"))
+        self.assertIn('should read "/games/old-name/ /games/new-name/ 301"', problem)
 
     def test_a_line_without_a_code_fails_for_a_renamed_game(self):
-        [problem] = redirect_problems(RENAMED_LINES.replace("/games/old-name /games/new-name/ 302", "/games/old-name /games/new-name/"))
-        self.assertIn('should read "/games/old-name /games/new-name/ 302"', problem)
+        [problem] = redirect_problems(RENAMED_LINES.replace("/games/old-name /games/new-name/ 301", "/games/old-name /games/new-name/"))
+        self.assertIn('should read "/games/old-name /games/new-name/ 301"', problem)
 
     def test_a_destination_with_no_page_in_dist_is_reported(self):
         problems = redirect_problems(RENAMED_LINES, files=["games/new-name/index.html"])
@@ -178,17 +178,17 @@ class RedirectRule(unittest.TestCase):
         self.assertTrue(all("has no page or file in dist/" in problem for problem in problems))
 
     def test_a_slashless_destination_resolves_only_as_a_file(self):
-        self.assertEqual(redirect_problems("/old.png /images/new.png 302\n", renamed_games=(),
+        self.assertEqual(redirect_problems("/old.png /images/new.png 301\n", renamed_games=(),
                                            files=["images/new.png"]), [])
-        [problem] = redirect_problems("/old /games/new-name 302\n", renamed_games=())
+        [problem] = redirect_problems("/old /games/new-name 301\n", renamed_games=())
         self.assertIn("has no page or file in dist/", problem)
 
     def test_an_external_destination_cannot_resolve(self):
-        [problem] = redirect_problems("/old https://example.com/ 302\n", renamed_games=())
+        [problem] = redirect_problems("/old https://example.com/ 301\n", renamed_games=())
         self.assertIn("has no page or file in dist/", problem)
 
     def test_a_repeated_source_is_reported(self):
-        [problem] = redirect_problems(RENAMED_LINES + "/games/old-name/ /games/new-name/ 302\n")
+        [problem] = redirect_problems(RENAMED_LINES + "/games/old-name/ /games/new-name/ 301\n")
         self.assertIn("repeats the source /games/old-name/", problem)
 
     def test_a_malformed_line_is_reported(self):
@@ -196,20 +196,20 @@ class RedirectRule(unittest.TestCase):
         self.assertIn("is not", problem)
 
     def test_a_game_without_an_editor_owes_only_its_page_lines(self):
-        page_lines = "/games/old-name/ /games/new-name/ 302\n/games/old-name /games/new-name/ 302\n"
+        page_lines = "/games/old-name/ /games/new-name/ 301\n/games/old-name /games/new-name/ 301\n"
         self.assertEqual(redirect_problems(page_lines, renamed_games=(RENAMED_WITHOUT_EDITOR,),
                                            files=["games/new-name/index.html"]), [])
 
     def test_a_splat_under_the_former_slug_is_reported(self):
-        [problem] = redirect_problems(RENAMED_LINES + "/playground/old-name/* /playground/new-name/ 302\n")
+        [problem] = redirect_problems(RENAMED_LINES + "/playground/old-name/* /playground/new-name/ 301\n")
         self.assertIn("is a splat under the former slug 'old-name'", problem)
-        [problem] = redirect_problems(RENAMED_LINES + "/games/old-name/:version /games/new-name/ 302\n")
+        [problem] = redirect_problems(RENAMED_LINES + "/games/old-name/:version /games/new-name/ 301\n")
         self.assertIn("is a splat under the former slug 'old-name'", problem)
-        [problem] = redirect_problems(RENAMED_LINES + "/playground/old-name* /playground/new-name/ 302\n")
+        [problem] = redirect_problems(RENAMED_LINES + "/playground/old-name* /playground/new-name/ 301\n")
         self.assertIn("is a splat under the former slug 'old-name'", problem)
 
     def test_a_splat_under_a_slug_that_merely_shares_the_prefix_is_not_the_former_slug(self):
-        self.assertEqual(redirect_problems(RENAMED_LINES + "/games/old-name-two/* /games/new-name/ 302\n"), [])
+        self.assertEqual(redirect_problems(RENAMED_LINES + "/games/old-name-two/* /games/new-name/ 301\n"), [])
 
     def test_a_file_with_no_renamed_games_and_no_rules_passes(self):
         self.assertEqual(redirect_problems("# nothing renamed yet\n", renamed_games=()), [])

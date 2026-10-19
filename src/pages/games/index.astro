@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import GameRow from '../../components/GameRow.astro';
+import GameTile from '../../components/GameTile.astro';
 import { readGameCatalogs } from '../../lib/games-catalog-files.js';
 
 const games = (await getCollection('games')).sort(
@@ -27,8 +27,10 @@ const catalogs = readGameCatalogs(games);
     app stores rather than here.
   </p>
 
-  <ol class="games">
-    {games.map((game) => <GameRow game={game} />)}
+  {/* role="list" is explicit because WebKit drops an <ol>'s list semantics once list-style is none
+      outside a nav, and VoiceOver would then read six links with no group and no count. */}
+  <ol class="shelf" role="list">
+    {games.map((game) => <GameTile game={game} />)}
   </ol>
 
   <section class="achievements">
@@ -77,11 +79,19 @@ const catalogs = readGameCatalogs(games);
     padding-left: 1rem;
   }
 
-  /* A numbered list in play order — the numbers are the challenge's own (tong.md opens "Game 1 of
-     the 20 Games Challenge"). Rows are divided by rules, not boxed; the page scrolls, not the list. */
-  .games {
+  /* A grid of tiles in play order, each tile one link: a whole-tile link is one name and one tap
+     target, where a row split them across buttons. The <ol> keeps the play order for assistive
+     tech; its default padding goes because it would push a 256 px tile past the 288 px a 320 px
+     phone leaves inside its gutters. The page scrolls and the grid never does — no height, no
+     overflow — because a grid that scrolled inside the page once hid tiles. */
+  .shelf {
+    padding: 0;
     margin: 0 0 2rem;
-    padding-left: 1.75rem;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 256px);
+    justify-content: center;
+    gap: 1.5rem;
   }
 
   .achievements {

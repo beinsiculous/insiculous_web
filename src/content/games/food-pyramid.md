@@ -6,6 +6,7 @@ status: 'playable'
 wasm: '/games/food-pyramid/v5/game.js'
 editor: '/playground/breakout/v4/game.js'
 screenshots: ['/images/food-pyramid-2026-09.png']
+capsule: '/images/capsules/ai_food_pyramid_capsule_256x256.png'
 order: 2
 ---
 

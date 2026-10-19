@@ -206,10 +206,11 @@ types locked **and** unlocked with descriptions, unlocked sorting above locked w
 each game group displaying its full manifest (hidden entries masked until unlocked). `/games/` and
 `/profile/` stay unlocked-only, using the manifests’ names instead of prettified ids;
 `/fortknight/achievements/` narrows to the active profile’s unlocked fortnight achievements, and sits
-in the face nav as the final entry. `/games/` lists the games as a numbered list in play
-order — each row a play button and, for a game whose rules are scripts on the playground
-(`playgroundProject` in its frontmatter; Tong today), an “edit on the playground” button — and
-carries a game-achievements board under it; `/profile/`’s achievements panel shows all three types
+in the face nav as the final entry. `/games/` shows the games as a grid in play order — one
+square tile per game, its capsule art and its name, the whole tile one link to the game’s play
+page; the “edit on the playground” button is on the play page of a game whose rules are scripts on
+the playground (`playgroundProject` in its frontmatter; Tong today) — and carries a
+game-achievements board under it; `/profile/`’s achievements panel shows all three types
 in a scroll box, keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
 achievements happen: `/` and `/fortknight/` carry Create-a-profile buttons, and the first time an
 achievement exists with no profile saved, the naming dialog (`askProfileName` in

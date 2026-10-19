@@ -7,6 +7,7 @@ wasm: '/games/tong/v6/game.js'
 editor: '/playground/pong/v5/game.js'
 playgroundProject: 'pong'
 screenshots: ['/images/tong-rally-2026-09.png']
+capsule: '/images/capsules/ai_tong_capsule_256x256.png'
 order: 1
 ---
 

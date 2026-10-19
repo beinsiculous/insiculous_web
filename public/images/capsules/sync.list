@@ -1,0 +1,22 @@
+# The six capsule tiles the /games/ shelf shows, copied from deion_assets by its
+# scripts/sync_sprites.py — the only way art enters this folder. Run it from the
+# working-set root, because the site has no deion_assets symlink:
+#
+#     python3 deion_assets/scripts/sync_sprites.py --list insiculous_web/public/images/capsules/sync.list
+#
+# and `--check` to prove the copies still match the pinned commit below (the
+# working set's scripts/check-sprite-sync.sh runs that over every list, this one
+# after the games').
+#
+# The sync owns this whole directory: its non-check path deletes every file here
+# that this list does not name, so nothing else may be committed beside the synced
+# files. The .sheet.ron sidecars beside the PNGs are the sync's contract; the site
+# never reads them. The quarantined `ai_` prefix stays on the copies.
+#
+# deion_assets bf294bdf638a01a7b53b1423620239371b8e3532
+ai/capsules/tong/ai_tong_capsule_256x256.png
+ai/capsules/food_pyramid/ai_food_pyramid_capsule_256x256.png
+ai/capsules/toast_busters/ai_toast_busters_capsule_256x256.png
+ai/capsules/bratdog/ai_bratdog_capsule_256x256.png
+ai/capsules/meatieroids/ai_meatieroids_capsule_256x256.png
+ai/capsules/chicken_coop/ai_chicken_coop_capsule_256x256.png

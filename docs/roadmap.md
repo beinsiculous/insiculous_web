@@ -100,10 +100,11 @@ What that means for the items this file used to number 1–9:
   manifest from `achievements.json` exported by the native game (hidden entries masked until
   unlocked). `/games/` and `/profile/` stay unlocked-only, displaying real names from the
   manifests instead of prettified ids. `/fortknight/achievements/` narrows to the active
-  profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` lists
-  the games as a numbered list in play order — each row a play button and, for a game whose rules
-  are scripts on the playground (`playgroundProject` in its frontmatter; Tong today), an “edit on
-  the playground” button — and carries a game-achievements board under it; `/profile/`’s panel
+  profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` shows
+  the games as a grid in play order — one square tile per game, its capsule art and its name, the
+  whole tile one link to the game’s play page; the “edit on the playground” button is on the play
+  page of a game whose rules are scripts on the playground (`playgroundProject` in its frontmatter;
+  Tong today) — and carries a game-achievements board under it; `/profile/`’s panel
   shows all three types in a scroll box, keyboard-reachable. A visitor with achievements and no profile is offered one — the
   naming dialog opens once ever, and `/` and `/fortknight/` carry Create-a-profile buttons.
 - **The `sun-b` starts for `ostara` and `fimbulsumar`** in `data/seasons.json` disagree with Focus

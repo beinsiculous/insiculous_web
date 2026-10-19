@@ -140,8 +140,8 @@ Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
   stay, immutable, beside the new slug's. Its entry (renamed to `<new>.md`) sets
   `formerSlug: '<old>'`, and `public/_redirects` carries its lines —
   `/games/<old>/` and `/games/<old>`, plus `/playground/<old>/` and `/playground/<old>`
-  when the entry has an `editor` bundle — each to the new page with the temporary
-  code. Check 9 holds them: a missing line, the wrong code, a destination with no page
+  when the entry has an `editor` bundle — each to the new page with check 9's one
+  code, 301 now that the first renames have stuck. Check 9 holds them: a missing line, the wrong code, a destination with no page
   in `dist/`, or a splat under the old slug fails the build. No splat, because the
   editor bundle under `/playground/<old>/` is still what the new playground page
   loads.
@@ -165,7 +165,7 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `docs/WEB_PLAYGROUND.md` § The game bundles.
 - A games entry’s `playgroundProject:` names a bundled *data* project (`assets/projects.json`)
   whose rules are that game’s, as scripts; it puts an “edit on the playground” button on the
-  game’s row of `/games/`, and `postbuild-check.mjs` fails the build if the slug is not in the
+  game’s play page, and `postbuild-check.mjs` fails the build if the slug is not in the
   synced bundle.
 - Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
   lists bundled project manifests, and each project’s data lives under

@@ -6,7 +6,7 @@
 //    generated /games/<slug>/ page in dist/.
 // 2. Cloudflare Pages rejects any single asset over 25 MiB. Catch oversized
 //    files (usually .wasm) locally instead of at deploy time.
-// 3. Every `wasm`/`screenshots` path referenced in games frontmatter must
+// 3. Every `wasm`/`capsule`/`screenshots` path referenced in games frontmatter must
 //    exist as a file in dist/ — a typo'd path should fail the build, not
 //    surface when a visitor hits Play.
 // 4. Static accessibility checks on every built page: <html lang>, exactly one <h1>, alt on
@@ -48,10 +48,11 @@ const CONTENT_GAMES = join(ROOT, 'src', 'content', 'games');
 // The default bundle PlaygroundEmbed.astro loads (`/playground/v2/game.js`): bump both together.
 const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v2', 'assets', 'projects.json');
 const REDIRECTS = join(DIST, '_redirects');
-// Every renamed game's redirect lines carry this code. Temporary while a rename may still be
-// rolled back; flip it to 301 together with the lines in public/_redirects once the rename has
-// lived on main unreverted.
-const REDIRECT_CODE = 302;
+// Every renamed game's redirect lines carry this code. Permanent, because the renames have lived
+// on main unreverted; from here a rollback of a rename is forward-fix only, since a browser that
+// cached a 301 keeps following it and no purge reaches it. Change it only together with the lines
+// in public/_redirects.
+const REDIRECT_CODE = 301;
 
 const SIZE_LIMIT = 25 * 1024 * 1024; // Cloudflare Pages per-file limit
 const errors = [];
@@ -108,6 +109,9 @@ if (existsSync(DIST) && existsSync(CONTENT_GAMES)) {
 
     const wasm = frontmatter.match(/^wasm:\s*['"]([^'"]+)['"]/m);
     if (wasm) refs.push(wasm[1]);
+
+    const capsule = frontmatter.match(/^capsule:\s*['"]([^'"]+)['"]/m);
+    if (capsule) refs.push(capsule[1]);
 
     const formerSlug = frontmatter.match(/^formerSlug:\s*['"]?([a-z0-9-]+)['"]?/m);
     if (formerSlug) {
