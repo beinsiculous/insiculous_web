@@ -68,16 +68,61 @@ def category_label(keep, category_key):
     return category_key[:1].upper() + category_key[1:] if category_key else ""
 
 
-def task_groups_for(keep, day_key, block_key):
+def rows_for_season(rows, season_key):
+    """Twin of rowsForSeason: the rows tagged with season_key and the rows tagged with nothing; every row
+    when there is no season key."""
+    rows = [row for row in (rows or []) if isinstance(row, dict)]
+    if season_key is None:
+        return rows
+    return [row for row in rows if row.get("season") is None or row.get("season") == season_key]
+
+
+def timed_blocks(keep, season_key):
+    """Twin of timedBlocks: blocks with start, end and wrapsMidnight resolved from the season's blockStarts."""
+    season = season_by_key(keep, season_key)
+    block_starts = (season or {}).get("blockStarts")
+    blocks = keep.get("blocks") or []
+    if not block_starts or not isinstance(block_starts, dict):
+        return [{
+            "key": block["key"],
+            "label": block["label"],
+            "start": block.get("start"),
+            "end": block.get("end"),
+            "wrapsMidnight": default_to(block.get("wrapsMidnight"), False),
+            "mealPrimary": block.get("mealPrimary"),
+            "mealSecondary": block.get("mealSecondary"),
+            "sourceRow": block.get("sourceRow"),
+        } for block in blocks]
+    result = []
+    for index, block in enumerate(blocks):
+        next_block = blocks[(index + 1) % len(blocks)] if blocks else None
+        start = default_to(block_starts.get(block["key"]), block.get("start"))
+        end = default_to(block_starts.get(next_block["key"]), next_block.get("start")) if next_block else None
+        wraps_midnight = (end <= start) if (start and end) else False
+        result.append({
+            "key": block["key"],
+            "label": block["label"],
+            "start": start,
+            "end": end,
+            "wrapsMidnight": wraps_midnight,
+            "mealPrimary": block.get("mealPrimary"),
+            "mealSecondary": block.get("mealSecondary"),
+            "sourceRow": block.get("sourceRow"),
+        })
+    return result
+
+
+def task_groups_for(keep, day_key, block_key, season_key=None):
     """Tasks for a day key and block, in slab order, grouped by Description with first-appearance order."""
     groups = []
-    for task in keep["tasks"]:
-        if task["dayKey"] != day_key or task["block"] != block_key:
+    for task in keep.get("tasks") or []:
+        if task.get("dayKey") != day_key or task.get("block") != block_key:
             continue
-        group = next((candidate for candidate in groups if candidate["group"] == task["group"]), None)
+        group = next((candidate for candidate in groups if candidate["group"] == task.get("group")), None)
         if group is None:
-            group = {"group": task["group"], "category": task["category"], "tasks": []}
+            group = {"group": task.get("group"), "category": task.get("category"), "tasks": []}
             groups.append(group)
+        matching_servings = rows_for_season(task.get("serves"), season_key)
         group["tasks"].append({
             "id": task["id"],
             "step": task["step"],
@@ -87,32 +132,38 @@ def task_groups_for(keep, day_key, block_key):
                 "dayKey": (serving or {}).get("dayKey"),
                 "label": day_label(keep, (serving or {}).get("dayKey")),
                 "daysAfter": default_to((serving or {}).get("daysAfter"), 0),
-            } for serving in default_to(task.get("serves"), [])],
+            } for serving in matching_servings],
         })
     return groups
 
 
 def appointments_for(keep, day_key, block_key):
-    matching = [appointment for appointment in keep["appointments"]
-                if appointment["dayKey"] == day_key and appointment["block"] == block_key]
+    matching = [appointment for appointment in keep.get("appointments") or []
+                if appointment.get("dayKey") == day_key and appointment.get("block") == block_key]
     return sorted(matching, key=lambda appointment: (appointment["timing"]["estimatedStart"], appointment["title"]))
 
 
-def meals_for_day_key(keep, day_key):
-    for meals in keep["meals"]:
-        if meals["dayKey"] == day_key:
+def meals_for_day_key(keep, day_key, season_key=None):
+    for meals in rows_for_season(keep.get("meals"), season_key):
+        if meals.get("dayKey") == day_key:
             return meals
     return None
 
 
-def meal_for_block(keep, day_key, block):
-    field = MEAL_FIELD_BY_NAME.get(block["mealPrimary"].lower())
-    if field is None:
+def meal_name_for_block(block):
+    """Twin of mealNameForBlock: the block's meal option when the Meals sheet has a column for it, else None."""
+    primary = block.get("mealPrimary")
+    return primary if primary and MEAL_FIELD_BY_NAME.get(primary.lower()) else None
+
+
+def meal_for_block(keep, day_key, block, season_key=None):
+    name = meal_name_for_block(block)
+    if name is None:
         return None
-    meals = meals_for_day_key(keep, day_key)
+    meals = meals_for_day_key(keep, day_key, season_key)
     if meals is None:
         return None
-    return {"name": block["mealPrimary"], "dish": meals[field]}
+    return {"name": name, "dish": meals.get(MEAL_FIELD_BY_NAME[name.lower()])}
 
 
 def task_ids_for_day_key(keep, day_key):
@@ -195,7 +246,8 @@ def resolve_day(keep, iso_date, wall_time=None):
         }
 
     day = day_by_key(keep, entry["dayKey"])
-    current_block_key = block_key_for_time(keep["blocks"], wall_time) if wall_time else None
+    blocks = timed_blocks(keep, entry["season"])
+    current_block_key = block_key_for_time(blocks, wall_time) if wall_time else None
 
     return {
         "status": "day",
@@ -212,7 +264,7 @@ def resolve_day(keep, iso_date, wall_time=None):
             "mainFocusLabel": day["mainFocusLabel"],
         },
         "currentBlock": current_block_key,
-        "meals": meals_for_day_key(keep, entry["dayKey"]),
+        "meals": meals_for_day_key(keep, entry["dayKey"], entry["season"]),
         "blocks": [{
             "key": block["key"],
             "label": block["label"],
@@ -221,10 +273,10 @@ def resolve_day(keep, iso_date, wall_time=None):
             "wrapsMidnight": block["wrapsMidnight"],
             "focus": day["blockFocus"].get(block["key"]),
             "isCurrent": block["key"] == current_block_key,
-            "meal": meal_for_block(keep, entry["dayKey"], block),
+            "meal": meal_for_block(keep, entry["dayKey"], block, entry["season"]),
             "appointments": appointments_for(keep, entry["dayKey"], block["key"]),
-            "taskGroups": task_groups_for(keep, entry["dayKey"], block["key"]),
-        } for block in keep["blocks"]],
+            "taskGroups": task_groups_for(keep, entry["dayKey"], block["key"], entry["season"]),
+        } for block in blocks],
     }
 
 
@@ -233,22 +285,42 @@ def day_label(keep, day_key):
     return f"{day['weekday']} {day['variant']}" if day else day_key
 
 
-def resolve_menu(keep):
+def resolve_menu(keep, season_key=None):
     """Twin of resolveMenu: the fortnight menu grouped by slot."""
-    return [{
-        "slot": slot,
-        "label": label,
-        "entries": [{
-            "mealKey": entry["mealKey"],
-            "menu": entry["menu"],
-            "cookDay": entry["cookDay"],
-            "cookDayLabel": day_label(keep, entry["cookDay"]),
-            "leftoversDay": entry["leftoversDay"],
-            "leftoversDayLabel": day_label(keep, entry["leftoversDay"]) if entry["leftoversDay"] else None,
-            "cookExtra": entry["cookExtra"],
-            "cookExtraNote": entry["cookExtraNote"],
-        } for entry in keep["menu"] if entry["slot"] == slot],
-    } for slot, label in (("brunch", "Brunch"), ("snack", "Snack"), ("dinner", "Dinner"))]
+    seasonal_menu = rows_for_season(keep.get("menu"), season_key)
+
+    slots = (("brunch", "Brunch"), ("snack", "Snack"), ("dinner", "Dinner"))
+    result = []
+    for slot, label in slots:
+        entries = []
+        for entry in seasonal_menu:
+            if entry.get("slot") != slot:
+                continue
+            item = {
+                "mealKey": entry["mealKey"],
+                "menu": entry["menu"],
+                "cookDay": entry["cookDay"],
+                "cookDayLabel": day_label(keep, entry["cookDay"]),
+                "leftoversDay": entry.get("leftoversDay"),
+                "leftoversDayLabel": day_label(keep, entry["leftoversDay"]) if entry.get("leftoversDay") else None,
+                "cookExtra": entry["cookExtra"],
+                "cookExtraNote": entry.get("cookExtraNote"),
+            }
+            if "prepDay" in entry:
+                item["prepDay"] = entry["prepDay"]
+                item["prepDayLabel"] = day_label(keep, entry["prepDay"]) if entry["prepDay"] else None
+            if "prepBlock" in entry:
+                item["prepBlock"] = entry["prepBlock"]
+            if "foodGroups" in entry:
+                item["foodGroups"] = entry["foodGroups"]
+            if "recipeLink" in entry:
+                item["recipeLink"] = entry["recipeLink"]
+            if "ingredients" in entry:
+                item["ingredients"] = [{key: value for key, value in (ingredient or {}).items() if key != "sourceRow"}
+                                       for ingredient in (entry["ingredients"] or [])]
+            entries.append(item)
+        result.append({"slot": slot, "label": label, "entries": entries})
+    return result
 
 
 PRODUCE_RANKS = ["hero", "secondary", "tertiary", "quaternary"]
@@ -276,17 +348,27 @@ def resolve_seasons(keep, iso_date=None):
     """Twin of resolveSeasons: the five seasons, with the one containing iso_date marked current."""
     entry = calendar_entry_for_date(keep, iso_date) if iso_date else None
     current_key = entry["season"] if entry else None
-    return [{
-        "key": season["key"],
-        "name": season["name"],
-        "isCurrent": season["key"] == current_key,
-        "gregorianRange": season.get("gregorianRange"),
-        "startDescription": season.get("startDescription"),
-        "safeOutsidePercent": season.get("safeOutsidePercent"),
-        "focus": [{"key": key, "label": category_label(keep, key)} for key in default_to(season.get("focus"), [])],
-        "produce": produce_lists(season),
-        "mealIdeas": meal_idea_lists(season),
-    } for season in keep["seasons"]]
+    result = []
+    for season in keep.get("seasons") or []:
+        item = {
+            "key": season["key"],
+            "name": season["name"],
+            "isCurrent": season["key"] == current_key,
+            "gregorianRange": season.get("gregorianRange"),
+            "startDescription": season.get("startDescription"),
+            "safeOutsidePercent": season.get("safeOutsidePercent"),
+            "focus": [{"key": key, "label": category_label(keep, key)} for key in default_to(season.get("focus"), [])],
+            "produce": produce_lists(season),
+            "mealIdeas": meal_idea_lists(season),
+        }
+        if "blockStarts" in season:
+            item["blockStarts"] = season["blockStarts"]
+        if "themes" in season:
+            item["themes"] = season["themes"]
+        if "heroes" in season:
+            item["heroes"] = season["heroes"]
+        result.append(item)
+    return result
 
 
 def default_to(value, fallback):

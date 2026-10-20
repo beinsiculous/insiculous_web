@@ -23,7 +23,7 @@ import helpers  # noqa: F401 — puts scripts/ on the path so fk_core imports, w
 from fk_core.keys import CATEGORY_KEY_ORDER, CATEGORY_LABELS, DAY_KEY_ORDER, slugify
 
 WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-BLOCK_KEYS = ["early", "midday", "late", "too-dark"]
+BLOCK_KEYS = ["too-early", "early", "midday", "late", "too-dark"]
 
 # The wheel, in order. The first segment of the calendar is deep winter's tail — the previous
 # year's run of the same season, which is how Hogmanay sits either side of New Year.
@@ -85,7 +85,7 @@ def _task_id(day_key, block_key, step):
     return f"{day_key}-{block_key}-{slugify(step)}"
 
 
-def _blocks():
+def _blocks_v6():
     rows = [
         ("early", "Early", "08:00", "11:00", "Breakfast", "Brunch"),
         ("midday", "Midday", "11:00", "15:00", "Brunch", "Snack"),
@@ -99,17 +99,44 @@ def _blocks():
     } for index, (key, label, start, end, primary, secondary) in enumerate(rows)]
 
 
+def _blocks():
+    # Five blocks in v7, no start, end or wrapsMidnight
+    rows = [
+        ("too-early", "Too Early", None, "Breakfast"),
+        ("early", "Early", "Breakfast", "Brunch"),
+        ("midday", "Midday", "Brunch", "Snack"),
+        ("late", "Late", "Snack", "Dinner"),
+        ("too-dark", "Too Dark", "Dinner", None),
+    ]
+    return [{
+        "key": key, "label": label, "mealPrimary": primary, "mealSecondary": secondary,
+        "sourceRow": index + 2,
+    } for index, (key, label, primary, secondary) in enumerate(rows)]
+
+
 def _days():
     days = []
     for index, day_key in enumerate(DAY_KEY_ORDER, start=1):
         weekday, variant = _day_key_parts(day_key)
         main_focus = "flexible" if index == 8 else CATEGORY_KEY_ORDER[(index - 1) % 7]
         main_focus_label = "FLEXIBLE" if main_focus == "flexible" else CATEGORY_LABELS[main_focus].upper()
-        block_focus = {"early": "Example prep", "midday": main_focus_label.title(), "late": "Example wind-down"}
+        block_focus = {
+            "too-early": None,
+            "early": "Example prep",
+            "midday": main_focus_label.title(),
+            "late": "Example wind-down",
+            "too-dark": None,
+        }
         if index == 3:
             block_focus["late"] = None
         if index == 8:
-            block_focus = {"early": "Flexible", "midday": "Flexible", "late": "Flexible"}
+            block_focus = {
+                "too-early": None,
+                "early": "Flexible",
+                "midday": "Flexible",
+                "late": "Flexible",
+                "too-dark": None,
+            }
         days.append({
             "index": index, "dayKey": day_key, "weekday": weekday, "variant": variant,
             "mainFocus": main_focus, "mainFocusLabel": main_focus_label,
@@ -122,6 +149,15 @@ def _seasons():
     seasons = []
     for index, (key, name) in enumerate(SEASONS):
         foci = [CATEGORY_KEY_ORDER[(index + offset) % 7] for offset in range(4)]
+        # Slightly different block starts per season to test season clocks
+        early_start = f"0{7 + (index % 2)}:30"
+        block_starts = {
+            "too-early": "05:30",
+            "early": early_start,
+            "midday": "11:00",
+            "late": "15:00",
+            "too-dark": "18:00",
+        }
         seasons.append({
             "key": key, "name": name,
             "gregorianRange": f"Example range {index + 1}",
@@ -131,6 +167,17 @@ def _seasons():
             "startDayKey": "sun-a",
             "safeOutsidePercent": 20 * (index + 1),
             "focus": foci,
+            "blockStarts": block_starts,
+            "themes": {
+                "celebratedHeritage": f"Example Heritage {index}",
+                "bibleConcept": f"Example Concept {index}",
+                "other": f"Example Other {index}",
+            },
+            "heroes": {
+                "starch": f"Example Starch {index}",
+                "protein": f"Example Protein {index}",
+                "flavor": f"Example Flavor {index}",
+            },
             "typed": {},
             "produce": {
                 "vegetables": {"hero": f"Example root {index}", "secondary": f"Example leaf {index}",
@@ -176,8 +223,9 @@ def _tasks():
             "id": _task_id(day_key, block_key, step), "group": group, "step": step,
             "dayKey": day_key, "block": block_key, "category": category,
             "serves": [{"role": role, "dayKey": serve_day,
-                        "daysAfter": (day_index[serve_day] - day_index[day_key]) % 14}
-                       for role, serve_day in serves],
+                        "daysAfter": (day_index[serve_day] - day_index[day_key]) % 14,
+                        "season": season}
+                       for role, serve_day, season in serves],
             "sourceRow": len(rows) + 2,
         })
 
@@ -194,9 +242,10 @@ def _tasks():
     # A skip on the fortnight's last day, which must not cross into the next fortnight.
     add("sat-b", "late", "Laundry", "Example fold and put away", "cleaning")
     add("tue-a", "midday", "Open for Appointments", "Example open", "operations")
-    # The one meal-prep task, cooked the next day and eaten again three days on.
+    # Meal-prep task with season-tagged serves
     add("thu-a", "early", "Meal Prep & Store", "Example smoothies", "meals",
-        serves=(("cook", "fri-b"), ("leftovers", "sun-b")))
+        serves=(("cook", "fri-b", "deepwinter"), ("leftovers", "sun-b", "deepwinter"),
+                ("cook", "sat-b", "longlight"), ("leftovers", "mon-a", "longlight")))
     return rows
 
 
@@ -222,6 +271,173 @@ def _appointments():
 
 
 def _menu():
+    # Build menus for two seasons: deepwinter and longlight
+    rows = []
+    for season in ("deepwinter", "longlight"):
+        for slot in ("brunch", "snack", "dinner"):
+            for number in range(1, 8):
+                cook_day = DAY_KEY_ORDER[(number - 1) * 2]
+                leftovers_day = DAY_KEY_ORDER[(number - 1) * 2 + 1]
+                rows.append({
+                    "mealKey": f"{slot.title()}{number}", "slot": slot, "season": season,
+                    "cookDay": cook_day, "leftoversDay": leftovers_day,
+                    "menu": f"Example {season} {slot} {number}", "cookExtra": False, "cookExtraNote": None,
+                    "prepDay": cook_day, "prepBlock": "early",
+                    "foodGroups": {"fruit": 1, "vegetable": 1, "proteinFatOil": 1, "grainStarch": 1, "sugar": 0, "other": 0},
+                    "recipeLink": f"https://example.com/{season}/{slot}{number}",
+                    "ingredients": [
+                        {"ingredient": f"Example {slot} item", "perPerson": 1, "unit": "cup",
+                         "prep": "chop", "prepNotes": None, "cookNotes": None, "type": "produce",
+                         "dish": f"Example {season} {slot} {number}", "sourceRow": 2}
+                    ],
+                    "sourceRow": len(rows) + 3,
+                })
+        by_key = {f"{row['season']}:{row['mealKey']}": row for row in rows}
+        by_key[f"{season}:Brunch1"]["menu"] = "FLEXIBLE"
+        by_key[f"{season}:Dinner4"]["menu"] = "Example dinner OUT"
+        by_key[f"{season}:Dinner2"].update(cookExtra=True, cookExtraNote="Example: the extra becomes tacos")
+        by_key[f"{season}:Snack7"]["leftoversDay"] = None
+        rows.append({
+            "mealKey": "Snack8", "slot": "snack", "season": season, "cookDay": DAY_KEY_ORDER[13], "leftoversDay": None,
+            "menu": f"Example {season} snack 8", "cookExtra": False, "cookExtraNote": None,
+            "prepDay": DAY_KEY_ORDER[13], "prepBlock": "early",
+            "foodGroups": {"fruit": 1, "vegetable": 0, "proteinFatOil": 0, "grainStarch": 0, "sugar": 0, "other": 0},
+            "recipeLink": None,
+            "ingredients": [],
+            "sourceRow": len(rows) + 3,
+        })
+    return rows
+
+
+def _meals(menu):
+    """The resolved per-day view, derived per season with sourceRow: null."""
+    rows = []
+    seasons = sorted({entry["season"] for entry in menu if "season" in entry})
+    if not seasons:
+        for index, day_key in enumerate(DAY_KEY_ORDER):
+            row = {"dayKey": day_key, "sourceRow": index + 2}
+            for slot in ("brunch", "snack", "dinner"):
+                row[slot] = next(entry["menu"] for entry in menu
+                                 if entry["slot"] == slot and day_key in (entry["cookDay"], entry["leftoversDay"]))
+            rows.append(row)
+        return rows
+
+    for season in seasons:
+        for day_key in DAY_KEY_ORDER:
+            row = {"dayKey": day_key, "season": season, "sourceRow": None}
+            for slot in ("brunch", "snack", "dinner"):
+                row[slot] = next(entry["menu"] for entry in menu
+                                 if entry.get("season") == season and entry["slot"] == slot and
+                                 day_key in (entry["cookDay"], entry["leftoversDay"]))
+            rows.append(row)
+    return rows
+
+
+def build_champion_keep():
+    """A fresh, conforming, invented Champion's keep at schemaVersion 7. Every call returns a new object."""
+    menu = _menu()
+    return {
+        "meta": {
+            "sourceSlabs": ["ExampleFortKnightSlab.xlsx", "ExampleFolkKnowledgeSlab.xlsx", "ExampleForkKnifeChristmasSlab.xlsx"],
+            "stones": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge",
+                       "fun-knee", "fix-knitt"],
+            "foci": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss"],
+            "carriers": {
+                "meals": "fork-knife",
+                "cleaning": "fort-knight",
+                "working": "fort-knight",
+                "spirituality-development": "fort-knight",
+                "friends-family": "folk-knowledge",
+                "health": "fort-knight",
+                "operations": "fort-knight",
+            },
+            "generatedBy": "tests/champion_fixture.py",
+            "schemaVersion": 7,
+            "exportedAt": "2026-08-27T18:00:00+00:00",
+            "seasonNote": "Example: every fortnight starts on Sunday A.",
+            "assumptions": [],
+        },
+        "categories": [
+            {
+                "key": key,
+                "label": CATEGORY_LABELS[key],
+                "subjects": [
+                    {"label": f"Example {CATEGORY_LABELS[key]} focus subject", "peripheral": False},
+                    {"label": f"Example {CATEGORY_LABELS[key]} peripheral subject", "peripheral": True},
+                ]
+            }
+            for key in CATEGORY_KEY_ORDER
+        ],
+        "blocks": _blocks(),
+        "days": _days(),
+        "seasons": _seasons(),
+        "tasks": _tasks(),
+        "appointments": _appointments(),
+        "menu": menu,
+        "meals": _meals(menu),
+        "menuAlternates": [
+            {
+                "season": "deepwinter",
+                "soup": "Example winter soup",
+                "sandwich": "Example winter sandwich",
+                "menuSlot": "Dinner1",
+                "method": "Slow cooker",
+                "notes": "Serve warm",
+                "sourceRow": 2,
+            },
+            {
+                "season": "longlight",
+                "soup": "Example summer soup",
+                "sandwich": "Example summer sandwich",
+                "menuSlot": "Dinner2",
+                "method": "Chilled",
+                "notes": "Serve cold",
+                "sourceRow": 3,
+            }
+        ],
+        "menuProfiles": [
+            {
+                "season": "deepwinter",
+                "settings": [
+                    {"setting": "ExampleSeasonSetting", "value": "WinterVal", "sourceRow": 2}
+                ]
+            },
+            {
+                "season": "longlight",
+                "settings": [
+                    {"setting": "ExampleSeasonSetting", "value": "SummerVal", "sourceRow": 2}
+                ]
+            }
+        ],
+        "outsideSafety": [
+            {
+                "time": "12:00",
+                "byMonth": {
+                    "january": "Too Cold",
+                    "february": "Too Cold",
+                    "march": "coat & hat",
+                    "april": "SAFE!",
+                    "may": "SAFE!",
+                    "june": "SAFE!",
+                    "july": "Too Hot/High UV",
+                    "august": "SAFE!",
+                    "september": "SAFE!",
+                    "october": "coat & hat",
+                    "november": "Too Cold",
+                    "december": "Too Cold",
+                },
+                "sourceRow": 2,
+            }
+        ],
+        "cleaningAreas": [{"area": "Example sink", "bagua": "Example north", "room": "Example kitchen", "sourceRow": 2},
+                          {"area": "Example floor", "bagua": "Example north", "room": "Example kitchen", "sourceRow": 3},
+                          {"area": "Example mirror", "bagua": "Example east", "room": "Example bathroom", "sourceRow": 4}],
+        "calendar": _calendar(),
+        "years": [dict(row, slices=[dict(slice_row) for slice_row in row["slices"]]) for row in YEARS],
+    }
+
+
+def _menu_v6():
     rows = []
     for slot in ("brunch", "snack", "dinner"):
         for number in range(1, 8):
@@ -234,18 +450,16 @@ def _menu():
                 "sourceRow": len(rows) + 3,
             })
     by_key = {row["mealKey"]: row for row in rows}
-    by_key["Brunch1"]["menu"] = "FLEXIBLE"                      # a value, not a gap
-    by_key["Dinner4"]["menu"] = "Example dinner OUT"            # so is OUT
+    by_key["Brunch1"]["menu"] = "FLEXIBLE"
+    by_key["Dinner4"]["menu"] = "Example dinner OUT"
     by_key["Dinner2"].update(cookExtra=True, cookExtraNote="Example: the extra becomes tacos")
-    # A dish eaten once: its leftovers day is null, and its day's second serving is a row of its own.
     by_key["Snack7"]["leftoversDay"] = None
     rows.append({"mealKey": "Snack8", "slot": "snack", "cookDay": DAY_KEY_ORDER[13], "leftoversDay": None,
                  "menu": "Example snack 8", "cookExtra": False, "cookExtraNote": None, "sourceRow": len(rows) + 3})
     return rows
 
 
-def _meals(menu):
-    """The resolved per-day view, inverted from the menu the way the mason does it."""
+def _meals_v6(menu):
     rows = []
     for index, day_key in enumerate(DAY_KEY_ORDER):
         row = {"dayKey": day_key, "sourceRow": index + 2}
@@ -256,16 +470,36 @@ def _meals(menu):
     return rows
 
 
-def build_champion_keep():
-    """A fresh, conforming, invented Champion's keep. Every call returns a new object."""
-    menu = _menu()
+def build_champion_keep_v6():
+    """An invented Champion's keep matching schemaVersion 6."""
+    menu = _menu_v6()
+    days_v6 = []
+    for day in _days():
+        day_v6 = dict(day)
+        day_v6["blockFocus"] = {block_key: focus for block_key, focus in day["blockFocus"].items()
+                                if block_key in ("early", "midday", "late")}
+        days_v6.append(day_v6)
+
+    seasons_v6 = []
+    for season in _seasons():
+        season_v6 = dict(season)
+        del season_v6["blockStarts"]
+        del season_v6["themes"]
+        del season_v6["heroes"]
+        seasons_v6.append(season_v6)
+
+    tasks_v6 = []
+    for task in _tasks():
+        task_v6 = dict(task)
+        task_v6["serves"] = [{field: value for field, value in serving.items() if field != "season"}
+                             for serving in task["serves"]]
+        tasks_v6.append(task_v6)
+
     return {
         "meta": {
             "sourceSlabs": ["ExampleFortKnightSlab.xlsx", "ExampleForkKnifeSlab.xlsx", "ExampleFreshKeepSlab.xlsx",
                             "ExampleFretKnotSlab.xlsx", "ExampleFoeKissSlab.xlsx", "ExampleFolkKnowledgeSlab.xlsx",
                             "ExampleFunKneeSlab.xlsx", "ExampleFixKnittSlab.xlsx"],
-            # Composition (beinsiculous/fortknight#19): every stone, and the four foci the shipped slabs
-            # mark — the household keep's shape, invented content.
             "stones": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge",
                        "fun-knee", "fix-knitt"],
             "foci": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss"],
@@ -277,13 +511,13 @@ def build_champion_keep():
         },
         "categories": [{"key": key, "label": CATEGORY_LABELS[key], "subjects": [f"Example {CATEGORY_LABELS[key]} subject"]}
                        for key in CATEGORY_KEY_ORDER],
-        "blocks": _blocks(),
-        "days": _days(),
-        "seasons": _seasons(),
-        "tasks": _tasks(),
+        "blocks": _blocks_v6(),
+        "days": days_v6,
+        "seasons": seasons_v6,
+        "tasks": tasks_v6,
         "appointments": _appointments(),
         "menu": menu,
-        "meals": _meals(menu),
+        "meals": _meals_v6(menu),
         "cleaningAreas": [{"area": "Example sink", "bagua": "Example north", "room": "Example kitchen", "sourceRow": 2},
                           {"area": "Example floor", "bagua": "Example north", "room": "Example kitchen", "sourceRow": 3},
                           {"area": "Example mirror", "bagua": "Example east", "room": "Example bathroom", "sourceRow": 4}],

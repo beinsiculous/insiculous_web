@@ -14,6 +14,9 @@ from helpers import STDIN_PRELUDE, module_import, run_node
 CHAMPION = build_champion_keep()
 
 
+TIMED_BLOCKS = reference.timed_blocks(CHAMPION, "deepwinter")
+
+
 class ClockTests(unittest.TestCase):
     def call(self, symbol, arguments):
         script = module_import("clock.js", symbol) + STDIN_PRELUDE + \
@@ -28,19 +31,22 @@ class ClockTests(unittest.TestCase):
         self.assertEqual(self.call("formatClockRange", ["18:00", "08:00"]), "6:00 PM–8:00 AM")
 
     def test_the_block_for_a_wall_time_wraps_past_midnight(self):
-        expected = {"08:00": "early", "10:59": "early", "11:00": "midday", "14:59": "midday",
-                    "15:00": "late", "17:59": "late", "18:00": "too-dark", "23:59": "too-dark",
-                    "00:00": "too-dark", "07:59": "too-dark"}
+        expected = {"05:30": "too-early", "07:29": "too-early",
+                    "07:30": "early", "10:59": "early",
+                    "11:00": "midday", "14:59": "midday",
+                    "15:00": "late", "17:59": "late",
+                    "18:00": "too-dark", "23:59": "too-dark",
+                    "00:00": "too-dark", "05:29": "too-dark"}
         for wall_time, block_key in expected.items():
-            self.assertEqual(self.call("blockKeyForTime", [CHAMPION["blocks"], wall_time]), block_key, wall_time)
+            self.assertEqual(self.call("blockKeyForTime", [TIMED_BLOCKS, wall_time]), block_key, wall_time)
 
-    def test_the_four_blocks_cover_the_whole_day_and_both_ports_agree_on_every_minute(self):
+    def test_the_blocks_cover_the_whole_day_and_both_ports_agree_on_every_minute(self):
         """Every minute of the day belongs to exactly one block, and the twin says the same block."""
         script = module_import("clock.js", "blockKeyForTime") + STDIN_PRELUDE + \
             "process.stdout.write(JSON.stringify(inputs.times.map((time) => blockKeyForTime(inputs.blocks, time))));"
         times = [f"{minutes // 60:02d}:{minutes % 60:02d}" for minutes in range(24 * 60)]
-        resolved = run_node(script, {"blocks": CHAMPION["blocks"], "times": times})
+        resolved = run_node(script, {"blocks": TIMED_BLOCKS, "times": times})
         self.assertEqual([time for time, block_key in zip(times, resolved) if block_key is None], [],
                          "these minutes belong to no block")
-        self.assertEqual(set(resolved), {block["key"] for block in CHAMPION["blocks"]}, "every block owns some minute")
-        self.assertEqual(resolved, [reference.block_key_for_time(CHAMPION["blocks"], time) for time in times])
+        self.assertEqual(set(resolved), {block["key"] for block in TIMED_BLOCKS}, "every block owns some minute")
+        self.assertEqual(resolved, [reference.block_key_for_time(TIMED_BLOCKS, time) for time in times])

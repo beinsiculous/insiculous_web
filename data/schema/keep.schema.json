@@ -10,7 +10,7 @@
       "type": "object",
       "description": "What the file is, and when it was made.",
       "required": ["format", "version"],
-      "dependentRequired": { "foci": ["stones"] },
+      "dependentRequired": { "foci": ["stones"], "carriers": ["stones"] },
       "properties": {
         "format": {
           "const": "keep",
@@ -37,6 +37,19 @@
           "uniqueItems": true,
           "items": { "type": "string", "enum": ["fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
           "description": "The focus stones: at most four of those in stones, never fort-knight, in slab order - a set, not a ranking (season.focus is the ranked axis). The rest of the stones present are peripheral. Never without stones (dependentRequired), and copied only when the Champion's keep says it; that every entry is one of stones is the mason's contract, checked with the order."
+        },
+        "carriers": {
+          "type": "object",
+          "description": "Mapping from category keys to stone keys declaring which stone carries each category's content.",
+          "properties": {
+            "meals": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+            "cleaning": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+            "working": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+            "spirituality-development": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+            "friends-family": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+            "health": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] },
+            "operations": { "type": "string", "enum": ["fort-knight", "fork-knife", "fresh-keep", "fret-knot", "foe-kiss", "folk-knowledge", "fun-knee", "fix-knitt"] }
+          }
         }
       }
     },
@@ -68,8 +81,8 @@
               "properties": {
                 "key": { "type": "string" },
                 "label": { "type": "string" },
-                "start": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
-                "end": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                "start": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+                "end": { "type": ["string", "null"], "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
                 "focus": {
                   "type": ["string", "null"],
                   "description": "The slab's display text, not a category key. Null where the block carries none."
@@ -79,7 +92,7 @@
                   "description": "The meal this block carries, or null. An object - not a string.",
                   "properties": {
                     "name": { "type": "string" },
-                    "dish": { "type": "string" }
+                    "dish": { "type": ["string", "null"] }
                   }
                 }
               }
@@ -120,8 +133,8 @@
       }
     },
     "menu": {
-      "type": "array",
-      "description": "The fortnight menu, grouped by meal slot: which dish is cooked on which day, and which later day eats it as leftovers. ABSENT IS NOT EMPTY: a keep written before 2026-08-29 has no menu section at all, which says the export predates menus; a menu present but empty says the household has none. Tooling that reports on a keep must say which it saw. Meal keys and dish text are the household's own words and are never enumerated or normalised.",
+      "type": ["array", "null"],
+      "description": "The fortnight menu, grouped by meal slot: which dish is cooked on which day, and which later day eats it as leftovers. ABSENT IS NOT EMPTY: a keep written before 2026-08-29 has no menu section at all, which says the export predates menus; a menu present but empty says the household has none. Null indicates the keep was exported outside its seasons. Tooling that reports on a keep must say which it saw. Meal keys and dish text are the household's own words and are never enumerated or normalised.",
       "items": {
         "type": "object",
         "properties": {
@@ -155,8 +168,99 @@
                 },
                 "leftoversDayLabel": { "type": ["string", "null"] },
                 "cookExtra": { "type": "boolean", "description": "Cook more than the two servings need: the surplus is an ingredient in a later dish." },
-                "cookExtraNote": { "type": ["string", "null"], "description": "Why, in the household's words. Free text, and the only prose the menu sends to a page." }
+                "cookExtraNote": { "type": ["string", "null"], "description": "Why, in the household's words. Free text, and the only prose the menu sends to a page." },
+                "prepDay": {
+                  "type": ["string", "null"],
+                  "enum": [
+                    "sun-a", "mon-b", "tue-a", "wed-b", "thu-a", "fri-b", "sat-a",
+                    "sun-b", "mon-a", "tue-b", "wed-a", "thu-b", "fri-a", "sat-b",
+                    null
+                  ]
+                },
+                "prepDayLabel": { "type": ["string", "null"] },
+                "prepBlock": { "type": ["string", "null"] },
+                "foodGroups": {
+                  "type": "object",
+                  "properties": {
+                    "fruit": { "type": "integer" },
+                    "vegetable": { "type": "integer" },
+                    "proteinFatOil": { "type": "integer" },
+                    "grainStarch": { "type": "integer" },
+                    "sugar": { "type": "integer" },
+                    "other": { "type": "integer" }
+                  }
+                },
+                "recipeLink": { "type": ["string", "null"] },
+                "ingredients": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ingredient": { "type": "string" },
+                      "perPerson": { "type": ["number", "string", "null"] },
+                      "unit": { "type": ["string", "null"] },
+                      "prep": { "type": ["string", "null"] },
+                      "prepNotes": { "type": ["string", "null"] },
+                      "cookNotes": { "type": ["string", "null"] },
+                      "type": { "type": ["string", "null"] },
+                      "dish": { "type": ["string", "null"] }
+                    }
+                  }
+                }
               }
+            }
+          }
+        }
+      }
+    },
+    "menuAlternates": {
+      "type": ["array", "null"],
+      "description": "Alternates for the season (e.g. soups and sandwiches), or null when no season resolved.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "season": { "type": "string" },
+          "soup": { "type": "string" },
+          "sandwich": { "type": ["string", "null"] },
+          "menuSlot": { "type": ["string", "null"] },
+          "method": { "type": ["string", "null"] },
+          "notes": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "menuProfile": {
+      "type": ["array", "null"],
+      "description": "The season's profile settings as [{setting, value}], or null when no season resolved.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "setting": { "type": "string" },
+          "value": { "type": ["string", "number", "boolean", "null"] }
+        }
+      }
+    },
+    "outsideSafety": {
+      "type": ["array", "null"],
+      "description": "Outdoor safety by time and month, or null when the source keep carries no outside safety section.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "time": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+          "byMonth": {
+            "type": "object",
+            "properties": {
+              "january": { "type": "string" },
+              "february": { "type": "string" },
+              "march": { "type": "string" },
+              "april": { "type": "string" },
+              "may": { "type": "string" },
+              "june": { "type": "string" },
+              "july": { "type": "string" },
+              "august": { "type": "string" },
+              "september": { "type": "string" },
+              "october": { "type": "string" },
+              "november": { "type": "string" },
+              "december": { "type": "string" }
             }
           }
         }
@@ -172,6 +276,26 @@
         "gregorianRange": { "type": "string" },
         "startDescription": { "type": "string" },
         "safeOutsidePercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "blockStarts": {
+          "type": "object",
+          "description": "Season-specific start times for the blocks, keyed by block key."
+        },
+        "themes": {
+          "type": "object",
+          "properties": {
+            "celebratedHeritage": { "type": ["string", "null"] },
+            "bibleConcept": { "type": ["string", "null"] },
+            "other": { "type": ["string", "null"] }
+          }
+        },
+        "heroes": {
+          "type": "object",
+          "properties": {
+            "starch": { "type": ["string", "null"] },
+            "protein": { "type": ["string", "null"] },
+            "flavor": { "type": ["string", "null"] }
+          }
+        },
         "focus": {
           "type": "array",
           "items": {

@@ -57,24 +57,72 @@ export function categoryLabel(keep, categoryKey) {
   return categoryKey ? categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1) : "";
 }
 
+/** The rows of a per-season section that belong to `seasonKey`: the rows tagged with it, and the rows
+ *  tagged with nothing — a schemaVersion 6 keep tags no row, and an untagged serving passes through —
+ *  so meals, menu, alternates, profiles and servings follow one rule, and the writer counts emptiness
+ *  with the rule it writes with. With no season key, every row. Twin: champion_reference.rows_for_season. */
+export function rowsForSeason(rows, seasonKey) {
+  const list = (rows ?? []).filter((row) => row && typeof row === "object");
+  if (seasonKey == null) return list;
+  return list.filter((row) => row.season == null || row.season === seasonKey);
+}
+
+/** The blocks with start, end and wrapsMidnight resolved from the season's blockStarts,
+ *  falling back to the block's own start/end for a schemaVersion 6 keep. */
+export function timedBlocks(keep, seasonKey) {
+  const season = seasonByKey(keep, seasonKey);
+  const blockStarts = season?.blockStarts;
+  const blocks = keep.blocks ?? [];
+  if (!blockStarts || typeof blockStarts !== "object" || Array.isArray(blockStarts) || Object.keys(blockStarts).length === 0) {
+    return blocks.map((block) => ({
+      key: block.key,
+      label: block.label,
+      start: block.start ?? null,
+      end: block.end ?? null,
+      wrapsMidnight: block.wrapsMidnight ?? false,
+      mealPrimary: block.mealPrimary,
+      mealSecondary: block.mealSecondary,
+      sourceRow: block.sourceRow,
+    }));
+  }
+  return blocks.map((block, index) => {
+    const nextBlock = blocks[(index + 1) % blocks.length];
+    const start = blockStarts[block.key] ?? block.start ?? null;
+    const end = nextBlock ? (blockStarts[nextBlock.key] ?? nextBlock.start ?? null) : null;
+    const wrapsMidnight = start && end ? end <= start : false;
+    return {
+      key: block.key,
+      label: block.label,
+      start,
+      end,
+      wrapsMidnight,
+      mealPrimary: block.mealPrimary,
+      mealSecondary: block.mealSecondary,
+      sourceRow: block.sourceRow,
+    };
+  });
+}
+
 /** A day key's tasks for one block, in slab order, grouped by FortKnightSlab's Tasks sheet, Description column
- *  ("Cleaning", "Laundry", "Open for Appointments"...). Groups keep first-appearance order. */
-export function taskGroupsFor(keep, dayKey, blockKey) {
+ *  ("Cleaning", "Laundry", "Open for Appointments"...). Groups keep first-appearance order.
+ *  When seasonKey is provided, only servings matching that season (or with no season specified) are kept. */
+export function taskGroupsFor(keep, dayKey, blockKey, seasonKey = null) {
   const groups = [];
-  for (const task of keep.tasks) {
+  for (const task of keep.tasks ?? []) {
     if (task.dayKey !== dayKey || task.block !== blockKey) continue;
     let group = groups.find((candidate) => candidate.group === task.group);
     if (!group) {
       group = { group: task.group, category: task.category, tasks: [] };
       groups.push(group);
     }
+    const matchingServings = rowsForSeason(task.serves, seasonKey);
     group.tasks.push({
       id: task.id,
       step: task.step,
       category: task.category,
       // Meal Prep & Store tasks only; every other task's list is empty. The day keys and gaps are the
       // exporter's — this joins the label, which is the one thing a screen should not be deriving.
-      serves: (task.serves ?? []).map((serving) => ({
+      serves: matchingServings.map((serving) => ({
         role: serving?.role ?? null,
         dayKey: serving?.dayKey ?? null,
         label: dayLabel(keep, serving?.dayKey) ?? null,
@@ -88,25 +136,33 @@ export function taskGroupsFor(keep, dayKey, blockKey) {
 /** A day key's appointments for one block, earliest estimated start first, then by title so the order is
  *  total (two appointments may share a start). */
 export function appointmentsFor(keep, dayKey, blockKey) {
-  return keep.appointments
+  return (keep.appointments ?? [])
     .filter((appointment) => appointment.dayKey === dayKey && appointment.block === blockKey)
     .sort((left, right) =>
       left.timing.estimatedStart.localeCompare(right.timing.estimatedStart) || left.title.localeCompare(right.title));
 }
 
-/** The `meals` row for a day key: what ForkKnifeSlab's Meals sheet shows. "FLEXIBLE" and "OUT" are values. */
-export function mealsForDayKey(keep, dayKey) {
-  return keep.meals.find((meals) => meals.dayKey === dayKey) ?? null;
+/** The `meals` row for a day key: what ForkKnifeSlab's Meals sheet shows. "FLEXIBLE" and "OUT" are values.
+ *  With a seasonKey, the season's rows (rowsForSeason); without one, every row. */
+export function mealsForDayKey(keep, dayKey, seasonKey = null) {
+  return rowsForSeason(keep.meals, seasonKey).find((meals) => meals.dayKey === dayKey) ?? null;
+}
+
+/** The meal a block names, when the Meals sheet has a column for it: the slab's meal option ("Dinner"),
+ *  or null for a block whose option has no column (early's Breakfast) or no option at all. The name is
+ *  the block's, not any day's, which is what lets a day past the calendar keep it without a dish. */
+export function mealNameForBlock(block) {
+  return MEAL_FIELD_BY_NAME[block.mealPrimary?.toLowerCase()] ? block.mealPrimary : null;
 }
 
 /** The dish a block serves: its primary meal's name, and the day's text for it. Null when the block's
  *  primary meal has no column on the Meals sheet (early's Breakfast). */
-export function mealForBlock(keep, dayKey, block) {
-  const field = MEAL_FIELD_BY_NAME[block.mealPrimary.toLowerCase()];
-  if (!field) return null;
-  const meals = mealsForDayKey(keep, dayKey);
+export function mealForBlock(keep, dayKey, block, seasonKey = null) {
+  const name = mealNameForBlock(block);
+  if (!name) return null;
+  const meals = mealsForDayKey(keep, dayKey, seasonKey);
   if (!meals) return null;
-  return { name: block.mealPrimary, dish: meals[field] };
+  return { name, dish: meals[MEAL_FIELD_BY_NAME[name.toLowerCase()]] ?? null };
 }
 
 /** Every task id a day key can show, in the order the day renders them — the set a "checked everything"
@@ -207,7 +263,8 @@ export function resolveDay(keep, isoDate, wallTime = null) {
   }
 
   const day = dayByKey(keep, entry.dayKey);
-  const currentBlockKey = wallTime ? blockKeyForTime(keep.blocks, wallTime) : null;
+  const blocks = timedBlocks(keep, entry.season);
+  const currentBlockKey = wallTime ? blockKeyForTime(blocks, wallTime) : null;
 
   return {
     status: "day",
@@ -224,8 +281,8 @@ export function resolveDay(keep, isoDate, wallTime = null) {
       mainFocusLabel: day.mainFocusLabel,
     },
     currentBlock: currentBlockKey,
-    meals: mealsForDayKey(keep, entry.dayKey),
-    blocks: keep.blocks.map((block) => ({
+    meals: mealsForDayKey(keep, entry.dayKey, entry.season),
+    blocks: blocks.map((block) => ({
       key: block.key,
       label: block.label,
       start: block.start,
@@ -233,36 +290,55 @@ export function resolveDay(keep, isoDate, wallTime = null) {
       wrapsMidnight: block.wrapsMidnight,
       focus: day.blockFocus[block.key] ?? null,
       isCurrent: block.key === currentBlockKey,
-      meal: mealForBlock(keep, entry.dayKey, block),
+      meal: mealForBlock(keep, entry.dayKey, block, entry.season),
       appointments: appointmentsFor(keep, entry.dayKey, block.key),
-      taskGroups: taskGroupsFor(keep, entry.dayKey, block.key),
+      taskGroups: taskGroupsFor(keep, entry.dayKey, block.key, entry.season),
     })),
   };
 }
 
 /** The fortnight menu for the Menu screen: ForkKnifeSlab's Menu sheet grouped by slot, in slot order, each
- *  row carrying the day keys it is cooked and eaten on. Content only — no date, no calendar. */
-export function resolveMenu(keep) {
+ *  row carrying the day keys it is cooked and eaten on. Content only — no date, no calendar.
+ *  With a seasonKey, the season's rows (rowsForSeason); without one, every row. */
+export function resolveMenu(keep, seasonKey = null) {
   const slots = [
     { slot: "brunch", label: "Brunch" },
     { slot: "snack", label: "Snack" },
     { slot: "dinner", label: "Dinner" },
   ];
+  const seasonalMenu = rowsForSeason(keep.menu, seasonKey);
+
   return slots.map(({ slot, label }) => ({
     slot,
     label,
-    entries: keep.menu
+    entries: seasonalMenu
       .filter((entry) => entry.slot === slot)
-      .map((entry) => ({
-        mealKey: entry.mealKey,
-        menu: entry.menu,
-        cookDay: entry.cookDay,
-        cookDayLabel: dayLabel(keep, entry.cookDay),
-        leftoversDay: entry.leftoversDay,
-        leftoversDayLabel: entry.leftoversDay ? dayLabel(keep, entry.leftoversDay) : null,
-        cookExtra: entry.cookExtra,
-        cookExtraNote: entry.cookExtraNote,
-      })),
+      .map((entry) => {
+        const item = {
+          mealKey: entry.mealKey,
+          menu: entry.menu,
+          cookDay: entry.cookDay,
+          cookDayLabel: dayLabel(keep, entry.cookDay),
+          leftoversDay: entry.leftoversDay,
+          leftoversDayLabel: entry.leftoversDay ? dayLabel(keep, entry.leftoversDay) : null,
+          cookExtra: entry.cookExtra,
+          cookExtraNote: entry.cookExtraNote,
+        };
+        if (entry.prepDay !== undefined) item.prepDay = entry.prepDay;
+        if (entry.prepDay !== undefined) {
+          item.prepDayLabel = entry.prepDay ? dayLabel(keep, entry.prepDay) : null;
+        }
+        if (entry.prepBlock !== undefined) item.prepBlock = entry.prepBlock;
+        if (entry.foodGroups !== undefined) item.foodGroups = entry.foodGroups;
+        if (entry.recipeLink !== undefined) item.recipeLink = entry.recipeLink;
+        if (entry.ingredients !== undefined) {
+          item.ingredients = (entry.ingredients ?? []).map((ingredient) => {
+            const { sourceRow, ...withoutRow } = ingredient ?? {};
+            return withoutRow;
+          });
+        }
+        return item;
+      }),
   }));
 }
 
@@ -305,17 +381,23 @@ export function mealIdeaLists(season) {
  *  Outside the calendar's range no season is current — the app is expired, not somewhere else. */
 export function resolveSeasons(keep, isoDate = null) {
   const currentKey = isoDate ? (calendarEntryForDate(keep, isoDate)?.season ?? null) : null;
-  return keep.seasons.map((season) => ({
-    key: season.key,
-    name: season.name,
-    isCurrent: season.key === currentKey,
-    gregorianRange: season.gregorianRange ?? null,
-    startDescription: season.startDescription ?? null,
-    safeOutsidePercent: season.safeOutsidePercent ?? null,
-    focus: (season.focus ?? []).map((categoryKey) => ({ key: categoryKey, label: categoryLabel(keep, categoryKey) })),
-    produce: produceLists(season),
-    mealIdeas: mealIdeaLists(season),
-  }));
+  return (keep.seasons ?? []).map((season) => {
+    const item = {
+      key: season.key,
+      name: season.name,
+      isCurrent: season.key === currentKey,
+      gregorianRange: season.gregorianRange ?? null,
+      startDescription: season.startDescription ?? null,
+      safeOutsidePercent: season.safeOutsidePercent ?? null,
+      focus: (season.focus ?? []).map((categoryKey) => ({ key: categoryKey, label: categoryLabel(keep, categoryKey) })),
+      produce: produceLists(season),
+      mealIdeas: mealIdeaLists(season),
+    };
+    if (season.blockStarts !== undefined) item.blockStarts = season.blockStarts;
+    if (season.themes !== undefined) item.themes = season.themes;
+    if (season.heroes !== undefined) item.heroes = season.heroes;
+    return item;
+  });
 }
 
 /** One calendar year's Norse wheel: the five seasons as slices, sized by their share of the days the keep's

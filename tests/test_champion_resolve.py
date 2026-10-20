@@ -10,7 +10,7 @@ import unittest
 import champion_reference as reference
 from champion_fixture import (A_DATE_IN_CALENDAR, DATE_BEFORE_CALENDAR, DATE_IN_YEAR_PAST_CALENDAR,
                               DATE_PAST_CALENDAR, FIRST_DATE, LAST_DATE, build_champion_keep)
-from helpers import STDIN_PRELUDE, champion_import as module_import, run_node
+from helpers import STDIN_PRELUDE, champion_import as module_import, module_import as shared_import, run_node
 
 KEEP = build_champion_keep()
 
@@ -40,10 +40,47 @@ class ResolveParityTests(unittest.TestCase):
 
     def test_the_menu_and_the_seasons_match_their_twins(self):
         script = module_import("resolve.js", "resolveMenu", "resolveSeasons") + STDIN_PRELUDE + \
-            "process.stdout.write(JSON.stringify({menu: resolveMenu(inputs.keep), seasons: resolveSeasons(inputs.keep, inputs.date)}));"
-        from_javascript = run_node(script, {"keep": KEEP, "date": A_DATE_IN_CALENDAR})
-        self.assertEqual(from_javascript["menu"], reference.resolve_menu(KEEP))
+            "process.stdout.write(JSON.stringify({menu: resolveMenu(inputs.keep, inputs.season), seasons: resolveSeasons(inputs.keep, inputs.date)}));"
+        from_javascript = run_node(script, {"keep": KEEP, "date": A_DATE_IN_CALENDAR, "season": "longlight"})
+        self.assertEqual(from_javascript["menu"], reference.resolve_menu(KEEP, "longlight"))
         self.assertEqual(from_javascript["seasons"], reference.resolve_seasons(KEEP, A_DATE_IN_CALENDAR))
+
+    def test_two_clocks_case_different_block_starts_resolve_different_blocks(self):
+        """Two seasons with different blockStarts: one wall time lands in different blocks."""
+        # deepwinter early starts at 07:30, longlight early starts at 08:30 (see champion_fixture._seasons)
+        # Wall time "08:00" is "early" in deepwinter, but "too-early" in longlight!
+        wall_time = "08:00"
+        blocks_deepwinter = reference.timed_blocks(KEEP, "deepwinter")
+        blocks_longlight = reference.timed_blocks(KEEP, "longlight")
+        script = module_import("resolve.js", "timedBlocks") + \
+            shared_import("clock.js", "blockKeyForTime") + STDIN_PRELUDE + \
+            "process.stdout.write(JSON.stringify({" \
+            "dw: blockKeyForTime(timedBlocks(inputs.keep, 'deepwinter'), inputs.time)," \
+            "ll: blockKeyForTime(timedBlocks(inputs.keep, 'longlight'), inputs.time)" \
+            "}));"
+        from_js = run_node(script, {"keep": KEEP, "time": wall_time})
+        self.assertEqual(from_js["dw"], "early")
+        self.assertEqual(from_js["ll"], "too-early")
+        self.assertEqual(reference.block_key_for_time(blocks_deepwinter, wall_time), "early")
+        self.assertEqual(reference.block_key_for_time(blocks_longlight, wall_time), "too-early")
+
+    def test_two_seasons_of_servings(self):
+        """taskGroupsFor filters serves to the requested season key, both ports agreeing."""
+        script = module_import("resolve.js", "taskGroupsFor") + STDIN_PRELUDE + \
+            "process.stdout.write(JSON.stringify({" \
+            "dw: taskGroupsFor(inputs.keep, 'thu-a', 'early', 'deepwinter')," \
+            "ll: taskGroupsFor(inputs.keep, 'thu-a', 'early', 'longlight')" \
+            "}));"
+        from_js = run_node(script, {"keep": KEEP})
+        ref_dw = reference.task_groups_for(KEEP, "thu-a", "early", "deepwinter")
+        ref_ll = reference.task_groups_for(KEEP, "thu-a", "early", "longlight")
+        self.assertEqual(from_js["dw"], ref_dw)
+        self.assertEqual(from_js["ll"], ref_ll)
+
+        dw_serves = next(t["serves"] for g in ref_dw for t in g["tasks"] if t["step"] == "Example smoothies")
+        ll_serves = next(t["serves"] for g in ref_ll for t in g["tasks"] if t["step"] == "Example smoothies")
+        self.assertEqual([s["dayKey"] for s in dw_serves], ["fri-b", "sun-b"])
+        self.assertEqual([s["dayKey"] for s in ll_serves], ["sat-b", "mon-a"])
 
     def test_the_year_wheel_matches_its_twin(self):
         dates = [entry["date"] for entry in KEEP["calendar"]][::29] + [
@@ -235,11 +272,17 @@ class ResolveRuleTests(unittest.TestCase):
         self.assertEqual([season["isCurrent"] for season in reference.resolve_seasons(KEEP)], [False] * 5)
 
     def test_a_meal_prep_task_says_when_what_it_makes_gets_eaten(self):
-        [task] = [task for group in reference.task_groups_for(KEEP, "thu-a", "early")
-                  for task in group["tasks"] if task["step"] == "Example smoothies"]
-        self.assertEqual(task["serves"], [
+        [task_dw] = [task for group in reference.task_groups_for(KEEP, "thu-a", "early", "deepwinter")
+                     for task in group["tasks"] if task["step"] == "Example smoothies"]
+        self.assertEqual(task_dw["serves"], [
             {"role": "cook", "dayKey": "fri-b", "label": "Friday B", "daysAfter": 1},
             {"role": "leftovers", "dayKey": "sun-b", "label": "Sunday B", "daysAfter": 3},
+        ])
+        [task_ll] = [task for group in reference.task_groups_for(KEEP, "thu-a", "early", "longlight")
+                     for task in group["tasks"] if task["step"] == "Example smoothies"]
+        self.assertEqual(task_ll["serves"], [
+            {"role": "cook", "dayKey": "sat-b", "label": "Saturday B", "daysAfter": 9},
+            {"role": "leftovers", "dayKey": "mon-a", "label": "Monday A", "daysAfter": 4},
         ])
 
     def test_only_meal_prep_tasks_carry_serve_days(self):

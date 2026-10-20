@@ -16,7 +16,7 @@ import unittest
 
 import champion_reference as reference
 from champion_fixture import (A_DATE_IN_CALENDAR, DATE_IN_YEAR_PAST_CALENDAR, DATE_PAST_CALENDAR, LAST_DATE,
-                              build_champion_keep)
+                              build_champion_keep, build_champion_keep_v6)
 from helpers import REPOSITORY_ROOT, STDIN_PRELUDE, champion_import as module_import, run_node
 
 sys.path.insert(0, str(REPOSITORY_ROOT / "scripts"))
@@ -49,10 +49,11 @@ class KeepTests(unittest.TestCase):
 
     def test_the_household_s_chores_do_not_travel(self):
         """The file goes to a public website. It carries what is eaten and what is booked; it does not
-        carry the chores, the check-offs, the 1095-row calendar or the slab's row numbers."""
+        carry the chores, the check-offs, the 1095-row calendar, the slab's row numbers, the subjects,
+        peripheral markings, or the people/household counts."""
         text = json.dumps(self.built)
         for absent in ("tasks", "taskGroups", "calendar", "cleaningAreas", "serves", "sourceRow",
-                       "checkoffs", "safeOutsideRaw"):
+                       "checkoffs", "safeOutsideRaw", "subjects", "peripheral", "Household", "people"):
             self.assertNotIn(f'"{absent}"', text, f"{absent} reached the keep")
 
     def test_it_is_the_fourteen_day_keys_once_each_in_order(self):
@@ -67,7 +68,7 @@ class KeepTests(unittest.TestCase):
         self.assertEqual(thursday["mainFocusLabel"], reference.day_by_key(KEEP, "thu-a")["mainFocusLabel"])
         self.assertEqual([day["week"] for day in self.built["days"]], [1] * 7 + [2] * 7)
 
-    def test_every_day_carries_the_four_blocks_in_order_with_their_focus_and_dish(self):
+    def test_every_day_carries_the_five_blocks_in_order_with_their_focus_and_dish(self):
         for day in self.built["days"]:
             self.assertEqual([block["key"] for block in day["blocks"]],
                              [block["key"] for block in KEEP["blocks"]])
@@ -75,12 +76,14 @@ class KeepTests(unittest.TestCase):
             for block in day["blocks"]:
                 self.assertEqual(block["focus"], source["blockFocus"].get(block["key"]))
                 self.assertEqual(block["meal"], reference.meal_for_block(
-                    KEEP, day["dayKey"], next(b for b in KEEP["blocks"] if b["key"] == block["key"])))
+                    KEEP, day["dayKey"], next(b for b in KEEP["blocks"] if b["key"] == block["key"]),
+                    self.built["season"]["key"]))
 
     def test_the_dishes_are_the_slabs_words(self):
         """FLEXIBLE and OUT are answers, not gaps."""
+        season_key = self.built["season"]["key"]
         for day in self.built["days"]:
-            row = reference.meals_for_day_key(KEEP, day["dayKey"])
+            row = reference.meals_for_day_key(KEEP, day["dayKey"], season_key)
             self.assertEqual(day["meals"],
                              {"brunch": row["brunch"], "snack": row["snack"], "dinner": row["dinner"]})
         served = {day["meals"]["dinner"] for day in self.built["days"]}
@@ -200,9 +203,64 @@ class KeepTests(unittest.TestCase):
         self.assertEqual(built["meta"]["stones"], KEEP["meta"]["stones"])
         self.assertNotIn("foci", built["meta"])
 
+    def test_carriers_travels_verbatim_when_an_object(self):
+        """meta.carriers is copied verbatim when present as an object."""
+        self.assertEqual(self.built["meta"]["carriers"], KEEP["meta"]["carriers"])
+
+    def test_a_source_with_foci_and_no_stones_yields_no_composition_at_all(self):
+        """The schema makes foci depend on stones, so the writer copies nothing of composition without
+        the list the rest hangs on — a half-stated source still builds a conforming keep."""
+        half = json.loads(json.dumps(KEEP))
+        del half["meta"]["stones"]
+        built = build(keep=half)
+        self.assertNotIn("stones", built["meta"])
+        self.assertNotIn("foci", built["meta"])
+        self.assertNotIn("carriers", built["meta"])
+        self.assertTrue(check_web_keep(built).ok, check_web_keep(built).render())
+
+    def test_in_season_block_clocks_come_from_the_season_s_block_starts(self):
+        """Inside the calendar each block's start and end are the resolved season's clock — the season's
+        own blockStarts, each block ending where the next starts — not the blocks' own (v7 has none)."""
+        season_key = self.built["season"]["key"]
+        timed = reference.timed_blocks(KEEP, season_key)
+        for day in self.built["days"]:
+            self.assertEqual([(block["start"], block["end"]) for block in day["blocks"]],
+                             [(block["start"], block["end"]) for block in timed])
+        season = next(season for season in KEEP["seasons"] if season["key"] == season_key)
+        self.assertEqual(self.built["days"][0]["blocks"][0]["start"], season["blockStarts"]["too-early"])
+
+    def test_the_season_s_own_profile_beats_an_untagged_one_whatever_the_order(self):
+        """A profile tagged with no season is the fallback, never the pick: listed first it still loses to the
+        season's own row, and alone it is what travels."""
+        season_key = self.built["season"]["key"]
+        own = next(profile for profile in KEEP["menuProfiles"] if profile["season"] == season_key)
+        untagged = {"settings": [{"setting": "ExampleDefaultSetting", "value": "DefaultVal", "sourceRow": 2}]}
+        ordered = json.loads(json.dumps(KEEP))
+        ordered["menuProfiles"] = [untagged, own]
+        self.assertEqual(build(keep=ordered)["menuProfile"],
+                         [{"setting": entry["setting"], "value": entry["value"]} for entry in own["settings"]])
+        ordered["menuProfiles"] = [untagged]
+        self.assertEqual(build(keep=ordered)["menuProfile"], [{"setting": "ExampleDefaultSetting", "value": "DefaultVal"}])
+
+    def test_a_row_tagged_with_no_season_belongs_to_every_season(self):
+        """One rule for every per-season section, in the writer and the resolver alike: a row with no season
+        (every v6 row) survives beside tagged rows, and the emptiness the writer reports is counted with
+        the rule it writes with — one row for another season plus one untagged row is a menu of one, never
+        three empty slots; one row for another season alone is an empty menu."""
+        season_key = self.built["season"]["key"]
+        other = next(entry for entry in KEEP["menu"] if entry["season"] != season_key)
+        untagged = json.loads(json.dumps(next(entry for entry in KEEP["menu"] if entry["season"] == season_key)))
+        del untagged["season"]
+        mixed = json.loads(json.dumps(KEEP))
+        mixed["menu"] = [other, untagged]
+        built = build(keep=mixed)
+        self.assertEqual([entry["mealKey"] for slot in built["menu"] for entry in slot["entries"]], [untagged["mealKey"]])
+        mixed["menu"] = [other]
+        self.assertEqual(build(keep=mixed)["menu"], [])
+
     def test_a_fort_with_only_the_required_stone_still_builds_a_conforming_keep(self):
         """The 2^7 stone sets share one shape: an absent stone's sections are present and empty, so
-        the writer meets nothing new — no seasons means no calendar, and so no season and no year."""
+        the writer meets nothing new — no seasons means no calendar, and so no season, no year, and null menu."""
         bare = json.loads(json.dumps(KEEP))
         bare["meta"]["stones"] = ["fort-knight"]
         bare["meta"]["foci"] = []
@@ -212,16 +270,70 @@ class KeepTests(unittest.TestCase):
             category["subjects"] = []
         built = build(keep=bare)
         self.assertEqual((built["meta"]["stones"], built["meta"]["foci"]), (["fort-knight"], []))
-        self.assertEqual(built["menu"], [])
+        self.assertIsNone(built["menu"])
+        self.assertIsNone(built["menuAlternates"])
+        self.assertIsNone(built["menuProfile"])
         self.assertIsNone(built["season"])
         self.assertIsNone(built["year"])
         self.assertEqual(len(built["days"]), 14)
         self.assertEqual([day["meals"] for day in built["days"]], [None] * 14)
         self.assertTrue(check_web_keep(built).ok, check_web_keep(built).render())
 
+    def test_v6_keep_yields_no_carriers_old_block_clock_and_three_new_sections_null(self):
+        """A schemaVersion 6 keep builds with no carriers, blocks start/end from blocks[], and the 3 new sections null."""
+        v6_keep = build_champion_keep_v6()
+        built = build(keep=v6_keep)
+        self.assertNotIn("carriers", built["meta"])
+        self.assertIsNone(built["menuAlternates"])
+        self.assertIsNone(built["menuProfile"])
+        self.assertIsNone(built["outsideSafety"])
+        # Blocks carry their v6 start and end
+        for day in built["days"]:
+            for block in day["blocks"]:
+                orig = next(b for b in v6_keep["blocks"] if b["key"] == block["key"])
+                self.assertEqual(block["start"], orig["start"])
+                self.assertEqual(block["end"], orig["end"])
+        self.assertTrue(check_web_keep(built).ok, check_web_keep(built).render())
+
+    def test_v7_fixture_at_date_past_calendar(self):
+        """At DATE_PAST_CALENDAR, days have null meals, null clocks, {name, dish: null} meals, null menu,
+        menuAlternates and menuProfile. outsideSafety is by month, not by season, so it still travels. A block
+        with no meal inside the calendar (too-early, early's Breakfast) has none past it either: the edge
+        takes the dish away and never invents a meal."""
+        past = build(date=DATE_PAST_CALENDAR)
+        self.assertIsNone(past["menu"])
+        self.assertIsNone(past["menuAlternates"])
+        self.assertIsNone(past["menuProfile"])
+        self.assertIsNotNone(past["outsideSafety"])
+        for day in past["days"]:
+            self.assertIsNone(day["meals"])
+            for block in day["blocks"]:
+                self.assertIsNone(block["start"])
+                self.assertIsNone(block["end"])
+                source = next(candidate for candidate in KEEP["blocks"] if candidate["key"] == block["key"])
+                name = reference.meal_name_for_block(source)
+                self.assertEqual(block["meal"], {"name": name, "dish": None} if name else None)
+        self.assertIsNone(past["days"][0]["blocks"][0]["meal"], "too-early carries no meal option")
+        self.assertEqual(past["days"][0]["blocks"][4]["meal"], {"name": "Dinner", "dish": None})
+        # The name is the block's, not a Meals row's: a keep with no meals rows still names it past the edge.
+        without_meals = json.loads(json.dumps(KEEP))
+        without_meals["meals"] = []
+        past_without_meals = build(keep=without_meals, date=DATE_PAST_CALENDAR)
+        self.assertEqual(past_without_meals["days"][0]["blocks"][4]["meal"], {"name": "Dinner", "dish": None})
+
+    def test_menu_empty_array_for_keep_whose_menu_rows_are_empty(self):
+        """A keep inside calendar whose menu has no entries for the season yields menu: []."""
+        empty_menu_keep = json.loads(json.dumps(KEEP))
+        empty_menu_keep["menu"] = []
+        built = build(keep=empty_menu_keep)
+        self.assertEqual(built["menu"], [])
+
     def test_a_sparse_keep_degrades_rather_than_throwing(self):
         sparse = json.loads(json.dumps(KEEP))
-        del sparse["meals"][5]
+        # Remove a meal for the current season (longlight)
+        longlight_meals = [i for i, m in enumerate(sparse["meals"]) if m.get("season") == "longlight"]
+        if longlight_meals:
+            del sparse["meals"][longlight_meals[0]]
         sparse["appointments"] = []
         built = build(keep=sparse)
         self.assertEqual(len(built["days"]), 14)

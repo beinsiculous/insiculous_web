@@ -76,6 +76,13 @@ const VERSION_ONE_SECTIONS = new Set(["meta", "days", "season", "year"]);
 
 export function describeSection(keep, name) {
   const value = keep == null ? undefined : keep[name];
+  if (name === "menu" && value === null) {
+    return {
+      state: "expired",
+      count: 0,
+      message: "This keep was exported outside its seasons; no menu to show.",
+    };
+  }
   if (value === undefined || value === null) {
     return {
       state: "absent",

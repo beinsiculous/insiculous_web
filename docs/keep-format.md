@@ -89,8 +89,9 @@ enumerate them and no reader should either.
 
 ## What travels, and what does not
 
-**The keep is deliberately narrower than the planner data it comes from.** It carries what is eaten
-and what is booked. It does not carry:
+**The keep is deliberately narrower than the planner data it comes from.** It carries what is eaten,
+what is booked, and context for them: meal ingredients (without slab row numbers) and outdoor
+safety by month travel; `Household` and `people` do not (household size is a reader setting, never a slab value). It does not carry:
 
 - **tasks and check-offs** — the household’s chores do not travel to the web,
 - **the calendar** — a keep is keyed by day key and carries no dates at all,
@@ -167,11 +168,11 @@ half ships before the other. A file is refused only when the writer’s number e
 **Absent is not the same as empty**, and tooling that reports on a keep must say which it saw. The
 menu is the worked example, and a real one: a keep exported before **2026-08-29** has no `menu`
 section at all, which says the export predates menus; a keep with an empty menu says the household
-has none. Those are different sentences, and a report that conflates them sends someone to
+has none; and a null menu says the file was exported outside its seasons, with no current season to show. Those are different sentences, and a report that conflates them sends someone to
 re-export a file that was never the problem.
 
 `describeSection(keep, name)` in `src/lib/keep.js` is where that distinction lives — it answers
-*absent*, *empty*, *present* or *wrong-shape*, with a sentence for each. Renderers still collapse
+*absent*, *empty*, *present*, *expired* or *wrong-shape*, with a sentence for each. Renderers still collapse
 the two, deliberately: `validateKeep` ignores what it does not know and every panel degrades with
 `?? []`, which is the right behaviour for something drawing a page. The requirement is on tools that
 *report*.
@@ -192,7 +193,16 @@ given above.
     "version": 1,
     "exportedAt": "2026-08-27T18:00:00+00:00",
     "stones": ["fort-knight", "fork-knife", "folk-knowledge"],
-    "foci": ["fork-knife"]
+    "foci": ["fork-knife"],
+    "carriers": {
+      "meals": "fork-knife",
+      "cleaning": "fort-knight",
+      "working": "fort-knight",
+      "spirituality-development": "fort-knight",
+      "friends-family": "folk-knowledge",
+      "health": "fort-knight",
+      "operations": "fort-knight"
+    }
   },
   "days": [
     {
@@ -216,7 +226,7 @@ given above.
           "start": "21:00",
           "end": "23:59",
           "focus": null,
-          "meal": null
+          "meal": { "name": "Dinner", "dish": null }
         }
       ],
       "meals": {
@@ -253,7 +263,31 @@ given above.
           "leftoversDay": "tue-a",
           "leftoversDayLabel": "Tuesday A",
           "cookExtra": false,
-          "cookExtraNote": null
+          "cookExtraNote": null,
+          "prepDay": "sun-a",
+          "prepDayLabel": "Sunday A",
+          "prepBlock": "early",
+          "foodGroups": {
+            "fruit": 0,
+            "vegetable": 0,
+            "proteinFatOil": 1,
+            "grainStarch": 1,
+            "sugar": 0,
+            "other": 0
+          },
+          "recipeLink": "https://example.com/eggs",
+          "ingredients": [
+            {
+              "ingredient": "Eggs",
+              "perPerson": 2,
+              "unit": null,
+              "prep": null,
+              "prepNotes": null,
+              "cookNotes": null,
+              "type": "protein",
+              "dish": "Example eggs on toast"
+            }
+          ]
         }
       ]
     },
@@ -274,6 +308,41 @@ given above.
       ]
     }
   ],
+  "menuAlternates": [
+    {
+      "season": "example-season",
+      "soup": "Example soup",
+      "sandwich": "Example sandwich",
+      "menuSlot": "Dinner1",
+      "method": "Stove",
+      "notes": "Serve hot"
+    }
+  ],
+  "menuProfile": [
+    {
+      "setting": "ExampleSetting",
+      "value": "ExampleValue"
+    }
+  ],
+  "outsideSafety": [
+    {
+      "time": "12:00",
+      "byMonth": {
+        "january": "Too Cold",
+        "february": "Too Cold",
+        "march": "coat & hat",
+        "april": "SAFE!",
+        "may": "SAFE!",
+        "june": "SAFE!",
+        "july": "Too Hot/High UV",
+        "august": "SAFE!",
+        "september": "SAFE!",
+        "october": "coat & hat",
+        "november": "Too Cold",
+        "december": "Too Cold"
+      }
+    }
+  ],
   "season": {
     "key": "example-season",
     "name": "Example Season",
@@ -281,6 +350,20 @@ given above.
     "gregorianRange": "August – October",
     "startDescription": "the second Sunday of August",
     "safeOutsidePercent": 62.5,
+    "blockStarts": {
+      "early": "08:00",
+      "too-dark": "21:00"
+    },
+    "themes": {
+      "celebratedHeritage": "Example Heritage",
+      "bibleConcept": "Example Concept",
+      "other": "Example Other"
+    },
+    "heroes": {
+      "starch": "Example Potato",
+      "protein": "Example Beef",
+      "flavor": "Example Rosemary"
+    },
     "focus": [{ "key": "meals", "label": "Meals" }],
     "produce": [
       {

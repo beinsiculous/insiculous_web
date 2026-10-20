@@ -514,8 +514,14 @@ class DescribeSectionTests(unittest.TestCase):
     def test_null_reads_as_absent_not_as_a_value(self):
         """`season` and `year` are legitimately null, so a null section is the writer saying nothing is
         there — the same thing as not writing the key."""
-        [nulled] = self.describe([[{"menu": None}, "menu"]])
+        [nulled] = self.describe([[{"year": None}, "year"]])
         self.assertEqual(nulled["state"], "absent")
+
+    def test_null_menu_reads_as_expired_state(self):
+        """D10: describeSection learns a null menu as a fifth state, 'expired'."""
+        [expired] = self.describe([[{"menu": None}, "menu"]])
+        self.assertEqual(expired["state"], "expired")
+        self.assertEqual(expired["message"], "This keep was exported outside its seasons; no menu to show.")
 
     def test_a_section_that_is_not_a_list_is_named_rather_than_guessed_at(self):
         [wrong] = self.describe([[{"menu": {"dinner": []}}, "menu"]])

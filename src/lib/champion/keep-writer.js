@@ -24,14 +24,17 @@
 // Pure, like everything else in src/lib/: the championKeep and the date come in as arguments, and no Date object
 // is ever constructed. `exportedAt` is passed in for the same reason — the export script is the one
 // place that touches a clock.
-import { appointmentsFor, dayLabel, mealForBlock, mealsForDayKey, resolveMenu, resolveSeasons, resolveYear } from "./resolve.js";
+import {
+  appointmentsFor, dayLabel, mealForBlock, mealNameForBlock, mealsForDayKey, resolveMenu, resolveSeasons, resolveYear,
+  rowsForSeason, timedBlocks,
+} from "./resolve.js";
 
 /** The format this builder writes. Bumped ONLY for a breaking change — a reader that tolerates unknown
  *  fields can take an additive one without being redeployed, and the person holding the phone cannot
  *  redeploy the website. Adding a field is not a bump. */
 export const KEEP_FORMAT_VERSION = 1;
 
-/** Every appointment a day key holds, flattened across the four blocks into the order the day happens in.
+/** Every appointment a day key holds, flattened across the keep's blocks into the order the day happens in.
  *
  *  Block order IS the sort. `estimatedStart` is when to start moving, so it routinely precedes its own
  *  block — six of the championKeep's fifteen appointments sit outside their block's clock range — and `too-dark`
@@ -44,7 +47,7 @@ export const KEEP_FORMAT_VERSION = 1;
  *  keep — which goes to a public page — shows what is not marked. `omitFromKeep` itself never
  *  travels: the row is dropped, not flagged. */
 function appointmentsForDayKey(championKeep, dayKey) {
-  return championKeep.blocks.flatMap((block) => appointmentsFor(championKeep, dayKey, block.key)
+  return (championKeep.blocks ?? []).flatMap((block) => appointmentsFor(championKeep, dayKey, block.key)
     .filter((appointment) => appointment.omitFromKeep !== true)
     .map((appointment) => ({
       id: appointment.id,
@@ -54,25 +57,37 @@ function appointmentsForDayKey(championKeep, dayKey) {
     })));
 }
 
-/** One day key, as the web page renders it: what the day is for, the shape of its four blocks, what is
- *  booked, and what is eaten. */
-function keepDay(championKeep, day) {
-  const meals = mealsForDayKey(championKeep, day.dayKey);
+/** One day key, as the web page renders it: what the day is for, the shape of its blocks, what is
+ *  booked, and what is eaten. Past the calendar (no season), the day keeps its shape and loses what
+ *  depends on a season: `meals` is null, each block's `start`/`end` is null, and each block's meal keeps
+ *  the slab's meal option name and drops the dish ({name, dish: null}). */
+function keepDay(championKeep, day, season, blocks) {
+  const seasonKey = season?.key ?? null;
+  const meals = seasonKey ? mealsForDayKey(championKeep, day.dayKey, seasonKey) : null;
   return {
     dayKey: day.dayKey,
     label: dayLabel(championKeep, day.dayKey),
     week: day.index <= 7 ? 1 : 2,
     mainFocus: day.mainFocus,
     mainFocusLabel: day.mainFocusLabel,
-    blocks: championKeep.blocks.map((block) => ({
-      key: block.key,
-      label: block.label,
-      start: block.start,
-      end: block.end,
-      // The slab's display text ("Meal Prep"), not a category key — too-dark carries none.
-      focus: day.blockFocus?.[block.key] ?? null,
-      meal: mealForBlock(championKeep, day.dayKey, block),
-    })),
+    blocks: blocks.map((block) => {
+      // Past the calendar there is no season to pick a Meals row from, so the block keeps the name it
+      // gives its meal and loses the dish — the name is the block's, so no row is needed. A block whose
+      // option has no Meals column (Breakfast, or none at all) is null on both sides of the edge.
+      const mealName = mealNameForBlock(block);
+      const meal = seasonKey === null
+        ? (mealName ? { name: mealName, dish: null } : null)
+        : mealForBlock(championKeep, day.dayKey, block, seasonKey);
+      return {
+        key: block.key,
+        label: block.label,
+        start: season ? (block.start ?? null) : null,
+        end: season ? (block.end ?? null) : null,
+        // The slab's display text ("Meal Prep"), not a category key — too-dark carries none.
+        focus: day.blockFocus?.[block.key] ?? null,
+        meal,
+      };
+    }),
     appointments: appointmentsForDayKey(championKeep, day.dayKey),
     // The three dishes only; the row's dayKey and sourceRow are the slab's business, not the page's.
     meals: meals
@@ -81,21 +96,24 @@ function keepDay(championKeep, day) {
   };
 }
 
-/** Which stones the keep is built of, and which are foci — copied verbatim from the Champion's keep
- *  (beinsiculous/fortknight#19; the rule is fortknight's DOMAIN.md, "Composition"), additively: no
- *  version bump. A Champion's keep from before its schemaVersion 6 carries neither list, and then
+/** Which stones the keep is built of, which are foci, and which carry categories — copied verbatim
+ *  from the Champion's keep (beinsiculous/fortknight#19, #36; the rule is fortknight's DOMAIN.md, "Composition"),
+ *  additively: no version bump. A Champion's keep from before its schemaVersion 6 carries neither list, and then
  *  neither is written, because absent has to stay sayable: "this export predates composition" is a
  *  different sentence from "this fort added no optional stone" (stones: ["fort-knight"], foci: []).
  *  Each list is copied only when the source carries it — a source with stones and no foci yields
  *  stones and no foci, never an invented "no focus stones" (adversarial review, code round, F1).
- *  The lists are the Champion's keep's own statement — their order and their agreement are the
- *  mason's contract, checked where they are made — and nothing here infers a stone from a section
- *  being empty: a template slab's stone is present AND empty, where the stone owns no required data. */
+ *  Nothing is copied without stones: the schema makes foci depend on them and carriers name them, so
+ *  a source with foci and no stones yields a keep without composition rather than one the schema
+ *  refuses. meta.carriers is copied when it is an object. */
 function composition(championKeep) {
   const meta = championKeep.meta ?? {};
   if (!Array.isArray(meta.stones)) return {};
   const declared = { stones: [...meta.stones] };
   if (Array.isArray(meta.foci)) declared.foci = [...meta.foci];
+  if (meta.carriers && typeof meta.carriers === "object" && !Array.isArray(meta.carriers)) {
+    declared.carriers = { ...meta.carriers };
+  }
   return declared;
 }
 
@@ -105,14 +123,52 @@ function composition(championKeep) {
  *
  *  A date the calendar cannot answer yields a null season AND a null year, and the two are tied together
  *  deliberately. They are one question — what is it right now — so answering half of it would be worse
- *  than answering none: `resolveYear` matches a year by its first four characters, so 2028-12-31 has a
- *  wheel (the championKeep carries a 2028 row) while having no season (the calendar stops on 2028-12-30). That is
- *  one real day in this championKeep's three-year life, and on it the page would otherwise draw a full year with
- *  nothing marked current and no season card beside it. The fourteen days are unaffected either way,
- *  because they never depended on a date in the first place. */
+ *  than answering none. Past the calendar, menu, menuAlternates, and menuProfile are null together with season.
+ *  outsideSafety is copied without sourceRow, [] when empty, null when absent. All three new sections
+ *  are always keys on the built keep. */
 export function buildKeep(championKeep, isoDate, exportedAt = null) {
   const season = resolveSeasons(championKeep, isoDate).find((entry) => entry.isCurrent) ?? null;
   const wheel = resolveYear(championKeep, isoDate);
+  const blocks = timedBlocks(championKeep, season?.key ?? null);
+
+  let menu = null;
+  let menuAlternates = null;
+  let menuProfile = null;
+
+  if (season) {
+    // EMPTY HAS TO BE SAYABLE. resolveMenu always returns its three slots, so a household with no menu
+    // for this season would otherwise export three empty slots and every reader would call that "a menu
+    // with three things in it" (adversarial review, code round, F1). The rows are counted with the rule
+    // resolveMenu writes with — rowsForSeason — or the two disagree on a file that mixes tagged and
+    // untagged rows and the empty state becomes unreachable again.
+    menu = rowsForSeason(championKeep.menu, season.key).length === 0 ? [] : resolveMenu(championKeep, season.key);
+
+    if (championKeep.menuAlternates !== undefined) {
+      menuAlternates = rowsForSeason(championKeep.menuAlternates, season.key).map((row) => {
+        const { sourceRow, ...withoutRow } = row ?? {};
+        return withoutRow;
+      });
+    }
+
+    if (championKeep.menuProfiles !== undefined) {
+      // The season's own profile first; a profile tagged with no season is the fallback, never the pick.
+      const profiles = championKeep.menuProfiles ?? [];
+      const profile = profiles.find((candidate) => candidate?.season === season.key)
+        ?? profiles.find((candidate) => candidate?.season == null);
+      menuProfile = Array.isArray(profile?.settings)
+        ? profile.settings.map((entry) => ({ setting: entry.setting, value: entry.value }))
+        : [];
+    }
+  }
+
+  let outsideSafety = null;
+  if (championKeep.outsideSafety !== undefined && championKeep.outsideSafety !== null) {
+    outsideSafety = (championKeep.outsideSafety ?? []).map((row) => {
+      const { sourceRow, ...withoutRow } = row ?? {};
+      return withoutRow;
+    });
+  }
+
   return {
     meta: {
       format: "keep",
@@ -120,17 +176,12 @@ export function buildKeep(championKeep, isoDate, exportedAt = null) {
       exportedAt,
       ...composition(championKeep),
     },
-    days: (championKeep.days ?? []).map((day) => keepDay(championKeep, day)),
-    // The fortnight menu, by slot. resolveMenu is the Menu screen's own projection, reused rather
-    // than written twice: it already joins the day labels (the page looks up, it never resolves) and
-    // already drops the slab's row numbers. Additive — no version bump; a keep from before
-    // 2026-08-29 simply has no menu section, which is a different thing from an empty one.
-    //
-    // EMPTY HAS TO BE SAYABLE. resolveMenu always returns its three slots, so a household with no
-    // menu would otherwise export three empty slots and every reader would call that "a menu with
-    // three things in it" — making the empty state unreachable from the only writer there is, in the
-    // same change that made absent-versus-empty load-bearing. Adversarial review, code round, F1.
-    menu: (championKeep.menu ?? []).length === 0 ? [] : resolveMenu(championKeep),
+    days: (championKeep.days ?? []).map((day) => keepDay(championKeep, day, season, blocks)),
+    // The fortnight menu, by slot. resolveMenu is the Menu screen's own projection.
+    menu,
+    menuAlternates,
+    menuProfile,
+    outsideSafety,
     season,
     year: season && wheel.status === "year" ? wheel : null,
   };
