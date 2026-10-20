@@ -39,11 +39,11 @@
   - heading "Be Insiculous — 0 of 1 unlocked" [level=2]
   - list:
     - listitem: Player — Opened the games page. — Locked
-  - heading "Insiculous Pong — 0 of 12 unlocked" [level=2]
+  - heading "Tong — 0 of 12 unlocked" [level=2]
   - list:
     - listitem: Training Wheels — Beat the CPU on Easy. — Locked
     - listitem: Holding Your Own — Beat the CPU on Medium. — Locked
-    - listitem: Pong Master — Beat the CPU on Hard. — Locked
+    - listitem: Tong Master — Beat the CPU on Hard. — Locked
     - listitem: First Victory — Win a match in Normal mode. — Locked
     - listitem: Insanely Good — Win a match in Insane mode. — Locked
     - listitem: This Is Ridiculous — Win a match in Ridiculous mode. — Locked
@@ -53,7 +53,7 @@
     - listitem: Untouchable — Shut out the opponent in Insane mode. — Locked
     - listitem: Impossibly Clean — Shut out the opponent in Ridiculous mode. — Locked
     - listitem: Insiculously Dominant — Shut out the opponent in Insiculous mode. — Locked
-  - heading "Insiculous Breakout — 0 of 10 unlocked" [level=2]
+  - heading "The Food Pyramid — 0 of 10 unlocked" [level=2]
   - list:
     - listitem: Demolition Crew — Clear every brick in Normal mode. — Locked
     - listitem: Speed Wrecker — Clear every brick in Insane mode. — Locked
@@ -65,7 +65,7 @@
     - listitem: Insiculously Flawless — Clear Insiculous mode without losing a ball. — Locked
     - listitem: Wrecking Volley — Destroy 5 bricks in a single volley (no paddle touch). — Locked
     - listitem: Clutch Clear — Clear the board on your very last life. — Locked
-  - heading "Insiculous Invaders — 0 of 11 unlocked" [level=2]
+  - heading "Toast Busters — 0 of 11 unlocked" [level=2]
   - list:
     - listitem: Earth Defender — Repel the invasion in Normal mode. — Locked
     - listitem: Blitz Breaker — Repel the invasion in Insane mode. — Locked
@@ -78,7 +78,7 @@
     - listitem: Sharpshooter — Land 10 kill shots in a row without wasting a bullet. — Locked
     - listitem: Last Stand — Repel the invasion on your very last life. — Locked
     - listitem: UFO Hunter — Shoot down a mystery ship. — Locked
-  - heading "Insiculous Snake — 0 of 9 unlocked" [level=2]
+  - heading "Bratdog — 0 of 9 unlocked" [level=2]
   - list:
     - listitem: Garden Snake — Reach length 10. — Locked
     - listitem: Long Boi — Reach length 20. — Locked
@@ -89,7 +89,7 @@
     - listitem: Insiculous Devourer — Reach length 15 in Insiculous mode. — Locked
     - listitem: Ouroboros — Bite your own tail. — Locked
     - listitem: Quick Snack — Eat a food within 1.5 seconds of the previous one. — Locked
-  - heading "Insiculous Asteroids — 0 of 11 unlocked" [level=2]
+  - heading "Meatieroids — 0 of 11 unlocked" [level=2]
   - list:
     - listitem: Rock Steady — Reach wave 5 in Normal mode. — Locked
     - listitem: Belt at Full Speed — Reach wave 5 in Insane mode. — Locked
@@ -102,7 +102,7 @@
     - listitem: Untouchable — Clear 3 waves in a row without dying. — Locked
     - listitem: Double Tap — Shatter two rocks within half a second. — Locked
     - listitem: Living on the Edge — Reach wave 5 on your last ship. — Locked
-  - heading "Insiculous Frogger — 0 of 8 unlocked" [level=2]
+  - heading "Chicken Coop — 0 of 8 unlocked" [level=2]
   - list:
     - listitem: Pond Pioneer — Guide a frog into its first home. — Locked
     - listitem: Full House — Fill all five homes in one round. — Locked

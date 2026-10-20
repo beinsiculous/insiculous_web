@@ -136,6 +136,15 @@ Rules (enforced by `scripts/postbuild-check.mjs`, which runs on every build):
 - **Don't overwrite builds in place** — bump the version folder
   (`v1/` → `v2/`) and update the `wasm` frontmatter path, so CDN and browser
   caches can't serve a stale `.wasm` against new JS glue.
+- **A renamed game keeps its old bundle directories** — `public/games/<old>/v<N>/`
+  stay, immutable, beside the new slug's. Its entry (renamed to `<new>.md`) sets
+  `formerSlug: '<old>'`, and `public/_redirects` carries its lines —
+  `/games/<old>/` and `/games/<old>`, plus `/playground/<old>/` and `/playground/<old>`
+  when the entry has an `editor` bundle — each to the new page with check 9's one
+  code, 301 now that the first renames have stuck. Check 9 holds them: a missing line, the wrong code, a destination with no page
+  in `dist/`, or a splat under the old slug fails the build. No splat, because the
+  editor bundle under `/playground/<old>/` is still what the new playground page
+  loads.
 
 If a game ever needs threads/SharedArrayBuffer, uncomment the COOP/COEP block
 in `public/_headers`.
@@ -156,12 +165,12 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   `docs/WEB_PLAYGROUND.md` § The game bundles.
 - A games entry’s `playgroundProject:` names a bundled *data* project (`assets/projects.json`)
   whose rules are that game’s, as scripts; it puts an “edit on the playground” button on the
-  game’s row of `/games/`, and `postbuild-check.mjs` fails the build if the slug is not in the
+  game’s play page, and `postbuild-check.mjs` fails the build if the slug is not in the
   synced bundle.
 - Project layout: `assets/manifest.json` catalogs all bundle assets, `assets/projects.json`
   lists bundled project manifests, and each project’s data lives under
   `assets/projects/<slug>/assets/`.
-- **The canvas carries no padding and no border**: the engine sizes its surface from `#game-canvas`’s client box and winit reads the pointer from its padding edge, so a padded or bordered canvas would draw blurred and hit-test off by the padding; style the wrapper, never the canvas.
+- **The canvas carries no padding and no border**: the engine reads `#game-canvas`’s client box (the editor sizes its surface from it; a game keeps its 800×600 surface, lets the page scale the canvas, and maps the pointer from the box to the surface) and winit reads the pointer from its padding edge, so a padded or bordered canvas would draw blurred and hit-test off by the padding; style the wrapper, never the canvas.
 - **The editor pages are an application shell, not a document**: `/playground/` and
   `/playground/<slug>/` render on `src/layouts/AppLayout.astro` rather than `BaseLayout.astro` — a
   three-row body grid whose middle row is the workspace, an app bar carrying the wordmark, the

@@ -43,12 +43,12 @@ const DIST = resolve(import.meta.dirname, "..", "dist");
 
 const SENTINELS = {
   "/profile/": [
-    "Insiculous Pong — 8 unlocked",
+    "Tong — 9 unlocked",
     "Be Insiculous — 11 unlocked",
     "FortKnight — 1 unlocked",
   ],
   "/games/": [
-    "Insiculous Pong — 8 unlocked",
+    "Tong — 9 unlocked",
   ],
   "/fortknight/keep/": [
     "Sunday A",

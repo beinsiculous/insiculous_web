@@ -152,11 +152,11 @@ class TotalAchievementCountTests(unittest.TestCase):
 
     def test_counts_the_site_store_plus_every_game_save(self):
         site = json.dumps({"unlocks": {"player": {"unlocked_at": 1_756_252_800}, "moved-in": {"unlocked_at": 1_756_252_800}}})
-        pong = json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800}}})
-        self.assertEqual(self.count(site, {"pong": pong}), 3)
+        tong = json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800}}})
+        self.assertEqual(self.count(site, {"tong": tong}), 3)
 
     def test_malformed_stores_contribute_nothing(self):
-        self.assertEqual(self.count("not json {", {"snake": '{"unlocks": ["foo"]}'}), 0)
+        self.assertEqual(self.count("not json {", {"bratdog": '{"unlocks": ["foo"]}'}), 0)
 
 
 @unittest.skipIf(shutil.which("node") is None, "node not installed")
@@ -187,7 +187,7 @@ class PromptGatingTests(unittest.TestCase):
     def gate(self, site=None, game=None, settings=None, flag=None):
         return run_node(achievements_script(
             f"if (inputs.site) store.set({json.dumps(SITE_KEY)}, inputs.site);"
-            f"if (inputs.game) store.set('beinsiculous.games.pong.achievements', inputs.game);"
+            f"if (inputs.game) store.set('beinsiculous.games.tong.achievements', inputs.game);"
             f"if (inputs.settings) store.set({json.dumps(SETTINGS_KEY)}, inputs.settings);"
             f"if (inputs.flag) store.set({json.dumps(PROMPT_KEY)}, inputs.flag);"
             "process.stdout.write(JSON.stringify(shouldPromptForProfile()));",
@@ -247,7 +247,7 @@ class RenderAchievementsBoardTests(unittest.TestCase):
     def render(self, options, site=None, game=None):
         return run_node(achievements_script(
             f"if (inputs.site) store.set({json.dumps(SITE_KEY)}, inputs.site);"
-            "if (inputs.game) store.set('beinsiculous.games.pong.achievements', inputs.game);"
+            "if (inputs.game) store.set('beinsiculous.games.tong.achievements', inputs.game);"
             "const container = document.createElement('div');"
             "const result = renderAchievementsBoard(container, inputs.options);"
             "process.stdout.write(JSON.stringify({ ...result, children: container.children.map(serialize) }));",
@@ -305,7 +305,7 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertTrue(with_note["rendered"])
         self.assertEqual(with_note["unlockedCount"], 1)
         self.assertEqual(with_note["totalCount"], 1)
-        self.assertEqual(with_note["children"][0]["text"], "Insiculous Pong — 1 unlocked")
+        self.assertEqual(with_note["children"][0]["text"], "Tong — 1 unlocked")
         self.assertEqual(with_note["children"][-1]["tag"], "p")
         self.assertEqual(with_note["children"][-1]["className"], "achievement-note")
         self.assertIn("full achievement list lives in the game", with_note["children"][-1]["text"])
@@ -314,8 +314,8 @@ class RenderAchievementsBoardTests(unittest.TestCase):
 
     def test_game_with_catalog_unlocked_only_shows_real_names_and_no_descriptions_or_note(self):
         catalog = {
-            "slug": "pong",
-            "title": "Insiculous Pong",
+            "slug": "tong",
+            "title": "Tong",
             "achievements": [
                 {"id": "beat_cpu_easy", "name": "Training Wheels", "description": "Beat the CPU on Easy.", "hidden": False},
                 {"id": "marathon_win", "name": "Marathon", "description": "Win a long rally.", "hidden": False},
@@ -326,7 +326,7 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertTrue(result["rendered"])
         self.assertEqual(result["unlockedCount"], 1)
         self.assertEqual(result["totalCount"], 1)
-        self.assertEqual(result["children"][0]["text"], "Insiculous Pong — 1 unlocked")
+        self.assertEqual(result["children"][0]["text"], "Tong — 1 unlocked")
         [(item_text, item_class)] = self.items(result["children"])
         self.assertTrue(item_text.startswith("Training Wheels — "))
         self.assertNotIn("Beat the CPU on Easy", item_text)
@@ -342,8 +342,8 @@ class RenderAchievementsBoardTests(unittest.TestCase):
 
     def test_game_with_catalog_spine_mode_renders_unlocked_then_locked_with_no_note(self):
         catalog = {
-            "slug": "pong",
-            "title": "Insiculous Pong",
+            "slug": "tong",
+            "title": "Tong",
             "achievements": [
                 {"id": "beat_cpu_easy", "name": "Training Wheels", "description": "Beat the CPU on Easy.", "hidden": False},
                 {"id": "marathon_win", "name": "Marathon", "description": "Win a long rally.", "hidden": False},
@@ -354,7 +354,7 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertTrue(result["rendered"])
         self.assertEqual(result["unlockedCount"], 1)
         self.assertEqual(result["totalCount"], 2)
-        self.assertEqual(result["children"][0]["text"], "Insiculous Pong — 1 of 2 unlocked")
+        self.assertEqual(result["children"][0]["text"], "Tong — 1 of 2 unlocked")
         [(unlocked_text, unlocked_class), (locked_text, locked_class)] = self.items(result["children"])
         self.assertTrue(unlocked_text.startswith("Training Wheels — Beat the CPU on Easy. — "))
         self.assertEqual(unlocked_class, "")
@@ -367,13 +367,13 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertTrue(zero_unlocks["rendered"])
         self.assertEqual(zero_unlocks["unlockedCount"], 0)
         self.assertEqual(zero_unlocks["totalCount"], 2)
-        self.assertEqual(zero_unlocks["children"][0]["text"], "Insiculous Pong — 0 of 2 unlocked")
+        self.assertEqual(zero_unlocks["children"][0]["text"], "Tong — 0 of 2 unlocked")
         self.assertNotIn("p", [child["tag"] for child in zero_unlocks["children"]])
 
     def test_game_catalog_hidden_achievement_masking(self):
         catalog = {
-            "slug": "pong",
-            "title": "Insiculous Pong",
+            "slug": "tong",
+            "title": "Tong",
             "achievements": [
                 {"id": "secret", "name": "Secret Easter Egg", "description": "Found it.", "hidden": True},
             ],
@@ -393,8 +393,8 @@ class RenderAchievementsBoardTests(unittest.TestCase):
 
     def test_game_catalog_unknown_id_fallback(self):
         catalog = {
-            "slug": "pong",
-            "title": "Insiculous Pong",
+            "slug": "tong",
+            "title": "Tong",
             "achievements": [
                 {"id": "known_one", "name": "Known Achievement", "description": "Desc.", "hidden": False},
             ],
@@ -405,7 +405,7 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertTrue(result["rendered"])
         self.assertEqual(result["unlockedCount"], 1)
         self.assertEqual(result["totalCount"], 2)
-        self.assertEqual(result["children"][0]["text"], "Insiculous Pong — 1 of 2 unlocked")
+        self.assertEqual(result["children"][0]["text"], "Tong — 1 of 2 unlocked")
         [(unlocked_text, unlocked_class), (locked_text, locked_class)] = self.items(result["children"])
         self.assertTrue(unlocked_text.startswith("Newer Feature — "))
         self.assertEqual(unlocked_class, "")

@@ -57,7 +57,7 @@ const shotNames = {
   "/": "studio-home",
   "/games/": "studio-games",
   "/achievements/": "studio-achievements",
-  "/games/pong/": "studio-game",
+  "/games/tong/": "studio-game",
   "/devlog/": "studio-devlog",
   [devlogPostRoutes[0]]: "studio-devlog-post",
   "/engine/": "studio-engine",

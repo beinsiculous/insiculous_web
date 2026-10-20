@@ -46,6 +46,14 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
     )
   }
 
+  {
+    game.data.playgroundProject && (
+      <p class="playground-rules">
+        Its rules are scripts, editable on the playground: <a class="button secondary" href={`/playground/?project=${game.data.playgroundProject}`}>edit <span class="visually-hidden">{game.data.title}</span> on the playground →</a>
+      </p>
+    )
+  }
+
   <article>
     <Content />
   </article>

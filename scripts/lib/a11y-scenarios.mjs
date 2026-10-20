@@ -61,7 +61,7 @@ export const everyStoneKeepSeed = JSON.stringify({
 // many on purpose: enough rows that the board's 75vh scroll box genuinely overflows, so axe's
 // scrollable-region-focusable rule has a real scrollable region to test rather than passing as
 // inapplicable.
-export const pongAchievements = JSON.stringify({
+export const tongAchievements = JSON.stringify({
   unlocks: {
     win_normal: { unlocked_at: 1756252800 },
     beat_cpu_easy: { unlocked_at: 1756339200 },
@@ -71,6 +71,15 @@ export const pongAchievements = JSON.stringify({
     comebacks: { unlocked_at: 1756771200 },
     untouchable: { unlocked_at: 1756857600 },
     hat_trick: { unlocked_at: 1756944000 },
+  },
+});
+
+// One more unlock under the key Tong's old bundles wrote, `beinsiculous.games.pong.achievements`,
+// so the browser gates render the union of the two keys the boards show (games-achievements.js):
+// the Tong heading counts nine, and a page that read one key alone would count eight.
+export const formerKeyAchievements = JSON.stringify({
+  unlocks: {
+    beat_cpu_medium: { unlocked_at: 1756166400 },
   },
 });
 
@@ -98,16 +107,17 @@ export const siteAchievements = JSON.stringify({
   },
 });
 
-// Plant the four standard localStorage stores before navigation so pages see returning user state.
+// Plant the five standard localStorage stores before navigation so pages see returning user state.
 export async function addPopulatedStateInitScript(target) {
   await target.addInitScript(
-    ([settings, seed, gameUnlocks, siteUnlocks]) => {
+    ([settings, seed, gameUnlocks, formerKeyUnlocks, siteUnlocks]) => {
       localStorage.setItem("fortknight.user-settings", settings);
       localStorage.setItem("beinsiculous.keep", seed);
-      localStorage.setItem("beinsiculous.games.pong.achievements", gameUnlocks);
+      localStorage.setItem("beinsiculous.games.tong.achievements", gameUnlocks);
+      localStorage.setItem("beinsiculous.games.pong.achievements", formerKeyUnlocks);
       localStorage.setItem("beinsiculous.achievements", siteUnlocks);
     },
-    [JSON.stringify({ schemaVersion: 2 }), sampleKeepSeed, pongAchievements, siteAchievements]
+    [JSON.stringify({ schemaVersion: 2 }), sampleKeepSeed, tongAchievements, formerKeyAchievements, siteAchievements]
   );
 }
 
@@ -255,7 +265,7 @@ export const OPENED_ELEMENT_ROUTES = [
     open: openHelpDialog,
   },
   {
-    route: "/playground/pong/",
+    route: "/playground/tong/",
     seed: {},
     label: "help dialog",
     waitFor: "dialog#playground-help[open]",
