@@ -63,6 +63,16 @@ const { editorGames = [], projectControls = true } = Astro.props;
             accept=".zip,application/zip"
             disabled
           />
+          <label for="import-file-input" class="label-import">Import a song, sample or SoundFont</label>
+          <input
+            type="file"
+            id="import-file-input"
+            class="input-file"
+            accept=".mid,.wav,.sf2"
+            aria-describedby="import-file-status"
+            disabled
+          />
+          <output id="import-file-status" class="bar-note" aria-live="polite" for="import-file-input"></output>
         </div>
         <div class="reset-group">
           <button type="button" id="reset-button" class="btn-reset" disabled hidden>

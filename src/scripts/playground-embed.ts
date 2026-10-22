@@ -1,6 +1,7 @@
 export {};
 
 import { createScriptsPanel } from './playground-scripts-panel.ts';
+import { createFileImport } from './playground-import-file.ts';
 import { createSaveStatus } from './playground-save-status.ts';
 import { probeWebGpu, describeWebGpuFailure } from './webgpu-gate.ts';
 import { createPreviewLaunch } from './playground-preview-launch.ts';
@@ -101,6 +102,7 @@ type PlaygroundModule = {
   playground_list_files: () => string[];
   playground_read_file: (path: string) => string;
   playground_write_file: (path: string, text: string) => void;
+  playground_write_file_bytes: (name: string, bytes: Uint8Array, replace: boolean) => string;
   playground_script_errors: () => string[];
 };
 
@@ -131,6 +133,7 @@ function showCompatibility(message: string) {
  */
 function wireControls(wasm: PlaygroundModule) {
   const scriptsPanel = createScriptsPanel(wasm);
+  const fileImport = createFileImport(wasm);
   const saveStatus = createSaveStatus(wasm, document.getElementById('save-status'), () =>
     scriptsPanel.isDirty()
   );
@@ -286,6 +289,7 @@ function wireControls(wasm: PlaygroundModule) {
     previewLaunch.enable();
     if (saveButton) saveButton.disabled = false;
     if (importInput) importInput.disabled = false;
+    fileImport.enable();
     if (commandInput) commandInput.disabled = false;
     if (commandSubmit) commandSubmit.disabled = false;
     scriptsPanel.enable();
