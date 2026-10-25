@@ -30,6 +30,9 @@ modes**: Normal, Insane, Ridiculous, and *Insiculous* — all of it at once.
 Twelve achievements to chase, and the whole thing is localized in English and
 Pirate.
 
+Over it all, Bizet's *Toreador Song*, played live by the engine's conductor:
+every paddle hit walks the refrain, and the pause menu jams over it.
+
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
 (Vulkan / Metal / DX12) run the same code natively.

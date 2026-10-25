@@ -3,8 +3,8 @@ title: 'The Food Pyramid'
 formerSlug: 'breakout'
 blurb: 'A tong that bites, Deion as the ball, and six tiers of food bricks on the kitchen counter.'
 status: 'playable'
-wasm: '/games/food-pyramid/v5/game.js'
-editor: '/playground/breakout/v4/game.js'
+wasm: '/games/food-pyramid/v6/game.js'
+editor: '/playground/breakout/v5/game.js'
 screenshots: ['/images/food-pyramid-2026-09.png']
 capsule: '/images/capsules/ai_food_pyramid_capsule_256x256.png'
 namePlate: '/images/capsules/ai_food_pyramid_name_256x64.png'
@@ -25,6 +25,9 @@ any brick in one hit for ten seconds, or both.
 Eight levels, all hand-authored in the engine's scene editor — **CLASSIC**,
 **THE VAULT**, **PINATA**, and **THE GAUNTLET**, each with a two-player
 co-op variant. Ten achievements, chaos modes included.
+
+The counter marches to Verdi's *Triumphal March*, played live by the engine's
+conductor: every brick you break walks the fanfare, and the tong plays the bass.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
