@@ -3,8 +3,8 @@ title: 'Meatieroids'
 formerSlug: 'asteroids'
 blurb: 'Deion flies the Flying Funk through a belt of roided-out meatballs that flex, tumble, and burst into smaller, angrier ones.'
 status: 'playable'
-wasm: '/games/meatieroids/v5/game.js'
-editor: '/playground/asteroids/v4/game.js'
+wasm: '/games/meatieroids/v6/game.js'
+editor: '/playground/asteroids/v5/game.js'
 screenshots: ['/images/meatieroids-2026-10.png']
 capsule: '/images/capsules/ai_meatieroids_capsule_256x256.png'
 namePlate: '/images/capsules/ai_meatieroids_name_256x64.png'
@@ -26,6 +26,8 @@ the run only ends when the ships do.
 Co-op shares one belt: Cubert flies a second Funk firing ice chips, with his
 own lives and score. In **Ridiculous** and **Insiculous** a large meatieroid
 bursts into three. Eleven achievements, chaos modes included.
+
+The Flying Funk brawls to Holst's *Mars*, played live by the engine's conductor: every shot drums the ostinato, every meatieroid you break walks the brass theme on its size's own horn, and a lost ship lands the final chord.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

@@ -3,8 +3,8 @@ title: 'Toast Busters'
 formerSlug: 'invaders'
 blurb: 'Deion and Cubert hold the kitchen counter against four rows of haunted toast, behind butter bunkers that melt as they are chipped.'
 status: 'playable'
-wasm: '/games/toast-busters/v6/game.js'
-editor: '/playground/invaders/v5/game.js'
+wasm: '/games/toast-busters/v7/game.js'
+editor: '/playground/invaders/v6/game.js'
 screenshots: ['/images/toast-busters-2026-10.png']
 capsule: '/images/capsules/ai_toast_busters_capsule_256x256.png'
 namePlate: '/images/capsules/ai_toast_busters_name_256x64.png'
@@ -25,6 +25,8 @@ Co-op is the real draw: Cubert joins as a second cannon firing ice chips, with
 his own lives and score, defending the same bunkers against the same
 descending fleet. In **Ridiculous** and **Insiculous** each cannon fires a twin
 volley. Eleven achievements, chaos modes included.
+
+The Toasted march to Saint-Saëns's *Danse Macabre*, played live by the engine's conductor: every slice you bust rattles the bones on its own instrument, and Maxwell's saucer rings midnight.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

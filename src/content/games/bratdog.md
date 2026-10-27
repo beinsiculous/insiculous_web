@@ -3,8 +3,8 @@ title: 'Bratdog'
 formerSlug: 'snake'
 blurb: 'Frank the bratwurst dachshund loose in the kitchen, growing longer with every snack — and a versus mode where two dogs share the floor.'
 status: 'playable'
-wasm: '/games/bratdog/v6/game.js'
-editor: '/playground/snake/v5/game.js'
+wasm: '/games/bratdog/v7/game.js'
+editor: '/playground/snake/v6/game.js'
 screenshots: ['/images/bratdog-2026-09.png']
 capsule: '/images/capsules/ai_bratdog_capsule_256x256.png'
 namePlate: '/images/capsules/ai_bratdog_name_256x64.png'
@@ -26,6 +26,8 @@ share one kitchen, and every death has a cause — the counter, a self-bite,
 the other dog, or a head-on crash — so the game resolves a winner or a draw
 accordingly. In **Ridiculous**, and its faster sibling **Insiculous**, the
 counter's edge opens up and wraps around, with two snacks on the floor. Nine achievements, chaos modes included.
+
+Frank romps to Strauss's *Tritsch-Tratsch Polka*, played live by the engine's conductor: every snack walks the tune, every turn clicks a paw, and the second dog answers on the clarinet.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds

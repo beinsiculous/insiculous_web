@@ -3,8 +3,8 @@ title: 'Tong'
 formerSlug: 'pong'
 blurb: 'Tongs for paddles, a meatball for a ball, grills for goals, all of it from the Deion world — and you work the jaws yourself.'
 status: 'playable'
-wasm: '/games/tong/v6/game.js'
-editor: '/playground/pong/v5/game.js'
+wasm: '/games/tong/v7/game.js'
+editor: '/playground/pong/v6/game.js'
 playgroundProject: 'pong'
 screenshots: ['/images/tong-rally-2026-09.png']
 capsule: '/images/capsules/ai_tong_capsule_256x256.png'
@@ -29,6 +29,9 @@ Like every game in the series, it ships with the engine's signature **chaos
 modes**: Normal, Insane, Ridiculous, and *Insiculous* — all of it at once.
 Twelve achievements to chase, and the whole thing is localized in English and
 Pirate.
+
+Over it all, Bizet's *Toreador Song*, played live by the engine's conductor:
+every paddle hit walks the refrain, and the pause menu jams over it.
 
 Built on Insiculous 2D. Playable right here in the browser (WebGPU —
 Chrome/Edge, or Firefox with `dom.webgpu.enabled`); desktop builds
