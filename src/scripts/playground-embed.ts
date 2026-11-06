@@ -91,6 +91,7 @@ type PlaygroundModule = {
   playground_reset_project: (slug: string) => Promise<unknown>;
   playground_dispatch: (line: string) => boolean;
   playground_poll_responses: () => string[];
+  playground_poll_file_changes: () => string[];
   playground_is_dirty: () => boolean;
   playground_export_zip: () => Promise<Uint8Array>;
   playground_snapshot: (generation: bigint) => Promise<{ sceneEntry: string; bytes: Uint8Array }>;
@@ -132,7 +133,8 @@ function showCompatibility(message: string) {
  * save queue.
  */
 function wireControls(wasm: PlaygroundModule) {
-  const scriptsPanel = createScriptsPanel(wasm);
+  let fileChangeHook: ((paths: string[]) => void) | undefined;
+  const scriptsPanel = createScriptsPanel(wasm, (hook) => { fileChangeHook = hook; });
   const fileImport = createFileImport(wasm);
   const saveStatus = createSaveStatus(wasm, document.getElementById('save-status'), () =>
     scriptsPanel.isDirty()
@@ -187,6 +189,18 @@ function wireControls(wasm: PlaygroundModule) {
     }
   };
 
+  // A bundle from before the drain existed lacks the export, and a throw here would stop
+  // the rest of the tick (the save status, the conflict buttons): the feed degrades alone.
+  const pollFileChanges = () => {
+    if (typeof wasm.playground_poll_file_changes !== 'function') return;
+    try {
+      const paths = wasm.playground_poll_file_changes();
+      if (paths.length > 0) fileChangeHook?.(paths);
+    } catch {
+      // The next tick retries; nothing else on the tick depends on this feed.
+    }
+  };
+
   const pollResponses = () => {
     const responses = wasm.playground_poll_responses();
     if (responses && responses.length > 0) {
@@ -203,6 +217,7 @@ function wireControls(wasm: PlaygroundModule) {
       if (commandOutput) commandOutput.scrollTop = commandOutput.scrollHeight;
     }
 
+    pollFileChanges();
     saveStatus.poll();
 
     const conflicted = wasm.playground_conflicted_paths();

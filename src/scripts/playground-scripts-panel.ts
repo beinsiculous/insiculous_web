@@ -10,7 +10,10 @@ export interface ScriptsPanel {
   enable: () => void;
 }
 
-export function createScriptsPanel(bridge: ScriptsBridge): ScriptsPanel {
+export function createScriptsPanel(
+  bridge: ScriptsBridge,
+  registerFileChanges: (hook: (paths: string[]) => void) => void
+): ScriptsPanel {
   const scriptSelect = document.getElementById('script-select') as HTMLSelectElement | null;
   const scriptSource = document.getElementById('script-source') as HTMLTextAreaElement | null;
   const scriptSaveButton = document.getElementById('script-save') as HTMLButtonElement | null;
@@ -21,6 +24,10 @@ export function createScriptsPanel(bridge: ScriptsBridge): ScriptsPanel {
   let lastSaved = '';
   let pollErrorsIntervalId = 0;
   let lastErrorsJoined = '';
+  let enabled = false;
+  // The exact text a failed list refresh wrote to the status, so a later successful refresh
+  // clears that and nothing else: a load or save error belongs to the visitor until retried.
+  let listError = '';
 
   const isDirty = (): boolean => {
     if (!scriptSource) return false;
@@ -119,17 +126,48 @@ export function createScriptsPanel(bridge: ScriptsBridge): ScriptsPanel {
     });
   }
 
-  const enable = () => {
+  // The drain reports the panel's own Save as a change too, so the open file's bytes are read
+  // and compared first: a self-save or any no-op write leaves the textarea, its caret and
+  // the saved message alone; only bytes that differ replace a clean buffer, and a dirty one
+  // is kept and told.
+  const followOpenFileChange = () => {
+    if (!scriptSource) return;
+    let onDisk = '';
+    try {
+      onDisk = bridge.playground_read_file(currentPath);
+    } catch (error) {
+      if (scriptStatus) scriptStatus.textContent = String(error);
+      return;
+    }
+    if (onDisk === scriptSource.value) {
+      lastSaved = onDisk;
+      return;
+    }
+    if (isDirty()) {
+      if (scriptStatus) scriptStatus.textContent = `${currentPath} changed on disk; your unsaved edits are kept — Save writes them over it`;
+    } else {
+      loadFile(currentPath);
+    }
+  };
+
+  // A refresh runs in the middle of an editing session, so it never replaces or clears a
+  // dirty buffer: the open file gone from the list keeps its text and path, and the status
+  // line says so; only a clean buffer moves on or is blanked.
+  const refreshList = (changedPaths: string[] = []) => {
     let files: string[] = [];
     try {
       files = bridge.playground_list_files() || [];
-    } catch {
-      files = [];
+    } catch (error) {
+      listError = String(error);
+      if (scriptStatus) scriptStatus.textContent = listError;
+      return;
     }
+    if (listError && scriptStatus && scriptStatus.textContent === listError) scriptStatus.textContent = '';
+    listError = '';
 
     const rhaiFiles = files
       .filter((file) => file.endsWith('.rhai'))
-      .sort((a, b) => a.localeCompare(b));
+      .sort((first, second) => first.localeCompare(second));
 
     if (scriptSelect) {
       scriptSelect.innerHTML = '';
@@ -142,12 +180,25 @@ export function createScriptsPanel(bridge: ScriptsBridge): ScriptsPanel {
       scriptSelect.disabled = rhaiFiles.length === 0;
     }
 
+    const openFileListed = rhaiFiles.includes(currentPath);
+    if (currentPath && !openFileListed && isDirty()) {
+      // Keep the edits: the select shows no entry for the file, the status says what Save
+      // now does — the panel has no Save As, so Save recreates the path with these edits.
+      if (scriptSelect) scriptSelect.value = '';
+      if (scriptStatus) scriptStatus.textContent = `${currentPath} is no longer in the project; Save recreates it with your edits, or discard them`;
+      return;
+    }
+
     if (rhaiFiles.length > 0) {
-      const first = rhaiFiles[0];
+      const nextPath = openFileListed ? currentPath : rhaiFiles[0];
       if (scriptSelect) {
-        scriptSelect.value = first;
+        scriptSelect.value = nextPath;
       }
-      loadFile(first);
+      if (nextPath !== currentPath) {
+        loadFile(nextPath);
+      } else if (changedPaths.includes(currentPath)) {
+        followOpenFileChange();
+      }
       if (scriptSource) scriptSource.disabled = false;
       if (scriptSaveButton) scriptSaveButton.disabled = false;
     } else {
@@ -159,7 +210,15 @@ export function createScriptsPanel(bridge: ScriptsBridge): ScriptsPanel {
       }
       if (scriptSaveButton) scriptSaveButton.disabled = true;
     }
+  };
 
+  registerFileChanges((paths) => {
+    if (enabled && paths.some((path) => path.endsWith('.rhai'))) refreshList(paths);
+  });
+
+  const enable = () => {
+    enabled = true;
+    refreshList();
     if (!pollErrorsIntervalId) {
       pollErrorsIntervalId = window.setInterval(pollRuntimeErrors, 500);
     }
