@@ -92,6 +92,7 @@ type PlaygroundModule = {
   playground_dispatch: (line: string) => boolean;
   playground_poll_responses: () => string[];
   playground_poll_file_changes: () => string[];
+  playground_set_file_mutation_guard: (guard: (mutationJson: string) => string) => void;
   playground_is_dirty: () => boolean;
   playground_export_zip: () => Promise<Uint8Array>;
   playground_snapshot: (generation: bigint) => Promise<{ sceneEntry: string; bytes: Uint8Array }>;
@@ -252,6 +253,14 @@ function wireControls(wasm: PlaygroundModule) {
   // Register playground-ready listener on window BEFORE awaiting init()
   window.addEventListener('playground-ready', () => {
     if (status) status.textContent = '';
+    // Every glue export dereferences the module, which init() assigns: a registration
+    // made in wireControls, before `await wasm.default()`, threw and took the boot with
+    // it. The engine dispatches this event from inside its start, so the module is live
+    // here and the editor has not yet run a frame that could mutate a file. An older
+    // bundle without the export simply gets no guard.
+    if (typeof wasm.playground_set_file_mutation_guard === 'function') {
+      wasm.playground_set_file_mutation_guard(scriptsPanel.fileMutationGuard);
+    }
     const entries = wasm.playground_list_projects();
     if (!entries || entries.length === 0) return;
 

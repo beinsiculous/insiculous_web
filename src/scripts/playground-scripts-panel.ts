@@ -5,9 +5,40 @@ export interface ScriptsBridge {
   playground_script_errors: () => string[];
 }
 
+interface FileMutation {
+  phase: 'prepare' | 'done' | 'failed';
+  removed: string[];
+  renamed: [string, string][];
+}
+
+const INVALID_FILE_CHANGE = 'the scripts panel received an invalid file change';
+
+// The guard answers inside the engine's own callback, so a payload of another shape (an
+// engine and a page from different bundles) must come back as a refusal, never as an
+// exception thrown through the wasm boundary.
+function terminalPhaseOf(value: unknown): 'done' | 'failed' | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const phase = (value as Record<string, unknown>).phase;
+  return phase === 'done' || phase === 'failed' ? phase : undefined;
+}
+
+function isFileMutation(value: unknown): value is FileMutation {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  const isPath = (entry: unknown) => typeof entry === 'string';
+  return (
+    (candidate.phase === 'prepare' || candidate.phase === 'done' || candidate.phase === 'failed') &&
+    Array.isArray(candidate.removed) && candidate.removed.every(isPath) &&
+    Array.isArray(candidate.renamed) &&
+    candidate.renamed.every((pair) => Array.isArray(pair) && pair.length === 2 && pair.every(isPath))
+  );
+}
+
 export interface ScriptsPanel {
   isDirty: () => boolean;
   enable: () => void;
+  /** The synchronous guard the page registers with the engine once its module is live. */
+  fileMutationGuard: (mutationJson: string) => string;
 }
 
 export function createScriptsPanel(
@@ -25,6 +56,11 @@ export function createScriptsPanel(
   let pollErrorsIntervalId = 0;
   let lastErrorsJoined = '';
   let enabled = false;
+  let mutationBlocked = false;
+  // The rename of the open script accepted at Prepare: its old path and the path Done moves
+  // the save target to, only while that old path is still the one open.
+  let pendingFrom = '';
+  let pendingPath = '';
   // The exact text a failed list refresh wrote to the status, so a later successful refresh
   // clears that and nothing else: a load or save error belongs to the visitor until retried.
   let listError = '';
@@ -54,8 +90,13 @@ export function createScriptsPanel(
     }
   };
 
-  const saveCurrent = () => {
-    if (!scriptSource || !currentPath) return;
+  const saveCurrent = (): string => {
+    if (mutationBlocked) {
+      const refusal = 'a file change is in progress — save after it finishes';
+      if (scriptStatus) scriptStatus.textContent = refusal;
+      return refusal;
+    }
+    if (!scriptSource || !currentPath) return '';
     const value = scriptSource.value;
     try {
       bridge.playground_write_file(currentPath, value);
@@ -63,10 +104,12 @@ export function createScriptsPanel(
       if (scriptStatus) {
         scriptStatus.textContent = 'saved — syntax OK; runtime errors show during Play';
       }
+      return '';
     } catch (error) {
       if (scriptStatus) {
         scriptStatus.textContent = String(error);
       }
+      return String(error);
     }
   };
 
@@ -212,6 +255,53 @@ export function createScriptsPanel(
     }
   };
 
+  // The accepted mutation ends here on either outcome: Done moves the save target to the
+  // rename's destination, Failed keeps it, and both release the block. A terminal phase the
+  // page could not fully read settles the same way, or the rename it already made would
+  // leave Save writing the old path.
+  const settleMutation = (phase: 'done' | 'failed', touched: string[]) => {
+    if (mutationBlocked && phase === 'done' && pendingPath && currentPath === pendingFrom) currentPath = pendingPath;
+    mutationBlocked = false;
+    pendingFrom = '';
+    pendingPath = '';
+    if (phase === 'done' && enabled) refreshList(touched);
+  };
+
+  const fileMutationGuard = (mutationJson: string): string => {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(mutationJson);
+    } catch {
+      return INVALID_FILE_CHANGE;
+    }
+    if (!isFileMutation(parsed)) {
+      const phase = terminalPhaseOf(parsed);
+      if (phase) settleMutation(phase, []);
+      return INVALID_FILE_CHANGE;
+    }
+    const mutation = parsed;
+    if (mutation.phase === 'prepare') {
+      if (mutationBlocked) return 'another file change is still in progress';
+      if (currentPath && mutation.removed.includes(currentPath) && isDirty()) {
+        return `${currentPath} has unsaved script changes — save it before deleting it`;
+      }
+      const rename = mutation.renamed.find(([oldPath]) => oldPath === currentPath);
+      if (rename && isDirty()) {
+        if (!window.confirm(`${currentPath} has unsaved changes. Save them and rename the file?`)) {
+          return 'rename cancelled — the script has unsaved changes';
+        }
+        const error = saveCurrent();
+        if (error) return error;
+      }
+      pendingFrom = rename?.[0] || '';
+      pendingPath = rename?.[1] || '';
+      mutationBlocked = true;
+      return '';
+    }
+    settleMutation(mutation.phase, [...mutation.removed, ...mutation.renamed.flat()]);
+    return '';
+  };
+
   registerFileChanges((paths) => {
     if (enabled && paths.some((path) => path.endsWith('.rhai'))) refreshList(paths);
   });
@@ -226,6 +316,7 @@ export function createScriptsPanel(
 
   return {
     isDirty,
+    fileMutationGuard,
     enable,
   };
 }
