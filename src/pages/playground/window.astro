@@ -1,0 +1,28 @@
+---
+/**
+ * The Web Playground's editor in a window of its own, opened by *Open in a window ↗*.
+ *
+ * An ordinary editor page: it takes its project's lock, boots, edits, saves and
+ * switches project like /playground/ does. What differs is the layout — the editor
+ * fills the window — and the bar, which has no *Open in a window* and says how the
+ * editor goes back instead. The window arrives with `move=1`, and its boot asks for
+ * the lock a few times while the page it came from finishes unloading.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+import PlaygroundToolbar from '../../components/PlaygroundToolbar.astro';
+import PlaygroundHelp from '../../components/PlaygroundHelp.astro';
+import PlaygroundEmbed from '../../components/PlaygroundEmbed.astro';
+---
+
+<AppLayout
+  title="Web Playground window — Be Insiculous"
+  description="The Insiculous 2D scene editor in a window of its own."
+  noindex
+  windowed
+>
+  <Fragment slot="heading">Web Playground window</Fragment>
+  <PlaygroundToolbar slot="bar" windowed />
+
+  <PlaygroundHelp />
+  <PlaygroundEmbed />
+</AppLayout>

@@ -197,6 +197,14 @@ The Web Playground (`/playground/`) runs the engine’s editor in the browser:
   message contract both sides import. The first-run hint above the stage
   (`PlaygroundHint.astro`, `/playground/` only) remembers its Dismiss in `localStorage` under
   `beinsiculous.playground.hint`.
+- **One project in one page; *Open in a window ↗* is a navigation.** Every Playground editor boot
+  takes the Web Lock `beinsiculous.playground:<slug>` with `ifAvailable`, before the engine starts
+  (`src/scripts/playground-project-lock.ts`), and a page that cannot have it shows the owner card.
+  The window button (`src/scripts/playground-window.ts`) needs everything saved, drains, sends the
+  window to `/playground/window/` and the page to `/playground/parked/`, whose *Bring the editor
+  back here* boots the editor on that tab again once the window is closed; a Rust game’s page opens
+  `/playground/<slug>/window/` as a second, independent editor. The engine’s
+  `docs/WEB_PLAYGROUND.md` § The editor window is the contract.
 - **Assets land before the embed’s `src` moves**: `postbuild-check.mjs` resolves every
   `data-wasm-src` against `dist/`, so a bumped version dir must be in `public/` before
   `PlaygroundEmbed.astro`’s default changes.

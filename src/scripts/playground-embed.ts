@@ -5,6 +5,8 @@ import { createFileImport } from './playground-import-file.ts';
 import { createSaveStatus } from './playground-save-status.ts';
 import { probeWebGpu, describeWebGpuFailure } from './webgpu-gate.ts';
 import { createPreviewLaunch } from './playground-preview-launch.ts';
+import { browserLocks, createBootLock, runFencedImport, withoutMove } from './playground-project-lock.ts';
+import { commandBarrier, createWindowButton } from './playground-window.ts';
 
 const embed = document.querySelector('.playground-embed');
 const src = embed?.getAttribute('data-wasm-src');
@@ -98,6 +100,8 @@ type PlaygroundModule = {
   playground_snapshot: (generation: bigint) => Promise<{ sceneEntry: string; bytes: Uint8Array }>;
   playground_set_preview_open: (open: boolean) => void;
   playground_import_zip: (bytes: Uint8Array) => Promise<string>;
+  playground_archive_slug: (bytes: Uint8Array) => string;
+  playground_storage_persists: () => boolean;
   playground_read_file_bytes: (path: string) => Uint8Array;
   playground_conflicted_paths: () => string[];
   playground_save_state: () => string;
@@ -136,7 +140,10 @@ function showCompatibility(message: string) {
 function wireControls(wasm: PlaygroundModule) {
   let fileChangeHook: ((paths: string[]) => void) | undefined;
   const scriptsPanel = createScriptsPanel(wasm, (hook) => { fileChangeHook = hook; });
-  const fileImport = createFileImport(wasm);
+  // The imports, archive import, reset and switch in flight: the window refuses while any
+  // runs. One that succeeds navigates away, so only a failure gives its count back.
+  let inFlight = 0;
+  const fileImport = createFileImport(wasm, { begin: () => (inFlight += 1), end: () => (inFlight -= 1) });
   const saveStatus = createSaveStatus(wasm, document.getElementById('save-status'), () =>
     scriptsPanel.isDirty()
   );
@@ -167,8 +174,18 @@ function wireControls(wasm: PlaygroundModule) {
   // a queue rather than anything read off the response: every accepted dispatch
   // pushes its asker, and each response line shifts one off. Reading the answer's
   // content to guess the asker would misattribute two commands with the same shape.
-  type ResponseSink = 'console' | 'save';
+  type ResponseSink = 'console' | 'save' | ((line: string) => void);
   const responseSinks: ResponseSink[] = [];
+  const windowButton = createWindowButton({
+    slug: () => currentSlug,
+    isDirty,
+    inFlight: () => inFlight,
+    previewOpen: () => previewLaunch.isOpen(),
+    barrier: () => commandBarrier(wasm.playground_dispatch, (sink) => responseSinks.push(sink)),
+    drain: (slug) => wasm.playground_open_project(slug),
+    banner,
+    leaving: () => (leavingByChoice = true),
+  });
 
   // A refusal the banner carries is cleared by the next save that goes through — and
   // only that refusal, so a banner some other failure wrote is left standing.
@@ -207,6 +224,10 @@ function wireControls(wasm: PlaygroundModule) {
     if (responses && responses.length > 0) {
       for (const line of responses) {
         const sink = responseSinks.shift() ?? 'console';
+        if (typeof sink === 'function') {
+          sink(line);
+          continue;
+        }
         if (sink === 'save') reportSaveResponse(line);
         if (commandOutput) {
           const row = document.createElement('div');
@@ -253,6 +274,8 @@ function wireControls(wasm: PlaygroundModule) {
   // Register playground-ready listener on window BEFORE awaiting init()
   window.addEventListener('playground-ready', () => {
     if (status) status.textContent = '';
+    // Not earlier: the engine reads `move` once, at its boot, and a reload is an ordinary one.
+    history.replaceState(history.state, '', withoutMove(window.location.href));
     // Every glue export dereferences the module, which init() assigns: a registration
     // made in wireControls, before `await wasm.default()`, threw and took the boot with
     // it. The engine dispatches this event from inside its start, so the module is live
@@ -311,6 +334,7 @@ function wireControls(wasm: PlaygroundModule) {
 
     if (exportButton) exportButton.disabled = false;
     previewLaunch.enable();
+    windowButton.enable({ holdsLock: bootLock.holdsLock(), storagePersists: wasm.playground_storage_persists() });
     if (saveButton) saveButton.disabled = false;
     if (importInput) importInput.disabled = false;
     fileImport.enable();
@@ -365,10 +389,12 @@ function wireControls(wasm: PlaygroundModule) {
 
       try {
         projectSelect.disabled = true;
+        inFlight += 1;
         await wasm.playground_open_project(targetSlug);
         leavingByChoice = true;
         window.location.search = '?project=' + encodeURIComponent(targetSlug);
       } catch (error) {
+        inFlight -= 1;
         leavingByChoice = false;
         projectSelect.disabled = false;
         projectSelect.value = currentSlug;
@@ -387,10 +413,12 @@ function wireControls(wasm: PlaygroundModule) {
 
       try {
         resetButton.disabled = true;
+        inFlight += 1;
         await wasm.playground_reset_project(currentSlug);
         leavingByChoice = true;
         window.location.search = '?project=' + encodeURIComponent(currentSlug);
       } catch (error) {
+        inFlight -= 1;
         leavingByChoice = false;
         resetButton.disabled = false;
         if (banner) banner.textContent = String(error);
@@ -450,12 +478,18 @@ function wireControls(wasm: PlaygroundModule) {
         }
 
         setTransitionControlsDisabled(true);
-        const buffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        const slug = await wasm.playground_import_zip(bytes);
+        inFlight += 1;
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const slug = await runFencedImport({
+          locks: bootLock.holdsLock() ? browserLocks() : null,
+          targetSlug: wasm.playground_archive_slug(bytes),
+          openSlug: currentSlug,
+          importArchive: () => wasm.playground_import_zip(bytes),
+        });
         leavingByChoice = true;
         window.location.search = '?project=' + encodeURIComponent(slug);
       } catch (error) {
+        inFlight -= 1;
         setTransitionControlsDisabled(false);
         if (banner) banner.textContent = String(error);
         renderImportRejectionDownload(file);
@@ -520,6 +554,7 @@ async function bootPlayground(source: string) {
     }
 
     if (status) status.textContent = 'Loading playground…';
+    if (!(await bootLock.ready())) return;
     const dynamicImport = new Function('u', 'return import(u)') as (
       u: string
     ) => Promise<PlaygroundModule>;
@@ -547,6 +582,14 @@ async function bootPlayground(source: string) {
     booting = false;
   }
 }
+
+// The lock is named from the bundle's own project list, which sits beside its glue.
+const bootLock = createBootLock({
+  listUrl: src ? new URL('assets/projects.json', new URL(src, window.location.href)).href : '',
+  retry: () => {
+    if (src) void bootPlayground(src);
+  },
+});
 
 if (src) {
   compatibilityRetry?.addEventListener('click', () => {

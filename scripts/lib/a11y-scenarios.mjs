@@ -272,6 +272,31 @@ export const OPENED_ELEMENT_ROUTES = [
     open: openHelpDialog,
   },
   {
+    // The owner card and the moving panel appear only when another page holds the project or a
+    // move is under way, which no audit browser reaches; shown here so axe and the tree see them.
+    route: "/playground/",
+    seed: {},
+    label: "owner card and moving panel",
+    waitFor: "#owner-card:not([hidden])",
+    open: () => {
+      const owner = document.getElementById("owner-card");
+      const moving = document.getElementById("moving-panel");
+      const blocked = document.getElementById("window-blocked");
+      if (!owner || !moving || !blocked) return "the window cards are not on the page";
+      owner.hidden = false;
+      moving.hidden = false;
+      blocked.hidden = false;
+      return true;
+    },
+  },
+  {
+    route: "/playground/parked/?project=pong",
+    seed: {},
+    label: "parked card",
+    waitFor: "#parked-moved:not([hidden])",
+    open: () => (document.getElementById("parked-moved")?.hidden === false ? true : "the parked card did not name the project"),
+  },
+  {
     // axe prunes a closed <details>, so the dock's two panels are audited only open — at both
     // widths, because the dock lays out in two columns from 66rem and one below it.
     route: "/playground/",

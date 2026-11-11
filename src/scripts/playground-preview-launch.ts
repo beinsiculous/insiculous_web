@@ -56,6 +56,8 @@ export interface PreviewLaunch {
    * that event, so an earlier call would be swallowed and never retried.
    */
   enable: () => void;
+  /** Whether a preview window this page opened, or re-took after a reload, is still open. */
+  isOpen: () => boolean;
 }
 
 const PREVIEW_OPEN_NOTE =
@@ -305,6 +307,7 @@ export function createPreviewLaunch(options: PreviewLaunchOptions): PreviewLaunc
   refreshPlayButton();
 
   return {
+    isOpen: () => windowLifetimeActive,
     enable() {
       editorReady = true;
       adoptExistingPreview();

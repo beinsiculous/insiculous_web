@@ -20,6 +20,10 @@
  * With `fill` the embed is a workspace cell rather than a figure on a page:
  * no padding, no border and no controls note, and the canvas takes the whole
  * box it is given. That is the /playground/<slug>/ shape.
+ *
+ * With `windowHref` the embed carries *Open in a window ↗*: a game's editor page
+ * stores nothing, so its window is a second, independent editor and this page keeps
+ * running — no lock, no parking, nothing asked of the game's bundle.
  */
 import CompatibilityPanel from './CompatibilityPanel.astro';
 
@@ -36,6 +40,8 @@ interface Props {
   /** The still this game shows a browser that cannot run WebGPU, and its alt. */
   screenshot?: string;
   screenshotAlt?: string;
+  /** The game's editor window, offered as *Open in a window ↗* when set. */
+  windowHref?: string;
 }
 
 const {
@@ -47,12 +53,33 @@ const {
   fill = false,
   screenshot = '/images/pong-in-web.png',
   screenshotAlt = 'The neon-era Pong build running in a browser',
+  windowHref,
 } = Astro.props;
 ---
 
 {
   src ? (
     <div class={`game-embed playable${fill ? ' fill' : ''}`} data-wasm-src={src}>
+      {windowHref && (
+        <div class="window-row">
+          <button
+            type="button"
+            id="game-window-button"
+            class="btn-window"
+            data-window-href={windowHref}
+            aria-describedby="game-window-note"
+          >
+            Open in a window ↗
+          </button>
+          <span id="game-window-note" class="window-note">
+            The window starts from the game’s own scene — edits on this page stay on this page.
+          </span>
+          <p id="game-window-blocked" class="window-blocked" role="alert" hidden>
+            Your browser blocked the window.
+            <button type="button" id="game-window-retry" class="btn-window">Try again</button>
+          </p>
+        </div>
+      )}
       <p id="game-loading" class="status" role="status">Checking WebGPU…</p>
       <CompatibilityPanel screenshot={screenshot} screenshotAlt={screenshotAlt} />
       <div class="stage">
@@ -97,6 +124,18 @@ const {
 
 <script>
   import { probeWebGpu, describeWebGpuFailure } from '../scripts/webgpu-gate.ts';
+  import { openIndependentWindow } from '../scripts/playground-window.ts';
+
+  const windowButton = document.getElementById('game-window-button');
+  const windowBlocked = document.getElementById('game-window-blocked');
+  const openGameWindow = () => {
+    const href = windowButton?.dataset.windowHref;
+    if (!href) return;
+    const opened = openIndependentWindow((url, target, features) => window.open(url, target, features), href);
+    if (windowBlocked) windowBlocked.hidden = opened;
+  };
+  windowButton?.addEventListener('click', openGameWindow);
+  document.getElementById('game-window-retry')?.addEventListener('click', openGameWindow);
 
   const embed = document.querySelector('.game-embed.playable');
   const src = embed?.getAttribute('data-wasm-src');
@@ -254,6 +293,48 @@ const {
     text-align: center;
     min-height: 1.2em;
     margin-bottom: 0.6rem;
+  }
+
+  .window-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    min-width: 0;
+  }
+
+  .btn-window {
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 0.3rem 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .btn-window:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .window-note {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+    min-width: 0;
+  }
+
+  .window-blocked {
+    flex: 1 1 100%;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
   }
 
   .controls-note {
