@@ -155,3 +155,7 @@ What that means for the items this file used to number 1–9:
   piece it used to stand in for.
 - **Store links.** When the first paid game ships, this site needs somewhere to point at it — the
   games page is currently built around on-site listings only.
+- **MIDI Evil.** Shipped, route `/midi-evil/`: the studio page about the music workstation the
+  engine’s songs are composed in, desktop-only today. The browser build is tracked in
+  `beinsiculous/midi-evil`; it opens with an accessibility spike and ships only when it is
+  keyboard and screen-reader operable — every editing workflow, not just the page around it.

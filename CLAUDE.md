@@ -1,7 +1,7 @@
 # beinsiculous.com — agent guide
 
 One repository, two surfaces of one site (`docs/app.md`): the **Be Insiculous** studio (`/`,
-`/games/`, `/achievements/`, `/devlog/`, `/engine/`) and the planner face **FortKnight** (`/fortknight/`), with the
+`/games/`, `/achievements/`, `/devlog/`, `/engine/`, `/midi-evil/`) and the planner face **FortKnight** (`/fortknight/`), with the
 shared profile at `/profile/`. The second face, **Fork Knife** (`/forkknife/`), was removed from the
 live site on 2026-08-28; its chain stays as design documents (`docs/meal-plan.md`,
 `docs/fork-knife-chain.md`), and its menu views land under `/fortknight/forkknife/` when that page

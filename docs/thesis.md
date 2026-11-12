@@ -39,7 +39,7 @@ manifesto voice.
 The **four projects each keep their own bubble of quirk**, and the quirk should be specific to each
 rather than one house style: FortKnight (`/fortknight/`), Fork Knife (its pages are folded into
 FortKnight's for now — see its section below), the games
-(`/games/`) and the devlog (`/devlog/`). Everything else — `/`, `/engine/`, `/404`, `/accessibility/`,
+(`/games/`) and the devlog (`/devlog/`). Everything else — `/`, `/engine/`, `/midi-evil/`, `/404`, `/accessibility/`,
 `/profile/`, and the shared header, footer and meta copy — is the studio speaking and takes the
 professional register. When it is unclear which layer a page belongs to, ask that question first.
 

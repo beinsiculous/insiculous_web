@@ -1,0 +1,168 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="MIDI Evil — the workstation — Be Insiculous"
+  description="MIDI Evil: a music workstation written in Rust — original synthesis, drum pads, a mixer with effects, .evil projects, Standard MIDI in and out — where the engine’s songs are composed."
+>
+  <p class="section-label">the workstation</p>
+  <h1>MIDI Evil</h1>
+  <p class="lede">
+    A music workstation written in Rust — original synthesis, drum pads, a mixer with effects, <code>.evil</code> projects, and Standard MIDI in and out — built for the engine’s songs and for its own sake.
+  </p>
+
+  <img
+    class="splash"
+    src="/images/ai_midi_evil_splash_320x192.png"
+    alt="MIDI Evil’s title card: Dr. Maxwell, a horned red mug, between two level meters above the words MIDI EVIL"
+    width="320"
+    height="192"
+  />
+
+  <div class="cta">
+    <a class="button" href="https://github.com/beinsiculous/midi-evil">get it on GitHub →</a>
+    <a class="button secondary" href="/engine/">how songs reach the engine →</a>
+  </div>
+
+  <section>
+    <h2>Instruments</h2>
+    <p>
+      Evil Synth is the instrument editor. Its voices start from 36 basic waveforms with
+      frequency sweeps, detune, pulse width, sync and ring modes, and unison; low-, band- and
+      high-pass filters; independent amplitude and filter envelopes, plus two auxiliary envelopes
+      and up to eight LFO lanes, free or synced to the tempo. A waveshaper and a delay sit on its
+      insert, and imported WAV and AIFF samples can be mapped across key zones. Twelve
+      presets are built in, and the same patch and seed always render the same audio.
+    </p>
+    <p>
+      Evil Beats is the drum side: a 4×4 grid of performance pads with an original drum kit,
+      per-pad tuning, envelopes, trimming, reverse and gated loops, choke groups and three
+      filtered output buses. A kit saves as one portable <code>.evilkit</code> file with its audio embedded, and held pads repeat at the song’s tempo.
+    </p>
+    <p>
+      Four built-in sounds are reference-guided recreations — Max Nasty, Evil-303, GlockenBlocks
+      and the Chiptune drum kit — built with original synthesis, not copied samples or factory
+      audio, and calibrated against measurements of the sounds they recreate. Every synth and
+      drum track then runs through the same mixer: four inserts per channel and two sends into
+      shared effect buses, with EQ, compression, chorus, flanger, delay, bitcrush, reverb and a
+      waveshaper.
+    </p>
+  </section>
+
+  <section>
+    <h2>The crossing</h2>
+    <p>
+      Songs cross to the engine as Standard MIDI files — <code>.mid</code>, not <code>.evil</code> — and the export keeps to the rules the engine depends on.
+      Every track name is preserved exactly, because the name is how the engine picks out the
+      tracks a game plays; the meter and the tempo are written at tick 0; each track’s gain and
+      pan become CC 7 and CC 10, with a program change for its instrument; and a muted track
+      stays in the file as an empty named track, so no track’s index shifts. The file is written
+      atomically, to a temporary file in the same directory and then renamed, so the engine’s
+      watcher never reads half a song.
+    </p>
+    <p>
+      On the other side, the engine’s conductor reads the file and picks it up: background tracks
+      play by themselves, and the tracks a game selects are walked one note or chord per trigger —
+      a hop plays the next note of the tune. The engine’s editor opens a song in MIDI Evil with
+      the right track selected, and saving writes the score back to the same file.
+    </p>
+    <a href="/images/midi-evil-piano-roll-2026-11.png" class="shot-link">
+      <img
+        src="/images/midi-evil-piano-roll-2026-11.png"
+        alt="MIDI Evil’s piano roll showing Bach’s Invention No. 2 as red note blocks across four bars beside a vertical keyboard, with the track rack and its two tracks on the left, and the play and record controls, a 64 BPM tempo and a 4/4 meter along the top"
+        width="1440"
+        height="900"
+        loading="lazy"
+      />
+    </a>
+    <p class="caption">
+      Bach’s Invention No. 2 in C minor, the public-domain example in MIDI Evil’s repository, imported and open in the piano roll. <span class="caption-hint">Tap to open it full size.</span>
+    </p>
+  </section>
+
+  <section>
+    <h2>Tech stack</h2>
+    <p>
+      Rust throughout, in a workspace of focused crates — synthesis, drums, projects, imports,
+      exports and rendering each in its own — so the preview you hear and the WAV you export come
+      from one renderer. The interface is <code>eframe</code> and <code>egui</code>, audio output is <code>rodio</code>, and MIDI devices go through <code>midir</code>.
+      Projects are versioned, human-readable JSON.
+    </p>
+    <p>
+      There are more than 300 tests, and the audit that runs them is hardware-independent: no audio device,
+      physical MIDI device or microphone is needed, so every change can be checked from the
+      command line.
+    </p>
+  </section>
+
+  <section>
+    <h2>Where it runs</h2>
+    <p>
+      On the desktop, today: <code>cargo install --path crates/midi-evil</code> from a clone puts <code>midi-evil</code> on your <code>PATH</code>, where the engine’s editor looks for it.
+      A browser build is being planned, and it ships only when it is usable with a keyboard and a
+      screen reader — every editing workflow, not just the page around it.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .lede {
+    font-size: 1.2rem;
+    color: var(--text-bright);
+    max-width: 38em;
+  }
+
+  /* Pixel art: a 2× screen doubles each pixel, and smoothing would blur them. On a phone narrower
+     than 320px, global.css scales it down to the column. */
+  .splash {
+    image-rendering: pixelated;
+    margin-top: 1.5rem;
+  }
+
+  /* A wrapper, not a <p>: global.css underlines every link inside a paragraph, and these are buttons.
+     The gap is on top: a bottom margin would collapse into the next heading's larger one. */
+  .cta {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  section p {
+    max-width: 46em;
+  }
+
+  section img {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+  }
+
+  /* A 1440px screenshot of a workstation is unreadable scaled into a phone, so the image links to itself. */
+  .shot-link {
+    display: block;
+  }
+
+  .shot-link:hover {
+    text-decoration: none;
+  }
+
+  /* Only worth saying where the image is actually too small to read. */
+  .caption-hint {
+    display: none;
+  }
+
+  @media (max-width: 40rem) {
+    .caption-hint {
+      display: inline;
+    }
+  }
+
+  .caption {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+  }
+</style>
