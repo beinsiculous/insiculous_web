@@ -46,13 +46,13 @@ function pongArchive() {
     "-c",
     `import pathlib, sys, zipfile
 root = pathlib.Path(sys.argv[1])
-manifest = '(slug: "pong", title: "Pong", bundle_version: "v6", content_hash: "", origin: bundled)'
+manifest = '(slug: "pong", title: "Pong", bundle_version: "v7", content_hash: "", origin: bundled)'
 with zipfile.ZipFile(sys.argv[2], "w", zipfile.ZIP_DEFLATED) as archive:
     archive.writestr("project.ron", manifest)
     for path in sorted(root.rglob("*")):
         if path.is_file():
             archive.write(path, path.relative_to(root.parent).as_posix())`,
-    join(DIST, "playground", "v6", "assets", "projects", "pong", "assets"),
+    join(DIST, "playground", "v7", "assets", "projects", "pong", "assets"),
     archive,
   ]);
   return archive;
@@ -263,13 +263,13 @@ try {
   await scenario("store: a file record with malformed metadata and intact bytes stops the boot and is byte-identical afterwards", async (context) => {
     const seed = await open(context, "/playground/parked/");
     await writeRawRecords(seed, {
-      projects: [{ slug: "pong", title: "Pong", bundle_version: "v6", content_hash: "", origin: "saved" }],
+      projects: [{ slug: "pong", title: "Pong", bundle_version: "v7", content_hash: "", origin: "saved" }],
       files: [{
         project: "pong",
         path: "assets/scenes/pong.scene.ron",
         bytes: bytesOf("the visitor's own scene"),
         revision: "one",
-        bundle_version: "v6",
+        bundle_version: "v7",
         deleted: false,
       }],
     });
@@ -282,13 +282,13 @@ try {
   await scenario("store: an imported-only project whose own manifest is undecodable stops the boot with its URL unchanged and its files intact", async (context) => {
     const seed = await open(context, "/playground/parked/");
     await writeRawRecords(seed, {
-      projects: [{ slug: "mine", title: 5, bundle_version: "v6", content_hash: "", origin: "imported" }],
+      projects: [{ slug: "mine", title: 5, bundle_version: "v7", content_hash: "", origin: "imported" }],
       files: [{
         project: "mine",
         path: "assets/scenes/main.scene.ron",
         bytes: bytesOf("SceneData(name: \"mine\")"),
         revision: 1,
-        bundle_version: "v6",
+        bundle_version: "v7",
         deleted: false,
       }],
     });

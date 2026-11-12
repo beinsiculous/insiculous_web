@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "examples",
+    "title": "Examples",
+    "bundle_version": "v7",
+    "content_hash": "65e6a0f753361c9c5e7093770dae81cb58478d1fcf342602a9193682d046d1ce",
+    "origin": "bundled"
+  },
+  {
+    "slug": "pong",
+    "title": "Pong",
+    "bundle_version": "v7",
+    "content_hash": "0777c221291045e1aab8f0c2f2bb149b82d884f24a61053ca327618132f2d658",
+    "origin": "bundled"
+  },
+  {
+    "slug": "game-template",
+    "title": "Game Template",
+    "bundle_version": "v7",
+    "content_hash": "ae1e09fa46fff4ef750844f4bc3d4a93012af71647bce30eabfe93cbac45b2cf",
+    "origin": "bundled"
+  }
+]

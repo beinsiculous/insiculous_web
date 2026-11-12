@@ -45,8 +45,8 @@ const DIST = join(ROOT, 'dist');
 const PUBLIC_GAMES = join(ROOT, 'public', 'games');
 const PUBLIC_PLAYGROUND = join(ROOT, 'public', 'playground');
 const CONTENT_GAMES = join(ROOT, 'src', 'content', 'games');
-// The default bundle PlaygroundEmbed.astro loads (`/playground/v6/game.js`): bump both together.
-const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v6', 'assets', 'projects.json');
+// The default bundle PlaygroundEmbed.astro loads (`/playground/v7/game.js`): bump both together.
+const PLAYGROUND_PROJECTS = join(DIST, 'playground', 'v7', 'assets', 'projects.json');
 const REDIRECTS = join(DIST, '_redirects');
 // Every renamed game's redirect lines carry this code. Permanent, because the renames have lived
 // on main unreverted; from here a rollback of a rename is forward-fix only, since a browser that
