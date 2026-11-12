@@ -29,6 +29,7 @@ const nav = [
   { href: '/achievements/', label: 'Achievements' },
   { href: '/devlog/', label: 'Devlog' },
   { href: '/engine/', label: 'Engine' },
+  { href: '/midi-evil/', label: 'MIDI Evil' },
   { href: '/fortknight/', label: 'FortKnight' },
 ];
 
@@ -206,7 +207,7 @@ const isActive = (href: string) =>
      again. The button only exists on a phone; above that breakpoint the list is the plain row it has always been.
      FaceLayout.astro carries the twin of this menu, with its rules in src/styles/faces.css. */
   .menu {
-    /* min-width: 0 lets the row shrink; without it the six links set an unshrinkable min-content floor and the
+    /* min-width: 0 lets the row shrink; without it the links set an unshrinkable min-content floor and the
        whole page scrolls sideways. */
     min-width: 0;
   }
@@ -276,6 +277,16 @@ const isActive = (href: string) =>
     .menu-panel > ul {
       display: flex;
       flex-wrap: wrap;
+      /* Seven links since MIDI Evil joined the bar. At the list's own 0.9rem gap and 0.9rem type the
+         seventh wrapped onto a second row at every width once a profile was saved, because the
+         container stops growing at 68rem. Measured on the built page with a profile seeded, on the
+         page whose link wears the brackets: 0.45rem and 0.85rem give one row from 1056px up with 8px
+         to spare. Only here: in the folded panel the links are a column and keep their size. */
+      gap: 0.45rem;
+    }
+
+    .menu-panel > ul a {
+      font-size: 0.85rem;
     }
 
     /* Both the disclosure and its panel dissolve, so the list and the icon row become flex items of

@@ -80,6 +80,12 @@ const favicon = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' view
         </ProfileSwitcher>
         <nav class="face-switch" aria-label="Site links">
           <a class="face-link face-home" href={studioPath()} title={`${STUDIO.label} — the studio site`} aria-label={STUDIO.label}>{STUDIO.logo}</a>
+          {/* The studio's other part with a door of its own. A face's bar has no room for a seventh
+              word, so it is an icon like its neighbours, and icon-only, so the label names it.
+              Drawn rather than the 🎵 emoji: the emoji is slate blue, and at .face-link's opacity it
+              measured about 2:1 against the fort's dark bar. A shape in the bar's own ink holds 3:1
+              in every skin and in high contrast, because it is whatever colour the text is. */}
+          <a class="face-link face-midi-evil" href={withBase("midi-evil/")} title="MIDI Evil — the studio’s music workstation" aria-label="MIDI Evil"><svg viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 3v11.1A3.5 3.5 0 1 0 11 17.5V8h7v6.1a3.5 3.5 0 1 0 2 3.4V3z" /></svg></a>
           {otherFaces.map((other) => (
             <a class="face-link" href={facePath(other.id)} title={`${other.label} — ${other.blurb}`} aria-label={other.label}>{other.logo}</a>
           ))}
