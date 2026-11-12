@@ -1,0 +1,86 @@
+---
+/**
+ * A Rust game's editor in a window of its own, opened by *Open in a window ↗* on the
+ * game's editor page.
+ *
+ * A game page stores nothing — its edits live in that page's memory — so this window
+ * is a second, independent editor that starts from the game's own scene. It takes no
+ * lock and parks nothing, and the page that opened it keeps running.
+ */
+import { getCollection } from 'astro:content';
+import AppLayout from '../../../layouts/AppLayout.astro';
+import PlaygroundToolbar from '../../../components/PlaygroundToolbar.astro';
+import PlaygroundHelp from '../../../components/PlaygroundHelp.astro';
+import GameEmbed from '../../../components/GameEmbed.astro';
+
+export async function getStaticPaths() {
+  const games = await getCollection('games');
+  const editorGames = games.filter((game) => game.data.editor);
+  return editorGames.map((game) => ({
+    params: { slug: game.id },
+    props: {
+      game,
+      otherEditorGames: editorGames
+        .filter((other) => other.id !== game.id)
+        .sort((first, second) => first.data.order - second.data.order)
+        .map((other) => ({ slug: other.id, title: other.data.title })),
+    },
+  }));
+}
+
+const { game, otherEditorGames } = Astro.props;
+
+// The same clamp as the editor page: the editor enlarges any window under its usable
+// minimum, and winit sizes its canvas from that config.
+const canvasWidth = Math.max(game.data.width ?? 800, 1024);
+const canvasHeight = Math.max(game.data.height ?? 600, 720);
+const screenshot = game.data.screenshots[0];
+---
+
+<AppLayout
+  title={`${game.data.title} in an editor window — Be Insiculous`}
+  description={`${game.data.title} in the Insiculous 2D scene editor, in a window of its own.`}
+  noindex
+  windowed
+>
+  <Fragment slot="heading">{game.data.title} in an editor window</Fragment>
+  <PlaygroundToolbar slot="bar" projectControls={false}>
+    <nav class="editor-pages" aria-label="Editor pages">
+      <a href="/playground/">Web Playground</a>
+      {otherEditorGames.map((other) => <a href={`/playground/${other.slug}/`}>{other.title}</a>)}
+    </nav>
+  </PlaygroundToolbar>
+
+  <PlaygroundHelp
+    projectHelp={false}
+    saveLine="save the scene for this window only — closing it brings the game’s own layout back"
+  >
+    <p>
+      The real Rust game, inside the engine’s scene editor, in a window of its own. It is
+      independent of the page that opened it: edits here stay here, and nothing persists.
+    </p>
+  </PlaygroundHelp>
+
+  <GameEmbed
+    src={game.data.editor}
+    title={game.data.title}
+    canvasLabel="scene editor canvas; focus it to edit and play"
+    width={canvasWidth}
+    height={canvasHeight}
+    fill
+    screenshot={screenshot}
+    screenshotAlt={screenshot && `${game.data.title} running in a browser`}
+  />
+</AppLayout>
+
+<style>
+  .editor-pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+</style>

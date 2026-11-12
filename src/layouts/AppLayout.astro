@@ -18,17 +18,25 @@ import AccessibilityControls from '../components/AccessibilityControls.astro';
  * The bar is `position: relative` and not sticky. AccessibilityControls' panel
  * is `position: absolute; top: calc(100% + 0.5rem)` against its nearest
  * positioned ancestor, so without this it would drop against the viewport.
+ *
+ * `windowed` is the editor in a window of its own: the heading is visually
+ * hidden (every page keeps its name for the audits), the workspace keeps only a
+ * gutter so the editor fills the window, and the footer shrinks to one line.
+ * The wordmark and the footer stay: they are the page's navigation and
+ * contentinfo landmarks, which the announce gate requires of every page.
  */
 interface Props {
   title: string;
   description?: string;
   noindex?: boolean;
+  windowed?: boolean;
 }
 
 const {
   title,
   description = 'Be Insiculous — an Artificial Intelligence Development Studio: a Rust game engine and the games that run on it, and planning software driven by your own AI assistant.',
   noindex = false,
+  windowed = false,
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
@@ -54,14 +62,14 @@ const currentPath = Astro.url.pathname;
     <link rel="alternate" type="application/rss+xml" title="Be Insiculous devlog" href="/rss.xml" />
     <title>{title}</title>
   </head>
-  <body>
+  <body class:list={[{ windowed }]}>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="app-bar">
       <nav aria-label="Studio">
         <a href="/" class="wordmark">be_insiculous<span class="cursor" aria-hidden="true">▌</span></a>
       </nav>
       <AccessibilityControls />
-      <h1 class="app-title"><slot name="heading" /></h1>
+      <h1 class:list={['app-title', { 'visually-hidden': windowed }]}><slot name="heading" /></h1>
       <slot name="bar" />
     </header>
 
@@ -146,6 +154,18 @@ const currentPath = Astro.url.pathname;
   .app-footer {
     border-top: 1px solid var(--border);
     padding: 0.4rem 1rem;
+  }
+
+  .windowed .app-bar {
+    padding: 0.35rem 0.6rem;
+  }
+
+  .windowed .workspace {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .windowed .app-footer {
+    padding: 0.15rem 0.6rem;
   }
 
   .app-footer p {

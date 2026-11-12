@@ -19,6 +19,12 @@ export interface FileImport {
   enable: () => void;
 }
 
+/** The page's count of imports in flight, which a file import joins while it runs. */
+export interface InFlightCount {
+  begin: () => void;
+  end: () => void;
+}
+
 /** What the bridge answers for an import, as `crate::upload::UploadOutcome` serializes it. */
 interface UploadOutcome {
   written: boolean;
@@ -42,7 +48,7 @@ function replacePrompt(outcome: UploadOutcome): string {
   return lines.join('\n\n');
 }
 
-export function createFileImport(bridge: FileImportBridge): FileImport {
+export function createFileImport(bridge: FileImportBridge, inFlight?: InFlightCount): FileImport {
   const input = document.getElementById('import-file-input') as HTMLInputElement | null;
   const status = document.getElementById('import-file-status') as HTMLOutputElement | null;
   const say = (message: string) => {
@@ -54,6 +60,7 @@ export function createFileImport(bridge: FileImportBridge): FileImport {
       const file = input.files?.[0];
       if (!file) return;
       input.disabled = true;
+      inFlight?.begin();
       try {
         const bytes = new Uint8Array(await file.arrayBuffer());
         let outcome = JSON.parse(bridge.playground_write_file_bytes(file.name, bytes, false)) as UploadOutcome;
@@ -81,6 +88,7 @@ export function createFileImport(bridge: FileImportBridge): FileImport {
       } catch (error) {
         say(String(error));
       } finally {
+        inFlight?.end();
         input.disabled = false;
         input.value = '';
       }

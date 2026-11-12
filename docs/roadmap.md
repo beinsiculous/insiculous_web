@@ -146,6 +146,7 @@ What that means for the items this file used to number 1–9:
   build. Each of the six Rust games also opens inside that editor at
   `/playground/<slug>/`, as a second bundle of the same game: the entities are live and
   editable, the rules stay compiled in, and nothing there persists.
+  The editor opens in a window of its own (*Open in a window ↗*, the `v6` bundle, Editor UX batch 5): one project in one page by a Web Lock, the move a navigation, the way back the parked page’s *Bring the editor back here*.
 - **The two tracks and the art policy** (`docs/thesis.md` is the source of the wording). The games
   listed on this site are free and may use AI art. The games we **sell** are not on this site at all —
   each has its own repository and ships on Steam and/or Android and iOS — and they carry no AI art.

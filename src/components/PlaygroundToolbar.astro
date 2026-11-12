@@ -10,6 +10,11 @@
  *
  * The ids are the engine-facing contract: src/scripts/playground-embed.ts
  * finds every project control by id, so they do not change with the markup.
+ *
+ * `windowed` is the editor's own window (/playground/window/): no *Open in a
+ * window*, and a note saying how the editor goes back. The owner card, the
+ * project-list card and the moving panel sit beside the controls, not in them,
+ * because the move makes the controls inert and the panel must stay live.
  */
 interface EditorGameLink {
   slug: string;
@@ -19,9 +24,10 @@ interface EditorGameLink {
 interface Props {
   editorGames?: EditorGameLink[];
   projectControls?: boolean;
+  windowed?: boolean;
 }
 
-const { editorGames = [], projectControls = true } = Astro.props;
+const { editorGames = [], projectControls = true, windowed = false } = Astro.props;
 ---
 
 <div class="bar-controls" role="group" aria-label="Editor controls">
@@ -51,6 +57,18 @@ const { editorGames = [], projectControls = true } = Astro.props;
         <output id="save-status" class="bar-note" aria-live="polite" for="project-select"></output>
         <button type="button" id="save-button" class="btn-toolbar" disabled>Save</button>
         <button type="button" id="play-button" class="btn-toolbar" disabled>Play ↗</button>
+        {windowed ? (
+          <span class="bar-note">
+            To move the editor back: close this window, then choose “Bring the editor back here” on the page.
+          </span>
+        ) : (
+          <>
+            <button type="button" id="window-button" class="btn-toolbar" aria-describedby="window-note" disabled>
+              Open in a window ↗
+            </button>
+            <output id="window-note" class="bar-note" aria-live="polite" for="window-button"></output>
+          </>
+        )}
         <div class="archive-group">
           <button type="button" id="export-button" class="btn-toolbar" disabled>
             Export project
@@ -89,6 +107,38 @@ const { editorGames = [], projectControls = true } = Astro.props;
   </button>
   <button type="button" id="help-button" class="btn-toolbar" aria-haspopup="dialog">Help</button>
 </div>
+
+{
+  projectControls && (
+    <div class="bar-cards" aria-live="polite">
+      {/* Static, so the alert exists before the refusal it reports, as the preview's does. */}
+      <p id="window-blocked" class="bar-card" role="alert" hidden>
+        Your browser blocked the editor’s window.
+        <button type="button" id="window-retry" class="btn-toolbar">Try again</button>
+      </p>
+      <div id="owner-card" class="bar-card" hidden>
+        <p>
+          <span id="owner-card-project">This project</span> is open in another tab or window.
+          Close it, then <em>Try again</em>.
+        </p>
+        <button type="button" id="owner-card-retry" class="btn-toolbar">Try again</button>
+        <button type="button" id="owner-card-close" class="btn-toolbar">Close this page</button>
+      </div>
+      <div id="project-list-card" class="bar-card" hidden>
+        <p>The project list did not load.</p>
+        <button type="button" id="project-list-retry" class="btn-toolbar">Try again</button>
+      </div>
+      <div id="moving-panel" class="moving-panel" hidden>
+        <div class="bar-card">
+          <p>Moving the editor to its window…</p>
+          <p>
+            If it stays here, this page cannot save any more: <a id="moving-reload" href="/playground/">Reload this page</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 <script>
   // Fullscreen takes the whole document, not the canvas: the app bar carries the
@@ -242,5 +292,49 @@ const { editorGames = [], projectControls = true } = Astro.props;
   .input-file:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  /* A row of its own in the wrapping bar, so a card reads as the page's state rather
+     than as one more control. */
+  .bar-cards {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .bar-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: var(--surface-raised);
+    color: var(--text-bright);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .bar-card p {
+    margin: 0;
+    flex: 1 1 20rem;
+    min-width: 0;
+  }
+
+  .moving-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+  }
+
+  .moving-panel .bar-card {
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 32rem;
   }
 </style>

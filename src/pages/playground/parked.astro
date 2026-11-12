@@ -1,0 +1,91 @@
+---
+/**
+ * Where the Playground page goes when its editor moves to a window.
+ *
+ * It listens to nothing and decides nothing: the editor comes back only when the
+ * visitor has closed the window and presses *Bring the editor back here*, which boots
+ * the editor on this tab under the project's lock. With the window still open, that
+ * boot meets the owner card. Opened with no `?project=` — the owner card's *Close this
+ * page* in a tab — it is the plain closed card.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Editor moved — Be Insiculous"
+  description="The Web Playground’s editor is open in its own window."
+  noindex
+>
+  <Fragment slot="heading">Web Playground</Fragment>
+
+  <section class="parked" aria-labelledby="parked-heading">
+    <h2 id="parked-heading">This page is closed</h2>
+    <div id="parked-card" class="parked-card" aria-live="polite">
+      <p id="parked-closed">
+        <a href="/playground/">Open the Playground</a>
+      </p>
+      <div id="parked-moved" hidden>
+        <p>
+          The editor for <strong id="parked-project">this project</strong> is open in its own
+          window. To work here again, close that window, then:
+        </p>
+        <p><a id="parked-return" class="parked-return" href="/playground/">Bring the editor back here</a></p>
+      </div>
+    </div>
+  </section>
+</AppLayout>
+
+<script>
+  // The one thing the page does: name the project and point the link back at it.
+  const slug = new URLSearchParams(window.location.search).get('project');
+  const heading = document.getElementById('parked-heading');
+  const moved = document.getElementById('parked-moved');
+  const closed = document.getElementById('parked-closed');
+  const project = document.getElementById('parked-project');
+  const link = document.getElementById('parked-return') as HTMLAnchorElement | null;
+  if (slug && heading && moved && closed && project && link) {
+    heading.textContent = 'The editor moved to a window';
+    project.textContent = `“${slug}”`;
+    link.href = `/playground/?project=${encodeURIComponent(slug)}&move=1`;
+    closed.hidden = true;
+    moved.hidden = false;
+  }
+</script>
+
+<style>
+  .parked {
+    max-width: 40rem;
+    margin: 2rem auto;
+    min-width: 0;
+  }
+
+  .parked h2 {
+    font-size: 1.2rem;
+    color: var(--text-bright);
+    margin: 0 0 0.8rem;
+  }
+
+  .parked-card {
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    background: var(--surface);
+  }
+
+  .parked-card p {
+    margin: 0 0 0.8rem;
+  }
+
+  .parked-card p:last-child {
+    margin-bottom: 0;
+  }
+
+  .parked-return {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+</style>
