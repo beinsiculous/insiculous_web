@@ -1,7 +1,7 @@
 ---
 title: 'Midi-evil and The Conductor!'
 description: 'A big ole quality of life improvement to the editor, and a whole lotta music makin and playin'
-pubDate: 2026-09-03
+pubDate: 2026-11-12
 author: Jesse
 tags: ['midi-evil', 'midi', 'ui', 'ux', 'editor']
 ---
