@@ -55,12 +55,10 @@ export const everyStoneKeepSeed = JSON.stringify({
   season: { ...sampleKeep.season, focus: everyStoneFocus },
 });
 
-// The /profile/ achievements board renders its headings, lists and delete button only when a game
-// has recorded unlocks — seed invented saves so audits test the populated board, not just the
-// empty state (the value is the engine's save-file shape, games-achievements.js). There are this
-// many on purpose: enough rows that the board's 75vh scroll box genuinely overflows, so axe's
-// scrollable-region-focusable rule has a real scrollable region to test rather than passing as
-// inapplicable.
+// The /profile/ achievements board renders its unlocked rows and delete button, and /games/ its
+// board and a tile's progress line, only when a game has recorded unlocks — seed invented saves so
+// audits test the populated state, not just the empty one (the value is the engine's save-file
+// shape, games-achievements.js).
 export const tongAchievements = JSON.stringify({
   unlocks: {
     win_normal: { unlocked_at: 1756252800 },
@@ -88,8 +86,7 @@ export const formerKeyAchievements = JSON.stringify({
 // populated only when their one store has unlocks — seed the two initial achievements invented,
 // in the same save-file shape the games write (games-achievements.js). The ids past those two are
 // invented and deliberately not in the registry: unknown ids still render, prettified, in the
-// insiculous group (loadSiteAchievements), and they are what makes the /profile/ board
-// long enough to overflow its 75vh box for the rule named above.
+// insiculous group (loadSiteAchievements), so the gates see that fallback too.
 export const siteAchievements = JSON.stringify({
   unlocks: {
     player: { unlocked_at: 1756425600 },

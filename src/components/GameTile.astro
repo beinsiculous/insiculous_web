@@ -9,14 +9,20 @@
  * trade is that the plate does not grow with the visitor's text size. The plate's alt is the name: it
  * is the link's one accessible name, announced once, and when the plate fails to load or images are
  * off, the browser renders that alt as the visible name in the plate's place. The art's alt is empty.
+ *
+ * Under the link, outside it so the link's name stays the game's name alone, sits the game's
+ * achievement count from its manifest. The page's script rewrites that line with this device's
+ * progress (it finds the line by data-achievement-progress, the game's slug); without script the
+ * prerendered count stands. A game with no manifest — not playable yet — carries no line.
  */
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   game: CollectionEntry<'games'>;
+  achievementCount?: number;
 }
 
-const { game } = Astro.props;
+const { game, achievementCount } = Astro.props;
 ---
 
 <li class="tile">
@@ -24,6 +30,13 @@ const { game } = Astro.props;
     <img class="plate" src={game.data.namePlate} alt={game.data.title} width="256" height="64" decoding="async" />
     <img class="art" src={game.data.capsule} alt="" width="256" height="256" decoding="async" />
   </a>
+  {
+    achievementCount !== undefined && (
+      <p class="progress" data-achievement-progress={game.id}>
+        {achievementCount} {achievementCount === 1 ? 'achievement' : 'achievements'}
+      </p>
+    )
+  }
 </li>
 
 <style>
@@ -46,6 +59,19 @@ const { game } = Astro.props;
   .art {
     width: 256px;
     height: 256px;
+  }
+
+  .progress {
+    width: 256px;
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  /* Set by the page's script once this device has an unlock in the game. */
+  .progress[data-started] {
+    color: var(--text-bright);
   }
 
   /* global.css's ring is 2 px; the tile's is 3 px on the whole box, inside the shelf's gutter. */

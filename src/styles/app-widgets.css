@@ -92,11 +92,6 @@ select {
 /* 20rem shows a whole generated id and its arrow; the min() lets a narrow screen take it back without a
    media query, which this file needs because /profile/ is a studio page and never loads faces.css. */
 
-/* ---------- the achievements board ---------- */
-/* The 75% rule, same as the /games/ grid: the achievements board never takes more than 75% of the
-   viewport height — past that it scrolls inside its own box instead of pushing the panels below it
-   (the delete buttons included) out of reach. */
-.achievements-scroll { max-height: 75vh; overflow-y: auto; }
 
 @media (max-width: 40rem) {
   .panel { padding: 0.9rem; }

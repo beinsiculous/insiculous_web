@@ -56,7 +56,6 @@ if (devlogPostRoutes.length === 0) {
 const shotNames = {
   "/": "studio-home",
   "/games/": "studio-games",
-  "/achievements/": "studio-achievements",
   "/games/tong/": "studio-game",
   "/devlog/": "studio-devlog",
   [devlogPostRoutes[0]]: "studio-devlog-post",

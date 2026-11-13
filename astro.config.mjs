@@ -8,10 +8,11 @@ export default defineConfig({
   site: 'https://beinsiculous.com',
   integrations: [
     // The planner face is an on-device app whose prerendered HTML is an empty no-JS shell,
-    // and the preview window is only ever reached from the editor that opens it — keep
-    // both out of the sitemap so crawlers see only real content.
+    // the preview window is only ever reached from the editor that opens it, and /achievements/
+    // is a redirect stub for a board that moved into /profile/ — keep all three out of the
+    // sitemap so crawlers see only real content.
     sitemap({
-      filter: (page) => !/\/(fortknight|profile|playground\/preview)\//.test(page),
+      filter: (page) => !/\/(fortknight|profile|achievements|playground\/preview)\//.test(page),
     }),
   ],
 });

@@ -8,6 +8,7 @@ const games = (await getCollection('games')).sort(
   (a, b) => a.data.order - b.data.order
 );
 const catalogs = readGameCatalogs(games);
+const achievementCountBySlug = new Map(catalogs.map((catalog) => [catalog.slug, catalog.achievements.length]));
 ---
 
 <BaseLayout
@@ -30,18 +31,22 @@ const catalogs = readGameCatalogs(games);
   {/* role="list" is explicit because WebKit drops an <ol>'s list semantics once list-style is none
       outside a nav, and VoiceOver would then read six links with no group and no count. */}
   <ol class="shelf" role="list">
-    {games.map((game) => <GameTile game={game} />)}
+    {games.map((game) => <GameTile game={game} achievementCount={achievementCountBySlug.get(game.id)} />)}
   </ol>
 
   <section class="achievements">
     <h2 id="gameAchievementsHeading">Game achievements</h2>
+    <p class="muted">
+      What this device has unlocked. Each game’s page lists everything there is to find in it, and
+      your <a href="/profile/#achievements">profile</a> holds the whole board.
+    </p>
     <div id="gameAchievementsBoard" data-catalogs={JSON.stringify(catalogs)}></div>
     <p class="muted" id="gameAchievementsStatus" role="status"></p>
   </section>
 </BaseLayout>
 
 <script>
-  import { maybePromptForProfile, renderAchievementsBoard, unlockAchievement } from "../../lib/achievements.js";
+  import { gameAchievementProgress, maybePromptForProfile, renderAchievementsBoard, unlockAchievement } from "../../lib/achievements.js";
   import { loadSettings, profileIds } from "../../lib/shared/user-settings.js";
   import { readEmbeddedCatalogs } from "../../lib/games-catalog.js";
 
@@ -58,8 +63,38 @@ const catalogs = readGameCatalogs(games);
   // above, so a null would mean this script drifted from its own markup.
   if (heading && profileIds(settings).length) heading.textContent = `${settings.activeWeightsId}’s game achievements`;
   const catalogs = readEmbeddedCatalogs(board);
-  const { rendered } = renderAchievementsBoard(board, { types: ["game"], gameCatalogs: catalogs });
-  if (status) status.textContent = rendered ? "" : "No game achievements on this device yet — they unlock as you play.";
+  const progressLines = catalogs.flatMap((catalog) => {
+    const line = document.querySelector<HTMLElement>(`[data-achievement-progress="${catalog.slug}"]`);
+    return line ? [{ catalog, line, prerenderedText: line.textContent }] : [];
+  });
+
+  /** The board and every tile's progress line, from what this device holds right now. */
+  function drawAchievements() {
+    if (board) {
+      const { rendered } = renderAchievementsBoard(board, { types: ["game"], gameCatalogs: catalogs });
+      if (status) status.textContent = rendered ? "" : "No game achievements on this device yet — they unlock as you play.";
+    }
+    // Each tile's count becomes this device's progress in that game. Untouched games keep the
+    // prerendered count — "0 of 12" under six tiles would read as a scoreboard of failures — and
+    // a game whose achievements were cleared goes back to it.
+    for (const { catalog, line, prerenderedText } of progressLines) {
+      const { unlockedCount, totalCount } = gameAchievementProgress(catalog);
+      if (unlockedCount === 0) {
+        line.textContent = prerenderedText;
+        delete line.dataset.started;
+      } else {
+        line.textContent = `${unlockedCount} of ${totalCount} achievements unlocked`;
+        line.dataset.started = "";
+      }
+    }
+  }
+
+  drawAchievements();
+  // Back from a game, the browser may restore this page from its back/forward cache without
+  // rerunning this script — and a game is exactly where the numbers above just changed.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) drawAchievements();
+  });
   // Player is the likeliest first achievement anywhere on the site, so this is where the
   // once-ever create-profile prompt most naturally lands; the module owns the once-ever logic.
   maybePromptForProfile();

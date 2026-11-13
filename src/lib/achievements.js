@@ -168,6 +168,19 @@ export async function maybePromptForProfile() {
 }
 
 /**
+ * One game's progress on this device, `{ unlockedCount, totalCount }`, counted the way the board's
+ * spine counts it so a tile and a board heading can never disagree: every recorded unlock, plus
+ * every manifest entry not yet unlocked. An unlock the manifest does not know (an older bundle's
+ * id) therefore counts on both sides.
+ * @param {import("./games-catalog.js").GameCatalog} catalog
+ */
+export function gameAchievementProgress(catalog) {
+  const unlockedIds = new Set(loadGameUnlocks(catalog.slug).map((unlock) => unlock.id));
+  const lockedCount = catalog.achievements.filter((achievement) => !unlockedIds.has(achievement.id)).length;
+  return { unlockedCount: unlockedIds.size, totalCount: unlockedIds.size + lockedCount };
+}
+
+/**
  * The shared achievements board: one h3 + ul per group with achievements, appended to `container`
  * (which is emptied first). `types` — a subset of ACHIEVEMENT_TYPES — says which groups render:
  * "game" draws one group per game (from the games' own saves and manifests), "insiculous" and
@@ -177,7 +190,7 @@ export async function maybePromptForProfile() {
  * `{ rendered, unlockedCount, totalCount }` so the caller can show its own empty-state copy or
  * status line.
  *
- * `includeLocked` (default false — other pages show what was earned) turns on the spine:
+ * `includeLocked` (default false — a board of what was earned) turns on the spine:
  * - For site types, every ACHIEVEMENTS entry renders, unlocked or not, with its description —
  *   unlocked first (dated oldest first, undated last, the store's order), then the locked entries,
  *   which carry the class `achievement-locked` and a plain-text "Locked" marker.
@@ -191,11 +204,14 @@ export async function maybePromptForProfile() {
  * Headings read `<title> — N of M unlocked` whenever the full list is known (spine mode for site
  * types and for games with a catalog), else `<title> — N unlocked`.
  *
- * The heading level is the page's to choose: on `/achievements/` it sits directly under `h1` so
- * must be `h2` to avoid skipping a level; on `/games/` and `/profile/` it sits under an `h2` section
- * header and defaults to `h3`.
+ * `gameSlugs` narrows the "game" type to the listed games — a game's own play page boards that
+ * one game. Left out, every game in GAMES is considered.
  *
- * @param {{ types?: string[], includeLocked?: boolean, gameCatalogs?: import("./games-catalog.js").GameCatalog[], headingLevel?: number }} [options]
+ * The heading level is the page's to choose: a board sitting directly under a page's `h1` must ask
+ * for `h2` to avoid skipping a level; under an `h2` section header — `/profile/`, `/games/` and a
+ * game's play page — the default `h3` is right.
+ *
+ * @param {{ types?: string[], includeLocked?: boolean, gameCatalogs?: import("./games-catalog.js").GameCatalog[], gameSlugs?: string[], headingLevel?: number }} [options]
  */
 export function renderAchievementsBoard(
   container,
@@ -205,6 +221,7 @@ export function renderAchievementsBoard(
     // The cast is for the type checker reading this untyped module from a page: a bare `[]`
     // default is inferred as never[], and every page would then be refused its catalogs.
     gameCatalogs = /** @type {import("./games-catalog.js").GameCatalog[]} */ ([]),
+    gameSlugs = /** @type {string[] | undefined} */ (undefined),
     headingLevel = 3,
   } = {}
 ) {
@@ -253,6 +270,7 @@ export function renderAchievementsBoard(
     if (type === "game") {
       const catalogsBySlug = new Map(gameCatalogs.map((catalog) => [catalog.slug, catalog]));
       for (const { slug, title: defaultTitle } of GAMES) {
+        if (gameSlugs && !gameSlugs.includes(slug)) continue;
         const catalog = catalogsBySlug.get(slug);
         const unlocks = loadGameUnlocks(slug);
         const title = catalog?.title || defaultTitle;

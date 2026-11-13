@@ -42,13 +42,18 @@ import {
 const DIST = resolve(import.meta.dirname, "..", "dist");
 
 const SENTINELS = {
+  // The profile board is the full one: the seed's nine Tong unlocks (six of them ids its manifest
+  // does not know) over the manifest's twelve make eighteen rows.
   "/profile/": [
-    "Tong — 9 unlocked",
-    "Be Insiculous — 11 unlocked",
-    "FortKnight — 1 unlocked",
+    "Tong — 9 of 18 unlocked",
+    "Be Insiculous — 11 of 11 unlocked",
+    "FortKnight — 1 of 1 unlocked",
   ],
   "/games/": [
     "Tong — 9 unlocked",
+  ],
+  "/games/tong/": [
+    "Tong — 9 of 18 unlocked",
   ],
   "/fortknight/keep/": [
     "Sunday A",

@@ -180,7 +180,7 @@ td a {
    a rule written there carries BaseLayout's data-astro-cid and never matches the switcher's elements,
    which carry ProfileSwitcher's. faces.css does the same job for the face by being a plain global file.
    Scoped to `header` on purpose: app-widgets.css styles the same class names for a page panel with a
-   block margin, and /profile/, /achievements/ and /games/ load it — element + class beats its bare class
+   block margin, and /profile/ loads it — element + class beats its bare class
    whichever order the two happen to be bundled in, so the bar never inherits the panel's margins. */
 header .nav-profile {
   display: flex;
@@ -418,4 +418,18 @@ hr {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-dim);
+}
+
+/* ---------- the achievements board (src/lib/achievements.js) ---------- */
+/* Here rather than in a page's <style> because the board's DOM is built in script, where a scoped
+   selector cannot reach it, and three studio pages draw one: /profile/, /games/ and a game's play
+   page. A locked row also says "Locked" in its text, so the dimming is never the only signal. */
+.achievement-locked {
+  color: var(--text-dim);
+}
+
+.achievement-note {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
 }

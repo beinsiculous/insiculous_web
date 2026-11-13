@@ -1,7 +1,7 @@
 # beinsiculous.com — agent guide
 
 One repository, two surfaces of one site (`docs/app.md`): the **Be Insiculous** studio (`/`,
-`/games/`, `/achievements/`, `/devlog/`, `/engine/`, `/midi-evil/`) and the planner face **FortKnight** (`/fortknight/`), with the
+`/games/`, `/devlog/`, `/engine/`, `/midi-evil/`) and the planner face **FortKnight** (`/fortknight/`), with the
 shared profile at `/profile/`. The second face, **Fork Knife** (`/forkknife/`), was removed from the
 live site on 2026-08-28; its chain stays as design documents (`docs/meal-plan.md`,
 `docs/fork-knife-chain.md`), and its menu views land under `/fortknight/forkknife/` when that page
@@ -144,8 +144,8 @@ chain's playgrounds, never merge, and are local-only as of 2026-08-29 — delete
 off it by a `pre-push` hook.
 
 Live on `main`'s lineage: FortKnight's Overview, `/fortknight/keep/`, the fourteen
-`/fortknight/days/<dayKey>/` pages, `/fortknight/achievements/`, `/profile/`, and the studio pages
-including `/achievements/`. Fork Knife's `/forkknife/*` routes are removed; its menu rendering lands
+`/fortknight/days/<dayKey>/` pages, `/fortknight/achievements/`, `/profile/`, and the studio pages.
+Fork Knife's `/forkknife/*` routes are removed; its menu rendering lands
 under `/fortknight/forkknife/` (`#18`).
 
 **The keep** is a small file written by `src/lib/champion/keep-writer.js` from a Champion's keep — by `scripts/export_keep.py` today (the private keep stays outside this checkout), by the slab-upload builder (`#24`) later, and by the phone when it returns: the fourteen
@@ -197,21 +197,26 @@ and sharing a key with the site's own unlocks would let one migrate into the oth
 `keep-store.js` argument). Initial achievements: `player` (insiculous — opened `/games/`) and
 `moved-in` (fortknight — loaded a keep).
 
-`/achievements/` is the every-achievement board — a studio page (BaseLayout, a nav entry after
-Games). Every game’s full list comes from its bundle’s `achievements.json`, the engine’s own registry
+The every-achievement board is the Achievements panel of `/profile/` (`#achievements`). It was
+its own studio page with a nav entry, `/achievements/`, until 2026-11-13; that route is now a
+redirect stub, because the board moved rather than went. Every game’s full list comes from its
+bundle’s `achievements.json`, the engine’s own registry
 exported by the game’s native binary (`--achievements-manifest`, written by the engine repo’s
 `scripts/build_wasm.sh`) and read
-at build time; a playable game without a manifest fails the build. `/achievements/` lists all three
+at build time; a playable game without a manifest fails the build. The profile board lists all three
 types locked **and** unlocked with descriptions, unlocked sorting above locked within each group and
-each game group displaying its full manifest (hidden entries masked until unlocked). `/games/` and
-`/profile/` stay unlocked-only, using the manifests’ names instead of prettified ids;
+each game group displaying its full manifest (hidden entries masked until unlocked); it runs the
+page’s length, with no scroll box. A game’s play page (`/games/<slug>/`) carries that one game’s
+full list the same way, directly under the embed, and redraws it as unlocks arrive mid-play (it
+polls — a write from the same document fires no storage event). `/games/` stays unlocked-only,
+using the manifests’ names instead of prettified ids;
 `/fortknight/achievements/` narrows to the active profile’s unlocked fortnight achievements, and sits
 in the face nav as the final entry. `/games/` shows the games as a grid in play order — one
 tile per game, its name plate, drawn in its title’s lettering, over its capsule art, the whole tile one link to the game’s play
-page; the “edit on the playground” button is on the play page of a game whose rules are scripts on
+page, with the game’s achievement count under it (this device’s progress once it has an unlock
+there; `gameAchievementProgress` counts it the way the board’s heading does); the “edit on the playground” button is on the play page of a game whose rules are scripts on
 the playground (`playgroundProject` in its frontmatter; Tong today) — and carries a
-game-achievements board under it; `/profile/`’s achievements panel shows all three types
-in a scroll box, keyboard-reachable (tabindex + an accessible name). A visitor with no profile is offered one where
+game-achievements board under it. A visitor with no profile is offered one where
 achievements happen: `/` and `/fortknight/` carry Create-a-profile buttons, and the first time an
 achievement exists with no profile saved, the naming dialog (`askProfileName` in
 `src/lib/profile-name-dialog.js`) opens — once ever, the settled flag riding beside the store under

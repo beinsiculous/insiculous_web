@@ -9,7 +9,8 @@ import { readGameCatalogs } from "../lib/games-catalog-files.js";
 import "../styles/app-widgets.css";
 
 // Profile (FortKnight's, held by the studio): the active profile (switch, name, Duplicate, Delete), the stored
-// keep and the achievements board. The assistant-workspace downloads and the pages that edited a profile's
+// keep and the achievements board — the every-achievement board, locked entries included, which was
+// its own page (/achievements/, now a stub pointing at this page's #achievements) until it moved here. The assistant-workspace downloads and the pages that edited a profile's
 // answers belong to the creation chain, removed from main on 2026-08-30 and preserved at the tag
 // `creation-chain-parked` — this page holds everything a profile still has.
 // The switcher is NOT here any more. BaseLayout grew chrome to hold one on 2026-08-31, so it lives in
@@ -53,17 +54,20 @@ const catalogs = readGameCatalogs(games);
     </div>
   </section>
 
-  <section class="panel">
-    <h2 id="achievementsHeading">Achievements</h2>
+  <!-- id="achievements" is the moved /achievements/ page's landing point; the stub there names it. -->
+  <section class="panel" id="achievements">
+    <h2>Achievements</h2>
     <p class="muted">
-      Everything this browser has unlocked — the site’s and the games’ — stays on the device you
-      earned it on; this board shows what this browser has recorded, and nothing is uploaded.
+      Three kinds live here: the studio’s (Be Insiculous), the games’ and FortKnight’s. Every
+      achievement is listed — locked entries included, with each game’s full list taken from its
+      own manifest. Everything is recorded on this device only — nothing is uploaded, and no server
+      holds a copy.
     </p>
-    <!-- tabindex + role/aria-labelledby: the 75vh cap (app-widgets.css .achievements-scroll) makes
-         this a scrollable region once it fills, and a scrollable region must be keyboard-reachable
-         and named — axe's scrollable-region-focusable rules on exactly this. -->
-    <div id="achievementsBoard" class="achievements-scroll" tabindex="0" role="group" aria-labelledby="achievementsHeading" data-catalogs={JSON.stringify(catalogs)}></div>
-    <p class="muted" id="achievementsStatus"></p>
+    <!-- The board runs the page's full length rather than scrolling inside a box: it is the last
+         panel, so nothing below it is pushed out of reach, and one scroll is simpler to read by
+         keyboard and screen reader than a region nested in the page. -->
+    <div id="achievementsBoard" data-catalogs={JSON.stringify(catalogs)}></div>
+    <p class="muted" id="achievementsStatus" role="status"></p>
     <div class="button-row" id="achievementsActions" hidden>
       <button type="button" id="deleteAchievementsButton">Delete recorded achievements from this device</button>
     </div>
@@ -191,11 +195,18 @@ const catalogs = readGameCatalogs(games);
 
   const catalogs = readEmbeddedCatalogs(elements.achievementsBoard);
 
-  /** All three achievement types on one board; the shared renderer owns the groups (src/lib/achievements.js). */
+  /** All three achievement types on one board, locked entries included; the shared renderer owns
+   *  the groups (src/lib/achievements.js). The delete button shows only when there is something
+   *  recorded to delete — the locked spine renders either way. */
   function renderAchievements() {
-    const { rendered } = renderAchievementsBoard(elements.achievementsBoard, { gameCatalogs: catalogs });
-    elements.achievementsActions.hidden = !rendered;
-    elements.achievementsStatus.textContent = rendered ? "" : "No achievements recorded in this browser yet.";
+    const { unlockedCount, totalCount } = renderAchievementsBoard(elements.achievementsBoard, {
+      includeLocked: true,
+      gameCatalogs: catalogs,
+    });
+    elements.achievementsActions.hidden = unlockedCount === 0;
+    elements.achievementsStatus.textContent = unlockedCount === 0
+      ? `Nothing unlocked on this device yet — ${totalCount} to find.`
+      : `${unlockedCount} of ${totalCount} achievements unlocked on this device.`;
   }
 
   elements.deleteAchievementsButton.addEventListener("click", () => {
@@ -209,3 +220,11 @@ const catalogs = readGameCatalogs(games);
   renderKeep();
   renderAchievements();
 </script>
+
+<style>
+  /* The moved /achievements/ page lands on this anchor, and the studio header is sticky: without
+     the margin the panel's heading arrives underneath it. */
+  #achievements {
+    scroll-margin-top: 6rem;
+  }
+</style>

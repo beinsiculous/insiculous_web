@@ -15,7 +15,7 @@ person's own AI workspace + apply-back), docs, tests.
 **Shipping status.** `main` is production. FortKnight's keep-fed pages are live — the Overview
 (`/fortknight/`), Keep (`/fortknight/keep/`) and the fourteen day pages
 (`/fortknight/days/<dayKey>/`), all reading a visitor-loaded keep — as are the achievements boards:
-the studio's `/achievements/`, listing every achievement the site knows, and the face's
+the Achievements panel of `/profile/`, listing every achievement the site knows, and the face's
 `/fortknight/achievements/`, the active profile's unlocked fortnight achievements. **The face is display-only as of 2026-08-30** (`docs/megaseed/display-only-face.md` in the working
 set): `/fortknight/{build,questionnaire,assistant,ask}/` were deleted outright rather than left as
 placeholders, along with the builder JavaScript, six Python CLIs, half of `fk_core` and the
@@ -94,18 +94,20 @@ What that means for the items this file used to number 1–9:
   (`beinsiculous.games.<slug>.achievements`, the engine's save file byte for byte); the site writes
   its own insiculous and fortknight unlocks into one store, `beinsiculous.achievements`, with the
   registry in `src/lib/achievements.js` — initial achievements `player` (opened `/games/`) and
-  `moved-in` (loaded a keep). The studio’s `/achievements/` (nav entry after Games) lists
+  `moved-in` (loaded a keep). The Achievements panel of `/profile/` (the studio page `/achievements/` until 2026-11-13,
+  when its nav entry went and the route became a stub pointing at `/profile/#achievements`) lists
   every achievement the site knows: the registry entries render locked and unlocked with their
   descriptions, unlocked above locked within each group, and each game group shows its full
   manifest from `achievements.json` exported by the native game (hidden entries masked until
-  unlocked). `/games/` and `/profile/` stay unlocked-only, displaying real names from the
-  manifests instead of prettified ids. `/fortknight/achievements/` narrows to the active
+  unlocked). A game’s play page boards that game’s full list the same way, redrawn as unlocks
+  arrive mid-play. `/games/` stays unlocked-only, displaying real names from the
+  manifests instead of prettified ids, and each tile carries the game’s achievement count, which
+  becomes this device’s progress once it has an unlock there. `/fortknight/achievements/` narrows to the active
   profile’s unlocked fortnight achievements and joined the face nav (six pills); `/games/` shows
   the games as a grid in play order — one tile per game, its name plate, drawn in its title’s lettering, over
   its capsule art, the whole tile one link to the game’s play page; the “edit on the playground” button is on the play
   page of a game whose rules are scripts on the playground (`playgroundProject` in its frontmatter;
-  Tong today) — and carries a game-achievements board under it; `/profile/`’s panel
-  shows all three types in a scroll box, keyboard-reachable. A visitor with achievements and no profile is offered one — the
+  Tong today) — and carries a game-achievements board under it. A visitor with achievements and no profile is offered one — the
   naming dialog opens once ever, and `/` and `/fortknight/` carry Create-a-profile buttons.
 - **The `sun-b` starts for `ostara` and `fimbulsumar`** in `data/seasons.json` disagree with Focus
   Key's `sun-a` ruling. Porting it touches `seasons.json`, `docs/domain.md` and the test
@@ -124,8 +126,8 @@ What that means for the items this file used to number 1–9:
 
 - **Web export.** Shipped — all six games are playable in the browser (WebGPU) through the embeds
   on `/games/`. All six games write `beinsiculous.games.<slug>.achievements` and export an
-  `achievements.json` manifest read at build time, which the boards on `/achievements/`,
-  `/games/` and `/profile/` read (`/fortknight/achievements/` narrows to the site’s fortnight
+  `achievements.json` manifest read at build time, which the boards on `/profile/`,
+  `/games/` and each game’s play page read (`/fortknight/achievements/` narrows to the site’s fortnight
   achievements). What remains is engine-side and tracked over
   there: high scores, and gesture-gated audio.
 - **The browser editor.** Shipped, route `/playground/`: the engine’s editor compiled to

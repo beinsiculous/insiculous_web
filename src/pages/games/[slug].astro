@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import GameEmbed from '../../components/GameEmbed.astro';
 import { publishedPosts } from '../../lib/devlog-posts.js';
+import { readGameCatalogs } from '../../lib/games-catalog-files.js';
 
 export async function getStaticPaths() {
   const games = await getCollection('games');
@@ -15,6 +16,9 @@ export async function getStaticPaths() {
 
 const { game } = Astro.props;
 const { Content } = await render(game);
+
+// Only a playable game has a manifest (readGameCatalogs skips the rest), so only it has a board.
+const [catalog] = readGameCatalogs([game]);
 
 const now = new Date();
 const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
@@ -51,6 +55,20 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
       <p class="playground-rules">
         Its rules are scripts, editable on the playground: <a class="button secondary" href={`/playground/?project=${game.data.playgroundProject}`}>edit <span class="visually-hidden">{game.data.title}</span> on the playground →</a>
       </p>
+    )
+  }
+
+  {
+    catalog && (
+      <section class="achievements">
+        <h2>Achievements</h2>
+        <p class="achievements-intro">
+          {catalog.achievements.length} to find in {game.data.title}. They unlock as you play and are
+          recorded on this device only — your <a href="/profile/#achievements">profile</a> holds the
+          board for every game.
+        </p>
+        <div id="gameAchievementsBoard" data-catalogs={JSON.stringify([catalog])} />
+      </section>
     )
   }
 
@@ -99,15 +117,48 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
      and a game without a wasm build writes nothing. */
   game.data.wasm && (
     <script>
-      import { maybePromptForProfile, totalAchievementCount } from "../../lib/achievements.js";
+      import { maybePromptForProfile, renderAchievementsBoard, totalAchievementCount } from "../../lib/achievements.js";
+      import { loadGameUnlocks } from "../../lib/games-achievements.js";
+      import { readEmbeddedCatalogs } from "../../lib/games-catalog.js";
 
-      // First-achievement watch. The WASM writes unlocks to localStorage mid-play, and this page is
-      // the only place an achievement can arrive during a session — every other page reads the
-      // stores once, at load. So while this page is open with none recorded, poll every 5s (and on
-      // visibilitychange, because a backgrounded tab's timers are throttled exactly when the person
-      // alt-tabs back to check) until the count moves off zero, then offer the once-ever
-      // create-profile prompt and stop. The interval is cleared on pagehide so a bfcached page does
-      // not keep polling a store it can no longer prompt about.
+      // The WASM writes unlocks to localStorage mid-play, and a write from this same document
+      // fires no storage event — so this page, the only place an achievement can arrive during a
+      // session, polls every 5s (and on visibilitychange, because a backgrounded tab's timers are
+      // throttled exactly when the person alt-tabs back to check). Each check does two things:
+      // redraws this game's board when its recorded unlocks have changed, and — when the page
+      // opened with nothing recorded anywhere — offers the once-ever create-profile prompt the
+      // first time anything is. The interval is cleared on pagehide so a page held in the
+      // back/forward cache does not keep polling, and started again on pageshow, which also fires
+      // when the page is restored from that cache — a restored page is played on like a fresh one.
+      const board = document.getElementById("gameAchievementsBoard");
+      const catalogs = readEmbeddedCatalogs(board);
+      const gameSlugs = catalogs.map((catalog) => catalog.slug);
+      // Ids and dates, not a count: achievements cleared in another tab and a different set of
+      // the same size earned since would leave a count unchanged and the board showing stale rows.
+      const recordedUnlocksSignature = () =>
+        JSON.stringify(gameSlugs.map((slug) =>
+          loadGameUnlocks(slug).map((unlock) => [unlock.id, unlock.unlockedAt?.getTime() ?? null])
+        ));
+
+      let shownUnlocksSignature: string | null = null;
+      let awaitingFirstAchievement = totalAchievementCount() === 0;
+      const check = () => {
+        const unlocksSignature = recordedUnlocksSignature();
+        if (board && unlocksSignature !== shownUnlocksSignature) {
+          renderAchievementsBoard(board, {
+            types: ["game"],
+            includeLocked: true,
+            gameCatalogs: catalogs,
+            gameSlugs,
+          });
+          shownUnlocksSignature = unlocksSignature;
+        }
+        if (awaitingFirstAchievement && totalAchievementCount() > 0) {
+          awaitingFirstAchievement = false;
+          maybePromptForProfile();
+        }
+      };
+
       let watch: ReturnType<typeof setInterval> | null = null;
       const stopWatching = () => {
         if (watch !== null) {
@@ -115,19 +166,17 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
           watch = null;
         }
       };
-      const checkForFirstAchievement = () => {
-        if (totalAchievementCount() > 0) {
-          stopWatching();
-          maybePromptForProfile();
-        }
-      };
-      if (totalAchievementCount() === 0) {
-        watch = setInterval(checkForFirstAchievement, 5000);
-        document.addEventListener("visibilitychange", () => {
-          if (!document.hidden) checkForFirstAchievement();
-        });
-        window.addEventListener("pagehide", stopWatching);
-      }
+      // pageshow fires after the first load too, so this is the one place the watch starts.
+      window.addEventListener("pageshow", () => {
+        stopWatching();
+        check();
+        watch = setInterval(check, 5000);
+      });
+      window.addEventListener("pagehide", stopWatching);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) check();
+      });
+      check();
     </script>
   )
 }
@@ -160,6 +209,10 @@ const relatedPosts = publishedPosts(await getCollection('devlog'), now).filter(
   .screenshots img {
     border: 1px solid var(--border);
     border-radius: 8px;
+  }
+
+  .achievements-intro {
+    max-width: 42em;
   }
 
   .editor-link,

@@ -4,11 +4,12 @@ Everything behind [beinsiculous.com](https://beinsiculous.com), in one repositor
 [Astro](https://astro.build), deployed to Cloudflare as a static-assets Worker. Two surfaces that
 deliberately read as two different websites:
 
-- **The studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/engine/`) — the game studio. All six games are
+- **The studio** (`/`, `/games/`, `/devlog/`, `/engine/`) — the game studio. All six games are
   playable in the browser through embedded WebAssembly builds from the Insiculous 2D engine
-  (Rust); desktop builds run the same code natively. `/achievements/` boards every achievement the
-  site knows — the site’s own registry entries and each game’s full manifest, locked and unlocked
-  (`/games/` and `/profile/` show unlocked game achievements by name). The games listed on this site are free and may use AI art; the
+  (Rust); desktop builds run the same code natively. `/profile/` boards every achievement the
+  site knows — the site’s own registry entries and each game’s full manifest, locked and unlocked;
+  each game’s play page boards that game’s full list, and `/games/` shows each tile’s progress and
+  the unlocked game achievements by name (`/achievements/`, the board’s old page, is a stub pointing at `/profile/#achievements`). The games listed on this site are free and may use AI art; the
   games we sell carry none, live in their own repositories, and ship on Steam and/or Android and
   iOS rather than here (`docs/thesis.md` is the source of that policy’s wording).
 - **FortKnight** (`/fortknight/`) — an LLM-assisted planner for a repeating 14-day schedule,
@@ -16,7 +17,7 @@ deliberately read as two different websites:
   are live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`) and the fourteen day
   pages (`/fortknight/days/<dayKey>/`) all read a **keep** the visitor loads from their own
   device, and **Achievements** (`/fortknight/achievements/`) shows the active profile's unlocked
-  fortnight achievements (the studio's `/achievements/` is the every-achievement board). Build,
+  fortnight achievements (`/profile/` holds the every-achievement board). Build,
   Questionnaire and Assistant still answer with a "still being built" page (see Deploying below).
 
 The planner is data-first — JSON files are the source of truth, Markdown docs are the assistant's
@@ -292,7 +293,7 @@ Ten files were deleted from `main` with the chain — `ApplyFromAssistant.astro`
 `MealPlanEditor.astro`, `meal-plan-editor.js`, `forkknife.js` and the `/forkknife/` pages — and each
 is recoverable with `git show creation-chain-parked:PATH`. On `main`, FortKnight's keep-fed pages
 are live — the Overview, Keep and the fourteen day pages — alongside the achievements boards (the
-studio's `/achievements/` and the face's `/fortknight/achievements/`), while
+one on `/profile/` and the face's `/fortknight/achievements/`), while
 `/fortknight/{build,questionnaire,assistant,ask}/` were deleted outright on 2026-08-30 and hard-404
 by ruling — a redirect stub records a move, and these were removals. Fork Knife's routes
 (`/forkknife/*`) were removed from the live site on 2026-08-28; its menu rendering lands at

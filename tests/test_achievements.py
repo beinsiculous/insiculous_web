@@ -412,6 +412,47 @@ class RenderAchievementsBoardTests(unittest.TestCase):
         self.assertEqual(locked_text, "Known Achievement — Desc. — Locked")
         self.assertEqual(locked_class, "achievement-locked")
 
+    def test_game_slugs_narrow_the_game_groups_to_the_listed_games(self):
+        """A game's play page boards that one game: another game's slug renders nothing."""
+        catalog = {
+            "slug": "tong",
+            "title": "Tong",
+            "achievements": [
+                {"id": "beat_cpu_easy", "name": "Training Wheels", "description": "Beat the CPU on Easy.", "hidden": False},
+            ],
+        }
+        options = {"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]}
+        listed = self.render({**options, "gameSlugs": ["tong"]})
+        self.assertEqual(listed["children"][0]["text"], "Tong — 0 of 1 unlocked")
+        unlisted = self.render({**options, "gameSlugs": ["bratdog"]})
+        self.assertFalse(unlisted["rendered"])
+        self.assertEqual(unlisted["children"], [])
+
+    def test_game_progress_counts_what_the_spine_heading_counts(self):
+        """A tile's progress line and the board's heading must agree, an id the manifest does not
+        know included: it counts as unlocked and widens the total."""
+        catalog = {
+            "slug": "tong",
+            "title": "Tong",
+            "achievements": [
+                {"id": "beat_cpu_easy", "name": "Training Wheels", "description": "Beat the CPU on Easy.", "hidden": False},
+                {"id": "marathon_win", "name": "Marathon", "description": "Win a long rally.", "hidden": True},
+            ],
+        }
+        game = json.dumps({"unlocks": {"beat_cpu_easy": {"unlocked_at": 1_756_252_800},
+                                       "retired_id": {"unlocked_at": 1_756_252_900}}})
+        progress = run_node(achievements_script(
+            "if (inputs.game) store.set('beinsiculous.games.tong.achievements', inputs.game);"
+            "process.stdout.write(JSON.stringify(gameAchievementProgress(inputs.catalog)));",
+            "gameAchievementProgress"), {"catalog": catalog, "game": game})
+        self.assertEqual(progress, {"unlockedCount": 2, "totalCount": 3})
+        board = self.render({"types": ["game"], "includeLocked": True, "gameCatalogs": [catalog]}, game=game)
+        self.assertEqual(board["children"][0]["text"], "Tong — 2 of 3 unlocked")
+        untouched = run_node(achievements_script(
+            "process.stdout.write(JSON.stringify(gameAchievementProgress(inputs.catalog)));",
+            "gameAchievementProgress"), {"catalog": catalog, "game": None})
+        self.assertEqual(untouched, {"unlockedCount": 0, "totalCount": 2})
+
     def test_heading_level_is_h2_when_asked_and_h3_by_default(self):
         default_result = self.render({"types": ["insiculous"]}, site=json.dumps({"unlocks": {"player": {"unlocked_at": 1_756_425_600}}}))
         self.assertEqual(default_result["children"][0]["tag"], "h3")

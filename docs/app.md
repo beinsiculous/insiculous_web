@@ -45,7 +45,7 @@ Operation Name Drop (`#24`). That is a new writer, not this chain returning.
 **Deployment status.** Live: the Overview (`/fortknight/`), **Keep** (`/fortknight/keep/`), the
 fourteen day pages (`/fortknight/days/<dayKey>/`) — all reading a visitor-loaded keep (next section)
 — and **Achievements** (`/fortknight/achievements/`), which reads the site's achievement store
-instead of the keep. The studio side has `/achievements/`, the every-achievement board — listing all three types, locked and unlocked, with each game’s full manifest.
+instead of the keep. The every-achievement board — all three types, locked and unlocked, with each game’s full manifest — is the Achievements panel of `/profile/`; it was the studio page `/achievements/` until 2026-11-13, and that route is now a stub pointing at `/profile/#achievements`.
 
 **Recovery, and why the tag alone is not enough.** `creation-chain-parked` lives on origin and
 preserves the functional chain, but it pins the **2026-08-26** snapshot — before the 2026-08-28/29
@@ -114,7 +114,7 @@ names their commit there instead.
 ## The site
 beinsiculous.com is one Astro 7 build, deployed to Cloudflare as a static-assets Worker. It carries two surfaces
 that deliberately look like two different websites:
-the **Be Insiculous studio** (`/`, `/games/`, `/achievements/`, `/devlog/`, `/engine/` — its own `BaseLayout.astro`),
+the **Be Insiculous studio** (`/`, `/games/`, `/devlog/`, `/engine/` — its own `BaseLayout.astro`),
 and the FortKnight planner face under `FaceLayout.astro`, with its own skin.
 
 Multi-page, no UI framework. `npm install` once, then:
